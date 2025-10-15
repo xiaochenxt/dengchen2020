@@ -16,7 +16,7 @@
 
     <name>${project.artifactId}</name>
     <url>https://github.com/xiaochenxt</url>
-    <description>xc项目pom</description>
+    <description>dc项目pom</description>
 
     <developers>
         <developer>
