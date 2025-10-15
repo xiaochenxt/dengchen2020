@@ -1,0 +1,2 @@
+io.github.dengchen2020.cache.caffeine.CaffeineCacheAutoConfiguration
+io.github.dengchen2020.cache.redis.RedisCacheAutoConfiguration

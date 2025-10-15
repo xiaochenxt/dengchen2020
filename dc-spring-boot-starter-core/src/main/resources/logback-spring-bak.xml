@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 引入 Spring Boot 默认的 Logback 配置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+    <!-- 定义异步 Appender -->
+    <!-- discardingThreshold：丢弃阈值，0：不丢弃任何日志。如果大于0，日志量高时TRACE、DEBUG 或 INFO 级别的日志会被丢弃，一般情况下INFO日志也不想丢弃，可以继承AsyncAppender将INFO日志保留 -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+        <queueSize>16384</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- discardingThreshold：丢弃阈值，0：不丢弃任何日志。如果大于0，日志量高时TRACE、DEBUG 或 INFO 级别的日志会被丢弃，一般情况下INFO日志也不想丢弃，可以继承AsyncAppender将INFO日志保留 -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>16384</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </root>
+
+    <!-- 显示logback的内部状态-->
+    <!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" /> -->
+</configuration>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.dengchen2020</groupId>
+        <artifactId>dc-spring-boot-starter-parent</artifactId>
+        <version>0.1.0</version>
+    </parent>
+
+    <artifactId>dc-spring-boot-starter-cache</artifactId>
+    <name>${project.artifactId}</name>
+    <url>https://github.com/xiaochenxt/xc-spring-boot-starter-cache</url>
+    <description>扩展spring缓存，更友好的配置方式，支持redis缓存、caffeine本地缓存（支持多节点同步）</description>
+
+    <developers>
+        <developer>
+            <id>dc2024</id>
+            <name>小郴</name>
+            <email>876975281@qq.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/xiaochenxt/xc-spring-boot-starter-cache</url>
+        <connection>https://github.com/xiaochenxt/xc-spring-boot-starter-cache.git</connection>
+        <developerConnection>https://github.com/xiaochenxt/xc-spring-boot-starter-cache.git</developerConnection>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.dengchen2020</groupId>
+            <artifactId>dc-spring-boot-starter-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

@@ -1,0 +1,43 @@
+package io.github.dengchen2020.websocket.handler.cluster;
+
+import io.github.dengchen2020.core.redis.RedisMessagePublisher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+
+import java.util.List;
+
+/**
+ * websocket集群自动配置
+ * @author xiaochen
+ * @since 2024/6/27
+ */
+@ConditionalOnClass(MessageListener.class)
+@Configuration(proxyBeanMethods = false)
+public class ClusterDcWebSocketAutoConfiguration {
+
+    @ConditionalOnMissingBean
+    @Bean
+    public WebSocketHelper webSocketHelper(RedisMessagePublisher redisMessagePublisher) {
+        return new WebSocketHelper(redisMessagePublisher);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ClusterWebSocketHandlerRegistrar {
+        public ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJackson2JsonRedisSerializer redisSerializer) {
+            for (ClusterDcWebSocketHandler dcWebSocketHandler : clusterDcWebSocketHandler) {
+                MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(dcWebSocketHandler);
+                messageListenerAdapter.setSerializer(redisSerializer);
+                messageListenerAdapter.afterPropertiesSet();
+                redisMessageListenerContainer.addMessageListener(messageListenerAdapter, ChannelTopic.of(dcWebSocketHandler.webSocketHelper().topic()));
+            }
+        }
+    }
+
+}

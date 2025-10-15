@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WorkspaceSettings">
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-parent" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-utils" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-native" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-core" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-cache" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-id-generator" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-ip" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-jpa" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-lock" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-message" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-ratelimiter" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-security" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-websocket" />
+    <option name="workspace" value="true" />
+  </component>
+</project>

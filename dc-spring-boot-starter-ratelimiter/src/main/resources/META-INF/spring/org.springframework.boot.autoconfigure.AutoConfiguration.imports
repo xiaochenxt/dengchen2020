@@ -1,0 +1,2 @@
+io.github.dengchen2020.ratelimiter.local.LocalRateLimiterAutoConfiguration
+io.github.dengchen2020.ratelimiter.redis.RedisRateLimiterAutoConfiguration

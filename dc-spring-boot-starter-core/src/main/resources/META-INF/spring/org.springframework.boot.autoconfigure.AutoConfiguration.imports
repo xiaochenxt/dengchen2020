@@ -1,0 +1,9 @@
+io.github.dengchen2020.core.config.BaseAutoConfiguration
+io.github.dengchen2020.core.scheduled.SchedulingAutoConfiguration
+io.github.dengchen2020.core.redis.RedisDependencyAutoConfiguration
+io.github.dengchen2020.core.jackson.JacksonAutoConfiguration
+io.github.dengchen2020.core.rabbit.RabbitAutoConfiguration
+io.github.dengchen2020.core.redis.frequency.FrequencyControlAutoConfiguration
+io.github.dengchen2020.core.validation.DcValidationAutoConfiguration
+io.github.dengchen2020.core.web.mvc.DcWebAutoConfiguration
+io.github.dengchen2020.core.web.mvc.StaticServletAutoConfiguration

@@ -1,0 +1,21 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "dc.ip.v4.location",
+      "type": "java.lang.String",
+      "description": "ipv4数据包的文件目录地址，例如：C:/Users/devloper/ip/ip.xdb 或 /home/devloper/ip/ip.xdb .",
+      "defaultValue": "ip.xdb"
+    },{
+      "name": "dc.ip.v6.location",
+      "type": "java.lang.String",
+      "description": "ipv6数据包的文件目录地址，例如：C:/Users/devloper/ip/ipv6.xdb 或 /home/devloper/ip/ipv6.xdb .",
+      "defaultValue": "ipv6.xdb"
+    },{
+      "name": "dc.ip.verify",
+      "type": "java.lang.Boolean",
+      "description": "是否验证ip数据包的有效性.",
+      "defaultValue": true
+    }
+  ]
+}

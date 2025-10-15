@@ -1,0 +1,34 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "dc.validation.fail-fast",
+      "type": "java.lang.Boolean",
+      "description": "参数校验快速失败，校验字段非常多时可提升性能.",
+      "defaultValue": true
+    },
+    {
+      "name": "dc.task.scheduling.optimize",
+      "type": "java.lang.Boolean",
+      "description": "是否开启定时任务优化，相同任务上次未执行完，下次任务不执行，避免任务周期过短且任务执行时间过长导致的任务重复执行，集群环境下可自动由另一台服务器接替执行。不同任务互不影响。未开启则参考spring默认配置.",
+      "defaultValue": true
+    },
+    {
+      "name": "dc.debug.cglib.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否在target中显示cglib生成的类文件，dev环境下默认启用.",
+      "defaultValue": false
+    },
+    {
+      "name": "dc.static.servlet.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用静态资源处理的servlet.",
+      "defaultValue": true
+    },{
+      "name": "dc.frequency-control.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用请求频控.",
+      "defaultValue": false
+    }
+  ]
+}

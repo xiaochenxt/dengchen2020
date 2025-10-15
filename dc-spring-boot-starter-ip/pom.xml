@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.dengchen2020</groupId>
+    <artifactId>dc-spring-boot-starter-parent</artifactId>
+    <version>0.1.0</version>
+  </parent>
+
+  <artifactId>dc-spring-boot-starter-ip</artifactId>
+  <packaging>jar</packaging>
+
+  <name>${project.artifactId}</name>
+  <url>https://github.com/xiaochenxt/xc-spring-boot-starter-ip</url>
+  <description>ip工具包，支持ipv4和ipv6</description>
+
+  <developers>
+    <developer>
+      <id>dc2024</id>
+      <name>小郴</name>
+      <email>876975281@qq.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/xiaochenxt/xc-spring-boot-starter-ip</url>
+    <connection>https://github.com/xiaochenxt/xc-spring-boot-starter-ip.git</connection>
+    <developerConnection>https://github.com/xiaochenxt/xc-spring-boot-starter-ip.git</developerConnection>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.dengchen2020</groupId>
+      <artifactId>dc-spring-boot-starter-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.lionsoul</groupId>
+      <artifactId>ip2region</artifactId>
+    </dependency>
+
+  </dependencies>
+
+
+</project>

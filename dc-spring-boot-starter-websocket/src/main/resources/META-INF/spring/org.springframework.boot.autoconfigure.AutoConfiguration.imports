@@ -1,0 +1,2 @@
+io.github.dengchen2020.websocket.config.SpringWebSocketAutoConfiguration
+io.github.dengchen2020.websocket.handler.cluster.ClusterDcWebSocketAutoConfiguration
