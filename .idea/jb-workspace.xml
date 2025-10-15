@@ -3,7 +3,6 @@
   <component name="WorkspaceSettings">
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-parent" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-utils" />
-    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-native" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-core" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-cache" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-id-generator" />
@@ -14,6 +13,7 @@
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-ratelimiter" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-security" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-websocket" />
+    <project name="dc-spring-boot-native-image" path="$PROJECT_DIR$/dc-spring-boot-native-image" />
     <option name="workspace" value="true" />
   </component>
 </project>

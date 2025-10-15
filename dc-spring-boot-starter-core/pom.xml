@@ -94,7 +94,7 @@
 
         <dependency>
             <groupId>io.github.dengchen2020</groupId>
-            <artifactId>dc-spring-boot-native</artifactId>
+            <artifactId>dc-spring-boot-native-image</artifactId>
         </dependency>
 
         <dependency>

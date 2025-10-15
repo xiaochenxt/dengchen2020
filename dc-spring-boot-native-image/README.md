@@ -3,8 +3,8 @@
 ```xml
 <dependency>
     <groupId>io.github.dengchen2020</groupId>
-    <artifactId>xc-spring-boot-native</artifactId>
-    <version>0.0.6</version>
+    <artifactId>dc-spring-boot-native-image</artifactId>
+    <version>${lastVersion}</version>
 </dependency>
 ```
 springboot项目需先执行spring-boot:process-aot

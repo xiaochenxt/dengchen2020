@@ -57,7 +57,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xc.version>0.1.0</xc.version>
+        <dc.version>0.1.0</dc.version>
         <querydsl.version>5.1.0</querydsl.version>
         <redisson.version>3.52.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -71,52 +71,52 @@
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-core</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-cache</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-id-generator</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-ip</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-jpa</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-lock</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-message</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-ratelimiter</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-security</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-starter-websocket</artifactId>
-                <version>${xc.version}</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
@@ -125,7 +125,7 @@
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-native</artifactId>
+                <artifactId>dc-spring-boot-native-image</artifactId>
                 <version>0.0.1</version>
             </dependency>
             <dependency>
