@@ -10,10 +10,10 @@
 
     <artifactId>dc-utils</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.10</version>
+    <version>0.0.1</version>
 
     <name>${project.artifactId}</name>
-    <url>https://github.com/xiaochenxt/xc-utils</url>
+    <url>https://github.com/xiaochenxt/dengchen2020</url>
     <description>xc工具类集合</description>
 
     <developers>
@@ -25,9 +25,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/xiaochenxt/xc-utils</url>
-        <connection>https://github.com/xiaochenxt/xc-utils.git</connection>
-        <developerConnection>https://github.com/xiaochenxt/xc-utils.git</developerConnection>
+        <url>https://github.com/xiaochenxt/dengchen2020</url>
+        <connection>https://github.com/xiaochenxt/dengchen2020.git</connection>
+        <developerConnection>https://github.com/xiaochenxt/dengchen2020.git</developerConnection>
     </scm>
 
     <properties>

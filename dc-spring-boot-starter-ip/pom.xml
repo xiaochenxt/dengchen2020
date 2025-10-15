@@ -12,7 +12,7 @@
   <packaging>jar</packaging>
 
   <name>${project.artifactId}</name>
-  <url>https://github.com/xiaochenxt/xc-spring-boot-starter-ip</url>
+  <url>https://github.com/xiaochenxt/dengchen2020</url>
   <description>ip工具包，支持ipv4和ipv6</description>
 
   <developers>
@@ -24,9 +24,9 @@
   </developers>
 
   <scm>
-    <url>https://github.com/xiaochenxt/xc-spring-boot-starter-ip</url>
-    <connection>https://github.com/xiaochenxt/xc-spring-boot-starter-ip.git</connection>
-    <developerConnection>https://github.com/xiaochenxt/xc-spring-boot-starter-ip.git</developerConnection>
+    <url>https://github.com/xiaochenxt/dengchen2020</url>
+    <connection>https://github.com/xiaochenxt/dengchen2020.git</connection>
+    <developerConnection>https://github.com/xiaochenxt/dengchen2020.git</developerConnection>
   </scm>
 
   <dependencies>
