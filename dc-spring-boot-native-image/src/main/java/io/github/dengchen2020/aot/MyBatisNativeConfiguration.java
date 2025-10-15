@@ -66,7 +66,7 @@ import java.util.stream.Stream;
 /**
  * 解决mybatis-spring-boot-starter的aot编译运行问题（同时支持mybatis-plus）
  */
-@ConditionalOnProperty(value = "xc.aot.mybatis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "dc.aot.mybatis.enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(org.mybatis.spring.mapper.MapperFactoryBean.class)
 @ImportRuntimeHints(MyBatisNativeConfiguration.MyBaitsRuntimeHintsRegistrar.class)
 @Configuration(proxyBeanMethods = false)
