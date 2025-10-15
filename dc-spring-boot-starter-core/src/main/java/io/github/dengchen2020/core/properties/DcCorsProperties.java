@@ -11,7 +11,7 @@ import java.util.List;
  * @since 2024/7/5
  */
 @ConfigurationProperties("dc.cors")
-public class XcCorsProperties {
+public class DcCorsProperties {
 
     /**
      * 是否启用CORS过滤器，默认启用，非特殊需求不建议关闭

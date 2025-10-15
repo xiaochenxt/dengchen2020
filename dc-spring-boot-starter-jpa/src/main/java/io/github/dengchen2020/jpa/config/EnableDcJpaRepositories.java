@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface EnableXcJpaRepositories {
+public @interface EnableDcJpaRepositories {
 
     /**
      * {@link #basePackages（）} 属性的别名。允许更简洁的注释声明，例如：

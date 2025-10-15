@@ -14,7 +14,7 @@ import org.springframework.data.repository.core.support.RepositoryComposition;
  * {@code
  * @RequiredArgsConstructor
  * @Component // 需注入到Spring容器中
- * public class XcRepositoryFragmentsCustomizer implements RepositoryFragmentsCustomizer {
+ * public class DcRepositoryFragmentsCustomizer implements RepositoryFragmentsCustomizer {
  *
  *     private final SpringBean springBean;
  *

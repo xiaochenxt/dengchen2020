@@ -1,8 +1,8 @@
 package io.github.dengchen2020.core.web.mvc;
 
 import io.github.dengchen2020.core.filter.DcShallowEtagHeaderFilter;
-import io.github.dengchen2020.core.properties.XcCorsProperties;
-import io.github.dengchen2020.core.properties.XcETagProperties;
+import io.github.dengchen2020.core.properties.DcCorsProperties;
+import io.github.dengchen2020.core.properties.DcETagProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -29,7 +29,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2025/6/23
  */
-@EnableConfigurationProperties(XcCorsProperties.class)
+@EnableConfigurationProperties(DcCorsProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Configuration(proxyBeanMethods = false)
 public class DcWebAutoConfiguration implements WebMvcConfigurer {
@@ -37,7 +37,7 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnProperty(value = "dc.cors.enabled", matchIfMissing = true, havingValue = "true")
     @ConditionalOnMissingFilterBean(CorsFilter.class)
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(XcCorsProperties builder) {
+    public FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(DcCorsProperties builder) {
         CorsConfiguration config = new CorsConfiguration();
         if (StringUtils.hasText(builder.getAllowedOriginPatterns())) {
             config.addAllowedOriginPattern(builder.getAllowedOriginPatterns());
@@ -82,15 +82,15 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
         return filterRegistrationBean;
     }
 
-    @EnableConfigurationProperties(XcETagProperties.class)
+    @EnableConfigurationProperties(DcETagProperties.class)
     @ConditionalOnProperty(value = "dc.etag.enabled", havingValue = "true")
     @ConditionalOnMissingFilterBean(ShallowEtagHeaderFilter.class)
     @Configuration(proxyBeanMethods = false)
     static class EtagAutoConfiguration {
 
-        private final XcETagProperties properties;
+        private final DcETagProperties properties;
 
-        public EtagAutoConfiguration(XcETagProperties properties) {
+        public EtagAutoConfiguration(DcETagProperties properties) {
             this.properties = properties;
         }
 

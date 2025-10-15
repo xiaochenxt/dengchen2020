@@ -12,7 +12,7 @@ import java.util.Set;
  * @since 2024/8/6
  */
 @ConfigurationProperties("dc.etag")
-public class XcETagProperties {
+public class DcETagProperties {
 
     /**
      * 是否启用ETag
