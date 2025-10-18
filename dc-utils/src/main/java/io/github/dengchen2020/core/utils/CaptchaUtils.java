@@ -6,6 +6,8 @@ import com.wf.captcha.base.Captcha;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 验证码工具类
@@ -139,7 +141,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static ArithmeticCaptcha arithmetic(int width, int height, int len, float fontSize) {
-        ArithmeticCaptcha captcha = new ArithmeticCaptcha(width, height, len);
+        ArithmeticCaptcha captcha = new NoJsArithmeticCaptcha(width, height, len);
         try {
             captcha.setFont(1, fontSize);
         } catch (IOException | FontFormatException e) {
@@ -222,6 +224,76 @@ public abstract class CaptchaUtils {
             throw new RuntimeException("生成验证码失败", e);
         }
         return captcha;
+    }
+
+    /**
+     * 算术验证码-不依赖js引擎
+     */
+    public static class NoJsArithmeticCaptcha extends com.wf.captcha.ArithmeticCaptcha  {
+        public NoJsArithmeticCaptcha() {
+        }
+
+        public NoJsArithmeticCaptcha(int width, int height) {
+            this();
+            setWidth(width);
+            setHeight(height);
+        }
+
+        public NoJsArithmeticCaptcha(int width, int height, int len) {
+            this(width, height);
+            setLen(len);
+        }
+
+        public NoJsArithmeticCaptcha(int width, int height, int len, Font font) {
+            this(width, height, len);
+            setFont(font);
+        }
+
+        /**
+         * 生成随机验证码
+         *
+         * @return 验证码字符数组
+         */
+        @Override
+        protected char[] alphas() {
+            // 存储所有加减项（每个项可能是单个数字或乘除运算的结果）
+            List<Integer> addSubTerms = new ArrayList<>();
+            int currentMulDiv = num(10);
+            StringBuilder sb = new StringBuilder(String.valueOf(currentMulDiv));
+            for (int i = 1; i < len; i++) {
+                // 随机运算符：+ - x，对应 加 减 乘以
+                int type = num(1, 4);
+                char operator = type == 1 ? '+' : (type == 2 ? '-' : 'x');
+                sb.append(operator);
+                // 生成下一个数字
+                int num = num(10);
+                sb.append(num);
+                if (operator == 'x') {
+                    currentMulDiv *= num;
+                } else {
+                    // 加号/减号：先将当前乘除组结果存入加减项，再重置乘除组
+                    addSubTerms.add(currentMulDiv);
+                    currentMulDiv = num;
+                    // 记录加减运算符（用正负号标记，方便后续计算）
+                    addSubTerms.add(operator == '+' ? 1 : -1);
+                }
+            }
+            // 最后一个乘除组结果加入加减项
+            addSubTerms.add(currentMulDiv);
+            // 计算最终结果（处理加减）
+            int result = addSubTerms.getFirst();
+            for (int i = 1; i < addSubTerms.size(); i += 2) {
+                int sign = addSubTerms.get(i);
+                int term = addSubTerms.get(i + 1);
+                result += sign * term;
+            }
+            // 构建验证码
+            chars = String.valueOf(result);
+            sb.append("=?");
+            setArithmeticString(sb.toString());
+            return chars.toCharArray();
+        }
+
     }
 
 }
