@@ -11,6 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_CLASS_ARRAY;
+
 /**
  * MethodHandle操作简化工具类
  * <p>因为类型擦除等原因，工具类中无法使用{@code invokeExact}（性能极好，但严格要求类型一致）和{@code invoke}（性能极好，比{@code invokeExact}性能差一点点，但使用更方便，不严格要求类型一致），使用示例：
@@ -54,7 +56,7 @@ public abstract class MethodHandleUtils {
      * @return 方法句柄
      */
     public static MethodHandle getPublicMethod(Class<?> clazz, String methodName, Class<?> returnType) {
-        return getPublicMethod(clazz, methodName, returnType, new Class<?>[0]);
+        return getPublicMethod(clazz, methodName, returnType, EMPTY_CLASS_ARRAY);
     }
 
     /**
@@ -86,7 +88,7 @@ public abstract class MethodHandleUtils {
      * @return 方法句柄
      */
     public static MethodHandle getPrivateMethod(Class<?> clazz, String methodName, Class<?> returnType) {
-        return getPrivateMethod(clazz, methodName, returnType, new Class<?>[0]);
+        return getPrivateMethod(clazz, methodName, returnType, EMPTY_CLASS_ARRAY);
     }
 
     /**
@@ -123,7 +125,7 @@ public abstract class MethodHandleUtils {
      * @return 方法句柄
      */
     public static MethodHandle getPublicStaticMethod(Class<?> clazz, String methodName, Class<?> returnType) {
-        return getPublicStaticMethod(clazz, methodName, returnType, new Class<?>[0]);
+        return getPublicStaticMethod(clazz, methodName, returnType, EMPTY_CLASS_ARRAY);
     }
 
     /**
@@ -155,7 +157,7 @@ public abstract class MethodHandleUtils {
      * @return 方法句柄
      */
     public static MethodHandle getPrivateStaticMethod(Class<?> clazz, String methodName, Class<?> returnType) {
-        return getPrivateStaticMethod(clazz, methodName, returnType, new Class<?>[0]);
+        return getPrivateStaticMethod(clazz, methodName, returnType, EMPTY_CLASS_ARRAY);
     }
 
     /**

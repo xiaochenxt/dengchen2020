@@ -2,6 +2,7 @@ package io.github.dengchen2020.core.utils;
 
 import java.net.HttpCookie;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -18,7 +19,7 @@ public abstract class CookieUtils {
      * @param httpCookie HttpCookie
      * @return cookie值
      */
-    public static String parseToString(List<HttpCookie> httpCookie) {
+    public static String parseToString(Collection<HttpCookie> httpCookie) {
         StringJoiner joiner = new StringJoiner(";");
         for (HttpCookie cookie : httpCookie) {
             joiner.add(cookie.toString());
@@ -42,8 +43,8 @@ public abstract class CookieUtils {
      * @param setCookieValue setCookieValue
      * @return cookie值
      */
-    public static List<HttpCookie> parse(List<String> setCookieValue) {
-        List<HttpCookie> httpCookies = new ArrayList<>();
+    public static List<HttpCookie> parse(Collection<String> setCookieValue) {
+        List<HttpCookie> httpCookies = new ArrayList<>(setCookieValue.size());
         setCookieValue.forEach(s -> {
             List<HttpCookie> cookies = HttpCookie.parse(s);
             if (!cookies.isEmpty()) httpCookies.add(cookies.getFirst());

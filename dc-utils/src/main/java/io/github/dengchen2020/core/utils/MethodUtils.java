@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_METHOD_ARRAY;
+
 /**
  * 方法工具类
  * @author xiaochen
@@ -38,7 +40,7 @@ public abstract class MethodUtils {
      */
     public static Method[] getMethodsWithAnnotation(final Class<?> cls, final Class<? extends Annotation> annotationCls,
                                                     final boolean searchSupers, final boolean ignoreAccess) {
-        return getMethodsListWithAnnotation(cls, annotationCls, searchSupers, ignoreAccess).toArray(new Method[0]);
+        return getMethodsListWithAnnotation(cls, annotationCls, searchSupers, ignoreAccess).toArray(EMPTY_METHOD_ARRAY);
     }
 
     /**

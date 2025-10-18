@@ -15,7 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 二维码生成器，支持自定义logo大小比例和颜色设置
+ * 二维码生成器，支持自定义logo大小比例和颜色设置 </br>
+ * 参数设置非线程安全，仅以下示例可单例使用
+ * <pre>
+ * {@code
+ *     private final QRCodeGenerator qrCodeGenerator = QRCodeGenerator.create().logoPath("/logo.jpg");
+ *
+ *     @GetMapping(value = "/qrcode", produces = MediaType.IMAGE_JPEG_VALUE)
+ *     public void qrcode(HttpServletResponse response) throws IOException {
+ *         var text = RandomStringUtils.insecure().nextAlphanumeric(6);
+ *         qrCodeGenerator.generate(response.getOutputStream(), text);
+ *     }
+ * }
+ * </pre>
  *
  * @author xiaochen
  * @since 2025/10/16
@@ -28,7 +40,7 @@ public class QRCodeGenerator {
     private static final BarcodeFormat DEFAULT_FORMAT = BarcodeFormat.QR_CODE;
     private static final ErrorCorrectionLevel DEFAULT_ERROR_LEVEL = ErrorCorrectionLevel.H;
     private static final String DEFAULT_CHARSET = "utf-8";
-    private static final int DEFAULT_SIZE = 300;
+    private static final int DEFAULT_SIZE = 140;
     private static final int DEFAULT_MARGIN = 0;
     private static final float DEFAULT_LOGO_SCALE = 0.2f;
     private static final int DEFAULT_LOGO_BORDER_COLOR = DEFAULT_BACKGROUND_COLOR;
@@ -37,8 +49,7 @@ public class QRCodeGenerator {
     private BarcodeFormat format = DEFAULT_FORMAT;
     private int width = DEFAULT_SIZE;
     private int height = DEFAULT_SIZE;
-    private String logoPath;
-    private InputStream logoInputStream;
+    private byte[] logo;
     private ErrorCorrectionLevel errorLevel = DEFAULT_ERROR_LEVEL;
     private String charset = DEFAULT_CHARSET;
     private int margin = DEFAULT_MARGIN;
@@ -65,9 +76,8 @@ public class QRCodeGenerator {
      */
     public QRCodeGenerator text(String text) {
         if (text == null || text.isBlank()) throw new IllegalArgumentException("二维码内容不能为空");
-        QRCodeGenerator generator = new QRCodeGenerator();
-        generator.text = text;
-        return generator;
+        this.text = text;
+        return this;
     }
 
     /**
@@ -82,7 +92,7 @@ public class QRCodeGenerator {
      * 设置正方形尺寸（宽=高）
      */
     public QRCodeGenerator size(int size) {
-        if (size <= 0) throw new IllegalArgumentException("尺寸必须为正数");
+        if (size <= 0) return this;
         this.width = size;
         this.height = size;
         return this;
@@ -92,25 +102,31 @@ public class QRCodeGenerator {
      * 分别设置宽和高（非正方形场景）
      */
     public QRCodeGenerator size(int width, int height) {
-        if (width <= 0 || height <= 0) throw new IllegalArgumentException("宽和高必须为正数");
+        if (width <= 0 || height <= 0) return this;
         this.width = width;
         this.height = height;
         return this;
     }
 
     /**
-     * 设置类路径下的logo资源（与输入流互斥）
+     * 设置logo
+     * @param logoPath 类路径下的logo资源路径
      */
     public QRCodeGenerator logoPath(String logoPath) {
-        this.logoPath = logoPath;
+        try (InputStream inputStream = getClass().getResourceAsStream(logoPath)) {
+            if (inputStream == null) return this;
+            this.logo = inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("logo资源读取失败"+ logoPath, e);
+        }
         return this;
     }
 
     /**
-     * 设置logo输入流（生成后自动关闭）
+     * 设置logo
      */
-    public QRCodeGenerator logoInputStream(InputStream logoInputStream) {
-        this.logoInputStream = logoInputStream;
+    public QRCodeGenerator logo(byte[] logoData) {
+        this.logo = logoData;
         return this;
     }
 
@@ -140,7 +156,7 @@ public class QRCodeGenerator {
      * 设置边距（默认0，不能为负）
      */
     public QRCodeGenerator margin(int margin) {
-        if (margin < 0) throw new IllegalArgumentException("边距不能为负数");
+        if (margin < 0) return this;
         this.margin = margin;
         return this;
     }
@@ -149,7 +165,7 @@ public class QRCodeGenerator {
      * 设置logo相对于二维码的比例（0-1之间，默认0.2）
      */
     public QRCodeGenerator logoScale(float scale) {
-        if (scale <= 0 || scale >= 1) throw new IllegalArgumentException("logo比例必须在(0,1)之间");
+        if (scale <= 0 || scale >= 1) return this;
         this.logoScale = scale;
         return this;
     }
@@ -206,10 +222,17 @@ public class QRCodeGenerator {
      * 生成二维码并写入输出流
      */
     public void generate(OutputStream outputStream) {
-        if (text == null || text.isBlank()) throw new IllegalArgumentException("二维码内容不能为空");
+        generate(outputStream, text);
+    }
+
+    /**
+     * 生成内容为{@code text}的二维码并写入输出流
+     */
+    public void generate(OutputStream outputStream, String text) {
+        if (text == null) throw new IllegalArgumentException("未设置二维码内容");
         try {
             // 1. 生成二维码矩阵
-            BitMatrix matrix = createBitMatrix();
+            BitMatrix matrix = createBitMatrix(text);
             // 2. 矩阵转图片
             BufferedImage image = matrixToImage(matrix);
             // 3. 添加logo
@@ -224,7 +247,7 @@ public class QRCodeGenerator {
     /**
      * 生成二维码数据矩阵
      */
-    private BitMatrix createBitMatrix() throws WriterException {
+    private BitMatrix createBitMatrix(String text) throws WriterException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, errorLevel);
         hints.put(EncodeHintType.CHARACTER_SET, charset);
@@ -263,20 +286,11 @@ public class QRCodeGenerator {
     }
 
     /**
-     * 添加logo到二维码（自动处理流关闭）
+     * 添加logo到二维码
      */
     private void addLogo(BufferedImage image) throws IOException {
-        if (logoInputStream != null) {
-            try (InputStream is = logoInputStream) {
-                drawLogo(image, is);
-                if (logoInputStream instanceof ByteArrayInputStream) {
-                    if (logoInputStream.markSupported()) logoInputStream.reset();
-                }
-            }
-        } else if (logoPath != null) {
-            // 读取类路径资源
-            try (InputStream is = getClass().getResourceAsStream(logoPath)) {
-                if (is == null) throw new IOException("logo资源不存在：" + logoPath);
+        if (logo != null) {
+            try (InputStream is = new ByteArrayInputStream(logo)) {
                 drawLogo(image, is);
             }
         }

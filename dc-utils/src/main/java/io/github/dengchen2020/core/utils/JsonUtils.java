@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
+
 /**
  * json处理工具类
  * <p>未注入到SpringBean，与Spring的全局Jackson配置可能不一致，因此可能导致转换的部分字段数据与前者不一致</p>
@@ -32,8 +34,6 @@ public abstract class JsonUtils {
     protected static JsonMapper defaultObjectMapper;
 
     protected static ObjectMapper nonNullObjectMapper;
-
-    static final byte[] EMPTY_ARRAY = new byte[0];
 
     static {
         defaultObjectMapper = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).addModule(new JavaTimeModule()).build();
@@ -215,7 +215,7 @@ public abstract class JsonUtils {
      * @return 字节数组
      */
     public static byte[] serialize(Object o, FilterProvider filterProvider) {
-        if (o == null) return EMPTY_ARRAY;
+        if (o == null) return EMPTY_BYTE_ARRAY;
         Class<?> clazz = o.getClass();
         if (clazz == byte[].class) {
             if (log.isDebugEnabled()) log.debug("源对象为字节数组，无需序列化");

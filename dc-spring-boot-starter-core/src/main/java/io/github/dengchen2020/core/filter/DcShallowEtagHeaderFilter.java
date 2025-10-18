@@ -26,7 +26,7 @@ public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
     private final List<PathPattern> includePatterns;
 
     public DcShallowEtagHeaderFilter(String[] includePatterns) {
-        this.includePatterns = new ArrayList<>();
+        this.includePatterns = new ArrayList<>(includePatterns.length);
         PathPatternParser parser = PathPatternParser.defaultInstance;
         for (String pattern : includePatterns) {
             this.includePatterns.add(parser.parse(parser.initFullPathPattern(pattern)));

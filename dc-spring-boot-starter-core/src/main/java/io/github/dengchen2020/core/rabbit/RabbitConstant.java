@@ -5,7 +5,9 @@ package io.github.dengchen2020.core.rabbit;
  * @author xiaochen
  * @since 2024/8/22
  */
-public class RabbitConstant {
+public final class RabbitConstant {
+
+    private RabbitConstant() {}
 
     /**
      * 死信队列

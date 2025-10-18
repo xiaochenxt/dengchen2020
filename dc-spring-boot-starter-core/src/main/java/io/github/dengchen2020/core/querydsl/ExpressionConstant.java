@@ -11,7 +11,9 @@ import java.util.Collection;
  * @author xiaochen
  * @since 2024/4/2
  */
-public class ExpressionConstant {
+public final class ExpressionConstant {
+
+    private ExpressionConstant() {}
 
     /**
      * 检查,分割存储的字符串字段中是否包含特定值

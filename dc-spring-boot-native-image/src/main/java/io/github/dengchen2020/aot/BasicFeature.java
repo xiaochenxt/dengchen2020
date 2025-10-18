@@ -10,6 +10,7 @@ import java.lang.invoke.SerializedLambda;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -38,6 +39,7 @@ class BasicFeature implements Feature {
         serializedLambda(featureUtils, access);
         graalJs(featureUtils, access);
         jetty(featureUtils, access);
+        image(featureUtils, access);
     }
 
     /**
@@ -212,6 +214,23 @@ class BasicFeature implements Feature {
                     new JettyWebSocketRequiredRegister().register(featureUtils);
                 } catch (Exception ignored) {}
             }, jettyWebSocket);
+        }
+    }
+
+    private void image(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> imageReader = featureUtils.loadClass("com.sun.imageio.plugins.jpeg.JPEGImageReader");
+        if (imageReader != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerJniMethods(imageReader, "acceptPixels","passComplete","passStarted","pushBack","readInputData","setImageData","skipInputBytes","skipPastImage","warningOccurred","warningWithMessage");
+                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGQTable","qTable");
+                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGHuffmanTable","lengths","values");
+                featureUtils.registerJniFields("sun.awt.image.ByteComponentRaster","data","dataOffsets","pixelStride","scanlineStride","type");
+                featureUtils.registerJniMethods("java.util.HashMap", "containsKey","put");
+                featureUtils.registerJni(ArrayList.class.getDeclaredConstructors());
+                featureUtils.registerJniMethods("java.util.ArrayList", "add");
+                featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
+                featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
+            }, imageReader);
         }
     }
 

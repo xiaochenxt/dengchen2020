@@ -23,6 +23,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.time.Duration;
 import java.util.List;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
+
 /**
  * Web自动配置
  *
@@ -96,7 +98,7 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
 
         @Bean
         public FilterRegistrationBean<ShallowEtagHeaderFilter> etagFilterFilterRegistrationBean() {
-            ShallowEtagHeaderFilter filter = new DcShallowEtagHeaderFilter(properties.getIgnorePath().toArray(String[]::new));
+            ShallowEtagHeaderFilter filter = new DcShallowEtagHeaderFilter(properties.getIgnorePath().toArray(EMPTY_STRING_ARRAY));
             if (properties.isWriteWeakETag()) filter.setWriteWeakETag(properties.isWriteWeakETag());
             FilterRegistrationBean<ShallowEtagHeaderFilter> filterRegistrationBean = new FilterRegistrationBean<>();
             filterRegistrationBean.setFilter(filter);

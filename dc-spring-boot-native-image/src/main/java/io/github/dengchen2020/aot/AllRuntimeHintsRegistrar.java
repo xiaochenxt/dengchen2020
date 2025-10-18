@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_STRING_ARRAY;
+
 /**
  * 将springboot项目中不含第三方库的所有类注册反射调用，为所有实现了Serializable的注册序列化，可解决90%的运行时错误问题
  * @author xiaochen
@@ -25,7 +27,7 @@ public class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 String packageName = aClass.getPackageName();
                 list.add(packageName);
             }
-            Set<Class<?>> classes = aotUtils.collectClass(list.toArray(new String[0]));
+            Set<Class<?>> classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
             aotUtils.registerReflection(classes);
             aotUtils.registerPattern("*.properties");
             aotUtils.registerSerializable(classes);

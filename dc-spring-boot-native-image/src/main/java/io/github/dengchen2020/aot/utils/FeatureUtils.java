@@ -127,6 +127,32 @@ public class FeatureUtils extends CollectUtils {
         }
     }
 
+    public void registerReflectionMethods(Class<?> c, String... methods) {
+        RuntimeReflection.register(c);
+        registerReflection(collectMethods(c, methods));
+        if (!debug) return;
+        System.out.println("registering reflect " + c.getName());
+    }
+
+    public void registerReflectionFields(Class<?> c, String... fields) {
+        RuntimeReflection.register(c);
+        registerReflection(collectFields(c, fields));
+        if (!debug) return;
+        System.out.println("registering reflect " + c.getName());
+    }
+
+    public void registerReflectionMethods(String className, String... methods) {
+        Class<?> c = loadClass(className);
+        if (c == null) return;
+        registerReflectionMethods(c, methods);
+    }
+
+    public void registerReflectionFields(String className, String... fields) {
+        Class<?> c = loadClass(className);
+        if (c == null) return;
+        registerReflectionFields(c, fields);
+    }
+
     public void registerJni(Class<?>... classes) {
         for (Class<?> c : classes) {
             RuntimeJNIAccess.register(c);
@@ -171,6 +197,32 @@ public class FeatureUtils extends CollectUtils {
             if (i != fieldsLength - 1) s.append(",");
         }
         System.out.println("registering jni field " + s);
+    }
+
+    public void registerJniMethods(Class<?> c, String... methods) {
+        RuntimeJNIAccess.register(c);
+        registerJni(collectMethods(c, methods));
+        if (!debug) return;
+        System.out.println("registering jni " + c.getName());
+    }
+
+    public void registerJniFields(Class<?> c, String... fields) {
+        RuntimeJNIAccess.register(c);
+        registerJni(collectFields(c, fields));
+        if (!debug) return;
+        System.out.println("registering jni " + c.getName());
+    }
+
+    public void registerJniMethods(String className, String... methods) {
+        Class<?> c = loadClass(className);
+        if (c == null) return;
+        registerJniMethods(c, methods);
+    }
+
+    public void registerJniFields(String className, String... fields) {
+        Class<?> c = loadClass(className);
+        if (c == null) return;
+        registerJniFields(c, fields);
     }
 
     public void registerJniIfPresent(String... classes) {

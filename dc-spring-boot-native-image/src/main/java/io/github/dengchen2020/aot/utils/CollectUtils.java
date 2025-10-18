@@ -24,6 +24,16 @@ import java.util.regex.Pattern;
  */
 public class CollectUtils {
 
+    public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    public static final String EMPTY_STRING = "";
+
+    public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
+
+    public static final Method[] EMPTY_METHOD_ARRAY = new Method[0];
+
+    public static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+
     public static final boolean debug = Boolean.getBoolean("aot.debug");
 
     private final ClassLoader classLoader;
@@ -54,7 +64,7 @@ public class CollectUtils {
     }
 
     public Set<Class<?>> collectClass(Collection<String> packages) {
-        return collectClass(null, packages.toArray(new String[0]));
+        return collectClass(null, packages.toArray(EMPTY_STRING_ARRAY));
     }
 
     public Set<Class<?>> collectClass(Predicate<Class<?>> predicate, String... packages) {
@@ -373,7 +383,7 @@ public class CollectUtils {
         for (Method method : m) {
             if (predicate.test(method)) methods.add(method);
         }
-        return methods.toArray(new Method[0]);
+        return methods.toArray(EMPTY_METHOD_ARRAY);
     }
 
     public Field[] collectFields(Class<?> c, String... name) {
@@ -401,7 +411,7 @@ public class CollectUtils {
         for (Field field : f) {
             if (predicate.test(field)) fields.add(field);
         }
-        return fields.toArray(new Field[0]);
+        return fields.toArray(EMPTY_FIELD_ARRAY);
     }
 
 }

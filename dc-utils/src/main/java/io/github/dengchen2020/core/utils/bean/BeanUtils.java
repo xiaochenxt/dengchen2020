@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
+
 /**
  * Bean操作工具类，相比Spring的BeanUtils，会忽略null值的拷贝
  * <p>性能很高，但更推荐使用MapStruct</p>
@@ -92,7 +94,7 @@ public abstract class BeanUtils {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             Collections.addAll(ignoredProperties, ignoreProperties);
-            org.springframework.beans.BeanUtils.copyProperties(source, target, ignoredProperties.toArray(new String[0]));
+            org.springframework.beans.BeanUtils.copyProperties(source, target, ignoredProperties.toArray(EMPTY_STRING_ARRAY));
             return;
         }
         copyProperties(source, target, Set.of(ignoreProperties));
@@ -113,7 +115,7 @@ public abstract class BeanUtils {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             ignoredProperties.addAll(ignoreProperties);
-            org.springframework.beans.BeanUtils.copyProperties(source, target, ignoredProperties.toArray(new String[0]));
+            org.springframework.beans.BeanUtils.copyProperties(source, target, ignoredProperties.toArray(EMPTY_STRING_ARRAY));
             return;
         }
         copyProperties(source, target, new IgnorePropertiesConverter(ignoreProperties));
@@ -138,7 +140,7 @@ public abstract class BeanUtils {
      * 查找对象中为空的字段
      */
     public static String[] getNullPropertyNames(Object source) {
-        return getNullPropertyNameSet(source).toArray(new String[0]);
+        return getNullPropertyNameSet(source).toArray(EMPTY_STRING_ARRAY);
     }
 
     /**

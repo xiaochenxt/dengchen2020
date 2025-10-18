@@ -30,6 +30,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
+
 /**
  * 为静态资源提供访问缓存（为避免内存占用过多，超过一定大小的资源不会缓存）
  * @author xiaochen
@@ -52,7 +54,6 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     private final String forwardStaticPathPattern;
 
     private final Map<String, CacheEntry> cache = new ConcurrentReferenceHashMap<>();
-    private final byte[] emptyBytes = new byte[0];
     private static final int CACHE_EXPIRE_SECONDS = 5;
     private static final int MAX_CACHE_ENTRIES = 2048;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("static-resource-cache-cleaner").factory());
@@ -133,13 +134,13 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
             ResourceInfo info = new ResourceInfo(
                     HttpServletResponse.SC_NOT_FOUND,
                     resp.getContentType(),
-                    emptyBytes,
+                    EMPTY_BYTE_ARRAY,
                     -1,
                     null
             );
             long expireTime = System.currentTimeMillis() + (CACHE_EXPIRE_SECONDS * 1000);
             cache.put(uri, new CacheEntry(info, expireTime));
-            resp.setStatus(info.status);
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         Resource resource = null;
@@ -156,7 +157,7 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     private void handleCachedResource(ResourceInfo info, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType(info.contentType);
         if (info.status == HttpServletResponse.SC_NOT_FOUND) {
-            resp.setStatus(info.status);
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         long lastModified = parseDateHeader(req);
@@ -197,9 +198,9 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
             cache.put(uri, new CacheEntry(info, expireTime));
         } else if (status == HttpServletResponse.SC_NOT_FOUND) {
             ResourceInfo info = new ResourceInfo(
-                    status,
+                    HttpServletResponse.SC_NOT_FOUND,
                     resp.getContentType(),
-                    emptyBytes,
+                    EMPTY_BYTE_ARRAY,
                     -1,
                     null
             );

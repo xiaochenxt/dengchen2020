@@ -15,8 +15,6 @@ import java.util.UUID;
  */
 public abstract class StrUtils extends StringUtils {
 
-    public static final String EMPTY_STRING = "";
-
     /**
      * 字符串格式化输出
      * @param strPattern 含{}占位符的字符串
