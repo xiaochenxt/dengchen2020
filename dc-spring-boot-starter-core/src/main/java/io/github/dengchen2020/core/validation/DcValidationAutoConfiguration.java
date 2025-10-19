@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * @author xiaochen
  * @since 2025/6/6
  */
-@ConditionalOnClass(ValidationConfigurationCustomizer.class)
+@ConditionalOnClass({ValidationConfigurationCustomizer.class, ConfigurationImpl.class})
 @ConditionalOnProperty(value = "dc.validation.fail-fast", matchIfMissing = true, havingValue = "true")
 @Configuration(proxyBeanMethods = false)
 public class DcValidationAutoConfiguration {
