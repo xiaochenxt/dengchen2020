@@ -2,11 +2,10 @@ package io.github.dengchen2020.ratelimiter.redis;
 
 import io.github.dengchen2020.ratelimiter.RateLimiterInterceptor;
 import io.github.dengchen2020.ratelimiter.properties.RateLimiterProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,7 +17,7 @@ import java.time.Duration;
  * @author xiaochen
  * @since 2024/8/3
  */
-@ConditionalOnClass(LettuceConnectionFactory.class)
+@ConditionalOnBean(StringRedisTemplate.class)
 @ConditionalOnProperty(value = "dc.ratelimiter.type", havingValue = "redis")
 @EnableConfigurationProperties(RateLimiterProperties.class)
 @Configuration(proxyBeanMethods = false)
