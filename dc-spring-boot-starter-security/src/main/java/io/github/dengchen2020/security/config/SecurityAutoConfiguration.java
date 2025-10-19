@@ -9,7 +9,6 @@ import io.github.dengchen2020.security.event.listener.SecurityScheduledTaskHandl
 import io.github.dengchen2020.security.properties.SecurityProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.servlet.ConditionalOnMissingFilterBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
@@ -44,7 +43,7 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
         return new BCryptPasswordEncoder(4);
     }
 
-    @ConditionalOnMissingFilterBean(AuthenticationFilter.class)
+    @ConditionalOnMissingBean(value = AuthenticationFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Bean
     public FilterRegistrationBean<AuthenticationFilter> authenticationFilter() {
         FilterRegistrationBean<AuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<>();
