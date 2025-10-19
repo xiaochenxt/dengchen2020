@@ -3,7 +3,6 @@ package io.github.dengchen2020.cache.redis;
 import io.github.dengchen2020.cache.DefaultCacheHelper;
 import io.github.dengchen2020.cache.properties.CacheSpecBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,13 +24,12 @@ import java.util.Map;
  * @author xiaochen
  * @since 2024/5/30
  */
-@ConditionalOnClass(RedisConnectionFactory.class)
+@ConditionalOnBean(RedisConnectionFactory.class)
 @EnableConfigurationProperties(CacheSpecBuilder.class)
 @ConditionalOnProperty(value = "spring.cache.type", havingValue = "redis")
 @Configuration(proxyBeanMethods = false)
 public class RedisCacheAutoConfiguration {
 
-    @ConditionalOnBean(RedisConnectionFactory.class)
     @ConditionalOnMissingBean
     @Bean
     public RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {

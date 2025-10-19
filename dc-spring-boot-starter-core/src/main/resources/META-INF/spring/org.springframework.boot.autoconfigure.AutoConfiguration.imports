@@ -1,5 +1,6 @@
 io.github.dengchen2020.core.config.BaseAutoConfiguration
 io.github.dengchen2020.core.scheduled.SchedulingAutoConfiguration
+io.github.dengchen2020.core.redis.LettuceDependencyAutoConfiguration
 io.github.dengchen2020.core.redis.RedisDependencyAutoConfiguration
 io.github.dengchen2020.core.jackson.JacksonAutoConfiguration
 io.github.dengchen2020.core.rabbit.RabbitAutoConfiguration
