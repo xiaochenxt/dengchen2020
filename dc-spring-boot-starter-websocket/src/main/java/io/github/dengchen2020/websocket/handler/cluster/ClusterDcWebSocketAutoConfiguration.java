@@ -1,11 +1,12 @@
 package io.github.dengchen2020.websocket.handler.cluster;
 
+import io.github.dengchen2020.core.redis.RedisDependencyAutoConfiguration;
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -18,7 +19,8 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/6/27
  */
-@ConditionalOnClass(MessageListener.class)
+@AutoConfigureAfter(RedisDependencyAutoConfiguration.class)
+@ConditionalOnBean(RedisMessagePublisher.class)
 @Configuration(proxyBeanMethods = false)
 public class ClusterDcWebSocketAutoConfiguration {
 
