@@ -84,6 +84,7 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @EnableConfigurationProperties(DcETagProperties.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnProperty(value = "dc.etag.enabled", havingValue = "true")
     @ConditionalOnMissingBean(value = ShallowEtagHeaderFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Configuration(proxyBeanMethods = false)

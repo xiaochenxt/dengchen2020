@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,16 +38,10 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/7/3
  */
-@AutoConfigureAfter({RedisReactiveAutoConfiguration.class})
+@AutoConfigureAfter({RedisAutoConfiguration.class})
 @ConditionalOnBean(ReactiveRedisConnectionFactory.class)
 @Configuration(proxyBeanMethods = false)
 public class RedisDependencyAutoConfiguration {
-
-    @ConditionalOnMissingBean
-    @Bean
-    public RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
-        return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializer);
-    }
 
     @ConditionalOnMissingBean
     @Bean
@@ -58,9 +52,10 @@ public class RedisDependencyAutoConfiguration {
         return container;
     }
 
+    @ConditionalOnMissingBean
     @Bean
-    public ScheduledConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
-        return new ScheduledConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
+    public RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
+        return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializer);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -100,6 +95,11 @@ public class RedisDependencyAutoConfiguration {
             }
         }
 
+    }
+
+    @Bean
+    public ScheduledConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
+        return new ScheduledConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
     }
 
 }
