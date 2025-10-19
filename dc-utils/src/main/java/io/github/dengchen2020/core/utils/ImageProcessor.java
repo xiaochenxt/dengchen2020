@@ -121,7 +121,7 @@ public class ImageProcessor {
     private int height = 0;                     // 主图目标高度
     private int imageWatermarkWidth = 0;        // 图片水印宽度
     private int imageWatermarkHeight = 0;       // 图片水印高度
-    private float imageWatermarkAlpha = 1.0f;
+    private float imageWatermarkAlpha = 1.0f;   // 图片水印透明度
 
     // 多组水印配置
     private final List<TextWatermarkConfig> textWatermarkConfigs = new ArrayList<>();

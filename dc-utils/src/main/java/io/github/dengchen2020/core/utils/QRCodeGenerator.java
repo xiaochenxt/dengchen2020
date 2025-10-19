@@ -34,29 +34,20 @@ import java.util.Map;
  */
 public class QRCodeGenerator {
 
-    // 默认配置常量
-    private static final int DEFAULT_PATTERN_COLOR = 0xFF000000; // 默认图案颜色：黑色
-    private static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF; // 默认背景色：白色
     private static final BarcodeFormat DEFAULT_FORMAT = BarcodeFormat.QR_CODE;
     private static final ErrorCorrectionLevel DEFAULT_ERROR_LEVEL = ErrorCorrectionLevel.H;
-    private static final String DEFAULT_CHARSET = "utf-8";
-    private static final int DEFAULT_SIZE = 140;
-    private static final int DEFAULT_MARGIN = 0;
-    private static final float DEFAULT_LOGO_SCALE = 0.2f;
-    private static final int DEFAULT_LOGO_BORDER_COLOR = DEFAULT_BACKGROUND_COLOR;
 
-    private String text;
     private BarcodeFormat format = DEFAULT_FORMAT;
-    private int width = DEFAULT_SIZE;
-    private int height = DEFAULT_SIZE;
+    private int width = 140;
+    private int height = 140;
     private byte[] logo;
     private ErrorCorrectionLevel errorLevel = DEFAULT_ERROR_LEVEL;
-    private String charset = DEFAULT_CHARSET;
-    private int margin = DEFAULT_MARGIN;
-    private float logoScale = DEFAULT_LOGO_SCALE;
-    private int patternColor = DEFAULT_PATTERN_COLOR;
-    private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
-    private int logoBorderColor = DEFAULT_LOGO_BORDER_COLOR;
+    private String charset = "utf-8";
+    private int margin = 0;
+    private float logoScale = 0.2f;
+    private int patternColor = 0xFF000000; // 默认图案颜色：黑色
+    private int backgroundColor = 0xFFFFFFFF; // 默认背景色：白色
+    private int logoBorderColor = 0xFFFFFFFF; // logo默认背景色：白色
 
     // 私有构造函数：禁止外部直接实例化，必须通过create()获取
     private QRCodeGenerator() {}
@@ -67,17 +58,6 @@ public class QRCodeGenerator {
      */
     public static QRCodeGenerator create() {
         return new QRCodeGenerator();
-    }
-
-    /**
-     * 静态工厂方法：初始化生成器并设置核心内容
-     * @param text 二维码内容（不能为空）
-     * @return 生成器实例，用于链式配置
-     */
-    public QRCodeGenerator text(String text) {
-        if (text == null || text.isBlank()) throw new IllegalArgumentException("二维码内容不能为空");
-        this.text = text;
-        return this;
     }
 
     /**
@@ -216,13 +196,6 @@ public class QRCodeGenerator {
     public QRCodeGenerator logoBorderColor(Color color) {
         this.logoBorderColor = color.getRGB();
         return this;
-    }
-
-    /**
-     * 生成二维码并写入输出流
-     */
-    public void generate(OutputStream outputStream) {
-        generate(outputStream, text);
     }
 
     /**

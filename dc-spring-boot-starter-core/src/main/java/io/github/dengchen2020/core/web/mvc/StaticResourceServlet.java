@@ -6,10 +6,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -42,8 +42,8 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
 
     private final ResourceUrlProvider resourceUrlProvider;
 
-    public StaticResourceServlet(WebMvcProperties webMvcProperties, ResourceUrlProvider resourceUrlProvider) {
-        this.staticPathPattern  = webMvcProperties.getStaticPathPattern();
+    public StaticResourceServlet(Environment environment, ResourceUrlProvider resourceUrlProvider) {
+        this.staticPathPattern  = environment.getProperty("spring.mvc.static-path-pattern","/**");
         this.forwardStaticPathPattern = staticPathPattern.replace("/**", "/");
         this.resourceUrlProvider = resourceUrlProvider;
     }
