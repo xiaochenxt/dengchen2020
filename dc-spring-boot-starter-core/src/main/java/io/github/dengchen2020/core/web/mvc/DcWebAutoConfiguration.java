@@ -6,7 +6,6 @@ import io.github.dengchen2020.core.properties.DcETagProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.servlet.ConditionalOnMissingFilterBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +36,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY
 public class DcWebAutoConfiguration implements WebMvcConfigurer {
 
     @ConditionalOnProperty(value = "dc.cors.enabled", matchIfMissing = true, havingValue = "true")
-    @ConditionalOnMissingFilterBean(CorsFilter.class)
+    @ConditionalOnMissingBean(value = CorsFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(DcCorsProperties builder) {
         CorsConfiguration config = new CorsConfiguration();
@@ -86,7 +85,7 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
 
     @EnableConfigurationProperties(DcETagProperties.class)
     @ConditionalOnProperty(value = "dc.etag.enabled", havingValue = "true")
-    @ConditionalOnMissingFilterBean(ShallowEtagHeaderFilter.class)
+    @ConditionalOnMissingBean(value = ShallowEtagHeaderFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Configuration(proxyBeanMethods = false)
     static class EtagAutoConfiguration {
 

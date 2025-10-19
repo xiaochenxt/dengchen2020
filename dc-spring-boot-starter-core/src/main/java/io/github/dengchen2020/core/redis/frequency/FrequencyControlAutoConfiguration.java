@@ -1,13 +1,10 @@
 package io.github.dengchen2020.core.redis.frequency;
 
-import io.github.dengchen2020.core.redis.RedisDependencyAutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,8 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author xiaochen
  * @since 2025/5/15
  */
-@ConditionalOnBean(RedisConnectionFactory.class)
-@AutoConfigureAfter(RedisDependencyAutoConfiguration.class)
+@ConditionalOnBean(StringRedisTemplate.class)
 @Configuration(proxyBeanMethods = false)
 public class FrequencyControlAutoConfiguration {
 
