@@ -1,6 +1,5 @@
 package io.github.dengchen2020.id;
 
-import io.github.dengchen2020.id.exception.IdGeneratorException;
 import io.github.dengchen2020.id.snowflake.SnowflakeIdGenerator;
 
 import java.time.Instant;
@@ -14,25 +13,22 @@ public class IdHelper {
 
     private static SnowflakeIdGenerator idGenInstance = null;
 
-    public static SnowflakeIdGenerator getIdGenInstance() {
-        return idGenInstance;
-    }
-
 
     /**
      * 设置参数，程序仅初始化时执行一次
+     * <p>注意：如果项目中引入了spring-boot-starter-data-redis，不需要调用该方法，且该方法调用无效</p>
      */
-    public static void setIdGenerator(SnowflakeIdGenerator generator) throws IdGeneratorException {
+    public static void setIdGenerator(SnowflakeIdGenerator generator) {
         if(idGenInstance == null) idGenInstance = generator;
     }
 
     /**
      * 生成新的Id
-     * 调用本方法前，请确保调用了 setIdGenerator 方法做初始化。
+     * <p>调用本方法前，请确保调用了 setIdGenerator 方法做初始化。</p>
      *
      * @return id
      */
-    public static long nextId() throws IdGeneratorException {
+    public static long nextId() {
         return idGenInstance.newLong();
     }
 
@@ -46,22 +42,12 @@ public class IdHelper {
     }
 
     /**
-     * 根据时间戳生成id
+     * 根据时间戳生成id（同一时间戳生成的id相同）
      * @param timestamp 时间戳
      * @return id
      */
     public static long newLongFromTimestamp(long timestamp) {
-        return idGenInstance.newLongFromTimestamp(timestamp);
-    }
-
-    /**
-     * 根据时间戳生成id
-     * @param timestamp 时间戳
-     * @param workId 机器id，为0则返回结果是同时间戳最小id
-     * @return id
-     */
-    public static long newLongFromTimestamp(long timestamp, short workId) {
-        return idGenInstance.newLongFromTimestamp(timestamp, workId);
+        return idGenInstance.newLongFromTimestamp(timestamp, (short) 0);
     }
 
 }

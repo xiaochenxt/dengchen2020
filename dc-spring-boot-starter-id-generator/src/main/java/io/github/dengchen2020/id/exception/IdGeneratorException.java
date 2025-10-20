@@ -7,23 +7,12 @@ package io.github.dengchen2020.id.exception;
  */
 public class IdGeneratorException extends RuntimeException {
 
-    public IdGeneratorException() {
-    }
-
     public IdGeneratorException(String message) {
         super(message);
     }
 
     public IdGeneratorException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public IdGeneratorException(Throwable cause) {
-        super(cause);
-    }
-
-    public IdGeneratorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
     public IdGeneratorException(String msgFormat, Object... args) {

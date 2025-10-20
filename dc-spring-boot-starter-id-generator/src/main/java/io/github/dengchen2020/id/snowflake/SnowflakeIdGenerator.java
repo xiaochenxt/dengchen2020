@@ -1,7 +1,5 @@
 package io.github.dengchen2020.id.snowflake;
 
-import io.github.dengchen2020.id.exception.IdGeneratorException;
-
 import java.time.Instant;
 
 /**
@@ -13,22 +11,20 @@ public class SnowflakeIdGenerator {
 
     private static SnowWorker _SnowWorker = null;
 
-    public SnowflakeIdGenerator(SnowflakeIdGeneratorOptions options) throws IdGeneratorException {
-        if (options == null) {
-            throw new RuntimeException("雪花算法配置错误");
-        }
+    public SnowflakeIdGenerator(SnowflakeIdGeneratorOptions options) {
+        if (options == null) throw new IllegalArgumentException("雪花算法配置错误");
 
         // 1.BaseTime
         if (options.getBaseTime() < 315504000000L || options.getBaseTime() > System.currentTimeMillis()) {
-            throw new IdGeneratorException("基础时间（BaseTime）配置错误，取值范围：315504000000-"+System.currentTimeMillis());
+            throw new IllegalArgumentException("基础时间（BaseTime）配置错误，取值范围：315504000000-"+System.currentTimeMillis());
         }
 
         // 2.WorkerIdBitLength
         if (options.getWorkerIdBitLength() <= 0) {
-            throw new IdGeneratorException("序列数位长（WorkerIdBitLength）配置错误，取值范围：1-21");
+            throw new IllegalArgumentException("序列数位长（WorkerIdBitLength）配置错误，取值范围：1-21");
         }
         if (options.getWorkerIdBitLength() + options.getSeqBitLength() > 22) {
-            throw new IdGeneratorException("序列数位长（WorkerIdBitLength）配置错误，WorkerIdBitLength + SeqBitLength <= 22");
+            throw new IllegalArgumentException("序列数位长（WorkerIdBitLength）配置错误，WorkerIdBitLength + SeqBitLength <= 22");
         }
 
         // 3.WorkerId
@@ -37,12 +33,12 @@ public class SnowflakeIdGenerator {
             maxWorkerIdNumber = 63;
         }
         if (options.getWorkerId() < 0 || options.getWorkerId() > maxWorkerIdNumber) {
-            throw new IdGeneratorException("机器码（WorkerId）配置错误，取值范围：0-" + (maxWorkerIdNumber > 0 ? maxWorkerIdNumber : 63));
+            throw new IllegalArgumentException("机器码（WorkerId）配置错误，取值范围：0-" + (maxWorkerIdNumber > 0 ? maxWorkerIdNumber : 63));
         }
 
         // 4.SeqBitLength
         if (options.getSeqBitLength() < 2 || options.getSeqBitLength() > 21) {
-            throw new IdGeneratorException("序列数位长（SeqBitLength）配置错误，取值范围：2-21");
+            throw new IllegalArgumentException("序列数位长（SeqBitLength）配置错误，取值范围：2-21");
         }
 
         // 5.MaxSeqNumber
@@ -51,12 +47,12 @@ public class SnowflakeIdGenerator {
             maxSeqNumber = 63;
         }
         if (options.getMaxSeqNumber() < 0 || options.getMaxSeqNumber() > maxSeqNumber) {
-            throw new IdGeneratorException("最大序列数（含）（MaxSeqNumber）配置错误，取值范围：1-"+ maxSeqNumber);
+            throw new IllegalArgumentException("最大序列数（含）（MaxSeqNumber）配置错误，取值范围：1-"+ maxSeqNumber);
         }
 
         // 6.MinSeqNumber
         if (options.getMinSeqNumber() < 5 || options.getMinSeqNumber() > maxSeqNumber) {
-            throw new IdGeneratorException("最小序列数（含）（MinSeqNumber）配置错误，取值范围：5-" + maxSeqNumber);
+            throw new IllegalArgumentException("最小序列数（含）（MinSeqNumber）配置错误，取值范围：5-" + maxSeqNumber);
         }
 
         switch (options.getMethod()) {

@@ -1,13 +1,9 @@
 package io.github.dengchen2020.id.snowflake;
 
-import io.github.dengchen2020.id.exception.IdGeneratorException;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 雪花算法-漂移算法
- * @author xiaochen
- * @since 2024/7/1
  */
 class SnowWorker {
 
@@ -48,7 +44,7 @@ class SnowWorker {
 
     protected final byte _TimestampShift;
 
-    private static final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     protected short _CurrentSeqNumber;
     protected long _LastTimeTick = 0;
@@ -72,29 +68,17 @@ class SnowWorker {
         _CurrentSeqNumber = minSeqNumber;
     }
 
-//    private void BeginOverCostAction(long useTimeTick) {
-//
-//    }
-
-    private void EndOverCostAction(long useTimeTick) {
+    private void endOverCostAction(long useTimeTick) {
         if (_TermIndex > 10000) {
             _TermIndex = 0;
         }
     }
 
-//    private void BeginTurnBackAction(long useTimeTick) {
-//
-//    }
-//
-//    private void EndTurnBackAction(long useTimeTick) {
-//
-//    }
-
-    private long NextOverCostId() {
-        long currentTimeTick = GetCurrentTimeTick();
+    private long nextOverCostId() {
+        long currentTimeTick = getCurrentTimeTick();
 
         if (currentTimeTick > _LastTimeTick) {
-            EndOverCostAction(currentTimeTick);
+            endOverCostAction(currentTimeTick);
 
             _LastTimeTick = currentTimeTick;
             _CurrentSeqNumber = minSeqNumber;
@@ -102,19 +86,19 @@ class SnowWorker {
             _OverCostCountInOneTerm = 0;
             _GenCountInOneTerm = 0;
 
-            return CalcId(_LastTimeTick);
+            return calcId(_LastTimeTick);
         }
 
         if (_OverCostCountInOneTerm >= topOverCostCount) {
-            EndOverCostAction(currentTimeTick);
+            endOverCostAction(currentTimeTick);
 
-            _LastTimeTick = GetNextTimeTick();
+            _LastTimeTick = getNextTimeTick();
             _CurrentSeqNumber = minSeqNumber;
             _IsOverCost = false;
             _OverCostCountInOneTerm = 0;
             _GenCountInOneTerm = 0;
 
-            return CalcId(_LastTimeTick);
+            return calcId(_LastTimeTick);
         }
 
         if (_CurrentSeqNumber > maxSeqNumber) {
@@ -124,15 +108,15 @@ class SnowWorker {
             _OverCostCountInOneTerm++;
             _GenCountInOneTerm++;
 
-            return CalcId(_LastTimeTick);
+            return calcId(_LastTimeTick);
         }
 
         _GenCountInOneTerm++;
-        return CalcId(_LastTimeTick);
+        return calcId(_LastTimeTick);
     }
 
-    private long NextNormalId() throws IdGeneratorException {
-        long currentTimeTick = GetCurrentTimeTick();
+    private long nextNormalId() {
+        long currentTimeTick = getCurrentTimeTick();
 
         if (currentTimeTick < _LastTimeTick) {
             if (_TurnBackTimeTick < 1) {
@@ -144,15 +128,13 @@ class SnowWorker {
                 if (_TurnBackIndex > 4) {
                     _TurnBackIndex = 1;
                 }
-                //BeginTurnBackAction(_TurnBackTimeTick);
             }
 
-            return CalcTurnBackId(_TurnBackTimeTick);
+            return calcTurnBackId(_TurnBackTimeTick);
         }
 
         // 时间追平时，_TurnBackTimeTick清零
         if (_TurnBackTimeTick > 0) {
-            //EndTurnBackAction(_TurnBackTimeTick);
             _TurnBackTimeTick = 0;
         }
 
@@ -160,11 +142,10 @@ class SnowWorker {
             _LastTimeTick = currentTimeTick;
             _CurrentSeqNumber = minSeqNumber;
 
-            return CalcId(_LastTimeTick);
+            return calcId(_LastTimeTick);
         }
 
         if (_CurrentSeqNumber > maxSeqNumber) {
-            //BeginOverCostAction(currentTimeTick);
 
             _TermIndex++;
             _LastTimeTick++;
@@ -173,13 +154,13 @@ class SnowWorker {
             _OverCostCountInOneTerm = 1;
             _GenCountInOneTerm = 1;
 
-            return CalcId(_LastTimeTick);
+            return calcId(_LastTimeTick);
         }
 
-        return CalcId(_LastTimeTick);
+        return calcId(_LastTimeTick);
     }
 
-    private long CalcId(long useTimeTick) {
+    private long calcId(long useTimeTick) {
         long result = ((useTimeTick << _TimestampShift) +
                 ((long) workerId << seqBitLength) +
                 (int) _CurrentSeqNumber);
@@ -188,7 +169,7 @@ class SnowWorker {
         return result;
     }
 
-    private long CalcTurnBackId(long useTimeTick) {
+    private long calcTurnBackId(long useTimeTick) {
         long result = ((useTimeTick << _TimestampShift) +
                 ((long) workerId << seqBitLength) + _TurnBackIndex);
 
@@ -196,16 +177,16 @@ class SnowWorker {
         return result;
     }
 
-    protected long GetCurrentTimeTick() {
+    protected long getCurrentTimeTick() {
         long millis = System.currentTimeMillis();
         return millis - baseTime;
     }
 
-    protected long GetNextTimeTick() {
-        long tempTimeTicker = GetCurrentTimeTick();
+    protected long getNextTimeTick() {
+        long tempTimeTicker = getCurrentTimeTick();
 
         while (tempTimeTicker <= _LastTimeTick) {
-            tempTimeTicker = GetCurrentTimeTick();
+            tempTimeTicker = getCurrentTimeTick();
         }
 
         return tempTimeTicker;
@@ -214,7 +195,7 @@ class SnowWorker {
     public long nextId() {
         lock.lock();
         try {
-            return _IsOverCost ? NextOverCostId() : NextNormalId();
+            return _IsOverCost ? nextOverCostId() : nextNormalId();
         } finally {
             lock.unlock();
         }

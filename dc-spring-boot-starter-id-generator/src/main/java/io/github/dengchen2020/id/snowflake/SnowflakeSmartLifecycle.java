@@ -80,7 +80,7 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
             running = true;
         } catch (Exception e) {
             running = false;
-            throw new IdGeneratorException("雪花算法初始化失败！" + e);
+            throw new IdGeneratorException("雪花算法初始化失败！", e);
         }
         IdHelper.setIdGenerator(new SnowflakeIdGenerator(options));
         if (log.isInfoEnabled()) log.info("雪花算法生成器初始化完成，workerId：{}，baseTime：{}", options.getWorkerId(), options.getBaseTime());

@@ -1,7 +1,6 @@
-package io.github.dengchen2020.id.config;
+package io.github.dengchen2020.id.snowflake;
 
 import io.github.dengchen2020.id.properties.IdGeneratorBuilder;
-import io.github.dengchen2020.id.snowflake.SnowflakeSmartLifecycle;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
