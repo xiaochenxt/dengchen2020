@@ -24,7 +24,7 @@ import java.util.Map;
  *     @GetMapping(value = "/qrcode", produces = MediaType.IMAGE_JPEG_VALUE)
  *     public void qrcode(HttpServletResponse response) throws IOException {
  *         var text = RandomStringUtils.insecure().nextAlphanumeric(6);
- *         qrCodeGenerator.generate(response.getOutputStream(), text);
+ *         qrCodeGenerator.generate(text, response.getOutputStream());
  *     }
  * }
  * </pre>
@@ -201,7 +201,7 @@ public class QRCodeGenerator {
     /**
      * 生成内容为{@code text}的二维码并写入输出流
      */
-    public void generate(OutputStream outputStream, String text) {
+    public void generate(String text, OutputStream outputStream) {
         if (text == null) throw new IllegalArgumentException("未设置二维码内容");
         try {
             // 1. 生成二维码矩阵
