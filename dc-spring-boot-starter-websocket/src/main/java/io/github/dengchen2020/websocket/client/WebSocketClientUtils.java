@@ -214,7 +214,7 @@ public class WebSocketClientUtils {
                 counter.set(0);
                 if (isOpen()) log.info("websocket客户端重连成功，url：{}", url);
             } catch (InterruptedException _) {
-
+                Thread.currentThread().interrupt();
             } catch (CompletionException | IllegalStateException e) {
                 if (counter.get() >= maxReconnectAttempts) {
                     log.error("websocket客户端第{}次重连失败，url：{}，不再重连", counter.get(), url);

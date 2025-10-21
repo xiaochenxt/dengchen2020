@@ -28,11 +28,11 @@ import java.util.Map;
 @EnableConfigurationProperties(CacheSpecBuilder.class)
 @ConditionalOnProperty(value = "spring.cache.type", havingValue = "redis")
 @Configuration(proxyBeanMethods = false)
-public class RedisCacheAutoConfiguration {
+public final class RedisCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
+    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
         String prefixCacheName = "dc:cache:";
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         CacheSpecBuilder.Redis builder = cacheSpecBuilder.getRedis();
@@ -52,7 +52,7 @@ public class RedisCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public DefaultCacheHelper defaultCacheHelper(RedisCacheManager redisCacheManager){
+    DefaultCacheHelper defaultCacheHelper(RedisCacheManager redisCacheManager){
         return new DefaultCacheHelper(redisCacheManager);
     }
 

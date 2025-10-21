@@ -24,10 +24,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @EnableConfigurationProperties(IdGeneratorBuilder.class)
 @ConditionalOnProperty(value = "dc.id.type",matchIfMissing = true,havingValue = "snowflake")
 @Configuration(proxyBeanMethods = false)
-public class SnowflakeAutoConfiguration {
+public final class SnowflakeAutoConfiguration {
 
     @Bean
-    public SnowflakeSmartLifecycle snowflakeSmartLifecycle(RedisConnectionFactory redisConnectionFactory, IdGeneratorBuilder idGeneratorBuilder){
+    SnowflakeSmartLifecycle snowflakeSmartLifecycle(RedisConnectionFactory redisConnectionFactory, IdGeneratorBuilder idGeneratorBuilder){
         return new SnowflakeSmartLifecycle(new StringRedisTemplate(redisConnectionFactory),idGeneratorBuilder.getSnowflake());
     }
 

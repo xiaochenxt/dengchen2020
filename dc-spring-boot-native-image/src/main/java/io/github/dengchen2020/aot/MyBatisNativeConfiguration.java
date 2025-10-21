@@ -70,7 +70,7 @@ import java.util.stream.Stream;
 @ConditionalOnClass(org.mybatis.spring.mapper.MapperFactoryBean.class)
 @ImportRuntimeHints(MyBatisNativeConfiguration.MyBaitsRuntimeHintsRegistrar.class)
 @Configuration(proxyBeanMethods = false)
-public class MyBatisNativeConfiguration {
+public final class MyBatisNativeConfiguration {
 
     @Bean
     MyBatisBeanFactoryInitializationAotProcessor myBatisBeanFactoryInitializationAotProcessor() {

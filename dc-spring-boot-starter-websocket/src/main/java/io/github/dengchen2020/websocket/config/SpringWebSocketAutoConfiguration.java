@@ -31,7 +31,7 @@ import java.util.Set;
 @EnableWebSocket
 @ConditionalOnClass(WebSocketHandler.class)
 @Configuration(proxyBeanMethods = false)
-public class SpringWebSocketAutoConfiguration implements WebSocketConfigurer {
+public final class SpringWebSocketAutoConfiguration implements WebSocketConfigurer {
 
     private final List<WebSocketHandler> webSocketHandlers;
 
@@ -41,7 +41,7 @@ public class SpringWebSocketAutoConfiguration implements WebSocketConfigurer {
 
     private final WebSocketProperties webSocketProperties;
 
-    public SpringWebSocketAutoConfiguration(@Nullable List<WebSocketHandler> webSocketHandlers, @Nullable HandshakeHandler handshakeHandler, @Nullable HandshakeInterceptor[] handshakeInterceptors, WebSocketProperties webSocketProperties) {
+    SpringWebSocketAutoConfiguration(@Nullable List<WebSocketHandler> webSocketHandlers, @Nullable HandshakeHandler handshakeHandler, @Nullable HandshakeInterceptor[] handshakeInterceptors, WebSocketProperties webSocketProperties) {
         this.webSocketHandlers = webSocketHandlers;
         this.handshakeHandler = handshakeHandler;
         this.handshakeInterceptors = handshakeInterceptors;

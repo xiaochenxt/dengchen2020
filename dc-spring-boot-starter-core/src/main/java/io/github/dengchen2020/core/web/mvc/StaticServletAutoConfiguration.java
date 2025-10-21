@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(StaticServletBeanRegistrar.class)
 @Configuration(proxyBeanMethods = false)
-public class StaticServletAutoConfiguration {
+public final class StaticServletAutoConfiguration {
 
 
 

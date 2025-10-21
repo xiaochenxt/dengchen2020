@@ -25,18 +25,18 @@ import org.springframework.data.redis.connection.MessageListener;
 @EnableConfigurationProperties(CacheSpecBuilder.class)
 @ConditionalOnProperty(value = "spring.cache.type", matchIfMissing = true, havingValue = "caffeine")
 @Configuration(proxyBeanMethods = false)
-public class CaffeineCacheAutoConfiguration {
+public final class CaffeineCacheAutoConfiguration {
 
     @ConditionalOnBean(RedisMessagePublisher.class)
     @ConditionalOnMissingBean
     @Bean
-    public CaffeineCacheHelper caffeineCacheHelper(RedisMessagePublisher redisMessagePublisher){
+    CaffeineCacheHelper caffeineCacheHelper(RedisMessagePublisher redisMessagePublisher){
         return new CaffeineCacheHelper(redisMessagePublisher);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public CaffeineCacheManager caffeineCacheManager(CacheSpecBuilder cacheSpecBuilder,@Nullable CaffeineCacheHelper cacheHelper) {
+    CaffeineCacheManager caffeineCacheManager(CacheSpecBuilder cacheSpecBuilder,@Nullable CaffeineCacheHelper cacheHelper) {
         return new CaffeineCacheManager(cacheSpecBuilder.getCaffeine(), cacheHelper);
     }
 
@@ -54,11 +54,11 @@ public class CaffeineCacheAutoConfiguration {
      */
     @ConditionalOnClass(MessageListener.class)
     @Configuration(proxyBeanMethods = false)
-    static class CaffeineCacheSyncAutoConfiguration {
+    static final class CaffeineCacheSyncAutoConfiguration {
 
         @ConditionalOnMissingBean
         @Bean
-        public CacheSyncMessageListener cacheSyncMessageListener(CacheManager cacheManager){
+        CacheSyncMessageListener cacheSyncMessageListener(CacheManager cacheManager){
             return new CacheSyncMessageListener(cacheManager);
         }
 

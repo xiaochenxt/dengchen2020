@@ -15,14 +15,14 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
  * @since 2024/7/17
  */
 @Configuration(proxyBeanMethods = false)
-public class JacksonAutoConfiguration {
+public final class JacksonAutoConfiguration {
 
     @ConditionalOnClass(GenericJackson2JsonRedisSerializer.class)
     @Configuration(proxyBeanMethods = false)
     static class GenericJackson2JsonRedisSerializerConfiguration {
         @ConditionalOnMissingBean
         @Bean
-        public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer(Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder){
+        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer(Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder){
             return GenericJackson2JsonRedisSerializer.builder()
                     .defaultTyping(true)
                     .objectMapper(jackson2ObjectMapperBuilder.createXmlMapper(false)

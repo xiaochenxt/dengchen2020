@@ -41,11 +41,11 @@ import java.util.List;
 @AutoConfigureAfter({RedisAutoConfiguration.class})
 @ConditionalOnBean(ReactiveRedisConnectionFactory.class)
 @Configuration(proxyBeanMethods = false)
-public class RedisDependencyAutoConfiguration {
+public final class RedisDependencyAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
+    RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setTaskExecutor(new VirtualThreadTaskExecutor("redis-message-container-"));
         container.setConnectionFactory(redisConnectionFactory);
@@ -54,16 +54,16 @@ public class RedisDependencyAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
+    RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
         return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializer);
     }
 
     @Configuration(proxyBeanMethods = false)
-    static class RedisMessageListenerRegistrar {
+    static final class RedisMessageListenerRegistrar {
 
         private static final Logger log = LoggerFactory.getLogger(RedisMessageListenerRegistrar.class);
 
-        public RedisMessageListenerRegistrar(RedisMessageListenerContainer redisMessageListenerContainer, @Nullable List<MessageListener> messageListeners, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
+        RedisMessageListenerRegistrar(RedisMessageListenerContainer redisMessageListenerContainer, @Nullable List<MessageListener> messageListeners, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
             if (messageListeners != null) {
                 for (MessageListener messageListener : messageListeners) {
                     Topic topic;
@@ -98,7 +98,7 @@ public class RedisDependencyAutoConfiguration {
     }
 
     @Bean
-    public ScheduledConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
+    ScheduledConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
         return new ScheduledConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
     }
 

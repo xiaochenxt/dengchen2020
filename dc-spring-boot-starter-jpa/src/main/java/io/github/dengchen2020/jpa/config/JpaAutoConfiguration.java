@@ -15,16 +15,16 @@ import org.springframework.context.annotation.Configuration;
  * @since 2024/6/3
  */
 @Configuration(proxyBeanMethods = false)
-public class JpaAutoConfiguration {
+public final class JpaAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public JPAQueryFactory jpaQueryFactory(EntityManager entityManager){
+    JPAQueryFactory jpaQueryFactory(EntityManager entityManager){
         return new JPAQueryFactory(entityManager);
     }
 
     @Bean
-    public HibernatePropertiesCustomizer dcHibernatePropertiesCustomizer(@Value("${spring.profiles.active:null}") String active) {
+    HibernatePropertiesCustomizer dcHibernatePropertiesCustomizer(@Value("${spring.profiles.active:null}") String active) {
         return hibernateProperties -> {
             if (!"dev".equals(active)) hibernateProperties.remove(AvailableSettings.HBM2DDL_AUTO);
         };

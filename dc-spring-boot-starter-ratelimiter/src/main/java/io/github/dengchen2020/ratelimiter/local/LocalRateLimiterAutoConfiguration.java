@@ -19,11 +19,11 @@ import java.time.Duration;
 @ConditionalOnProperty(value = "dc.ratelimiter.type", matchIfMissing = true, havingValue = "local")
 @EnableConfigurationProperties(RateLimiterProperties.class)
 @Configuration(proxyBeanMethods = false)
-public class LocalRateLimiterAutoConfiguration implements WebMvcConfigurer {
+public final class LocalRateLimiterAutoConfiguration implements WebMvcConfigurer {
 
     private final RateLimiterProperties properties;
 
-    public LocalRateLimiterAutoConfiguration(RateLimiterProperties properties) {
+    LocalRateLimiterAutoConfiguration(RateLimiterProperties properties) {
         this.properties = properties;
     }
 

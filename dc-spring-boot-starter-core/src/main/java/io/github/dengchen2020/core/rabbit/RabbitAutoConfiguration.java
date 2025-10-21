@@ -28,19 +28,19 @@ import java.util.Map;
 @PropertySource("classpath:application-rabbit.properties")
 @ConditionalOnClass(MessageConverter.class)
 @Configuration(proxyBeanMethods = false)
-public class RabbitAutoConfiguration {
+public final class RabbitAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(RabbitAutoConfiguration.class);
 
     @ConditionalOnMissingBean
     @Bean
-    public MessageConverter jackson2JsonMessageConverter() {
+    MessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public RabbitTemplate.ConfirmCallback confirmCallback(MessageConverter messageConverter) {
+    RabbitTemplate.ConfirmCallback confirmCallback(MessageConverter messageConverter) {
         return (correlationData, ack, cause) -> {
             if (correlationData == null) {
                 if (ack) {
@@ -73,7 +73,7 @@ public class RabbitAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public RabbitTemplate.ReturnsCallback returnsCallback(MessageConverter messageConverter) {
+    RabbitTemplate.ReturnsCallback returnsCallback(MessageConverter messageConverter) {
         return returned -> {
             //排除延时任务：因为发送方确实没有投递到队列上，只是在交换器上暂存，等过期时间到了 才会发往队列
             if (returned.getMessage().getMessageProperties().getReceivedDelayLong() != null) {
@@ -87,7 +87,7 @@ public class RabbitAutoConfiguration {
     }
 
     @Bean
-    public RabbitTemplateCustomizer dcRabbitTemplateCustomizer(RabbitTemplate.ConfirmCallback confirmCallback, RabbitTemplate.ReturnsCallback returnsCallback) {
+    RabbitTemplateCustomizer dcRabbitTemplateCustomizer(RabbitTemplate.ConfirmCallback confirmCallback, RabbitTemplate.ReturnsCallback returnsCallback) {
         return template -> {
             template.setTaskExecutor(new VirtualThreadTaskExecutor("rabbitmq-"));
             template.setConfirmCallback(confirmCallback);
@@ -97,7 +97,7 @@ public class RabbitAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public MessageRecoverer messageRecoverer(MessageConverter messageConverter) {
+    MessageRecoverer messageRecoverer(MessageConverter messageConverter) {
         return (message, cause) -> {
             MessageProperties messageProperties = message.getMessageProperties();
             log.error(StrUtils.format("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，异常信息：", messageProperties.getHeader(RabbitConstant.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey()), cause);
@@ -108,7 +108,7 @@ public class RabbitAutoConfiguration {
      * 死信队列
      */
     @Bean
-    public Queue deadLetterQueue() {
+    Queue deadLetterQueue() {
         Map<String, Object> args = new HashMap<>();
         return new Queue(RabbitConstant.DEAD_LETTER_QUEUE, true, false, false, args);
     }
@@ -117,7 +117,7 @@ public class RabbitAutoConfiguration {
      * 死信交换机
      */
     @Bean
-    public DirectExchange deadLetterExchange() {
+    DirectExchange deadLetterExchange() {
         return new DirectExchange(RabbitConstant.DEAD_LETTER_EXCHANGE);
     }
 

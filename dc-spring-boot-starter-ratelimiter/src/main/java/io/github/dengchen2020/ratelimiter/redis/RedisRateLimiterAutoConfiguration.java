@@ -21,7 +21,7 @@ import java.time.Duration;
 @ConditionalOnProperty(value = "dc.ratelimiter.type", havingValue = "redis")
 @EnableConfigurationProperties(RateLimiterProperties.class)
 @Configuration(proxyBeanMethods = false)
-public class RedisRateLimiterAutoConfiguration implements WebMvcConfigurer {
+public final class RedisRateLimiterAutoConfiguration implements WebMvcConfigurer {
 
     private final RateLimiterProperties properties;
 

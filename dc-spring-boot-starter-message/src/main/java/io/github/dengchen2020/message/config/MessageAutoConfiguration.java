@@ -25,7 +25,7 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 @EnableConfigurationProperties(DcMessageBuilder.class)
 @Configuration(proxyBeanMethods = false)
-public class MessageAutoConfiguration {
+public final class MessageAutoConfiguration {
 
     private final DcMessageBuilder.DingTalk dingTalk;
 
@@ -33,7 +33,7 @@ public class MessageAutoConfiguration {
 
     private final DcMessageBuilder.WeChat weChat;
 
-    public MessageAutoConfiguration(DcMessageBuilder dcMessageBuilder) {
+    MessageAutoConfiguration(DcMessageBuilder dcMessageBuilder) {
         this.dingTalk = dcMessageBuilder.getDingTalk();
         this.feiShu = dcMessageBuilder.getFeiShu();
         this.weChat = dcMessageBuilder.getWeChat();
@@ -41,28 +41,28 @@ public class MessageAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public FeiShuClient feiShuService(){
+    FeiShuClient feiShuService(){
         return new FeiShuClientImpl(feiShu.getWebhook(), feiShu.getSecret());
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public DingTalkClient dingTalkService(){
+    DingTalkClient dingTalkService(){
         return new DingTalkClientImpl(dingTalk.getWebhook(), dingTalk.getSecret());
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public WeChatClient weChatClient(){
+    WeChatClient weChatClient(){
         return new WeChatClientImpl(weChat.getWebhook());
     }
 
     @ConditionalOnClass(MimeMessage.class)
     @Configuration(proxyBeanMethods = false)
-    static class EmailClientAutoConfiguration {
+    static final class EmailClientAutoConfiguration {
         @ConditionalOnBean(JavaMailSender.class)
         @Bean
-        public EmailClient emailService(JavaMailSender javaMailSender, DcMessageBuilder dcMessageBuilder){
+        EmailClient emailService(JavaMailSender javaMailSender, DcMessageBuilder dcMessageBuilder){
             return new EmailClientImpl(javaMailSender, dcMessageBuilder.getEmail().getTo());
         }
     }

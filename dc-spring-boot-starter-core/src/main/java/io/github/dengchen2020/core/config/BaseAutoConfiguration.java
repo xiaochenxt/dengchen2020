@@ -41,13 +41,13 @@ import java.util.Set;
  */
 @PropertySource("classpath:application-core.properties")
 @Configuration(proxyBeanMethods = false)
-public class BaseAutoConfiguration implements InitializingBean {
+public final class BaseAutoConfiguration implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(BaseAutoConfiguration.class);
 
     private final Environment environment;
 
-    public BaseAutoConfiguration(Environment environment) {
+    BaseAutoConfiguration(Environment environment) {
         this.environment = environment;
     }
 
@@ -71,10 +71,10 @@ public class BaseAutoConfiguration implements InitializingBean {
 
     @ConditionalOnClass(name = "org.apache.hc.client5.http.classic.HttpClient")
     @Configuration(proxyBeanMethods = false)
-    static class RestClientAutoConfiguration {
+    static final class RestClientAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
-        public HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() {
+        HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() {
             HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                     .setMaxConnPerRoute(200)
@@ -89,14 +89,14 @@ public class BaseAutoConfiguration implements InitializingBean {
         @Bean
         @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
         @ConditionalOnMissingBean
-        public RestClient.Builder httpClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer, HttpComponentsClientHttpRequestFactory factory) {
+        RestClient.Builder httpClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer, HttpComponentsClientHttpRequestFactory factory) {
             RestClient.Builder builder = restClientBuilderConfigurer.configure(RestClientUtils.builder(factory));
             return builder;
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public RestClient restClient(HttpComponentsClientHttpRequestFactory factory) {
+        RestClient restClient(HttpComponentsClientHttpRequestFactory factory) {
             return RestClientUtils.builder(factory).build();
         }
     }

@@ -189,7 +189,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
                     // 未到令牌生成时间：计算等待时长，释放锁后休眠
                     long waitMs = bucket.nextTokenTime - System.currentTimeMillis();
                     bucket.lock.unlock(); // 先释放锁，避免持有锁休眠
-                    TimeUnit.MILLISECONDS.sleep(waitMs);
+                    Thread.sleep(waitMs);
                 } finally {
                     // 确保锁最终被释放（避免异常导致锁泄漏）
                     if (bucket.lock.isHeldByCurrentThread()) {
@@ -198,7 +198,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
                 }
             } else {
                 // 锁竞争：短暂休眠后重试（避免CPU空转）
-                TimeUnit.MILLISECONDS.sleep(10);
+                Thread.sleep(10);
                 if (log.isTraceEnabled()) log.trace("[锁竞争] Key: {}, 等待获取令牌桶锁", key);
             }
         }
@@ -280,7 +280,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
         while (!isShutdown) {
             try {
                 // 1. 休眠指定周期
-                TimeUnit.MILLISECONDS.sleep(CLEANUP_PERIOD_MS);
+                Thread.sleep(CLEANUP_PERIOD_MS);
                 int cleanupCount = 0;
                 // 加锁遍历有序Map
                 keyLock.lock();

@@ -21,11 +21,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @ConditionalOnProperty(value = "dc.security.permission.enabled", havingValue = "true")
 @Configuration(proxyBeanMethods = false)
-public class PermissionVerifierAutoConfiguration {
+public final class PermissionVerifierAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public PermissionVerifier permissionVerifier() {
+    PermissionVerifier permissionVerifier() {
         return new SimplePermissionVerifier();
     }
 
@@ -36,7 +36,7 @@ public class PermissionVerifierAutoConfiguration {
 
         private final PermissionVerifier permissionVerifier;
 
-        public InterceptorConfiguration(SecurityProperties securityProperties, PermissionVerifier permissionVerifier) {
+        InterceptorConfiguration(SecurityProperties securityProperties, PermissionVerifier permissionVerifier) {
             this.securityProperties = securityProperties;
             this.permissionVerifier = permissionVerifier;
         }

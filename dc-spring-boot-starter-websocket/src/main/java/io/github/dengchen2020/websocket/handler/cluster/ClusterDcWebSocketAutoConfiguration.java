@@ -22,17 +22,17 @@ import java.util.List;
 @AutoConfigureAfter(RedisDependencyAutoConfiguration.class)
 @ConditionalOnBean(RedisMessagePublisher.class)
 @Configuration(proxyBeanMethods = false)
-public class ClusterDcWebSocketAutoConfiguration {
+public final class ClusterDcWebSocketAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public WebSocketHelper webSocketHelper(RedisMessagePublisher redisMessagePublisher) {
+    WebSocketHelper webSocketHelper(RedisMessagePublisher redisMessagePublisher) {
         return new WebSocketHelper(redisMessagePublisher);
     }
 
     @Configuration(proxyBeanMethods = false)
-    static class ClusterWebSocketHandlerRegistrar {
-        public ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJackson2JsonRedisSerializer redisSerializer) {
+    static final class ClusterWebSocketHandlerRegistrar {
+        ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJackson2JsonRedisSerializer redisSerializer) {
             for (ClusterDcWebSocketHandler dcWebSocketHandler : clusterDcWebSocketHandler) {
                 MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(dcWebSocketHandler);
                 messageListenerAdapter.setSerializer(redisSerializer);

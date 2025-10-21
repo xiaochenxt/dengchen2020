@@ -16,10 +16,10 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass({ValidationConfigurationCustomizer.class, ConfigurationImpl.class})
 @ConditionalOnProperty(value = "dc.validation.fail-fast", matchIfMissing = true, havingValue = "true")
 @Configuration(proxyBeanMethods = false)
-public class DcValidationAutoConfiguration {
+public final class DcValidationAutoConfiguration {
 
     @Bean
-    public ValidationConfigurationCustomizer dcValidationConfigurationCustomizer(){
+    ValidationConfigurationCustomizer dcValidationConfigurationCustomizer(){
         return configuration -> {
             if (configuration instanceof ConfigurationImpl configurationImpl) {
                 if (configurationImpl.getProperties().get(BaseHibernateValidatorConfiguration.FAIL_FAST) == null) {

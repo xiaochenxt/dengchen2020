@@ -186,6 +186,10 @@ class SnowWorker {
         long tempTimeTicker = getCurrentTimeTick();
 
         while (tempTimeTicker <= _LastTimeTick) {
+            try {
+                // 直接等待相差的时间，避免频繁且无效的唤醒检查
+                Thread.sleep(_LastTimeTick - tempTimeTicker);
+            } catch (InterruptedException _) {}
             tempTimeTicker = getCurrentTimeTick();
         }
 

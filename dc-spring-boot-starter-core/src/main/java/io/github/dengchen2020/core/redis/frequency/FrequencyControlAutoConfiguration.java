@@ -16,11 +16,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @ConditionalOnBean(StringRedisTemplate.class)
 @Configuration(proxyBeanMethods = false)
-public class FrequencyControlAutoConfiguration {
+public final class FrequencyControlAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public FrequencyControlSupport frequencyControlSupport(StringRedisTemplate redisTemplate) {
+    FrequencyControlSupport frequencyControlSupport(StringRedisTemplate redisTemplate) {
         return new FrequencyControlSupport(redisTemplate);
     }
 

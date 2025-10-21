@@ -33,12 +33,12 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY
 @EnableConfigurationProperties(DcCorsProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Configuration(proxyBeanMethods = false)
-public class DcWebAutoConfiguration implements WebMvcConfigurer {
+public final class DcWebAutoConfiguration implements WebMvcConfigurer {
 
     @ConditionalOnProperty(value = "dc.cors.enabled", matchIfMissing = true, havingValue = "true")
     @ConditionalOnMissingBean(value = CorsFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(DcCorsProperties builder) {
+    FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(DcCorsProperties builder) {
         CorsConfiguration config = new CorsConfiguration();
         if (StringUtils.hasText(builder.getAllowedOriginPatterns())) {
             config.addAllowedOriginPattern(builder.getAllowedOriginPatterns());
@@ -88,16 +88,16 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnProperty(value = "dc.etag.enabled", havingValue = "true")
     @ConditionalOnMissingBean(value = ShallowEtagHeaderFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Configuration(proxyBeanMethods = false)
-    static class EtagAutoConfiguration {
+    static final class EtagAutoConfiguration {
 
         private final DcETagProperties properties;
 
-        public EtagAutoConfiguration(DcETagProperties properties) {
+        EtagAutoConfiguration(DcETagProperties properties) {
             this.properties = properties;
         }
 
         @Bean
-        public FilterRegistrationBean<ShallowEtagHeaderFilter> etagFilterFilterRegistrationBean() {
+        FilterRegistrationBean<ShallowEtagHeaderFilter> etagFilterFilterRegistrationBean() {
             ShallowEtagHeaderFilter filter = new DcShallowEtagHeaderFilter(properties.getIgnorePath().toArray(EMPTY_STRING_ARRAY));
             if (properties.isWriteWeakETag()) filter.setWriteWeakETag(properties.isWriteWeakETag());
             FilterRegistrationBean<ShallowEtagHeaderFilter> filterRegistrationBean = new FilterRegistrationBean<>();
@@ -107,7 +107,7 @@ public class DcWebAutoConfiguration implements WebMvcConfigurer {
 
         @ConditionalOnMissingBean
         @Bean
-        public EtagOptimizeResponseBodyAdvice etagOptimizeResponseBodyAdvice() {
+        EtagOptimizeResponseBodyAdvice etagOptimizeResponseBodyAdvice() {
             return new EtagOptimizeResponseBodyAdvice(properties.getMaxLength().toBytes());
         }
     }

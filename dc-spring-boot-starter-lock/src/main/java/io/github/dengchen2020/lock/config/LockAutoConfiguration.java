@@ -23,11 +23,11 @@ import java.util.concurrent.Executors;
  */
 @ConditionalOnClass(RedissonClient.class)
 @Configuration(proxyBeanMethods = false)
-public class LockAutoConfiguration implements DisposableBean {
+public final class LockAutoConfiguration implements DisposableBean {
 
     private final RedissonClient redissonClient;
 
-    public LockAutoConfiguration(Environment environment) {
+    LockAutoConfiguration(Environment environment) {
         Config config = new Config();
         config.setNettyExecutor(Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redisson-netty-", 0).factory()));
         config.setExecutor(Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redisson-", 0).factory()));
@@ -64,12 +64,12 @@ public class LockAutoConfiguration implements DisposableBean {
 
     @ConditionalOnMissingBean
     @Bean
-    public RedissonLock redissonLock() {
+    RedissonLock redissonLock() {
         return new RedissonLock(redissonClient);
     }
 
     @Bean
-    public LockAop lockAop() {
+    LockAop lockAop() {
         return new LockAop(redissonClient);
     }
 

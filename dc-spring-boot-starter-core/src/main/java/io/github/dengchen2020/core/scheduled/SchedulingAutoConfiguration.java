@@ -16,11 +16,11 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  */
 @ConditionalOnProperty(value = "dc.task.scheduling.optimize", matchIfMissing = true, havingValue = "true")
 @Configuration(proxyBeanMethods = false)
-public class SchedulingAutoConfiguration implements SchedulingConfigurer {
+public final class SchedulingAutoConfiguration implements SchedulingConfigurer {
 
     private final ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder;
 
-    public SchedulingAutoConfiguration(@Nullable ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder) {
+    SchedulingAutoConfiguration(@Nullable ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder) {
         this.threadPoolTaskSchedulerBuilder = threadPoolTaskSchedulerBuilder;
     }
 
