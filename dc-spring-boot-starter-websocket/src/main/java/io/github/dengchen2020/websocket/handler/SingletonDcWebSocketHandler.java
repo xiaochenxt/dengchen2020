@@ -42,14 +42,14 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
     protected void clear(WebSocketSession session) {
         Authentication authentication = getClientInfo(session);
         if (authentication == null) return;
-        if (authentication.getUserId() != null) {
-            userIdSessionMap.computeIfPresent(authentication.getUserId(), (userId, sessions) -> {
+        if (authentication.userId() != null) {
+            userIdSessionMap.computeIfPresent(authentication.userId(), (userId, sessions) -> {
                 sessions.removeIf(s -> s.getId().equals(session.getId()));
                 return sessions.isEmpty() ? null : sessions;
             });
         }
-        if (authentication.getTenantId() != null) {
-            tenantIdSessionMap.computeIfPresent(authentication.getTenantId(), (tenantId, sessions) -> {
+        if (authentication.tenantId() != null) {
+            tenantIdSessionMap.computeIfPresent(authentication.tenantId(), (tenantId, sessions) -> {
                 sessions.removeIf(s -> s.getId().equals(session.getId()));
                 return sessions.isEmpty() ? null : sessions;
             });
@@ -59,16 +59,16 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
     @Override
     public void online(WebSocketSession session) {
         Authentication authentication = getClientInfo(session);
-        if (authentication.getUserId() == null) return;
-        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.computeIfAbsent(authentication.getUserId(), (userId) -> new ConcurrentLinkedQueue<>());
+        if (authentication.userId() == null) return;
+        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.computeIfAbsent(authentication.userId(), (userId) -> new ConcurrentLinkedQueue<>());
         int onlineCount = sessionQueue.size();
         int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
         if (onlineCount > 0 && onlineCount >= allowSameUserMaxOnlineCount){
             close(sessionQueue.iterator().next(), CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
         }
         sessionQueue.add(session);
-        if (authentication.getTenantId() != null) {
-            tenantIdSessionMap.computeIfAbsent(authentication.getTenantId(), (tenantId) -> new ConcurrentLinkedQueue<>()).add(session);
+        if (authentication.tenantId() != null) {
+            tenantIdSessionMap.computeIfAbsent(authentication.tenantId(), (tenantId) -> new ConcurrentLinkedQueue<>()).add(session);
         }
     }
 

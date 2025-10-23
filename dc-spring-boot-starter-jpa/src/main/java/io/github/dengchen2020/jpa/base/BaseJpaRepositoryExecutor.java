@@ -46,8 +46,9 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     private final String deleteInSql;
     private final String softDeleteSql;
     private final String softDeleteInSql;
-    private static final String tenantIdSql = " and " + tenantIdFieldName + " = :tenantId";
-    private static final String userIdSql = " and " + userIdFieldName + " = :userId";
+    private static final String tenantIdSqlFragment = " and " + tenantIdFieldName + " = :tenantId";
+    private static final String userIdSqlFragment = " and " + userIdFieldName + " = :userId";
+    private static final String deletedFieldName = "deleted";
 
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em, final JPAQueryFactory queryFactory) {
         super(entityInformation, em, queryFactory);
@@ -159,7 +160,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     private Long getTenantIdNonNull(){
         Authentication authentication = SecurityContextHolder.getAuthentication();
         Assert.notNull(authentication, "未设置authentication，无法获取tenantId");
-        Long tenantId = authentication.getTenantId();
+        Long tenantId = authentication.tenantId();
         Assert.notNull(tenantId, "tenantId must not be null");
         return tenantId;
     }
@@ -168,7 +169,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     private String getUserIdNonNull(){
         Authentication authentication = SecurityContextHolder.getAuthentication();
         Assert.notNull(authentication, "未设置authentication，无法获取userId");
-        String userId = authentication.getUserId();
+        String userId = authentication.userId();
         Assert.notNull(userId, "userId must not be null");
         return userId;
     }
@@ -177,16 +178,16 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     private Long getTenantId(){
         if (strictVerifyAuthentication) return getTenantIdNonNull();
         Authentication authentication = SecurityContextHolder.getAuthentication();
-        if (authentication == null || authentication.getUserId() == null) return null;
-        return authentication.getTenantId();
+        if (authentication == null || authentication.tenantId() == null) return null;
+        return authentication.tenantId();
     }
 
     @Nullable
     private String getUserId(){
         if (strictVerifyAuthentication) return getUserIdNonNull();
         Authentication authentication = SecurityContextHolder.getAuthentication();
-        if (authentication == null || authentication.getUserId() == null) return null;
-        return authentication.getUserId();
+        if (authentication == null || authentication.userId() == null) return null;
+        return authentication.userId();
     }
 
     /**
@@ -231,7 +232,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null ){
-            query = entityManager.createQuery(selectInSql + tenantIdSql, getDomainClass())
+            query = entityManager.createQuery(selectInSql + tenantIdSqlFragment, getDomainClass())
                     .setParameter(idFieldName, ids)
                     .setParameter(tenantIdFieldName, tenantId);
         }else {
@@ -260,7 +261,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
-            query = entityManager.createQuery(deleteSql + tenantIdSql)
+            query = entityManager.createQuery(deleteSql + tenantIdSqlFragment)
                     .setParameter(idFieldName, id)
                     .setParameter(tenantIdFieldName, tenantId);
         }else {
@@ -277,7 +278,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null) {
-            query = entityManager.createQuery(deleteInSql + tenantIdSql)
+            query = entityManager.createQuery(deleteInSql + tenantIdSqlFragment)
                     .setParameter(idFieldName, ids)
                     .setParameter(tenantIdFieldName, tenantId);
         }else {
@@ -300,7 +301,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
-            query = entityManager.createQuery(softDeleteSql + tenantIdSql)
+            query = entityManager.createQuery(softDeleteSql + tenantIdSqlFragment)
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, id)
                     .setParameter(tenantIdFieldName, tenantId);
@@ -319,7 +320,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
-            query = entityManager.createQuery(softDeleteInSql + tenantIdSql)
+            query = entityManager.createQuery(softDeleteInSql + tenantIdSqlFragment)
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, ids)
                     .setParameter(tenantIdFieldName, tenantId);
@@ -380,7 +381,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
-            query = entityManager.createQuery(selectInSql + userIdSql, getDomainClass())
+            query = entityManager.createQuery(selectInSql + userIdSqlFragment, getDomainClass())
                     .setParameter(idFieldName, ids)
                     .setParameter(userIdFieldName, userId);
         }else {
@@ -409,7 +410,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
-            query = entityManager.createQuery(deleteSql +userIdSql)
+            query = entityManager.createQuery(deleteSql + userIdSqlFragment)
                     .setParameter(idFieldName, id)
                     .setParameter(userIdFieldName, userId);
         }else {
@@ -426,7 +427,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
-            query = entityManager.createQuery(deleteInSql + userIdSql)
+            query = entityManager.createQuery(deleteInSql + userIdSqlFragment)
                     .setParameter(idFieldName, ids)
                     .setParameter(userIdFieldName, userId);
         }else {
@@ -449,7 +450,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
-            query = entityManager.createQuery(softDeleteSql + userIdSql)
+            query = entityManager.createQuery(softDeleteSql + userIdSqlFragment)
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, id)
                     .setParameter(userIdFieldName, userId);
@@ -468,7 +469,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
-            query = entityManager.createQuery(softDeleteInSql + userIdSql)
+            query = entityManager.createQuery(softDeleteInSql + userIdSqlFragment)
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, ids)
                     .setParameter(userIdFieldName, userId);

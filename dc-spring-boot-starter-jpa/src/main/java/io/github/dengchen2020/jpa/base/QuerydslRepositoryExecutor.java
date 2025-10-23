@@ -10,7 +10,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
-import io.github.dengchen2020.core.jdbc.PageParam;
+import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -54,7 +54,6 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     protected final EntityPath<T> path;
     protected final PathBuilder<T> builder;
     protected final Querydsl querydsl;
-    static final String deletedFieldName = "deleted";
 
     public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager em, JPAQueryFactory queryFactory) {
         super(entityInformation, em);
@@ -212,22 +211,21 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     /**
      * Querydsl分页查询
      * @param query JPAQuery<R>
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o 排序方式
      * @return SimplePage<R>
      */
     @Override
-    public <R> SimplePage<R> fetchPage(JPAQuery<R> query, PageParam param, OrderSpecifier<?>... o){
-        if (param.getDeleted() != null) query.where(builder.getBoolean(deletedFieldName).ne(!param.getDeleted()));
-        if (param.getSize() == 0) return new SimplePage<>(!param.isSelectCount() ? 0 : query.fetchCount(), Collections.emptyList());
+    public <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
+        if (page.getSize() == 0) return new SimplePage<>(!page.isSelectCount() ? 0 : query.fetchCount(), Collections.emptyList());
         if (o != null && o.length > 0) query = query.orderBy(o);
-        if (!param.isSelectCount()) {
-            return new SimplePage<>(null, query.limit(param.getSize())
-                    .offset(param.getOffset())
+        if (!page.isSelectCount()) {
+            return new SimplePage<>(null, query.limit(page.getSize())
+                    .offset(page.getOffset())
                     .fetch());
         }
-        QueryResults<R> result = query.limit(param.getSize())
-                .offset(param.getOffset())
+        QueryResults<R> result = query.limit(page.getSize())
+                .offset(page.getOffset())
                 .fetchResults();
         return new SimplePage<>(result.getTotal(), result.getResults());
     }
@@ -235,52 +233,52 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     /**
      * Querydsl分页条件查询
      *
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o     排序方式
      * @return 分页后的数据
      */
     @Override
-    public SimplePage<T> findAll(Predicate predicate, PageParam param, OrderSpecifier<?>... o){
-        return fetchPage(selectFrom().where(predicate), param, o);
+    public SimplePage<T> findAll(Predicate predicate, Page page, OrderSpecifier<?>... o){
+        return fetchPage(selectFrom().where(predicate), page, o);
     }
 
     /**
      * 返回流读取器
      * @param query JPAQuery<R>
-     * @param param 查询参数
+     * @param page 查询参数
      * @param o 排序方式
      * @return Stream<R>
      */
     @Override
-    public <R> Stream<R> fetchStream(JPAQuery<R> query, PageParam param, OrderSpecifier<?>... o){
+    public <R> Stream<R> fetchStream(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
         if (o != null && o.length > 0) query = query.orderBy(o);
-        if(param == null) return query.stream();
-        return query.limit(param.getSize())
-                .offset(param.getOffset())
+        if(page == null) return query.stream();
+        return query.limit(page.getSize())
+                .offset(page.getOffset())
                 .stream();
     }
 
     /**
      * 返回流读取器
      * @param predicate 条件
-     * @param param 查询参数
+     * @param page 查询参数
      * @param o 排序方式
      * @return Stream<T>
      */
     @Override
-    public Stream<T> findStream(Predicate predicate, PageParam param, OrderSpecifier<?>... o){
-        return fetchStream(selectFrom().where(predicate), param, o);
+    public Stream<T> findStream(Predicate predicate, Page page, OrderSpecifier<?>... o){
+        return fetchStream(selectFrom().where(predicate), page, o);
     }
 
     /**
      * 返回流读取器
-     * @param param 查询参数
+     * @param page 查询参数
      * @param o 排序方式
      * @return Stream<T>
      */
     @Override
-    public Stream<T> findStream(PageParam param, OrderSpecifier<?>... o){
-        return fetchStream(selectFrom(), param, o);
+    public Stream<T> findStream(Page page, OrderSpecifier<?>... o){
+        return fetchStream(selectFrom(), page, o);
     }
 
     /**

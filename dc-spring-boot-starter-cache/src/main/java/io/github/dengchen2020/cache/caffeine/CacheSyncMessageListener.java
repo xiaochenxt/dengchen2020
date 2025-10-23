@@ -27,20 +27,20 @@ public class CacheSyncMessageListener extends MessageListenerAdapter {
 
     @RedisMessageListener(CACHE_SYNC)
     public void handleMessage(CacheSyncParam cacheSync) {
-        if(cacheSync.getCacheName() == null) {
+        if(cacheSync.cacheName() == null) {
             for (String cacheName : cacheManager.getCacheNames()) {
                 Cache cache = cacheManager.getCache(cacheName);
                 if (cache != null) cache.invalidate();
             }
             if (log.isDebugEnabled()) log.debug("所有缓存被清除");
         }else {
-            for (String cacheName : cacheSync.getCacheName()) {
+            for (String cacheName : cacheSync.cacheName()) {
                 Cache cache = cacheManager.getCache(cacheName);
                 if (cache == null) continue;
-                switch (cacheSync.getType()) {
+                switch (cacheSync.type()) {
                     case 1 -> {
-                        if (cache.evictIfPresent(cacheSync.getKey())) {
-                            if (log.isDebugEnabled()) log.debug("缓存名：{}，key：{}被同步清除", cacheSync.getCacheName(), cacheSync.getKey());
+                        if (cache.evictIfPresent(cacheSync.key())) {
+                            if (log.isDebugEnabled()) log.debug("缓存名：{}，key：{}被同步清除", cacheSync.cacheName(), cacheSync.key());
                         }
                     }
                     case 2 -> {

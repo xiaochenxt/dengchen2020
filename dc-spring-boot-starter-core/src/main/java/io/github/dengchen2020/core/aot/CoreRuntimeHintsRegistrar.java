@@ -1,13 +1,14 @@
 package io.github.dengchen2020.core.aot;
 
-import io.github.dengchen2020.core.validation.*;
 import io.github.dengchen2020.aot.utils.AotUtils;
 import io.github.dengchen2020.core.event.ScheduledHandleBeforeEvent;
+import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.PageParam;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import io.github.dengchen2020.core.jdbc.StatsPage;
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
-import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.security.principal.SimpleUserAuthentication;
+import io.github.dengchen2020.core.validation.*;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -22,8 +23,8 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         AotUtils aotUtils = AotUtils.newInstance(hints, classLoader);
         aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, AllowedValuesValidator.class, JsonValidator.class, NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
-                PageParam.class, SimplePage.class, StatsPage.class, ScheduledHandleBeforeEvent.class);
-        aotUtils.registerSerializable(Authentication.class, AnonymousAuthentication.class);
+                Page.class, PageParam.class, SimplePage.class, StatsPage.class, ScheduledHandleBeforeEvent.class);
+        aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
     }
 
 }

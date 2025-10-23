@@ -5,7 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import io.github.dengchen2020.core.jdbc.PageParam;
+import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -34,46 +34,46 @@ public interface ComplexJpaRepository<T> {
     /**
      * Querydsl分页查询
      * @param query JPAQuery<R>
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o 排序方式
      * @return SimplePage<R>
      */
-    <R> SimplePage<R> fetchPage(JPAQuery<R> query, PageParam param, OrderSpecifier<?>... o);
+    <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o);
 
     /**
      * Querydsl分页条件查询
      *
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o     排序方式
      * @return 分页后的数据
      */
-    SimplePage<T> findAll(Predicate predicate, PageParam param, OrderSpecifier<?>... o);
+    SimplePage<T> findAll(Predicate predicate, Page page, OrderSpecifier<?>... o);
 
     /**
      * 返回流读取器
      * @param query JPAQuery<R>
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o 排序方式
      * @return Stream<R>
      */
-    <R> Stream<R> fetchStream(JPAQuery<R> query, PageParam param, OrderSpecifier<?>... o);
+    <R> Stream<R> fetchStream(JPAQuery<R> query, Page page, OrderSpecifier<?>... o);
 
     /**
      * 返回流读取器
      * @param predicate 条件
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o 排序方式
      * @return Stream<T>
      */
-    Stream<T> findStream(Predicate predicate, PageParam param, OrderSpecifier<?>... o);
+    Stream<T> findStream(Predicate predicate, Page page, OrderSpecifier<?>... o);
 
     /**
      * 返回流读取器
-     * @param param 分页参数
+     * @param page 分页参数
      * @param o 排序方式
      * @return Stream<T>
      */
-    Stream<T> findStream(PageParam param, OrderSpecifier<?>... o);
+    Stream<T> findStream(Page page, OrderSpecifier<?>... o);
 
     /**
      * 返回流读取器

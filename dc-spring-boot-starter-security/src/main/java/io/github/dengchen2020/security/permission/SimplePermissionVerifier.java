@@ -21,10 +21,10 @@ public class SimplePermissionVerifier implements PermissionVerifier {
      */
     @Override
     public boolean hasPermission(Authentication authentication, String... permissions) {
-        if (authentication.getPermissions() == null) return true;
-        if (authentication.getPermissions().isEmpty()) return false;
+        if (authentication.permissions() == null) return true;
+        if (authentication.permissions().isEmpty()) return false;
         Set<String> permissionSet = Set.of(permissions);
-        for (String s : authentication.getPermissions()) {
+        for (String s : authentication.permissions()) {
             if (permissionSet.contains(s)) return true;
         }
         return false;

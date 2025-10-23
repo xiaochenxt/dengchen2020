@@ -23,38 +23,38 @@ public class ClusterWebSocketMsgListener extends MessageListenerAdapter {
     }
 
     public void handleMessage(WebSocketSendParam sendParam) {
-        switch (sendParam.getType()) {
+        switch (sendParam.type()) {
             case 0 -> {
-                if (sendParam.getUserId() != null) {
-                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.getUserId(), sendParam.getCloseStatus());
-                }else if (sendParam.getTenantId() != null) {
-                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.getTenantId(), sendParam.getCloseStatus());
+                if (sendParam.userId() != null) {
+                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.userId(), sendParam.getCloseStatus());
+                }else if (sendParam.tenantId() != null) {
+                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.tenantId(), sendParam.getCloseStatus());
                 }
             }
             case 1 -> {
-                if (sendParam.getUserId() == null) {
-                    log.warn("websocket发送消息异常，用户id为null，msg：{}", new String(sendParam.getMsg()));
+                if (sendParam.userId() == null) {
+                    log.warn("websocket发送消息异常，用户id为null，msg：{}", new String(sendParam.msg()));
                     return;
                 }
-                switch (sendParam.getMsgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.getUserId(), new String(sendParam.getMsg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.getUserId(), ByteBuffer.wrap(sendParam.getMsg()));
+                switch (sendParam.msgType()) {
+                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), new String(sendParam.msg()));
+                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), ByteBuffer.wrap(sendParam.msg()));
                 }
             }
             case 2 -> {
-                if (sendParam.getTenantId() == null) {
-                    log.warn("websocket发送消息异常，租户id为null，msg：{}", new String(sendParam.getMsg()));
+                if (sendParam.tenantId() == null) {
+                    log.warn("websocket发送消息异常，租户id为null，msg：{}", new String(sendParam.msg()));
                     return;
                 }
-                switch (sendParam.getMsgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.getTenantId(), new String(sendParam.getMsg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.getTenantId(), ByteBuffer.wrap(sendParam.getMsg()));
+                switch (sendParam.msgType()) {
+                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), new String(sendParam.msg()));
+                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), ByteBuffer.wrap(sendParam.msg()));
                 }
             }
             case 3 -> {
-                switch (sendParam.getMsgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendToAllNoPublish(new String(sendParam.getMsg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendToAllNoPublish(ByteBuffer.wrap(sendParam.getMsg()));
+                switch (sendParam.msgType()) {
+                    case 1 -> clusterSpringWebSocketHandler.sendToAllNoPublish(new String(sendParam.msg()));
+                    case 2 -> clusterSpringWebSocketHandler.sendToAllNoPublish(ByteBuffer.wrap(sendParam.msg()));
                 }
             }
         }

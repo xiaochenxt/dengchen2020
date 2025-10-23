@@ -19,9 +19,9 @@ import java.util.UUID;
  */
 public class JwtHelper {
 
-    Signer signer;
+    private final Signer signer;
 
-    Verifier verifier;
+    private final Verifier verifier;
 
     public JwtHelper(String secret) {
         this.signer = HMACSigner.newSHA256Signer(secret);

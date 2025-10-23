@@ -11,22 +11,17 @@ import java.util.Objects;
  * @author xiaochen
  * @since 2019/2/26 10:17
  */
-public class PageParam {
+public class PageParam implements Page {
 
     public static PageParam of(int page, int size){
-        return of(page, size, true, null);
+        return of(page, size, true);
     }
 
     public static PageParam of(int page, int size, boolean selectCount){
-        return of(page, size, selectCount, null);
-    }
-
-    public static PageParam of(int page, int size, boolean selectCount, Boolean deleted) {
         PageParam param = new PageParam();
         param.setPage(page);
         param.setSize(size);
         param.setSelectCount(selectCount);
-        param.setDeleted(deleted);
         return param;
     }
 
@@ -46,11 +41,6 @@ public class PageParam {
      * 是否查询数量，不需要时设置为false（通过limit分页时一般只需要第一页查询数量，通过id分页时可始终为false），数据量大时可显著提升查询性能
      */
     private boolean selectCount = true;
-
-    /**
-     * 查询逻辑删除的数据，true：已删除，false：未删除
-     */
-    private Boolean deleted;
 
     public int getSize() {
         return size;
@@ -80,24 +70,16 @@ public class PageParam {
         this.selectCount = selectCount;
     }
 
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PageParam pageParam = (PageParam) o;
-        return page == pageParam.page && size == pageParam.size && selectCount == pageParam.selectCount && Objects.equals(deleted, pageParam.deleted);
+        return page == pageParam.page && size == pageParam.size && selectCount == pageParam.selectCount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(page, size, selectCount, deleted);
+        return Objects.hash(page, size, selectCount);
     }
 
     @Override
@@ -106,7 +88,6 @@ public class PageParam {
                 "page=" + page +
                 ", size=" + size +
                 ", selectCount=" + selectCount +
-                ", deleted=" + deleted +
                 '}';
     }
 }
