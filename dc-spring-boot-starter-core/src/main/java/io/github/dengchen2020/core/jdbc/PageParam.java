@@ -38,7 +38,7 @@ public class PageParam implements Page {
     private int size = 10;
 
     /**
-     * 是否查询数量，不需要时设置为false（通过limit分页时一般只需要第一页查询数量，通过id分页时可始终为false），数据量大时可显著提升查询性能
+     * 是否查询数量，不需要时设置为false（通过索引字段（例如：id）分页时可始终为false），数据量大时可显著提升查询性能
      */
     private boolean selectCount = true;
 
