@@ -63,12 +63,12 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
     /**
      * 从redis中获取机器id，并设置机器id
      */
-    private void setWorkerIdFromRedis(Short workerId, int maxWorkerIdNumber) throws Exception {
+    private void setWorkerIdFromRedis(Short workerId, int maxWorkerIdNumber) {
         if (workerId == null || workerId < 0 || workerId > maxWorkerIdNumber) {
             workerId = (short) ThreadLocalRandom.current().nextInt(0, maxWorkerIdNumber);
         }
         Long newWorkerId = stringRedisTemplate.execute(script, List.of(SNOWFLAKE_WORKERID_LIST_KEY), String.valueOf(workerId), String.valueOf(maxWorkerIdNumber));
-        if (newWorkerId == -1) throw new Exception("workerId已用完！");
+        if (newWorkerId == -1) throw new IdGeneratorException("workerId已用完，请清理无效的workerId或增加workerIdBitLength");
         options.setWorkerId(newWorkerId.shortValue());
     }
 
@@ -80,10 +80,10 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
             running = true;
         } catch (Exception e) {
             running = false;
-            throw new IdGeneratorException("雪花算法初始化失败！", e);
+            throw new IdGeneratorException("雪花算法初始化失败", e);
         }
         IdHelper.setIdGenerator(new SnowflakeIdGenerator(options));
-        if (log.isInfoEnabled()) log.info("雪花算法生成器初始化完成，workerId：{}，baseTime：{}", options.getWorkerId(), options.getBaseTime());
+        if (log.isInfoEnabled()) log.info("雪花算法生成器初始化完成，workerId：{}，配置信息：{}", options.getWorkerId(), options);
     }
 
     /**

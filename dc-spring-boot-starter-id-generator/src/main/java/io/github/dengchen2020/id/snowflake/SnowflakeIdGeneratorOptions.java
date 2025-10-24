@@ -1,5 +1,7 @@
 package io.github.dengchen2020.id.snowflake;
 
+import java.util.Objects;
+
 /**
  * 雪花算法使用的参数
  *
@@ -124,6 +126,31 @@ public class SnowflakeIdGeneratorOptions {
 
     public void setTopOverCostCount(short topOverCostCount) {
         this.topOverCostCount = topOverCostCount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        SnowflakeIdGeneratorOptions that = (SnowflakeIdGeneratorOptions) o;
+        return method == that.method && baseTime == that.baseTime && workerId == that.workerId && workerIdBitLength == that.workerIdBitLength && seqBitLength == that.seqBitLength && maxSeqNumber == that.maxSeqNumber && minSeqNumber == that.minSeqNumber && topOverCostCount == that.topOverCostCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(method, baseTime, workerId, workerIdBitLength, seqBitLength, maxSeqNumber, minSeqNumber, topOverCostCount);
+    }
+
+    public String toString() {
+        return "SnowflakeIdGeneratorOptions{" +
+                "method=" + method +
+                ", baseTime=" + baseTime +
+                ", workerId=" + workerId +
+                ", workerIdBitLength=" + workerIdBitLength +
+                ", seqBitLength=" + seqBitLength +
+                ", maxSeqNumber=" + maxSeqNumber +
+                ", minSeqNumber=" + minSeqNumber +
+                ", topOverCostCount=" + topOverCostCount +
+                '}';
     }
 }
 
