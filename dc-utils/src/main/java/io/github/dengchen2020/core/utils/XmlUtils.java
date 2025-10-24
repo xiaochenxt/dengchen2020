@@ -35,7 +35,7 @@ public abstract class XmlUtils {
 
     static {
         defaultXmlMapper = XmlMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).addModule(new JavaTimeModule()).build();
-        nonNullXmlMapper = defaultXmlMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        nonNullXmlMapper = defaultXmlMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static ObjectMapper getXmlMapper() {

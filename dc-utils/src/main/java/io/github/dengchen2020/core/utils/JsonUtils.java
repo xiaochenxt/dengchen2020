@@ -37,7 +37,7 @@ public abstract class JsonUtils {
 
     static {
         defaultObjectMapper = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).addModule(new JavaTimeModule()).build();
-        nonNullObjectMapper = defaultObjectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        nonNullObjectMapper = defaultObjectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static ObjectMapper getObjectMapper() {

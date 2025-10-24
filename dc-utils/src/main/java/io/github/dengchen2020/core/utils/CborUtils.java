@@ -31,7 +31,7 @@ public abstract class CborUtils {
 
     static {
         defaultCborMapper = CBORMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).addModule(new JavaTimeModule()).build();
-        nonNullCborMapper = defaultCborMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        nonNullCborMapper = defaultCborMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static ObjectMapper getCBORMapper() {
