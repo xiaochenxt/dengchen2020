@@ -63,7 +63,7 @@ public class RedisMessagePublisher {
 
     private void convertAndSend(String channelName, byte[] message){
         try {
-            reactiveRedisTemplate.convertAndSend(channelName, message).delaySubscription(Duration.ofSeconds(1)).retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(3))).subscribe(count -> {
+            reactiveRedisTemplate.convertAndSend(channelName, message).delaySubscription(Duration.ofSeconds(1)).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
                 if (log.isDebugEnabled()) log.debug("发布消息 {} 到通道 {}，收到消息的客户端数量：{}", new String(message), channelName, count);
             });
         } catch (Exception e) {
