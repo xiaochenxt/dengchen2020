@@ -7,6 +7,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ class BasicFeature implements Feature {
         graalJs(featureUtils, access);
         jetty(featureUtils, access);
         image(featureUtils, access);
+        ssl(featureUtils, access);
     }
 
     /**
@@ -232,6 +234,19 @@ class BasicFeature implements Feature {
                 featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
                 featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
             }, imageReader);
+        }
+    }
+
+    private void ssl(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> sslSocketFactory = featureUtils.loadClass("javax.net.ssl.SSLSocketFactory");
+        if (sslSocketFactory != null) {
+            try {
+                Method getDefault = sslSocketFactory.getDeclaredMethod("getDefault");
+                access.registerReachabilityHandler(duringAnalysisAccess -> {
+                    RuntimeReflection.register(sslSocketFactory);
+                    RuntimeReflection.register(getDefault);
+                }, getDefault);
+            } catch (NoSuchMethodException ignored) {}
         }
     }
 
