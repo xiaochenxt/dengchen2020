@@ -41,6 +41,7 @@ class BasicFeature implements Feature {
         graalJs(featureUtils, access);
         jetty(featureUtils, access);
         image(featureUtils, access);
+        dns(featureUtils, access);
         ssl(featureUtils, access);
     }
 
@@ -234,6 +235,17 @@ class BasicFeature implements Feature {
                 featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
                 featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
             }, imageReader);
+        }
+    }
+
+    /**
+     * redisson需要
+     */
+    private void dns(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> resolverConfigurationImpl = featureUtils.loadClass("sun.net.dns.ResolverConfigurationImpl");
+        if (resolverConfigurationImpl != null) {
+            RuntimeClassInitialization.initializeAtRunTime(resolverConfigurationImpl);
+            featureUtils.registerJniFields(resolverConfigurationImpl,"os_searchlist","os_nameservers");
         }
     }
 
