@@ -22,7 +22,7 @@ public record SimpleUserAuthentication(String userId, Long tenantId, Set<String>
         this(userId, null, null);
     }
 
-    public SimpleUserAuthentication(Long tenantId, String userId) {
+    public SimpleUserAuthentication(String userId, Long tenantId) {
         this(userId, tenantId, null);
     }
 
