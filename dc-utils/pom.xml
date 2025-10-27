@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -63,12 +63,6 @@
       <dependency>
           <groupId>jakarta.persistence</groupId>
           <artifactId>jakarta.persistence-api</artifactId>
-          <optional>true</optional>
-      </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-          <version>${jackson-bom.version}</version>
           <optional>true</optional>
       </dependency>
       <dependency>
