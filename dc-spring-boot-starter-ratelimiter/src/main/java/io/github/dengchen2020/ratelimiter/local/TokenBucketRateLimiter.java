@@ -318,7 +318,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
                 log.error("令牌桶清理异常：", e);
             }
         }
-        if (log.isInfoEnabled()) log.info("令牌桶清理线程已停止");
+        if (log.isDebugEnabled()) log.debug("令牌桶清理线程已停止");
     }
 
     /**
