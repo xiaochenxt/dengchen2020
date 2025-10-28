@@ -26,6 +26,11 @@
       "type": "java.lang.String",
       "description": "用于redisson lock的redis密码 .",
       "defaultValue": "${spring.data.redis.password}"
+    },{
+      "name": "dc.lock.redisson.redis.lazy-initialization",
+      "type": "java.lang.Boolean",
+      "description": "用于redisson lock的redis是否仅在进行第一次 Redis 调用时连接到 Redis，而不是在创建 Redisson 实例期间 .",
+      "defaultValue": true
     }
   ]
 }

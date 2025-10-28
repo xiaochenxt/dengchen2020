@@ -51,9 +51,13 @@ public final class LockAutoConfiguration implements DisposableBean {
         if (username != null) singleServerConfig.setUsername(username);
         String applicationName = environment.getProperty("spring.application.name","spring");
         singleServerConfig.setClientName(applicationName + "-redisson-lock");
-        // 在spring-aot处理器执行阶段不连接redis，避免使用其他环境的redis配置连不上而报错（编译环境与运行环境不一定相同，redis可能是内网的）
-        if (Boolean.parseBoolean(System.getProperty(AbstractAotProcessor.AOT_PROCESSING))) {
+        if (environment.getProperty("dc.lock.redisson.redis.lazy-initialization", boolean.class, true)) {
             config.setLazyInitialization(true);
+        }else {
+            // 在spring-aot处理器执行阶段不连接redis，避免使用其他环境的redis配置连不上而报错（编译环境与运行环境不一定相同，redis可能是内网的）
+            if (Boolean.parseBoolean(System.getProperty(AbstractAotProcessor.AOT_PROCESSING))) {
+               config.setLazyInitialization(true);
+            }
         }
         // 不注入redissonClient，因为需求不是操作redisson的完整功能只是需要它的分布式锁实现
         redissonClient = Redisson.create(config);
