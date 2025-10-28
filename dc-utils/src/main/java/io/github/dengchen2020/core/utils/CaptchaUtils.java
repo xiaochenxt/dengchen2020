@@ -229,24 +229,12 @@ public abstract class CaptchaUtils {
     /**
      * 算术验证码-不依赖js引擎
      */
-    public static class NoJsArithmeticCaptcha extends com.wf.captcha.ArithmeticCaptcha  {
-        public NoJsArithmeticCaptcha() {
-        }
-
-        public NoJsArithmeticCaptcha(int width, int height) {
-            this();
-            setWidth(width);
-            setHeight(height);
-        }
+    private static final class NoJsArithmeticCaptcha extends com.wf.captcha.ArithmeticCaptcha  {
 
         public NoJsArithmeticCaptcha(int width, int height, int len) {
-            this(width, height);
+            setWidth(width);
+            setHeight(height);
             setLen(len);
-        }
-
-        public NoJsArithmeticCaptcha(int width, int height, int len, Font font) {
-            this(width, height, len);
-            setFont(font);
         }
 
         /**
