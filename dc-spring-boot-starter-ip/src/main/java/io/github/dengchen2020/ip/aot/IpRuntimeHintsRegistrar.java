@@ -13,7 +13,7 @@ public class IpRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
-        aotUtils.registerResourcesIfPresent("ip.xdb", "ip.dat");
+        aotUtils.registerResourcesIfPresent("ip.xdb", "ipv6.xdb", "ip.dat");
     }
 
 }
