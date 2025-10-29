@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author xiaochen
  * @since 2025/5/23
  */
-public class BasicRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class BasicRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {

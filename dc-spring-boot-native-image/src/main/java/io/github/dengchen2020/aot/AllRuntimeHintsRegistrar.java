@@ -16,7 +16,7 @@ import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_STRING_ARRAY;
  * @author xiaochen
  * @since 2025/5/23
  */
-public class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
