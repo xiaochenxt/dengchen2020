@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Set;
 
+import static io.github.dengchen2020.aot.utils.CollectUtils.debug;
+
 /**
  * 基本注册，解决了一些代理检测无法自动配置的场景
  * <p>
@@ -276,7 +278,7 @@ class BasicFeature implements Feature {
                         field.setAccessible(true);
                         Object fieldValue = field.get(null);
                         access.registerFieldValueTransformer(field, (receiver, originalValue) -> fieldValue);
-                        System.out.println("Field " + webSocketClientUtils.getName() + "#" + field.getName() + " set to " + fieldValue + " at build time");
+                        if (debug) System.out.println("Field " + webSocketClientUtils.getName() + "#" + field.getName() + " set to " + fieldValue + " at build time");
                     } catch (IllegalAccessException ignored) {}
                 }
             },  webSocketClientUtils);
