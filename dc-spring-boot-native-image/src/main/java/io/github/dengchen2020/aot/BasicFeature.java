@@ -7,6 +7,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
@@ -43,6 +44,7 @@ class BasicFeature implements Feature {
         image(featureUtils, access);
         dns(featureUtils, access);
         ssl(featureUtils, access);
+        precompute(featureUtils, access);
     }
 
     /**
@@ -259,6 +261,25 @@ class BasicFeature implements Feature {
                     RuntimeReflection.register(getDefault);
                 }, getDefault);
             } catch (NoSuchMethodException ignored) {}
+        }
+    }
+
+    /**
+     * 将与某些模式匹配的字段值替换为提前计算好的值，而不会导致类构建时初始化
+     */
+    private void precompute(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> webSocketClientUtils = featureUtils.loadClass("io.github.dengchen2020.websocket.client.WebSocketClientUtils");
+        if (webSocketClientUtils != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                for (Field field : featureUtils.collectFields(webSocketClientUtils, "jakartaWebSocketClientContainerProviderPresent", "wsWebSocketContainerPresent")) {
+                    try {
+                        field.setAccessible(true);
+                        Object fieldValue = field.get(null);
+                        access.registerFieldValueTransformer(field, (receiver, originalValue) -> fieldValue);
+                        System.out.println("Field " + webSocketClientUtils.getName() + "#" + field.getName() + " set to " + fieldValue + " at build time");
+                    } catch (IllegalAccessException ignored) {}
+                }
+            },  webSocketClientUtils);
         }
     }
 
