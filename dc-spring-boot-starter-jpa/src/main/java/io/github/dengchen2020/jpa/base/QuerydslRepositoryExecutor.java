@@ -243,7 +243,7 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     }
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param query JPAQuery<R>
      * @param page 查询参数
      * @param o 排序方式
@@ -259,7 +259,7 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     }
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param predicate 条件
      * @param page 查询参数
      * @param o 排序方式
@@ -271,7 +271,7 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     }
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param page 查询参数
      * @param o 排序方式
      * @return Stream<T>
@@ -282,7 +282,7 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     }
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param o 排序方式
      * @return Stream<T>
      */

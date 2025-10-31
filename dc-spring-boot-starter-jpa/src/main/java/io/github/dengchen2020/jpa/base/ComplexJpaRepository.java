@@ -50,7 +50,7 @@ public interface ComplexJpaRepository<T> {
     SimplePage<T> findAll(Predicate predicate, Page page, OrderSpecifier<?>... o);
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param query JPAQuery<R>
      * @param page 分页参数
      * @param o 排序方式
@@ -59,7 +59,7 @@ public interface ComplexJpaRepository<T> {
     <R> Stream<R> fetchStream(JPAQuery<R> query, Page page, OrderSpecifier<?>... o);
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param predicate 条件
      * @param page 分页参数
      * @param o 排序方式
@@ -68,7 +68,7 @@ public interface ComplexJpaRepository<T> {
     Stream<T> findStream(Predicate predicate, Page page, OrderSpecifier<?>... o);
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param page 分页参数
      * @param o 排序方式
      * @return Stream<T>
@@ -76,7 +76,7 @@ public interface ComplexJpaRepository<T> {
     Stream<T> findStream(Page page, OrderSpecifier<?>... o);
 
     /**
-     * 返回流读取器
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param o 排序方式
      * @return Stream<T>
      */
