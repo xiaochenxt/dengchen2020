@@ -1,8 +1,9 @@
 package io.github.dengchen2020.websocket.handler;
 
-import jakarta.annotation.Nonnull;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.Session;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
@@ -21,6 +22,7 @@ import java.util.Set;
  * @author xiaochen
  * @since 2024/6/26
  */
+@NullMarked
 public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandler implements DcWebSocketHandler {
 
     /**
@@ -30,7 +32,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param message 文本消息
      */
     @Override
-    protected void handleTextMessage(@Nonnull WebSocketSession session,@Nonnull TextMessage message) {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         if (log.isDebugEnabled()) log.debug("收到文本消息：{}，客户端：{}", message, session);
     }
 
@@ -41,7 +43,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param message 二进制数据消息
      */
     @Override
-    protected void handleBinaryMessage(@Nonnull WebSocketSession session,@Nonnull BinaryMessage message) {
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         if (log.isDebugEnabled()) log.debug("收到二进制数据消息:{}，客户端：{}", message, session);
     }
 
@@ -52,7 +54,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param message pong消息
      */
     @Override
-    protected void handlePongMessage(@Nonnull WebSocketSession session,@Nonnull PongMessage message) {
+    protected void handlePongMessage(WebSocketSession session, PongMessage message) {
         if (log.isDebugEnabled()) log.debug("收到pong消息:{}，客户端：{}", message, session);
     }
 
@@ -63,7 +65,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param status  表示 WebSocket 关闭状态代码和原因。1xxx 范围内的状态代码由协议预定义。或者，可以发送带有原因的状态代码
      */
     @Override
-    public void afterConnectionClosed(@Nonnull WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         clear(session);
         if (CLOSE_CODE.contains(status.getCode())) {
             if (log.isDebugEnabled()) log.debug("连接关闭，原因是：{}，客户端：{}", status, session);
@@ -87,7 +89,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param exception 异常对象
      */
     @Override
-    public void handleTransportError(@Nonnull WebSocketSession session,@Nonnull Throwable exception) {
+    public void handleTransportError(WebSocketSession session, Throwable exception) {
         if (log.isDebugEnabled()) log.debug("连接发生异常，原因是：{}，客户端：{}", exception, session);
     }
 
@@ -101,7 +103,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param session websocket会话
      */
     @Override
-    public void afterConnectionEstablished(@Nonnull WebSocketSession session) {
+    public void afterConnectionEstablished(WebSocketSession session) {
         Principal principal = getClientInfo(session);
         if (principal == null) {
             CloseStatus status = CloseStatus.POLICY_VIOLATION.withReason("获取Token认证信息失败，请重新登录");
@@ -110,7 +112,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
             return;
         }
         initSessionConfig(session);
-        online(wrap(session));
+        online(wrap(session), principal);
         onlineSuccessEvent(session);
     }
 
@@ -154,7 +156,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      *
      * @param session websocket会话
      */
-    public void online(WebSocketSession session) {
+    public void online(WebSocketSession session, Principal principal) {
 
     }
 
@@ -164,6 +166,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param session websocket会话
      * @return 客户端信息
      */
+    @Nullable
     public Principal getClientInfo(WebSocketSession session) {
         return session.getPrincipal();
     }

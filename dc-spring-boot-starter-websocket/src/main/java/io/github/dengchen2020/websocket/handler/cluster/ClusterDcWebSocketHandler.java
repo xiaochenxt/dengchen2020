@@ -1,6 +1,7 @@
 package io.github.dengchen2020.websocket.handler.cluster;
 
 import io.github.dengchen2020.websocket.handler.SingletonDcWebSocketHandler;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
@@ -17,6 +18,7 @@ import java.nio.ByteBuffer;
  * @author xiaochen
  * @since 2024/6/26
  */
+@NullMarked
 public class ClusterDcWebSocketHandler extends SingletonDcWebSocketHandler {
 
     private final WebSocketHelper webSocketHelper;

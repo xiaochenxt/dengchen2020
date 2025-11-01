@@ -2,7 +2,7 @@ package io.github.dengchen2020.websocket.handler.cluster;
 
 
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
  * @author xiaochen
  * @since 2023/7/18
  */
+@NullMarked
 public class WebSocketHelper {
 
     public WebSocketHelper(RedisMessagePublisher redisMessagePublisher) {this("default", redisMessagePublisher);}
@@ -33,7 +34,6 @@ public class WebSocketHelper {
     private final RedisMessagePublisher redisMessagePublisher;
 
     public WebSocketHelper getInstance(String topic) {
-        if (topic == null) return this;
         if (this.topic.equals(defaultTopicPrefix + topic)) return this;
         return new WebSocketHelper(topic, redisMessagePublisher);
     }
@@ -54,7 +54,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param closeStatus 关闭连接原因
      */
-    public void close(@Nonnull String userId,@Nonnull CloseStatus closeStatus) {
+    public void close(String userId, CloseStatus closeStatus) {
         send(new WebSocketSendParam(userId, closeStatus));
     }
 
@@ -64,7 +64,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param closeStatus 关闭连接原因
      */
-    public void close(@Nonnull String[] userId,@Nonnull CloseStatus closeStatus) {
+    public void close(String[] userId, CloseStatus closeStatus) {
         send(new WebSocketSendParam(userId, closeStatus));
     }
 
@@ -74,7 +74,7 @@ public class WebSocketHelper {
      * @param tenantId 租户id
      * @param closeStatus 关闭连接原因
      */
-    public void close(@Nonnull Long tenantId,@Nonnull CloseStatus closeStatus) {
+    public void close(Long tenantId, CloseStatus closeStatus) {
         send(new WebSocketSendParam(tenantId, closeStatus));
     }
 
@@ -84,7 +84,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param message 文本消息
      */
-    public void send(@Nonnull String userId,@Nonnull String message) {
+    public void send(String userId, String message) {
         send(new WebSocketSendParam(userId, message));
     }
 
@@ -94,7 +94,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param message 文本消息
      */
-    public void send(@Nonnull String[] userId,@Nonnull String message) {
+    public void send(String[] userId, String message) {
         send(new WebSocketSendParam(userId, message));
     }
 
@@ -104,7 +104,7 @@ public class WebSocketHelper {
      * @param tenantId 租户id
      * @param message  文本消息
      */
-    public void send(@Nonnull Long tenantId,@Nonnull String message) {
+    public void send(Long tenantId, String message) {
         send(new WebSocketSendParam(tenantId, message));
     }
 
@@ -113,7 +113,7 @@ public class WebSocketHelper {
      *
      * @param message  文本消息
      */
-    public void sendToAll(@Nonnull String message) {
+    public void sendToAll(String message) {
         send(new WebSocketSendParam(message));
     }
 
@@ -123,7 +123,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param message 二进制消息
      */
-    public void send(@Nonnull String userId,@Nonnull ByteBuffer message) {
+    public void send(String userId, ByteBuffer message) {
         send(new WebSocketSendParam(userId, message));
     }
 
@@ -133,7 +133,7 @@ public class WebSocketHelper {
      * @param userId 用户id
      * @param message 二进制消息
      */
-    public void send(@Nonnull String[] userId,@Nonnull ByteBuffer message) {
+    public void send(String[] userId, ByteBuffer message) {
         send(new WebSocketSendParam(userId, message));
     }
 
@@ -143,7 +143,7 @@ public class WebSocketHelper {
      * @param tenantId 租户id
      * @param message  二进制消息
      */
-    public void send(@Nonnull Long tenantId,@Nonnull ByteBuffer message) {
+    public void send(Long tenantId, ByteBuffer message) {
         send(new WebSocketSendParam(tenantId, message));
     }
 
@@ -152,7 +152,7 @@ public class WebSocketHelper {
      *
      * @param message  二进制消息
      */
-    public void sendToAll(@Nonnull ByteBuffer message) {
+    public void sendToAll(ByteBuffer message) {
         send(new WebSocketSendParam(message));
     }
 

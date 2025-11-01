@@ -1,5 +1,7 @@
 package io.github.dengchen2020.websocket.handler;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.Principal;
 
+@NullMarked
 public interface DcWebSocketHandler {
 
     Logger log = LoggerFactory.getLogger(DcWebSocketHandler.class);
@@ -27,7 +30,7 @@ public interface DcWebSocketHandler {
      *
      * @param session websocket会话
      */
-    void online(WebSocketSession session);
+    void online(WebSocketSession session, Principal principal);
 
     /**
      * 获取客户端信息
@@ -35,6 +38,7 @@ public interface DcWebSocketHandler {
      * @param session websocket会话
      * @return 客户端信息
      */
+    @Nullable
     Principal getClientInfo(WebSocketSession session);
 
     /**
