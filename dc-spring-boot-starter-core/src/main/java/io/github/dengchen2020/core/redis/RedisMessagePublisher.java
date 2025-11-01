@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.redis;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -16,6 +16,7 @@ import java.time.Duration;
  * @author xiaochen
  * @since 2024/6/4
  */
+@NullMarked
 public class RedisMessagePublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RedisMessagePublisher.class);
@@ -36,7 +37,7 @@ public class RedisMessagePublisher {
      * @param channelName 频道名称
      * @param message     消息
      */
-    public void publish(@Nonnull String channelName,@Nonnull Object message) {
+    public void publish(String channelName, Object message) {
         byte[] bytes = serializer.serialize(message);
         convertAndSend(channelName, bytes);
     }
@@ -47,7 +48,7 @@ public class RedisMessagePublisher {
      * @param channelName 频道名称
      * @param message     消息
      */
-    public void publish(@Nonnull String channelName,@Nonnull String message) {
+    public void publish(String channelName, String message) {
         convertAndSend(channelName, message.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -57,7 +58,7 @@ public class RedisMessagePublisher {
      * @param channelName 频道名称
      * @param message     消息
      */
-    public void publish(@Nonnull String channelName,@Nonnull byte[] message) {
+    public void publish(String channelName, byte[] message) {
         convertAndSend(channelName, message);
     }
 

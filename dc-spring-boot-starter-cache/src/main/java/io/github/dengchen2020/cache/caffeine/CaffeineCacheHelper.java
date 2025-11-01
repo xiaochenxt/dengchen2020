@@ -2,7 +2,7 @@ package io.github.dengchen2020.cache.caffeine;
 
 import io.github.dengchen2020.cache.CacheHelper;
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.interceptor.SimpleKey;
@@ -12,6 +12,7 @@ import org.springframework.cache.interceptor.SimpleKey;
  * @author xiaochen
  * @since 2024/7/31
  */
+@NullMarked
 public class CaffeineCacheHelper implements CacheHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineCacheHelper.class);
@@ -38,7 +39,7 @@ public class CaffeineCacheHelper implements CacheHelper {
      * @param key       key
      */
     @Override
-    public void evict(@Nonnull String cacheName,@Nonnull Object key) {
+    public void evict(String cacheName, Object key) {
         evict(new String[]{cacheName}, key);
     }
 
@@ -49,7 +50,7 @@ public class CaffeineCacheHelper implements CacheHelper {
      * @param key        key
      */
     @Override
-    public void evict(@Nonnull String[] cacheNames,@Nonnull Object key) {
+    public void evict(String[] cacheNames, Object key) {
         Class<?> keyClass = key.getClass();
         CacheSyncParam cacheSyncParam;
         if (keyClass == String.class || keyClass.isPrimitive() || keyClass.getSuperclass() == Number.class) {
@@ -71,7 +72,7 @@ public class CaffeineCacheHelper implements CacheHelper {
      * @param cacheName 缓存名
      */
     @Override
-    public void clear(@Nonnull String cacheName) {
+    public void clear(String cacheName) {
         clear(new String[]{cacheName});
     }
 
@@ -81,7 +82,7 @@ public class CaffeineCacheHelper implements CacheHelper {
      * @param cacheNames 缓存名
      */
     @Override
-    public void clear(@Nonnull String[] cacheNames) {
+    public void clear(String[] cacheNames) {
         sync(new CacheSyncParam(cacheNames));
     }
 

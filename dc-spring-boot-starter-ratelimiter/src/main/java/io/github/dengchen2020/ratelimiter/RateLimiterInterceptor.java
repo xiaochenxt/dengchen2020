@@ -5,9 +5,9 @@ import io.github.dengchen2020.core.utils.IPUtils;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimit;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimitStrategy;
 import io.github.dengchen2020.ratelimiter.exception.RateLimitException;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 
@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author xiaochen
  * @since 2024/8/3
  */
+@NullMarked
 public class RateLimiterInterceptor extends BaseHandlerMethodInterceptor {
 
     private final RateLimiter secondRateLimiter;
@@ -35,7 +36,7 @@ public class RateLimiterInterceptor extends BaseHandlerMethodInterceptor {
     }
 
     @Override
-    public boolean preHandle(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull HandlerMethod handlerMethod) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
         RateLimit rateLimit = handlerMethod.getMethod().getAnnotation(RateLimit.class);
         if (rateLimit == null) rateLimit = handlerMethod.getBeanType().getAnnotation(RateLimit.class);
         if (rateLimit == null) return true;

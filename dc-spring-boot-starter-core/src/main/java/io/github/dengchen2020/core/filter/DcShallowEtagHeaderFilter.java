@@ -1,10 +1,10 @@
 package io.github.dengchen2020.core.filter;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
@@ -21,6 +21,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2025/4/22
  */
+@NullMarked
 public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
 
     private final List<PathPattern> includePatterns;
@@ -34,7 +35,7 @@ public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (matches(request)) {
             filterChain.doFilter(request, response);
             return;

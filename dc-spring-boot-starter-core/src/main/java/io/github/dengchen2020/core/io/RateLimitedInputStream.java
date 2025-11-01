@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.io;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.util.unit.DataSize;
 
 import java.io.FilterInputStream;
@@ -13,6 +13,7 @@ import java.io.InputStream;
  * @author xiaochen
  * @since 2025/4/17
  */
+@NullMarked
 public class RateLimitedInputStream extends FilterInputStream {
 
     private long rateLimit;
@@ -47,7 +48,7 @@ public class RateLimitedInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read(@Nonnull byte[] b, int off, int len) throws IOException {
+    public int read(byte[] b, int off, int len) throws IOException {
         rateLimit(len);
         int bytesRead = super.read(b, off, len);
         if (bytesRead != -1) this.bytesRead += bytesRead;

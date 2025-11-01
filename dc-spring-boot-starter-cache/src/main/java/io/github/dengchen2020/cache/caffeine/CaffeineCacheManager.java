@@ -3,7 +3,8 @@ package io.github.dengchen2020.cache.caffeine;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import io.github.dengchen2020.cache.properties.CacheSpecBuilder;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -21,11 +22,12 @@ import java.util.concurrent.Executors;
  * @author xiaochen
  * @since 2024/5/28
  */
+@NullMarked
 public class CaffeineCacheManager extends AbstractTransactionSupportingCacheManager {
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineCacheManager.class);
 
-    public CaffeineCacheManager(CacheSpecBuilder.Caffeine builder, CaffeineCacheHelper cacheHelper) {
+    public CaffeineCacheManager(CacheSpecBuilder.Caffeine builder,@Nullable CaffeineCacheHelper cacheHelper) {
         this.builder = builder;
         this.cacheHelper = cacheHelper;
     }
@@ -36,6 +38,7 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
 
     private final CacheSpecBuilder.Caffeine builder;
 
+    @Nullable
     private final CaffeineCacheHelper cacheHelper;
 
     public Cache buildCache(String name, CacheSpecBuilder.Caffeine.CacheSpec cacheSpec) {
@@ -64,10 +67,9 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         return new CaffeineCache(name, cache, cacheSpec.getAllowNullValues(), cacheHelper);
     }
 
-    @Nonnull
     @Override
     protected Collection<? extends Cache> loadCaches() {
-        if (builder == null || builder.getSpecs().isEmpty()) return Collections.emptyList();
+        if (builder.getSpecs().isEmpty()) return Collections.emptyList();
         List<Cache> list = new ArrayList<>();
         for (Map.Entry<String, CacheSpecBuilder.Caffeine.CacheSpec> entry : builder.getSpecs().entrySet()) {
             Cache cache = buildCache(entry.getKey(), entry.getValue());
@@ -77,7 +79,7 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
     }
 
     @Override
-    protected Cache getMissingCache(@Nonnull String name) {
+    protected Cache getMissingCache(String name) {
         return buildCache(name, new CacheSpecBuilder.Caffeine.CacheSpec());
     }
 

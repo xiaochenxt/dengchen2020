@@ -4,11 +4,11 @@ import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.security.authentication.token.TokenService;
 import io.github.dengchen2020.security.authentication.web.AuthenticationHttpServletRequestWrapper;
 import io.github.dengchen2020.core.security.principal.Authentication;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -22,6 +22,7 @@ import java.io.IOException;
  * @author xiaochen
  * @since 2023/10/13
  */
+@NullMarked
 public class AuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -33,7 +34,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response, @Nonnull final FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws IOException, ServletException {
         try {
             String token = tokenService.getToken(request);
             if (StringUtils.hasText(token)) {

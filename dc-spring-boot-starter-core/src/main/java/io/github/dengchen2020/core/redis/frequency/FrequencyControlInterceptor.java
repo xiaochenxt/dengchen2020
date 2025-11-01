@@ -1,9 +1,9 @@
 package io.github.dengchen2020.core.redis.frequency;
 
 import io.github.dengchen2020.core.interceptor.BaseHandlerMethodInterceptor;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.web.method.HandlerMethod;
 
 import java.security.Principal;
@@ -14,6 +14,7 @@ import java.security.Principal;
  * @author xiaochen
  * @since 2025/5/15
  */
+@NullMarked
 public class FrequencyControlInterceptor extends BaseHandlerMethodInterceptor {
 
     private final FrequencyControlSupport frequencyControlSupport;
@@ -23,7 +24,7 @@ public class FrequencyControlInterceptor extends BaseHandlerMethodInterceptor {
     }
 
     @Override
-    protected boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull HandlerMethod handlerMethod) {
+    protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
         FrequencyControl control = handlerMethod.getMethod().getAnnotation(FrequencyControl.class);
         if (control == null)
             control = handlerMethod.getBeanType().getAnnotation(FrequencyControl.class);

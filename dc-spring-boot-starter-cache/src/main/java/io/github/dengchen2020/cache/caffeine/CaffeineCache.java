@@ -2,13 +2,14 @@ package io.github.dengchen2020.cache.caffeine;
 
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Cache;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * caffeine缓存
  * @author xiaochen
  * @since 2024/5/29
  */
+@NullMarked
 public class CaffeineCache extends org.springframework.cache.caffeine.CaffeineCache {
 
     private final CaffeineCacheHelper cacheHelper;
@@ -24,7 +25,7 @@ public class CaffeineCache extends org.springframework.cache.caffeine.CaffeineCa
     }
 
     @Override
-    public void evict(@Nonnull Object key) {
+    public void evict(Object key) {
         super.evict(key);
         cacheHelper.evict(getName(), key);
     }

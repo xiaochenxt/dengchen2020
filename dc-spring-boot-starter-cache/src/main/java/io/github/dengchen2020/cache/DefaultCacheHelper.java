@@ -1,6 +1,7 @@
 package io.github.dengchen2020.cache;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
@@ -10,6 +11,7 @@ import org.springframework.cache.CacheManager;
  * @author xiaochen
  * @since 2024/5/29
  */
+@NullMarked
 public class DefaultCacheHelper implements CacheHelper {
 
     private final CacheManager cacheManager;
@@ -25,7 +27,8 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param key key
      * @return 缓存值
      */
-    public Object get(@Nonnull String cacheName,@Nonnull Object key) {
+    @Nullable
+    public Object get(String cacheName, Object key) {
         Cache cache = cacheManager.getCache(cacheName);
         if (cache != null) {
            Cache.ValueWrapper valueWrapper = cache.get(key);
@@ -41,7 +44,7 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param key       key
      */
     @Override
-    public void evict(@Nonnull String cacheName,@Nonnull Object key) {
+    public void evict(String cacheName, Object key) {
         evict(new String[]{cacheName}, key);
     }
 
@@ -52,7 +55,7 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param key        key
      */
     @Override
-    public void evict(@Nonnull String[] cacheNames,@Nonnull Object key) {
+    public void evict(String[] cacheNames, Object key) {
         for (String s : cacheNames) {
             Cache cache = cacheManager.getCache(s);
             if (cache != null) cache.evict(key);
@@ -66,7 +69,7 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param key       key
      * @param value 新值
      */
-    public void put(@Nonnull String cacheName,@Nonnull Object key,@Nonnull Object value) {
+    public void put(String cacheName, Object key, Object value) {
         Cache cache = cacheManager.getCache(cacheName);
         if (cache != null) cache.put(key, value);
     }
@@ -77,7 +80,7 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param cacheName 缓存名
      */
     @Override
-    public void clear(@Nonnull String cacheName) {
+    public void clear(String cacheName) {
         clear(new String[]{cacheName});
     }
 
@@ -87,7 +90,7 @@ public class DefaultCacheHelper implements CacheHelper {
      * @param cacheNames 缓存名
      */
     @Override
-    public void clear(@Nonnull String[] cacheNames) {
+    public void clear(String[] cacheNames) {
         for (String s : cacheNames) {
             Cache cache = cacheManager.getCache(s);
             if (cache != null) cache.clear();

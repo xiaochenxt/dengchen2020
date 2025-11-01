@@ -6,9 +6,9 @@ import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.security.annotation.HasPermission;
 import io.github.dengchen2020.security.exception.NoPermissionException;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.web.method.HandlerMethod;
 
 /**
@@ -17,6 +17,7 @@ import org.springframework.web.method.HandlerMethod;
  * @author xiaochen
  * @since 2024/7/22
  */
+@NullMarked
 public class PermissionVerifyInterceptor extends BaseHandlerMethodInterceptor {
 
     private final PermissionVerifier permissionVerifier;
@@ -26,7 +27,7 @@ public class PermissionVerifyInterceptor extends BaseHandlerMethodInterceptor {
     }
 
     @Override
-    public boolean preHandle(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull HandlerMethod handlerMethod) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
         Authentication authentication = SecurityContextHolder.getAuthentication();
         if (authentication instanceof AnonymousAuthentication) return true;
         HasPermission hasPermission = handlerMethod.getMethod().getAnnotation(HasPermission.class);

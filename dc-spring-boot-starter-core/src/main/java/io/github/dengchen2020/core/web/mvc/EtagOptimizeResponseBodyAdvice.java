@@ -2,7 +2,8 @@ package io.github.dengchen2020.core.web.mvc;
 
 import io.github.dengchen2020.core.utils.RequestUtils;
 import io.github.dengchen2020.core.utils.ResponseUtils;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -29,6 +30,7 @@ import java.io.IOException;
  * @author xiaochen
  * @since 2025/4/16
  */
+@NullMarked
 @ControllerAdvice
 public class EtagOptimizeResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
@@ -41,7 +43,7 @@ public class EtagOptimizeResponseBodyAdvice implements ResponseBodyAdvice<Object
     }
 
     @Override
-    public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         if (!AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) && !StringHttpMessageConverter.class.isAssignableFrom(converterType) && !AbstractJsonHttpMessageConverter.class.isAssignableFrom(converterType)
                 && !ResourceHttpMessageConverter.class.isAssignableFrom(converterType) && !ByteArrayHttpMessageConverter.class.isAssignableFrom(converterType)) {
             ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
@@ -50,10 +52,11 @@ public class EtagOptimizeResponseBodyAdvice implements ResponseBodyAdvice<Object
         return true;
     }
 
+    @Nullable
     @Override
-    public Object beforeBodyWrite(Object body, @Nonnull MethodParameter returnType, @Nonnull MediaType selectedContentType,
-                                  @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                  @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
+    public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request, ServerHttpResponse response) {
         long contentLength = response.getHeaders().getContentLength();
         if (contentLength < 0) {
             if (body instanceof String str) {

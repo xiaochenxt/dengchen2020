@@ -1,7 +1,7 @@
 package io.github.dengchen2020.core.io.resource;
 
 import io.github.dengchen2020.core.io.RateLimitedInputStream;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.unit.DataSize;
 
@@ -15,6 +15,7 @@ import java.io.InputStream;
  * @author xiaochen
  * @since 2025/4/17
  */
+@NullMarked
 public class RateLimitedFileSystemResource extends FileSystemResource {
 
     private final long rateLimit;
@@ -37,7 +38,6 @@ public class RateLimitedFileSystemResource extends FileSystemResource {
         this.rateLimit = rateLimit;
     }
 
-    @Nonnull
     @Override
     public InputStream getInputStream() throws IOException {
         return new RateLimitedInputStream(super.getInputStream(), rateLimit);

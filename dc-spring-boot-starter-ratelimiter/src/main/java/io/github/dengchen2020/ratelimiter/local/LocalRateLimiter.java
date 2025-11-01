@@ -1,7 +1,7 @@
 package io.github.dengchen2020.ratelimiter.local;
 
 import io.github.dengchen2020.ratelimiter.RateLimiter;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 
 import java.time.Duration;
 import java.util.Map;
@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author xiaochen
  * @since 2024/4/18
  */
+@NullMarked
 public class LocalRateLimiter implements RateLimiter {
 
     // 时间窗口长度(毫秒)
@@ -34,7 +35,7 @@ public class LocalRateLimiter implements RateLimiter {
      * @param duration 时间窗口
      */
     public LocalRateLimiter(Duration duration) {
-        if (duration == null || duration.isZero() || duration.isNegative()) {
+        if (duration.isZero() || duration.isNegative()) {
             throw new IllegalArgumentException("无效的时间窗口: " + duration);
         }
         this.windowMillis = duration.toMillis();
@@ -58,7 +59,7 @@ public class LocalRateLimiter implements RateLimiter {
      * @return true：触发限流，false：允许请求
      */
     @Override
-    public boolean limit(@Nonnull String limitKey, int limitNum) {
+    public boolean limit(String limitKey, int limitNum) {
         if (limitNum <= 0) return true;
         WindowCounter counter = counters.compute(limitKey, (k, v) -> {
             if (v == null) return new WindowCounter(System.currentTimeMillis());

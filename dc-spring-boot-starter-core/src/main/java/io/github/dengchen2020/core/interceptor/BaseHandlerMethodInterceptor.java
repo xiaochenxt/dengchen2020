@@ -1,9 +1,9 @@
 package io.github.dengchen2020.core.interceptor;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -15,10 +15,11 @@ import java.io.IOException;
  * @author xiaochen
  * @since 2025/2/25
  */
+@NullMarked
 public class BaseHandlerMethodInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull Object handler) throws IOException {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         if(!(handler instanceof HandlerMethod handlerMethod) || handlerMethod.getBean() instanceof AbstractErrorController || DispatcherType.ASYNC == request.getDispatcherType()) return true;
         return preHandle(request, response, handlerMethod);
     }
@@ -42,7 +43,7 @@ public class BaseHandlerMethodInterceptor implements HandlerInterceptor {
      * next interceptor 或处理程序本身。否则，DispatcherServlet 假定
      * 此拦截器已经处理了响应本身。
      */
-    protected boolean preHandle(@Nonnull HttpServletRequest request,@Nonnull HttpServletResponse response,@Nonnull HandlerMethod handler) throws IOException {
+    protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) {
         return true;
     }
 
