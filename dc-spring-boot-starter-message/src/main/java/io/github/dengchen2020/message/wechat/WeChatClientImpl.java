@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
  * @author xiaochen
  * @since 2025/4/7
  */
+@NullMarked
 public class WeChatClientImpl implements WeChatClient {
 
     private static final Logger log = LoggerFactory.getLogger(WeChatClientImpl.class);
@@ -29,7 +30,7 @@ public class WeChatClientImpl implements WeChatClient {
 
     private final String webhook;
 
-    public WeChatClientImpl(@Nonnull String webhook) {
+    public WeChatClientImpl(String webhook) {
         this.webhook = webhook;
         this.executor = defaultExecutor;
     }

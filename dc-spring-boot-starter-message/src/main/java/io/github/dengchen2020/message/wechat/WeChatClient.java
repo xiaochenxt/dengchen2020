@@ -3,6 +3,7 @@ package io.github.dengchen2020.message.wechat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.digest.DigestUtils;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.io.Resource;
 
 import java.util.Arrays;
@@ -19,6 +20,7 @@ public interface WeChatClient {
      * 发送消息
      * @param message 消息
      */
+    @NullMarked
     void send(Message message);
 
     /**
@@ -26,6 +28,7 @@ public interface WeChatClient {
      * @param message 消息
      * @param webhook 地址
      */
+    @NullMarked
     void send(Message message, String webhook);
 
     /**
@@ -34,6 +37,7 @@ public interface WeChatClient {
      * @param type 类型，例如：file,voice
      * @param key webhook中的key
      */
+    @NullMarked
     String upload(Resource resource, String type, String key);
 
     interface Message {

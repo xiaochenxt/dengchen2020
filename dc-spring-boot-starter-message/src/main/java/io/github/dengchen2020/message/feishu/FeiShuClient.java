@@ -3,6 +3,7 @@ package io.github.dengchen2020.message.feishu;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ public interface FeiShuClient {
      * 发送消息
      * @param message 消息
      */
+    @NullMarked
     void send(Message message);
 
     /**
@@ -24,6 +26,7 @@ public interface FeiShuClient {
      * @param message 消息
      * @param webhook webhook地址
      */
+    @NullMarked
     void send(Message message, String webhook);
 
     /**
@@ -32,6 +35,7 @@ public interface FeiShuClient {
      * @param webhook 地址
      * @param secret 密钥
      */
+    @NullMarked
     void send(Message message, String webhook, String secret);
 
     interface Message {

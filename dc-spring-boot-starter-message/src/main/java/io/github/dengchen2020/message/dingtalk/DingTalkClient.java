@@ -1,6 +1,7 @@
 package io.github.dengchen2020.message.dingtalk;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -17,6 +18,7 @@ public interface DingTalkClient {
      * 发送消息
      * @param message 消息
      */
+    @NullMarked
     void send(Message message);
 
     /**
@@ -24,6 +26,7 @@ public interface DingTalkClient {
      * @param message 消息
      * @param webhook 地址
      */
+    @NullMarked
     void send(Message message, String webhook);
 
     /**
@@ -32,6 +35,7 @@ public interface DingTalkClient {
      * @param webhook 地址
      * @param secret 密钥
      */
+    @NullMarked
     void send(Message message, String webhook, String secret);
 
     interface Message {

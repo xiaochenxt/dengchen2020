@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import io.github.dengchen2020.core.utils.sign.HMACUtils;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -23,6 +24,7 @@ import java.util.Base64;
  * @author xiaochen
  * @since 2023/3/11
  */
+@NullMarked
 public class DingTalkClientImpl implements DingTalkClient {
 
     private static final Logger log = LoggerFactory.getLogger(DingTalkClientImpl.class);
@@ -33,15 +35,22 @@ public class DingTalkClientImpl implements DingTalkClient {
 
     private final String webhook;
 
+    @Nullable
     private final String secret;
 
-    public DingTalkClientImpl(@Nonnull String webhook, String secret) {
+    public DingTalkClientImpl(String webhook) {
+        this.webhook = webhook;
+        this.secret = null;
+        this.executor = defaultExecutor;
+    }
+
+    public DingTalkClientImpl(String webhook, String secret) {
         this.webhook = webhook;
         this.secret = secret;
         this.executor = defaultExecutor;
     }
 
-    public DingTalkClientImpl(@Nonnull String webhook, String secret, AsyncTaskExecutor executor) {
+    public DingTalkClientImpl(String webhook, String secret, AsyncTaskExecutor executor) {
         this.webhook = webhook;
         this.secret = secret;
         this.executor = executor;
@@ -58,7 +67,7 @@ public class DingTalkClientImpl implements DingTalkClient {
     }
 
     @Override
-    public void send(Message message, String webhook, String secret) {
+    public void send(Message message, String webhook,@Nullable String secret) {
         if (!StringUtils.hasText(webhook)) {
             log.warn("未配置钉钉webhook");
             return;

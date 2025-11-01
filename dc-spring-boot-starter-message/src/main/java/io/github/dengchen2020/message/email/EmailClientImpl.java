@@ -1,19 +1,23 @@
 package io.github.dengchen2020.message.email;
 
-import jakarta.annotation.Nonnull;
-import jakarta.mail.internet.InternetAddress;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
-import java.io.File;
 import java.util.Date;
+
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
 
 /**
  * 邮件发送
@@ -21,19 +25,26 @@ import java.util.Date;
  * @author xiaochen
  * @since 2024/6/4
  */
+@NullMarked
 public class EmailClientImpl implements EmailClient {
 
     private static final Logger log = LoggerFactory.getLogger(EmailClientImpl.class);
 
     private final AsyncTaskExecutor executor;
 
-    private static final AsyncTaskExecutor defaultExecutor = new VirtualThreadTaskExecutor("email-");
+    static final AsyncTaskExecutor defaultExecutor = new VirtualThreadTaskExecutor("email-");
 
     private final JavaMailSender javaMailSender;
 
     private final String[] to;
 
-    public EmailClientImpl(JavaMailSender javaMailSender, String[] to) {
+    public EmailClientImpl(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+        this.to = EMPTY_STRING_ARRAY;
+        this.executor = defaultExecutor;
+    }
+
+    public EmailClientImpl(JavaMailSender javaMailSender, String... to) {
         this.javaMailSender = javaMailSender;
         this.to = to;
         this.executor = defaultExecutor;
@@ -46,18 +57,23 @@ public class EmailClientImpl implements EmailClient {
     }
 
     @Override
-    public void sendText(@Nonnull String subject,@Nonnull String text, String... to) {
+    public void sendText(String subject, String text) {
+        sendText(subject, text, to);
+    }
+
+    @Override
+    public void sendText(String subject, String text, String... to) {
+        if (to.length == 0) {
+            log.error("未指定收件人邮箱，邮件无法发送");
+            return;
+        }
         executor.execute(() -> {
             try {
                 SimpleMailMessage mail = new SimpleMailMessage();
                 if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
                     mail.setFrom(javaMailSenderImpl.getUsername());
                 }
-                if (to == null || to.length == 0) {
-                    mail.setTo(this.to);
-                } else {
-                    mail.setTo(to);
-                }
+                mail.setTo(to);
                 mail.setSentDate(new Date());
                 mail.setSubject(subject);
                 mail.setText(text);
@@ -68,32 +84,46 @@ public class EmailClientImpl implements EmailClient {
         });
     }
 
-    public void sendMime(@Nonnull String subject,@Nonnull String html, File[] inlines, File[] attachments) {
-        sendMime(subject, html, inlines, attachments, to);
+    @Override
+    public void sendMime(String subject, String html) {
+        sendMime(subject, html, null, null, to);
     }
 
-    public void sendMime(@Nonnull String subject,@Nonnull String html, File[] inlines, File[] attachments, String[] to) {
+    @Override
+    public void sendMime(String subject, String html, @Nullable DataSource... attachments) {
+        sendMime(subject, html, attachments, null, to);
+    }
+
+    @Override
+    public void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource... inlines) {
+        sendMime(subject, html, attachments, inlines, to);
+    }
+
+    @Override
+    public void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource[] inlines, @NonNull String... to) {
+        if (to.length == 0) {
+            log.error("未指定收件人邮箱，mime邮件无法发送");
+            return;
+        }
         executor.execute(() -> {
             try {
                 MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
                 if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
                     mime.setFrom(javaMailSenderImpl.getUsername());
                 }
-                InternetAddress[] address = new InternetAddress[to.length];
-                for (int i = 0; i < to.length; i++) {
-                    address[i] = new InternetAddress(to[i]);
-                }
-                mime.setTo(address);
+                mime.setTo(to);
                 mime.setSubject(subject);
                 mime.setText(html, true);
-                if (inlines != null) {
-                    for (File inline : inlines) {
-                        mime.addInline(inline.getName(), inline);
+                if (attachments != null) {
+                    for (DataSource attachment : attachments) {
+                        if (attachment instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
+                        mime.addAttachment(attachment.getName(), attachment);
                     }
                 }
-                if (attachments != null) {
-                    for (File attachment : attachments) {
-                        mime.addAttachment(attachment.getName(), attachment);
+                if (inlines != null) {
+                    for (DataSource inline : inlines) {
+                        if (inline instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
+                        mime.addInline(inline.getName(), inline);
                     }
                 }
                 javaMailSender.send(mime.getMimeMessage());
@@ -101,21 +131,6 @@ public class EmailClientImpl implements EmailClient {
                 log.error("mime邮件发送失败，subject：{}，html：{}，inlines：{}，attachments：{}，to：{}，异常信息：", subject, html, inlines, attachments, to, e);
             }
         });
-    }
-
-    @Override
-    public void sendMime(@Nonnull String subject,@Nonnull String html, File[] inlines, String... to) {
-        sendMime(subject, html, inlines, null, to);
-    }
-
-    @Override
-    public void send(@Nonnull String subject,@Nonnull String html, File[] attachments, String... to) {
-        sendMime(subject, html, null, attachments, to);
-    }
-
-    @Override
-    public void send(@Nonnull String subject,@Nonnull String html, String... to) {
-        sendMime(subject, html, null, to);
     }
 
 }

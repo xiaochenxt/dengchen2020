@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import io.github.dengchen2020.core.utils.sign.HMACUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -20,6 +22,7 @@ import java.util.Base64;
  * @author xiaochen
  * @since 2023/7/4
  */
+@NullMarked
 public class FeiShuClientImpl implements FeiShuClient {
 
     private static final Logger log = LoggerFactory.getLogger(FeiShuClientImpl.class);
@@ -30,7 +33,14 @@ public class FeiShuClientImpl implements FeiShuClient {
 
     private final String webhook;
 
+    @Nullable
     private final String secret;
+
+    public FeiShuClientImpl(String webhook) {
+        this.webhook = webhook;
+        this.secret = null;
+        this.executor = defaultExecutor;
+    }
 
     public FeiShuClientImpl(String webhook, String secret) {
         this(webhook, secret, defaultExecutor);
@@ -53,7 +63,7 @@ public class FeiShuClientImpl implements FeiShuClient {
     }
 
     @Override
-    public void send(Message message, String webhook, String secret) {
+    public void send(Message message, String webhook,@Nullable String secret) {
         if (!StringUtils.hasText(webhook)) {
             log.warn("未配置飞书webhook");
             return;
