@@ -49,8 +49,7 @@ public class QRCodeGenerator {
     private int backgroundColor = 0xFFFFFFFF; // 默认背景色：白色
     private int logoBorderColor = 0xFFFFFFFF; // logo默认背景色：白色
 
-    // 私有构造函数：禁止外部直接实例化，必须通过create()获取
-    private QRCodeGenerator() {}
+    public QRCodeGenerator() {}
 
     /**
      * 静态工厂方法：初始化生成器并设置核心内容
