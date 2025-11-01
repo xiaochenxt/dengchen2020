@@ -72,32 +72,37 @@ public class DingTalkClientImpl implements DingTalkClient {
             log.warn("未配置钉钉webhook");
             return;
         }
-        executor.execute(() -> {
-            ObjectNode params = JsonUtils.createObjectNode();
-            try {
-                params.put("msgtype", message.type());
-                params.putPOJO(message.type(), message);
-                if (message instanceof At at) {
-                    ObjectNode atNode = JsonUtils.createObjectNode();
-                    atNode.putPOJO("atMobiles", at.atMobiles());
-                    atNode.put("isAtAll", at.isAtAll());
-                    params.set("at", atNode);
-                }
-                String url;
-                if (StringUtils.hasText(secret)) {
-                    long timestamp = System.currentTimeMillis();
-                    url = webhook +"&timestamp=" + timestamp + "&sign=" + URLEncoder.encode(Base64.getEncoder().encodeToString(HMACUtils.sha256(timestamp+"\n"+secret, secret)), StandardCharsets.UTF_8);
-                }else {
-                    url = webhook;
-                }
-                JsonNode res = RestClientUtils.post().uri(url).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
-                if (res.path("errcode").asInt() != 0) {
-                    log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
-                }
-            } catch (Exception e) {
-                log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+        executor.execute(() -> sendSync(message, webhook, secret));
+    }
+
+    public boolean sendSync(Message message, String webhook,@Nullable String secret) {
+        ObjectNode params = JsonUtils.createObjectNode();
+        try {
+            params.put("msgtype", message.type());
+            params.putPOJO(message.type(), message);
+            if (message instanceof At at) {
+                ObjectNode atNode = JsonUtils.createObjectNode();
+                atNode.putPOJO("atMobiles", at.atMobiles());
+                atNode.put("isAtAll", at.isAtAll());
+                params.set("at", atNode);
             }
-        });
+            String url;
+            if (StringUtils.hasText(secret)) {
+                long timestamp = System.currentTimeMillis();
+                url = webhook +"&timestamp=" + timestamp + "&sign=" + URLEncoder.encode(Base64.getEncoder().encodeToString(HMACUtils.sha256(timestamp+"\n"+secret, secret)), StandardCharsets.UTF_8);
+            }else {
+                url = webhook;
+            }
+            JsonNode res = RestClientUtils.post().uri(url).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
+            if (res.path("errcode").asInt() != 0) {
+                log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+            return false;
+        }
+        return true;
     }
 
 }

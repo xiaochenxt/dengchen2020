@@ -67,21 +67,25 @@ public class EmailClientImpl implements EmailClient {
             log.error("未指定收件人邮箱，邮件无法发送");
             return;
         }
-        executor.execute(() -> {
-            try {
-                SimpleMailMessage mail = new SimpleMailMessage();
-                if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
-                    mail.setFrom(javaMailSenderImpl.getUsername());
-                }
-                mail.setTo(to);
-                mail.setSentDate(new Date());
-                mail.setSubject(subject);
-                mail.setText(text);
-                javaMailSender.send(mail);
-            } catch (MailException e) {
-                log.error("邮件发送失败，subject：{}，text：{}，to：{}，异常信息：", subject, text, to, e);
+        executor.execute(() -> sendTextSync(subject, text, to));
+    }
+
+    public boolean sendTextSync(String subject, String text, String... to) {
+        try {
+            SimpleMailMessage mail = new SimpleMailMessage();
+            if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
+                mail.setFrom(javaMailSenderImpl.getUsername());
             }
-        });
+            mail.setTo(to);
+            mail.setSentDate(new Date());
+            mail.setSubject(subject);
+            mail.setText(text);
+            javaMailSender.send(mail);
+            return true;
+        } catch (MailException e) {
+            log.error("邮件发送失败，subject：{}，text：{}，to：{}，异常信息：", subject, text, to, e);
+            return false;
+        }
     }
 
     @Override
@@ -105,32 +109,36 @@ public class EmailClientImpl implements EmailClient {
             log.error("未指定收件人邮箱，mime邮件无法发送");
             return;
         }
-        executor.execute(() -> {
-            try {
-                MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
-                if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
-                    mime.setFrom(javaMailSenderImpl.getUsername());
-                }
-                mime.setTo(to);
-                mime.setSubject(subject);
-                mime.setText(html, true);
-                if (attachments != null) {
-                    for (DataSource attachment : attachments) {
-                        if (attachment instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
-                        mime.addAttachment(attachment.getName(), attachment);
-                    }
-                }
-                if (inlines != null) {
-                    for (DataSource inline : inlines) {
-                        if (inline instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
-                        mime.addInline(inline.getName(), inline);
-                    }
-                }
-                javaMailSender.send(mime.getMimeMessage());
-            } catch (Exception e) {
-                log.error("mime邮件发送失败，subject：{}，html：{}，inlines：{}，attachments：{}，to：{}，异常信息：", subject, html, inlines, attachments, to, e);
+        executor.execute(() -> sendMimeSync(subject, html, attachments, inlines, to));
+    }
+
+    public boolean sendMimeSync(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource[] inlines, @NonNull String... to) {
+        try {
+            MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
+            if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
+                mime.setFrom(javaMailSenderImpl.getUsername());
             }
-        });
+            mime.setTo(to);
+            mime.setSubject(subject);
+            mime.setText(html, true);
+            if (attachments != null) {
+                for (DataSource attachment : attachments) {
+                    if (attachment instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
+                    mime.addAttachment(attachment.getName(), attachment);
+                }
+            }
+            if (inlines != null) {
+                for (DataSource inline : inlines) {
+                    if (inline instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
+                    mime.addInline(inline.getName(), inline);
+                }
+            }
+            javaMailSender.send(mime.getMimeMessage());
+            return true;
+        } catch (Exception e) {
+            log.error("mime邮件发送失败，subject：{}，html：{}，inlines：{}，attachments：{}，to：{}，异常信息：", subject, html, inlines, attachments, to, e);
+            return false;
+        }
     }
 
 }

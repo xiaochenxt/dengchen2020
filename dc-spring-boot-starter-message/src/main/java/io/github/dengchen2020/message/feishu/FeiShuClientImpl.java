@@ -68,25 +68,30 @@ public class FeiShuClientImpl implements FeiShuClient {
             log.warn("未配置飞书webhook");
             return;
         }
-        executor.execute(() -> {
-            ObjectNode params = JsonUtils.createObjectNode();
-            try {
-                params.put("msg_type", message.type());
-                params.putPOJO("content", message);
-                if (StringUtils.hasText(secret)) {
-                    String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-                    params.put("timestamp", timestamp);
-                    params.put("sign", Base64.getEncoder().encodeToString(HMACUtils.sha256("",timestamp+"\n"+secret)));
-                }
-                JsonNode res = RestClientUtils.post().uri(webhook)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(params).retrieve().body(JsonNode.class);
-                if (res.path("code").asInt() != 0) {
-                    log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
-                }
-            } catch (Exception e) {
-                log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+        executor.execute(() -> sendSync(message, webhook, secret));
+    }
+
+    public boolean sendSync(Message message, String webhook,@Nullable String secret) {
+        ObjectNode params = JsonUtils.createObjectNode();
+        try {
+            params.put("msg_type", message.type());
+            params.putPOJO("content", message);
+            if (StringUtils.hasText(secret)) {
+                String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+                params.put("timestamp", timestamp);
+                params.put("sign", Base64.getEncoder().encodeToString(HMACUtils.sha256("",timestamp+"\n"+secret)));
             }
-        });
+            JsonNode res = RestClientUtils.post().uri(webhook)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(params).retrieve().body(JsonNode.class);
+            if (res.path("code").asInt() != 0) {
+                log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+            return false;
+        }
+        return true;
     }
 }

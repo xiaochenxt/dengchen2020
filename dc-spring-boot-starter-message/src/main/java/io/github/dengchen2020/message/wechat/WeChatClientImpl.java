@@ -51,19 +51,24 @@ public class WeChatClientImpl implements WeChatClient {
             log.warn("未配置微信webhook");
             return;
         }
-        executor.execute(() -> {
-            ObjectNode params = JsonUtils.createObjectNode();
-            try {
-                params.put("msgtype", message.type());
-                params.putPOJO(message.type(), message);
-                JsonNode res = RestClientUtils.post().uri(webhook).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
-                if (res.path("errcode").asInt() != 0) {
-                    log.error("微信机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
-                }
-            } catch (Exception e) {
-                log.error("微信机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+        executor.execute(() -> sendSync(message, webhook));
+    }
+
+    public boolean sendSync(Message message, String webhook) {
+        ObjectNode params = JsonUtils.createObjectNode();
+        try {
+            params.put("msgtype", message.type());
+            params.putPOJO(message.type(), message);
+            JsonNode res = RestClientUtils.post().uri(webhook).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
+            if (res.path("errcode").asInt() != 0) {
+                log.error("微信机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+                return false;
             }
-        });
+        } catch (Exception e) {
+            log.error("微信机器人发送信息失败，参数：{}，webhook：{}，异常信息：", params, webhook, e);
+            return false;
+        }
+        return true;
     }
 
     @Override
