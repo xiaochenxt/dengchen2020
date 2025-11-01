@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
  * @author xiaochen
  * @since 2024/6/18
  */
+@NullMarked
 @NoRepositoryBean
 public interface ComplexJpaRepository<T> {
 

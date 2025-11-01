@@ -12,10 +12,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
  * @author xiaochen
  * @since 2025/3/28
  */
+@NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
@@ -93,9 +95,9 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
      * @param predicate
      * @return {@link JPAQuery}.
      */
-    protected JPAQuery<?> createQuery(@Nullable Predicate... predicate) {
+    protected JPAQuery<?> createQuery(Predicate... predicate) {
         JPAQuery<?> query = queryFactory.query().from(path);
-        if (predicate != null) query.where(predicate);
+        if (predicate.length > 0) query.where(predicate);
         getQueryHints().withFetchGraphs(entityManager).forEach(query::setHint);
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
         if (metadata == null) return query;
@@ -218,7 +220,7 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     @Override
     public <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
         if (page.getSize() == 0) return new SimplePage<>(!page.isSelectCount() ? 0 : query.fetchCount(), Collections.emptyList());
-        if (o != null && o.length > 0) query = query.orderBy(o);
+        if (o.length > 0) query = query.orderBy(o);
         if (!page.isSelectCount()) {
             return new SimplePage<>(null, query.limit(page.getSize())
                     .offset(page.getOffset())
@@ -250,8 +252,8 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
      * @return Stream<R>
      */
     @Override
-    public <R> Stream<R> fetchStream(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
-        if (o != null && o.length > 0) query = query.orderBy(o);
+    public <R> Stream<R> fetchStream(JPAQuery<R> query,@Nullable Page page, OrderSpecifier<?>... o){
+        if (o.length > 0) query = query.orderBy(o);
         if(page == null) return query.stream();
         return query.limit(page.getSize())
                 .offset(page.getOffset())

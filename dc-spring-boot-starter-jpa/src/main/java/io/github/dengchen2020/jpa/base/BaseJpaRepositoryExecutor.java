@@ -4,11 +4,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.IterableUtils;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
@@ -29,6 +29,7 @@ import java.util.Optional;
  * @author xiaochen
  * @since 2024/1/19
  */
+@NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor<T, ID> implements
@@ -61,10 +62,8 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     }
 
     @Transactional
-    @Nonnull
     @Override
-    public <S extends T> List<S> saveAll(@Nonnull Iterable<S> entities) {
-        Assert.notNull(entities, "entities must not be null");
+    public <S extends T> List<S> saveAll(Iterable<S> entities) {
         for (S entity : entities) save(entity);
         return IterableUtils.toList(entities);
     }
@@ -75,10 +74,10 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @param id id
      * @return T
      */
+    @Nullable
     @Transactional
     @Override
-    public T selectByIdForUpdate(@Nonnull ID id) {
-        Assert.notNull(id, "id must not be null");
+    public T selectByIdForUpdate(ID id) {
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, getHints());
     }
 
@@ -89,9 +88,8 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @return Optional<T>
      */
     @Transactional
-    @Nonnull
     @Override
-    public Optional<T> findByIdForUpdate(@Nonnull ID id) {
+    public Optional<T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
@@ -100,9 +98,9 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @param id id
      * @return Optional<T>
      */
+    @Nullable
     @Override
-    public T selectById(@Nonnull ID id) {
-        Assert.notNull(id, "id must not be null");
+    public T selectById(ID id) {
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
         if (metadata == null) {
             return entityManager.find(getDomainClass(), id, getHints());
@@ -127,7 +125,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      */
     @Override
     public int softDelete(Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
         Query query = entityManager.createQuery(softDeleteInSql)
                 .setParameter(deletedFieldName, true)
                 .setParameter(idFieldName, ids);
@@ -148,7 +145,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      */
     @Override
     public int softDelete(ID id) {
-        Assert.notNull(id, "id must not be null");
         Query query = entityManager.createQuery(softDeleteSql)
                 .setParameter(deletedFieldName, true)
                 .setParameter(idFieldName, id);
@@ -156,7 +152,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return query.executeUpdate();
     }
 
-    @Nonnull
     private Long getTenantIdNonNull(){
         Authentication authentication = SecurityContextHolder.getAuthentication();
         Assert.notNull(authentication, "未设置authentication，无法获取tenantId");
@@ -165,7 +160,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return tenantId;
     }
 
-    @Nonnull
     private String getUserIdNonNull(){
         Authentication authentication = SecurityContextHolder.getAuthentication();
         Assert.notNull(authentication, "未设置authentication，无法获取userId");
@@ -195,8 +189,9 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @param id id
      * @return T
      */
+    @Nullable
     @Override
-    public T selectByIdWithTenantId(@Nonnull ID id) {
+    public T selectByIdWithTenantId(ID id) {
         Long tenantId = getTenantId();
         T t = selectById(id);
         if (t == null) return null;
@@ -227,8 +222,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<T> selectInIdsWithTenantId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public List<T> selectInIdsWithTenantId(Iterable<ID> ids) {
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null ){
@@ -245,19 +239,18 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final List<T> selectInIdsWithTenantId(@Nonnull ID... ids) {
+    public final List<T> selectInIdsWithTenantId(ID... ids) {
         Assert.notEmpty(ids, "ids must not be null");
         return selectInIdsWithTenantId(List.of(ids));
     }
 
     @Override
-    public Optional<T> findByIdWithTenantId(@Nonnull ID id) {
+    public Optional<T> findByIdWithTenantId(ID id) {
         return Optional.ofNullable(selectByIdWithTenantId(id));
     }
 
     @Override
-    public int deleteWithTenantId(@Nonnull ID id) {
-        Assert.notNull(id, "id must not be null");
+    public int deleteWithTenantId(ID id) {
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
@@ -273,8 +266,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     }
 
     @Override
-    public int deleteWithTenantId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public int deleteWithTenantId(Iterable<ID> ids) {
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null) {
@@ -291,13 +283,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final int deleteWithTenantId(@Nonnull ID... ids) {
+    public final int deleteWithTenantId(ID... ids) {
         return deleteWithTenantId(List.of(ids));
     }
 
     @Override
-    public int softDeleteWithTenantId(@Nonnull ID id) {
-        Assert.notNull(id, "ids must not be null");
+    public int softDeleteWithTenantId(ID id) {
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
@@ -315,8 +306,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     }
 
     @Override
-    public int softDeleteWithTenantId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public int softDeleteWithTenantId(Iterable<ID> ids) {
         Long tenantId = getTenantId();
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
@@ -335,7 +325,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final int softDeleteWithTenantId(@Nonnull ID... ids) {
+    public final int softDeleteWithTenantId(ID... ids) {
         return softDeleteWithTenantId(List.of(ids));
     }
 
@@ -345,7 +335,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @return T
      */
     @Override
-    public T selectByIdWithUserId(@Nonnull ID id) {
+    public T selectByIdWithUserId(ID id) {
         String userId = getUserId();
         T t = selectById(id);
         if (t == null) return null;
@@ -376,8 +366,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<T> selectInIdsWithUserId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public List<T> selectInIdsWithUserId(Iterable<ID> ids) {
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
@@ -394,19 +383,18 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final List<T> selectInIdsWithUserId(@Nonnull ID... ids) {
+    public final List<T> selectInIdsWithUserId(ID... ids) {
         Assert.notEmpty(ids, "ids must not be null");
         return selectInIdsWithUserId(List.of(ids));
     }
 
     @Override
-    public Optional<T> findByIdWithUserId(@Nonnull ID id) {
+    public Optional<T> findByIdWithUserId(ID id) {
         return Optional.ofNullable(selectByIdWithUserId(id));
     }
 
     @Override
-    public int deleteWithUserId(@Nonnull ID id) {
-        Assert.notNull(id, "id must not be null");
+    public int deleteWithUserId(ID id) {
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
@@ -422,8 +410,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     }
 
     @Override
-    public int deleteWithUserId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public int deleteWithUserId(Iterable<ID> ids) {
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
@@ -440,13 +427,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final int deleteWithUserId(@Nonnull ID... ids) {
+    public final int deleteWithUserId(ID... ids) {
         return deleteWithUserId(List.of(ids));
     }
 
     @Override
-    public int softDeleteWithUserId(@Nonnull ID id) {
-        Assert.notNull(id, "id must not be null");
+    public int softDeleteWithUserId(ID id) {
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
@@ -464,8 +450,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     }
 
     @Override
-    public int softDeleteWithUserId(@Nonnull Iterable<ID> ids) {
-        Assert.notNull(ids, "ids must not be null");
+    public int softDeleteWithUserId(Iterable<ID> ids) {
         String userId = getUserId();
         Query query;
         if (strictVerifyAuthentication || userId != null){
@@ -484,7 +469,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
 
     @SafeVarargs
     @Override
-    public final int softDeleteWithUserId(@Nonnull ID... ids) {
+    public final int softDeleteWithUserId(ID... ids) {
         return softDeleteWithUserId(List.of(ids));
     }
 

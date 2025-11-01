@@ -5,6 +5,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @author xiaochen
  * @since 2024/11/27
  */
+@NullMarked
 @NoRepositoryBean
 public interface QueryDslJpaRepository<T> {
 

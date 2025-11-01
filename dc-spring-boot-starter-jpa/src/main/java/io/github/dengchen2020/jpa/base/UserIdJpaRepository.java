@@ -1,6 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
  * @author xiaochen
  * @since 2024/12/7
  */
+@NullMarked
 @NoRepositoryBean
 public interface UserIdJpaRepository<T, ID> {
 
@@ -19,49 +21,50 @@ public interface UserIdJpaRepository<T, ID> {
      * @param id id
      * @return T
      */
-    T selectByIdWithUserId(@Nonnull ID id);
+    @Nullable
+    T selectByIdWithUserId(ID id);
 
     /**
      * 根据id查询（携带用户id）
      * @param ids ids
      * @return T
      */
-    List<T> selectInIdsWithUserId(@Nonnull Iterable<ID> ids);
+    List<T> selectInIdsWithUserId(Iterable<ID> ids);
 
     /**
      * 根据id查询（携带用户id）
      * @param ids ids
      * @return T
      */
-    List<T> selectInIdsWithUserId(@Nonnull ID... ids);
+    List<T> selectInIdsWithUserId(ID... ids);
 
     /**
      * 根据id查询（携带用户id）
      * @param id id
      * @return T
      */
-    Optional<T> findByIdWithUserId(@Nonnull ID id);
+    Optional<T> findByIdWithUserId(ID id);
 
     /**
      * 根据id删除（携带用户id）
      * @param id id
      * @return 受影响的条数
      */
-    int deleteWithUserId(@Nonnull ID id);
+    int deleteWithUserId(ID id);
 
     /**
      * 根据id删除（携带用户id）
      * @param ids ids
      * @return 受影响的条数
      */
-    int deleteWithUserId(@Nonnull Iterable<ID> ids);
+    int deleteWithUserId(Iterable<ID> ids);
 
     /**
      * 根据id删除（携带用户id）
      * @param ids ids
      * @return 受影响的条数
      */
-    int deleteWithUserId(@Nonnull ID... ids);
+    int deleteWithUserId(ID... ids);
 
     /**
      * 批量逻辑删除
@@ -69,7 +72,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
-    int softDeleteWithUserId(@Nonnull Iterable<ID> ids);
+    int softDeleteWithUserId(Iterable<ID> ids);
 
     /**
      * 批量逻辑删除
@@ -77,7 +80,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
-    int softDeleteWithUserId(@Nonnull ID... ids);
+    int softDeleteWithUserId(ID... ids);
 
     /**
      * 逻辑删除
@@ -85,6 +88,6 @@ public interface UserIdJpaRepository<T, ID> {
      * @param id id
      * @return 受影响的行数
      */
-    int softDeleteWithUserId(@Nonnull ID id);
+    int softDeleteWithUserId(ID id);
 
 }

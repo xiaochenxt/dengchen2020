@@ -1,6 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
  * @author xiaochen
  * @since 2024/12/7
  */
+@NullMarked
 @NoRepositoryBean
 public interface TenantJpaRepository<T, ID> {
 
@@ -19,49 +21,50 @@ public interface TenantJpaRepository<T, ID> {
      * @param id id
      * @return T
      */
-    T selectByIdWithTenantId(@Nonnull ID id);
+    @Nullable
+    T selectByIdWithTenantId(ID id);
 
     /**
      * 根据id查询（携带租户id）
      * @param ids ids
      * @return T
      */
-    List<T> selectInIdsWithTenantId(@Nonnull Iterable<ID> ids);
+    List<T> selectInIdsWithTenantId(Iterable<ID> ids);
 
     /**
      * 根据id查询（携带租户id）
      * @param ids ids
      * @return T
      */
-    List<T> selectInIdsWithTenantId(@Nonnull ID... ids);
+    List<T> selectInIdsWithTenantId(ID... ids);
 
     /**
      * 根据id查询（携带租户id）
      * @param id id
      * @return T
      */
-    Optional<T> findByIdWithTenantId(@Nonnull ID id);
+    Optional<T> findByIdWithTenantId(ID id);
 
     /**
      * 根据id删除（携带租户id）
      * @param id id
      * @return 受影响的条数
      */
-    int deleteWithTenantId(@Nonnull ID id);
+    int deleteWithTenantId(ID id);
 
     /**
      * 根据id删除（携带租户id）
      * @param ids ids
      * @return 受影响的条数
      */
-    int deleteWithTenantId(@Nonnull Iterable<ID> ids);
+    int deleteWithTenantId(Iterable<ID> ids);
 
     /**
      * 根据id删除（携带租户id）
      * @param ids ids
      * @return 受影响的条数
      */
-    int deleteWithTenantId(@Nonnull ID... ids);
+    int deleteWithTenantId(ID... ids);
 
     /**
      * 批量逻辑删除
@@ -69,7 +72,7 @@ public interface TenantJpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
-    int softDeleteWithTenantId(@Nonnull Iterable<ID> ids);
+    int softDeleteWithTenantId(Iterable<ID> ids);
 
     /**
      * 批量逻辑删除
@@ -77,7 +80,7 @@ public interface TenantJpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
-    int softDeleteWithTenantId(@Nonnull ID... ids);
+    int softDeleteWithTenantId(ID... ids);
 
     /**
      * 逻辑删除
@@ -85,6 +88,6 @@ public interface TenantJpaRepository<T, ID> {
      * @param id id
      * @return 受影响的行数
      */
-    int softDeleteWithTenantId(@Nonnull ID id);
+    int softDeleteWithTenantId(ID id);
 
 }

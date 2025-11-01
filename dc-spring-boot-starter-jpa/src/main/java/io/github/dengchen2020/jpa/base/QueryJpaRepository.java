@@ -1,6 +1,8 @@
 package io.github.dengchen2020.jpa.base;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,6 +15,7 @@ import java.util.Optional;
  * @author xiaochen
  * @since 2024/8/1
  */
+@NullMarked
 @NoRepositoryBean
 public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
 
@@ -22,7 +25,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param id id
      * @return T
      */
-    T selectByIdForUpdate(@Nonnull ID id);
+    T selectByIdForUpdate(ID id);
 
     /**
      * findById 加锁版本
@@ -30,24 +33,23 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param id id
      * @return Optional<T>
      */
-    @Nonnull
-    Optional<T> findByIdForUpdate(@Nonnull ID id);
+    Optional<T> findByIdForUpdate(ID id);
 
     /**
      * 根据id查询
      * @param id id
      * @return Optional<T>
      */
-    @Nonnull
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    Optional<T> findById(@Nonnull ID id);
+    Optional<T> findById(@NonNull ID id);
 
     /**
      * 根据id查询
      * @param id id
      * @return T
      */
-    T selectById(@Nonnull ID id);
+    @Nullable
+    T selectById(ID id);
 
 }

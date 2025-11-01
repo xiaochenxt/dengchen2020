@@ -1,7 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,7 @@ public abstract class ClassUtils extends org.springframework.util.ClassUtils {
      * @param cls 查找的类，可能是 {@code null}
      * @return {@link List} 的超类，如果输入null，则从这个 {@code null} 开始依次排列
      */
-    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
+    public static List<Class<?>> getAllSuperclasses(@Nullable final Class<?> cls) {
         if (cls == null) return null;
         final List<Class<?>> classes = new ArrayList<>();
         Class<?> superclass = cls.getSuperclass();
@@ -38,7 +38,7 @@ public abstract class ClassUtils extends org.springframework.util.ClassUtils {
      * @param clazz 类来分析接口
      * @return 给定对象作为 List 实现的所有接口
      */
-    public static List<Class<?>> getAllInterfacesForClassAsList(Class<?> clazz) {
+    public static List<Class<?>> getAllInterfacesForClassAsList(@NonNull Class<?> clazz) {
         return getAllInterfacesForClassAsList(clazz, null);
     }
 
@@ -50,8 +50,7 @@ public abstract class ClassUtils extends org.springframework.util.ClassUtils {
      * @param classLoader 创建接口需要在其中可见的 ClassLoader（接受所有声明的接口时可以是 {@code null}）
      * @return 给定对象作为 List 实现的所有接口
      */
-    public static List<Class<?>> getAllInterfacesForClassAsList(Class<?> clazz, @Nullable ClassLoader classLoader) {
-        Assert.notNull(clazz, "Class must not be null");
+    public static List<Class<?>> getAllInterfacesForClassAsList(@NonNull Class<?> clazz, @Nullable ClassLoader classLoader) {
         if (clazz.isInterface() && isVisible(clazz, classLoader)) {
             return Collections.singletonList(clazz);
         }

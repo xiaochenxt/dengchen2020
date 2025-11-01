@@ -1,9 +1,8 @@
 package io.github.dengchen2020.core.security.context;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import org.springframework.util.Assert;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,8 +78,7 @@ public class SecurityContextHolder {
      * @param key 资源key
      * @param value 资源
      */
-    public static void bindResource(@Nonnull String key, Object value) {
-        Assert.notNull(key, "key must not be null");
+    public static void bindResource(@NonNull String key, Object value) {
         Map<String, Object> map = resources.get();
         if (map == null) {
             map = new HashMap<>();
@@ -93,8 +91,7 @@ public class SecurityContextHolder {
      * 解绑资源
      * @param key 资源key
      */
-    public static void unbindResource(@Nonnull String key) {
-        Assert.notNull(key, "key must not be null");
+    public static void unbindResource(@NonNull String key) {
         Map<String, Object> map = resources.get();
         if (map == null) return;
         map.remove(key);

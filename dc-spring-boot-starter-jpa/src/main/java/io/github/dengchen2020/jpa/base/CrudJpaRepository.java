@@ -1,7 +1,8 @@
 package io.github.dengchen2020.jpa.base;
 
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.Version;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,6 +19,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2019/2/28 11:03
  */
+@NullMarked
 @NoRepositoryBean
 public interface CrudJpaRepository<T, ID> extends QuerydslPredicateExecutor<T> , JpaRepository<T, ID> {
 
@@ -82,9 +84,9 @@ public interface CrudJpaRepository<T, ID> extends QuerydslPredicateExecutor<T> ,
      * @throws OptimisticLockingFailureException 当实体使用乐观锁定并且具有 version 属性
      * 与持久化存储中的值不同。如果实体假定存在，但数据库中不存在。
      */
-    @Nonnull
+    @NonNull
     @Override
-    <S extends T> S save(@Nonnull S entity);
+    <S extends T> S save(@NonNull S entity);
 
     /**
      * 批量保存，详见：{@link BaseJpaRepositoryExecutor#saveAll(Iterable)}
@@ -103,7 +105,6 @@ public interface CrudJpaRepository<T, ID> extends QuerydslPredicateExecutor<T> ,
      * @throws OptimisticLockingFailureException 当至少一个实体使用乐观锁定并且具有版本
      * 属性的值与持久存储中的值不同。如果至少有一个实体假定存在，但数据库中不存在。
      */
-    @Nonnull
     @Override
-    <S extends T> List<S> saveAll(@Nonnull Iterable<S> entities);
+    <S extends T> List<S> saveAll(Iterable<S> entities);
 }

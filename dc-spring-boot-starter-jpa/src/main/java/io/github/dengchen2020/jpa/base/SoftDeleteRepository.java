@@ -1,5 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -7,6 +8,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @author xiaochen
  * @since 2025/3/28
  */
+@NullMarked
 @NoRepositoryBean
 public interface SoftDeleteRepository<T, ID> {
 
