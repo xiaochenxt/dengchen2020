@@ -25,6 +25,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param id id
      * @return T
      */
+    @Nullable
     T selectByIdForUpdate(ID id);
 
     /**

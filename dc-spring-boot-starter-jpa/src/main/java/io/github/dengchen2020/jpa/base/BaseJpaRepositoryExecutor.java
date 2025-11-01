@@ -334,6 +334,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
      * @param id id
      * @return T
      */
+    @Nullable
     @Override
     public T selectByIdWithUserId(ID id) {
         String userId = getUserId();
