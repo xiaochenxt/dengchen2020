@@ -45,7 +45,7 @@ public class RedissonLock implements DLock {
     }
 
     @Override
-    public <T> T tryLockAndRun(String key, Callable<T> callable) throws Exception {
+    public <T> T tryLockAndRun(String key, Callable<T> callable) throws Throwable {
         RLock rLock = getLock(key);
         try {
             if (rLock.tryLock()) {
