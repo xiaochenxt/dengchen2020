@@ -69,7 +69,8 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
         int onlineCount = sessionQueue.size();
         int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
         if (onlineCount > 0 && onlineCount >= allowSameUserMaxOnlineCount){
-            close(sessionQueue.iterator().next(), CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
+            WebSocketSession head = sessionQueue.peek();
+            if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
         }
         sessionQueue.add(session);
         if (authentication.tenantId() != null) {

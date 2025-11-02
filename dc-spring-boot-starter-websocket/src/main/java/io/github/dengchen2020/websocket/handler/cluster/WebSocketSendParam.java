@@ -75,9 +75,4 @@ public record WebSocketSendParam(String[] userId, Long tenantId, byte[] msg, int
         this(null, tenantId, null, 0, 1, closeStatus.getCode(), closeStatus.getReason());
     }
 
-    public CloseStatus getCloseStatus() {
-        if (closeCode != null) return new CloseStatus(closeCode, closeReason);
-        return CloseStatus.NORMAL.withReason("未知");
-    }
-
 }

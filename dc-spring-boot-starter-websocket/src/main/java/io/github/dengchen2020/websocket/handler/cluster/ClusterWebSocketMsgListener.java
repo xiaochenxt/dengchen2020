@@ -3,6 +3,7 @@ package io.github.dengchen2020.websocket.handler.cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
 
@@ -26,9 +27,9 @@ public class ClusterWebSocketMsgListener extends MessageListenerAdapter {
         switch (sendParam.type()) {
             case 0 -> {
                 if (sendParam.userId() != null) {
-                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.userId(), sendParam.getCloseStatus());
+                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.userId(), new CloseStatus(sendParam.closeCode(), sendParam.closeReason()));
                 }else if (sendParam.tenantId() != null) {
-                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.tenantId(), sendParam.getCloseStatus());
+                    clusterSpringWebSocketHandler.closeNoPublish(sendParam.tenantId(), new CloseStatus(sendParam.closeCode(), sendParam.closeReason()));
                 }
             }
             case 1 -> {
