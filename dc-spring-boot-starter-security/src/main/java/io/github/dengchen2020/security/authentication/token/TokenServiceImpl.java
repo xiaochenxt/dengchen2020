@@ -11,6 +11,8 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.UUID;
 
+import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
+
 /**
  * 有状态Token认证实现
  * <p>对比无状态</p>
@@ -22,8 +24,6 @@ import java.util.UUID;
 public class TokenServiceImpl implements TokenService, StateToken {
 
     private static final Logger log = LoggerFactory.getLogger(TokenServiceImpl.class);
-
-    private static final String SEPARATOR = "-";
 
     private final AuthenticationConvert authenticationConvert;
 

@@ -15,4 +15,9 @@ public final class TokenConstant {
 
     public static final String ATI = "ati";
 
+    /**
+     * token生成时userId和随机字符串之间的分隔符
+     */
+    public static final String SEPARATOR = "-";
+
 }
