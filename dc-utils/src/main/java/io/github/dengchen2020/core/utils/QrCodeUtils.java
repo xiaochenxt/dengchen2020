@@ -24,6 +24,10 @@ public abstract class QrCodeUtils {
 
     private static final int BLACK = 0xFF000000;//用于设置图案的颜色
     private static final int WHITE = 0xFFFFFFFF; //用于背景色
+    /**
+     * 创建二维码读取器，{@link QRCodeReader#reset()} 实现为空，证明是线程安全的，可单例使用
+     */
+    public static final QRCodeReader reader = new QRCodeReader();
 
     /**
      * 生成二维码写入{@link OutputStream}
@@ -220,8 +224,6 @@ public abstract class QrCodeUtils {
                 new HybridBinarizer(new RGBLuminanceSource(image.getWidth(), image.getHeight(),
                         image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth())))
             );
-            // 创建QR码阅读器
-            QRCodeReader reader = new QRCodeReader();
             // 解析二维码
             Result result = reader.decode(bitmap);
             return result.getText();
@@ -235,7 +237,7 @@ public abstract class QrCodeUtils {
     /**
      * 当图片不是二维码，而是其它的条形码格式时，可使用对应的读取器解析出内容
      * @param image 图片
-     * @param reader 读取器
+     * @param reader 读取器，通过查看{@link Reader#reset()} 的实现是否是空实现，如果是空实现，说明没有内部状态，是线程安全的，此时可单例传递
      * @return
      */
     public static String decode(BufferedImage image, Reader reader) {
@@ -247,6 +249,7 @@ public abstract class QrCodeUtils {
             );
             // 解码
             Result result = reader.decode(bitmap);
+            reader.reset();
             return result.getText();
         } catch (NotFoundException e) {
             throw new IllegalArgumentException("未识别到有效条形码");
