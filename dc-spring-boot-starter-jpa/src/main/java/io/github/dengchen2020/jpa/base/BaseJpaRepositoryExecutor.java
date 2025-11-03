@@ -128,7 +128,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Query query = entityManager.createQuery(softDeleteInSql)
                 .setParameter(deletedFieldName, true)
                 .setParameter(idFieldName, ids);
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -148,7 +147,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         Query query = entityManager.createQuery(softDeleteSql)
                 .setParameter(deletedFieldName, true)
                 .setParameter(idFieldName, id);
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -261,7 +259,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
             query = entityManager.createQuery(deleteSql)
                     .setParameter(idFieldName, id);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -277,7 +274,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
             query = entityManager.createQuery(deleteInSql)
                     .setParameter(idFieldName, ids);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -301,7 +297,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, id);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -319,7 +314,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, ids);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -406,7 +400,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
             query = entityManager.createQuery(deleteSql)
                     .setParameter(idFieldName, id);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -422,7 +415,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
             query = entityManager.createQuery(deleteInSql)
                     .setParameter(idFieldName, ids);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -446,7 +438,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, id);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
@@ -464,7 +455,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
                     .setParameter(deletedFieldName, true)
                     .setParameter(idFieldName, ids);
         }
-        getHints().forEach(query::setHint);
         return query.executeUpdate();
     }
 
