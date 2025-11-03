@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 @NoRepositoryBean
 public interface ComplexJpaRepository<T> {
 
+    OrderSpecifier<?>[] EMPTY_ORDER_SPECIFIER = new OrderSpecifier<?>[0];
+
     /**
      * Querydsl的Q类实例
      * @return {@link EntityPath}
@@ -37,10 +39,30 @@ public interface ComplexJpaRepository<T> {
      * Querydsl分页查询
      * @param query JPAQuery<R>
      * @param page 分页参数
+     * @return SimplePage<R>
+     */
+    default <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page){
+        return fetchPage(query, page, EMPTY_ORDER_SPECIFIER);
+    }
+
+    /**
+     * Querydsl分页查询
+     * @param query JPAQuery<R>
+     * @param page 分页参数
      * @param o 排序方式
      * @return SimplePage<R>
      */
     <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o);
+
+    /**
+     * Querydsl分页条件查询
+     *
+     * @param page 分页参数
+     * @return 分页后的数据
+     */
+    default SimplePage<T> findAll(Predicate predicate, Page page){
+        return findAll(predicate, page, EMPTY_ORDER_SPECIFIER);
+    }
 
     /**
      * Querydsl分页条件查询
@@ -55,10 +77,30 @@ public interface ComplexJpaRepository<T> {
      * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param query JPAQuery<R>
      * @param page 分页参数
+     * @return Stream<R>
+     */
+    default <R> Stream<R> fetchStream(JPAQuery<R> query, Page page){
+        return fetchStream(query, page, EMPTY_ORDER_SPECIFIER);
+    }
+
+    /**
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
+     * @param query JPAQuery<R>
+     * @param page 分页参数
      * @param o 排序方式
      * @return Stream<R>
      */
     <R> Stream<R> fetchStream(JPAQuery<R> query, Page page, OrderSpecifier<?>... o);
+
+    /**
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
+     * @param predicate 条件
+     * @param page 分页参数
+     * @return Stream<T>
+     */
+    default Stream<T> findStream(Predicate predicate, Page page){
+        return findStream(predicate, page, EMPTY_ORDER_SPECIFIER);
+    }
 
     /**
      * 返回流读取器，调用方需手动关闭以便尽快释放资源
@@ -72,10 +114,27 @@ public interface ComplexJpaRepository<T> {
     /**
      * 返回流读取器，调用方需手动关闭以便尽快释放资源
      * @param page 分页参数
+     * @return Stream<T>
+     */
+    default Stream<T> findStream(Page page){
+        return findStream(page, EMPTY_ORDER_SPECIFIER);
+    }
+
+    /**
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
+     * @param page 分页参数
      * @param o 排序方式
      * @return Stream<T>
      */
     Stream<T> findStream(Page page, OrderSpecifier<?>... o);
+
+    /**
+     * 返回流读取器，调用方需手动关闭以便尽快释放资源
+     * @return Stream<T>
+     */
+    default Stream<T> findStream(){
+        return findStream(EMPTY_ORDER_SPECIFIER);
+    }
 
     /**
      * 返回流读取器，调用方需手动关闭以便尽快释放资源
