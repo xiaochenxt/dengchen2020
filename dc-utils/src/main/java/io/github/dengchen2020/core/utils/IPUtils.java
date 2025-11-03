@@ -1,6 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -68,7 +69,7 @@ public abstract class IPUtils {
      * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
      * </p>
      */
-    public static String getRemoteAddr(HttpServletRequest request) {
+    public static String getRemoteAddr(@NonNull HttpServletRequest request) {
         String ip = null;
         try {
             //获取nginx等代理服务器配置的自定义ip请求头的ip
@@ -127,7 +128,7 @@ public abstract class IPUtils {
      * @return 转换后的长整型数字
      * @throws IllegalArgumentException
      */
-    public static long ipv4ToLong(String ip) throws IllegalArgumentException {
+    public static long ipv4ToLong(@NonNull String ip) throws IllegalArgumentException {
         String[] ipParts = ip.split("\\.");
         if (ipParts.length != 4) {
             throw new IllegalArgumentException("输入的 IP 地址格式不正确");
@@ -163,7 +164,7 @@ public abstract class IPUtils {
      * @param ip
      * @return true：是 false：不是
      */
-    public static boolean isIpv4(String ip) {
+    public static boolean isIpv4(@NonNull String ip) {
         return IPV4_PATTERN.matcher(ip).matches();
     }
 
@@ -172,7 +173,7 @@ public abstract class IPUtils {
      * @param ip
      * @return true：是 false：不是
      */
-    public static boolean isIpv6(String ip) {
+    public static boolean isIpv6(@NonNull String ip) {
         return IPV6_PATTERN.matcher(ip).matches();
     }
 

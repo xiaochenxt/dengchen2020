@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.utils.excel;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -14,6 +16,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY
  * @author xiaochen
  * @since 2025/10/30
  */
+@NullMarked
 public class CsvWriter implements AutoCloseable {
     private final OutputStreamWriter writer;
     private final String[] fieldNames; // 字段名顺序
@@ -82,7 +85,7 @@ public class CsvWriter implements AutoCloseable {
         for (int i = 0; i < fieldNames.length; i++) {
             String fieldName = fieldNames[i];
             Object value = data.getOrDefault(fieldName, "");
-            String strValue = value == null ? "" : value.toString();
+            String strValue = value.toString();
 
             if (i > 0) sb.append(',');
             // 数字字段添加\t

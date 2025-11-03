@@ -1,5 +1,8 @@
 package io.github.dengchen2020.core.utils.excel;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -63,6 +66,7 @@ public class CsvReader implements AutoCloseable {
     /**
      * 单行读取（返回“字段名→值”的Map，自动处理\t前缀和特殊字符）
      */
+    @Nullable
     public Map<String, String> readRow() throws IOException {
         if (!hasNext) return null;
 
@@ -106,6 +110,7 @@ public class CsvReader implements AutoCloseable {
     /**
      * 批量读取
      */
+    @NonNull
     public List<Map<String, String>> readBatch(int batchSize) throws IOException {
         List<Map<String, String>> batchList = new ArrayList<>(batchSize);
         for (int i = 0; i < batchSize; i++) {

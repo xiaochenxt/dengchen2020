@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.imageio.IIOImage;
@@ -21,6 +22,7 @@ import java.util.Base64;
  * @author xiaochen
  * @since 2023/6/8
  */
+@NullMarked
 public abstract class ImageUtils {
 
     /**

@@ -1,6 +1,8 @@
 package io.github.dengchen2020.core.utils.digest;
 
 import io.github.dengchen2020.core.utils.StrUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -17,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
  * @author xiaochen
  * @since 2024/12/26
  */
+@NullMarked
 public abstract class DigestUtils {
 
     /**
@@ -125,7 +128,8 @@ public abstract class DigestUtils {
      * @see MessageDigest#getInstance(String)
      * @throws IllegalArgumentException 当捕获 {@link NoSuchAlgorithmException} 时。
      */
-    public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
+    @Nullable
+    public static MessageDigest getDigest(final String algorithm, final @Nullable MessageDigest defaultMessageDigest) {
         try {
             return getMessageDigest(algorithm);
         } catch (final Exception e) {
@@ -1133,7 +1137,7 @@ public abstract class DigestUtils {
      * @return 摘要
      * @throws IOException 从流中读取时出错
      */
-    @SuppressWarnings("resource") // 关闭 RandomAccessFile 将关闭通道。
+    // 关闭 RandomAccessFile 将关闭通道。
     public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
         return updateDigest(digest, data.getChannel());
     }

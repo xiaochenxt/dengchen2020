@@ -5,6 +5,8 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * 二维码工具类
@@ -20,6 +23,7 @@ import java.util.Hashtable;
  * @author xiaochen
  * @since 2023/7/28
  */
+@NullMarked
 public abstract class QrCodeUtils {
 
     private static final int BLACK = 0xFF000000;//用于设置图案的颜色
@@ -90,7 +94,7 @@ public abstract class QrCodeUtils {
      * @param logoInputStream logo输入流
      * @param outputStream    {@link OutputStream}
      */
-    private static void write(BitMatrix matrix, InputStream logoInputStream, OutputStream outputStream) {
+    private static void write(BitMatrix matrix,@Nullable InputStream logoInputStream, OutputStream outputStream) {
         try (logoInputStream; outputStream) {
             ImageIO.write(logoMatrix(matrixToImage(matrix), logoInputStream), "png", outputStream);
         } catch (IOException e) {
@@ -167,7 +171,7 @@ public abstract class QrCodeUtils {
      * @return 返回带有logo的二维码图片
      * @author Administrator sangwenhao
      */
-    private static BufferedImage logoMatrix(BufferedImage matrixImage, InputStream logoInputStream) throws IOException {
+    private static BufferedImage logoMatrix(BufferedImage matrixImage,@Nullable InputStream logoInputStream) throws IOException {
         //读取二维码图片，并构建绘图对象
         Graphics2D g2 = matrixImage.createGraphics();
 
@@ -206,7 +210,7 @@ public abstract class QrCodeUtils {
     public static String decode(InputStream inputStream) {
         try (inputStream) {
             BufferedImage image = ImageIO.read(inputStream);
-            return decode(image);
+            return decode(image, null);
         } catch (IOException e) {
             throw new IllegalArgumentException("二维码输入流读取失败");
         }
@@ -217,7 +221,7 @@ public abstract class QrCodeUtils {
      * @param image 图片
      * @return 二维码内容
      */
-    public static String decode(BufferedImage image) {
+    public static String decode(BufferedImage image,@Nullable Map<DecodeHintType,?> hints) {
         try {
             // 创建二进制位图
             BinaryBitmap bitmap = new BinaryBitmap(
@@ -225,7 +229,7 @@ public abstract class QrCodeUtils {
                         image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth())))
             );
             // 解析二维码
-            Result result = reader.decode(bitmap);
+            Result result = hints == null ? reader.decode(bitmap) : reader.decode(bitmap, hints);
             return result.getText();
         } catch (NotFoundException e) {
             throw new IllegalArgumentException("未识别到有效二维码");
@@ -240,7 +244,7 @@ public abstract class QrCodeUtils {
      * @param reader 读取器，通过查看{@link Reader#reset()} 的实现是否是空实现，如果是空实现，说明没有内部状态，是线程安全的，此时可单例传递
      * @return
      */
-    public static String decode(BufferedImage image, Reader reader) {
+    public static String decode(BufferedImage image, Reader reader,@Nullable Map<DecodeHintType,?> hints) {
         try {
             // 创建二进制位图
             BinaryBitmap bitmap = new BinaryBitmap(
@@ -248,7 +252,7 @@ public abstract class QrCodeUtils {
                             image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth())))
             );
             // 解码
-            Result result = reader.decode(bitmap);
+            Result result = hints == null ? reader.decode(bitmap) : reader.decode(bitmap, hints);
             reader.reset();
             return result.getText();
         } catch (NotFoundException e) {

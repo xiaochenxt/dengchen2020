@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.utils.encrypt;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -29,6 +31,7 @@ import java.util.Base64;
  * @author xiaochen
  * @since 2025/3/12
  */
+@NullMarked
 public abstract class AESUtils {
 
     public static final String ALGORITHM = "AES";

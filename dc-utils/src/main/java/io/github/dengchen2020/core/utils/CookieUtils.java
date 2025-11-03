@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +13,7 @@ import java.util.StringJoiner;
  * @author xiaochen
  * @since 2025/4/21
  */
+@NullMarked
 public abstract class CookieUtils {
 
     /**

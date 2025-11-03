@@ -2,6 +2,7 @@ package io.github.dengchen2020.core.utils;
 
 import com.wf.captcha.*;
 import com.wf.captcha.base.Captcha;
+import org.jspecify.annotations.NullMarked;
 
 import java.awt.*;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/4/15
  */
+@NullMarked
 public abstract class CaptchaUtils {
 
     private static final int width = 200;
