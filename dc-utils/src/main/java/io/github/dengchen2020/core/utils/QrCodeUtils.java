@@ -1,10 +1,9 @@
 package io.github.dengchen2020.core.utils;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
+import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import javax.imageio.ImageIO;
@@ -88,7 +87,7 @@ public abstract class QrCodeUtils {
      * @param outputStream    {@link OutputStream}
      */
     private static void write(BitMatrix matrix, InputStream logoInputStream, OutputStream outputStream) {
-        try (logoInputStream;outputStream) {
+        try (logoInputStream; outputStream) {
             ImageIO.write(logoMatrix(matrixToImage(matrix), logoInputStream), "png", outputStream);
         } catch (IOException e) {
             throw new RuntimeException("生成二维码失败", e);
@@ -193,6 +192,67 @@ public abstract class QrCodeUtils {
         g2.dispose();
         matrixImage.flush();
         return matrixImage;
+    }
+
+    /**
+     * 从输入流中解析二维码内容，完成后会自动关闭输入流
+     * @param inputStream
+     * @return 二维码内容
+     */
+    public static String decode(InputStream inputStream) {
+        try (inputStream) {
+            BufferedImage image = ImageIO.read(inputStream);
+            return decode(image);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("二维码输入流读取失败");
+        }
+    }
+
+    /**
+     * 从图片中解析二维码内容
+     * @param image 图片
+     * @return 二维码内容
+     */
+    public static String decode(BufferedImage image) {
+        try {
+            // 创建二进制位图
+            BinaryBitmap bitmap = new BinaryBitmap(
+                new HybridBinarizer(new RGBLuminanceSource(image.getWidth(), image.getHeight(),
+                        image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth())))
+            );
+            // 创建QR码阅读器
+            QRCodeReader reader = new QRCodeReader();
+            // 解析二维码
+            Result result = reader.decode(bitmap);
+            return result.getText();
+        } catch (NotFoundException e) {
+            throw new IllegalArgumentException("未识别到有效二维码");
+        } catch (ChecksumException | FormatException e) {
+            throw new IllegalArgumentException("二维码码识别失败或已损坏");
+        }
+    }
+
+    /**
+     * 当图片不是二维码，而是其它的条形码格式时，可使用对应的读取器解析出内容
+     * @param image 图片
+     * @param reader 读取器
+     * @return
+     */
+    public static String decode(BufferedImage image, Reader reader) {
+        try {
+            // 创建二进制位图
+            BinaryBitmap bitmap = new BinaryBitmap(
+                    new HybridBinarizer(new RGBLuminanceSource(image.getWidth(), image.getHeight(),
+                            image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth())))
+            );
+            // 解码
+            Result result = reader.decode(bitmap);
+            return result.getText();
+        } catch (NotFoundException e) {
+            throw new IllegalArgumentException("未识别到有效条形码");
+        } catch (ChecksumException | FormatException e) {
+            throw new IllegalArgumentException("条形码识别失败或已损坏");
+        }
     }
 
 }
