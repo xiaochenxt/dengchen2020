@@ -8,6 +8,7 @@ import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.ssl.SSLContexts;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -32,6 +33,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/5/14
  */
+@NullMarked
 public abstract class RestClientUtils {
 
     /**

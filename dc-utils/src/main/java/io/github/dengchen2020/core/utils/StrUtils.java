@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.util.StringUtils;
 
@@ -21,7 +22,7 @@ public abstract class StrUtils extends StringUtils {
      * @param args 参数
      * @return 格式化后的字符串
      */
-    public static String format(String strPattern,Object... args){
+    public static String format(@NonNull String strPattern,Object... args){
         return MessageFormatter.arrayFormat(strPattern,args).getMessage();
     }
 
@@ -101,7 +102,7 @@ public abstract class StrUtils extends StringUtils {
      * @param targetByteLength 目标字节数
      * @return 缩短字节后的字符串
      */
-    public static String shortenString(String str, int targetByteLength) {
+    public static String shortenString(@NonNull String str, int targetByteLength) {
         try {
             byte[] bytes = str.getBytes();
             int originalByteLength = bytes.length;
@@ -127,7 +128,7 @@ public abstract class StrUtils extends StringUtils {
      * @param name 原字段名
      * @return 新字段名
      */
-    public static String convertToSnakeCase(String name) {
+    public static String convertToSnakeCase(@NonNull String name) {
         StringBuilder result = new StringBuilder();
         for (int i = 0,len = name.length(); i < len; i++) {
             char c = name.charAt(i);
@@ -159,7 +160,7 @@ public abstract class StrUtils extends StringUtils {
      * @param cs  要检查的 CharSequence，可能为 null
      * @return {@code true} 如果仅包含数字，并且为非空值
      */
-    public static boolean isNumeric(final CharSequence cs) {
+    public static boolean isNumeric(final @NonNull CharSequence cs) {
         if (!hasText(cs)) return false;
         final int sz = cs.length();
         for (int i = 0; i < sz; i++) {
@@ -172,7 +173,7 @@ public abstract class StrUtils extends StringUtils {
      * 将map转化为query参数，例如{@code a=1&b=2&c=3}
      * @param params map
      */
-    public static String toQuery(Map<String, ?> params) {
+    public static String toQuery(@NonNull Map<String, ?> params) {
         StringBuilder query = new StringBuilder();
         for (Iterator<? extends Map.Entry<String, ?>> iterator = params.entrySet().iterator(); iterator.hasNext(); ) {
             Map.Entry<String, ?> entry = iterator.next();
@@ -199,7 +200,7 @@ public abstract class StrUtils extends StringUtils {
      * @param i 索引
      * @return 值
      */
-    public static String getValue(String[] arr, int i) {
+    public static String getValue(String @NonNull[] arr, int i) {
         if (arr.length >= i + 1) return arr[i];
         return "";
     }

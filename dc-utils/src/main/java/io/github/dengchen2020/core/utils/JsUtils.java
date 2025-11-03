@@ -3,6 +3,7 @@ package io.github.dengchen2020.core.utils;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
+import org.jspecify.annotations.NonNull;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -51,7 +52,7 @@ public abstract class JsUtils {
     /**
      * 执行JS表达式
      */
-    public static Object eval(String expr) {
+    public static Object eval(@NonNull String expr) {
         try {
             return engineLocal.get().eval(expr);
         } catch (ScriptException e) {
@@ -62,7 +63,7 @@ public abstract class JsUtils {
     /**
      * 执行带变量的JS代码
      */
-    public static Object eval(String script, Map<String, Object> vars) {
+    public static Object eval(@NonNull String script, Map<String, Object> vars) {
         ScriptEngine engine = engineLocal.get();
         Bindings bindings = engine.createBindings();
         if (vars != null) bindings.putAll(vars);
@@ -76,7 +77,7 @@ public abstract class JsUtils {
     /**
      * 调用JS函数
      */
-    public static Object call(String funcScript, String funcName, Object... params) {
+    public static Object call(@NonNull String funcScript,@NonNull String funcName, Object... params) {
         ScriptEngine engine = engineLocal.get();
         try {
             engine.eval(funcScript);

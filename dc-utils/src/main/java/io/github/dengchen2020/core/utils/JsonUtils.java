@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -274,7 +275,7 @@ public abstract class JsonUtils {
      * @param arrayNode ArrayNode
      * @return Stream<JsonNode>
      */
-    public static Stream<JsonNode> toStream(ArrayNode arrayNode){
+    public static Stream<JsonNode> toStream(@NonNull ArrayNode arrayNode){
         return StreamSupport.stream(arrayNode.spliterator(),false);
     }
 
