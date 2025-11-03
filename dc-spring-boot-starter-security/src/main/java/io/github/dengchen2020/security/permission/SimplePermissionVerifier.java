@@ -20,7 +20,7 @@ public class SimplePermissionVerifier implements PermissionVerifier {
      * @return true：有权限，false：无权限
      */
     @Override
-    public boolean hasPermission(Authentication authentication, String... permissions) {
+    public boolean hasPermission(Authentication authentication, String[] permissions) {
         if (authentication.permissions() == null) return true;
         if (authentication.permissions().isEmpty()) return false;
         Set<String> permissionSet = Set.of(permissions);

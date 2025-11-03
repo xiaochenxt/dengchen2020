@@ -20,6 +20,10 @@ public class ViewToastException extends BaseException {
         super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE);
     }
 
+    public ViewToastException(Throwable cause, String message) {
+        super(message, CODE, cause);
+    }
+
     public ViewToastException(Throwable cause, String message, Object... args) {
         super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE, cause);
     }

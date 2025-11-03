@@ -45,6 +45,11 @@ public class CallException extends BaseException {
         this.alarm = true;
     }
 
+    public CallException(Throwable cause, String message) {
+        super(message, CODE, cause);
+        this.alarm = false;
+    }
+
     public CallException(Throwable cause, String message, Object... args) {
         super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE, cause);
         this.alarm = false;

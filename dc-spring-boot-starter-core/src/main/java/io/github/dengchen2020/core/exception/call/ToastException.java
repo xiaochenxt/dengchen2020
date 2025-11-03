@@ -18,6 +18,10 @@ public class ToastException extends BaseException {
         super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE);
     }
 
+    public ToastException(Throwable cause, String message) {
+        super(message, CODE, cause);
+    }
+
     public ToastException(Throwable cause, String message, Object... args) {
         super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE, cause);
     }

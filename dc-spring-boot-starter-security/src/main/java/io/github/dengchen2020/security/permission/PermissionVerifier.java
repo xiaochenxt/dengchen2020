@@ -14,6 +14,6 @@ public interface PermissionVerifier {
      * @param authentication 认证信息对象
      * @return true：有权限，false：没权限
      */
-    boolean hasPermission(Authentication authentication, String... permissions);
+    boolean hasPermission(Authentication authentication, String[] permissions);
 
 }
