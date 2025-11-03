@@ -23,6 +23,8 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleTokenServiceImpl.class);
 
+    private static final String SEPARATOR = "-";
+
     private final AuthenticationConvert authenticationConvert;
 
     private final StringRedisTemplate stringRedisTemplate;
@@ -162,7 +164,7 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
      * @return Token信息
      */
     public TokenInfo createToken(Authentication authentication, long expireSeconds) {
-        String token = authentication.getName() + "-" + UUID.randomUUID().toString().replace("-", "");
+        String token = authentication.getName() + SEPARATOR + UUID.randomUUID().toString().replace("-", "");
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
         stringRedisTemplate.execute(onlineScript, Collections.emptyList(), token, authentication.getName(), payload, String.valueOf(expireSeconds));
@@ -206,7 +208,7 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
 
     public String getName(String token) {
         if (token == null) return "";
-        return token.split("-")[0];
+        return token.split(SEPARATOR)[0];
     }
 
 }
