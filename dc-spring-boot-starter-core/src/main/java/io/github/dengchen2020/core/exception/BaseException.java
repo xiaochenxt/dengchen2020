@@ -8,14 +8,10 @@ package io.github.dengchen2020.core.exception;
  */
 public abstract class BaseException extends RuntimeException {
 
-    private int code;
+    private final int code;
 
     public int getCode() {
         return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
     }
 
     public BaseException(String message, int code) {
