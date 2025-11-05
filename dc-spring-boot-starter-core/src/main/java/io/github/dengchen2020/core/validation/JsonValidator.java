@@ -1,7 +1,7 @@
 package io.github.dengchen2020.core.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -12,7 +12,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class JsonValidator implements ConstraintValidator<Json, String> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final JsonMapper JSON = new JsonMapper();
 
     private int maxLength = 0;
 
@@ -31,7 +31,7 @@ public class JsonValidator implements ConstraintValidator<Json, String> {
             return false;
         }
         try {
-            objectMapper.readTree(value);
+            JSON.readTree(value);
             return true;
         } catch (JsonProcessingException e) {
             return false;

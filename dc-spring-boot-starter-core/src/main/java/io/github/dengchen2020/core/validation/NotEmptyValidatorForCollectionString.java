@@ -17,7 +17,7 @@ public class NotEmptyValidatorForCollectionString implements ConstraintValidator
     @Override
     public boolean isValid(Collection<String> value, ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) return false;
-        for (CharSequence s : value) {
+        for (String s : value) {
             if (!StringUtils.hasText(s)) return false;
         }
         return true;

@@ -11,7 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 定时任务多台服务器并发处理
@@ -62,7 +62,7 @@ public class ScheduledConcurrencyAop {
             return joinPoint.proceed();
         }
         //阻止指定时间内的重复执行
-        if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, localIpInfo, Duration.ofSeconds(seconds)))) {
+        if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, localIpInfo, seconds, TimeUnit.SECONDS))) {
             return joinPoint.proceed();
         }
         return null;
