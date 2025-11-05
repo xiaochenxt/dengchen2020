@@ -1,6 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
@@ -27,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * RestClient工具类
@@ -102,7 +104,7 @@ public abstract class RestClientUtils {
 
     public static RestClient.Builder builder(ClientHttpRequestFactory factory) {
         return RestClient.builder()
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE)
                 .requestFactory(factory)
                 .messageConverters(RestClientUtils::moveXmlConverterToLast);
     }
@@ -119,6 +121,7 @@ public abstract class RestClientUtils {
                 stringHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
                 continue;
             }
+            // todo spring7.0开始，重新进行了排序，json在xml之前，因此从springboot4.0开始，不再需要排序
             if (httpMessageConverter instanceof MappingJackson2XmlHttpMessageConverter) {
                 iterator.remove();
                 converters.addLast(httpMessageConverter);
@@ -148,6 +151,9 @@ public abstract class RestClientUtils {
         HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                 .setMaxConnPerRoute(maxConnPerRoute <= 0 ? DEFAULT_MAX_CONN_PER_ROUTE : maxConnPerRoute)
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
+                        .build())
                 .build();
         return HttpClientBuilder.create().setConnectionManager(manager);
     }
@@ -155,7 +161,6 @@ public abstract class RestClientUtils {
     private static HttpComponentsClientHttpRequestFactory createFactory(HttpClient httpClient) {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
         factory.setReadTimeout(DEFAULT_READ_TIMEOUT);
-        factory.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
         return factory;
     }
 
