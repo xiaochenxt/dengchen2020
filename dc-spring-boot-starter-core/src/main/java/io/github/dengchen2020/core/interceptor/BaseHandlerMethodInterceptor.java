@@ -4,11 +4,8 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.io.IOException;
 
 /**
  * 控制器的拦截器基类
@@ -19,8 +16,8 @@ import java.io.IOException;
 public class BaseHandlerMethodInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        if(!(handler instanceof HandlerMethod handlerMethod) || handlerMethod.getBean() instanceof AbstractErrorController || DispatcherType.ASYNC == request.getDispatcherType()) return true;
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if(!(handler instanceof HandlerMethod handlerMethod) || DispatcherType.ERROR == request.getDispatcherType() || DispatcherType.ASYNC == request.getDispatcherType()) return true;
         return preHandle(request, response, handlerMethod);
     }
 

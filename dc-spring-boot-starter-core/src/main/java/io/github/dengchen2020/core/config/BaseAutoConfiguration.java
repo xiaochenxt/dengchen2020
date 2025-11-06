@@ -2,6 +2,7 @@ package io.github.dengchen2020.core.config;
 
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 基础自动配置
@@ -78,11 +80,13 @@ public final class BaseAutoConfiguration implements InitializingBean {
             HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                     .setMaxConnPerRoute(200)
+                    .setDefaultConnectionConfig(ConnectionConfig.custom()
+                            .setConnectTimeout(30, TimeUnit.SECONDS)
+                            .build())
                     .build();
             HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(manager).build();
             HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
             factory.setReadTimeout(Duration.ofSeconds(10));
-            factory.setConnectTimeout(Duration.ofSeconds(30));
             return factory;
         }
 

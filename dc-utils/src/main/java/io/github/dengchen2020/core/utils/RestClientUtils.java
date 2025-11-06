@@ -152,7 +152,7 @@ public abstract class RestClientUtils {
                 .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                 .setMaxConnPerRoute(maxConnPerRoute <= 0 ? DEFAULT_MAX_CONN_PER_ROUTE : maxConnPerRoute)
                 .setDefaultConnectionConfig(ConnectionConfig.custom()
-                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
+                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toSeconds(), TimeUnit.SECONDS)
                         .build())
                 .build();
         return HttpClientBuilder.create().setConnectionManager(manager);
