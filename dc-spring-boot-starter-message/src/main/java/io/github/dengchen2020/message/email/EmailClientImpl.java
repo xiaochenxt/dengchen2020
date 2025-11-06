@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -94,17 +93,17 @@ public class EmailClientImpl implements EmailClient {
     }
 
     @Override
-    public void sendMime(String subject, String html, @Nullable DataSource... attachments) {
+    public void sendMime(String subject, String html, DataSource @Nullable... attachments) {
         sendMime(subject, html, attachments, null, to);
     }
 
     @Override
-    public void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource... inlines) {
+    public void sendMime(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable... inlines) {
         sendMime(subject, html, attachments, inlines, to);
     }
 
     @Override
-    public void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource[] inlines, @NonNull String... to) {
+    public void sendMime(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable[] inlines, String... to) {
         if (to.length == 0) {
             log.error("未指定收件人邮箱，mime邮件无法发送");
             return;
@@ -112,7 +111,7 @@ public class EmailClientImpl implements EmailClient {
         executor.execute(() -> sendMimeSync(subject, html, attachments, inlines, to));
     }
 
-    public boolean sendMimeSync(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource[] inlines, @NonNull String... to) {
+    public boolean sendMimeSync(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable[] inlines, String... to) {
         try {
             MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
             if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {

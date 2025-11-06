@@ -2,7 +2,7 @@ package io.github.dengchen2020.message.email;
 
 import jakarta.activation.DataSource;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 邮件发送接口
@@ -50,7 +50,7 @@ public interface EmailClient {
      * @param html html内容
      * @param attachments 附件
      */
-    void sendMime(String subject, String html, @Nullable DataSource... attachments);
+    void sendMime(String subject, String html, DataSource @Nullable... attachments);
 
     /**
      * 发送mime邮件
@@ -59,7 +59,7 @@ public interface EmailClient {
      * @param attachments 附件
      * @param to 收件人邮箱
      */
-    default void sendMime(String subject, String html, @Nullable DataSource[] attachments, String... to){
+    default void sendMime(String subject, String html, DataSource @Nullable[] attachments, String... to){
         sendMime(subject,html,attachments,null,to);
     }
 
@@ -70,7 +70,7 @@ public interface EmailClient {
      * @param attachments 附件
      * @param inlines 内联元素文件，一般不用这个也不推荐使用，html中使用src等方式引入即可
      */
-    void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource... inlines);
+    void sendMime(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable... inlines);
 
     /**
      * 发送mime邮件
@@ -80,6 +80,6 @@ public interface EmailClient {
      * @param inlines 内联元素文件，一般不用这个也不推荐使用，html中使用src等方式引入即可
      * @param to 收件人邮箱
      */
-    void sendMime(String subject, String html, @Nullable DataSource[] attachments, @Nullable DataSource[] inlines, String... to);
+    void sendMime(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable[] inlines, String... to);
 
 }

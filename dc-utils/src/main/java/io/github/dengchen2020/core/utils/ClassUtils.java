@@ -1,7 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;

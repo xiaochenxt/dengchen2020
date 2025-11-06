@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
