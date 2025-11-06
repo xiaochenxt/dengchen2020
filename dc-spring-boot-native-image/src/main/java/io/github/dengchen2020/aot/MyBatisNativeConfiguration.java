@@ -255,11 +255,11 @@ public final class MyBatisNativeConfiguration {
 
         private static Class<?> typeToClass(Type src, Class<?> fallback) {
             Class<?> result = null;
-            if (src instanceof Class<?>) {
-                if (((Class<?>) src).isArray()) {
-                    result = ((Class<?>) src).getComponentType();
+            if (src instanceof Class<?> cls) {
+                if (cls.isArray()) {
+                    result = cls.getComponentType();
                 } else {
-                    result = (Class<?>) src;
+                    result = cls;
                 }
             } else if (src instanceof ParameterizedType parameterizedType) {
                 int index = (parameterizedType.getRawType() instanceof Class

@@ -16,7 +16,7 @@ public abstract class IterableUtils {
      */
     public static <T> List<T> toList(Iterable<T> iterable) {
         if (iterable == null) return Collections.emptyList();
-        if (iterable instanceof List) return (List<T>) iterable;
+        if (iterable instanceof List<T> list) return list;
         return newList(iterable);
     }
 
@@ -27,7 +27,7 @@ public abstract class IterableUtils {
      */
     public static <T> Collection<T> toCollection(Iterable<T> iterable) {
         if (iterable == null) return Collections.emptyList();
-        if (iterable instanceof Collection<T>) return (Collection<T>) iterable;
+        if (iterable instanceof Collection<T> collection) return collection;
         return newList(iterable);
     }
 
