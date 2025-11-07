@@ -3,6 +3,8 @@ package io.github.dengchen2020.ip.service.impl.xdb;
 import io.github.dengchen2020.core.utils.IPUtils;
 import io.github.dengchen2020.ip.model.IpInfo;
 import io.github.dengchen2020.ip.service.IpService;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.lionsoul.ip2region.xdb.Version;
 import org.lionsoul.ip2region.xdb.XdbException;
@@ -23,19 +25,20 @@ import static io.github.dengchen2020.core.utils.StrUtils.getValue;
  * @author xiaochen
  * @since 2023/5/6
  */
+@NullMarked
 public class IpXdbServiceImpl implements IpService, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(IpXdbServiceImpl.class);
 
     private Searcher searcherIpv4;
 
-    private Searcher searcherIpv6;
+    @Nullable private Searcher searcherIpv6;
 
-    public IpXdbServiceImpl(String ipv4DataPath, String ipv6DataPath, boolean verify) {
+    public IpXdbServiceImpl(String ipv4DataPath,@Nullable String ipv6DataPath, boolean verify) {
         loadData(ipv4DataPath, ipv6DataPath, verify);
     }
 
-    public synchronized void loadData(String ipv4DataPath, String ipv6DataPath, boolean verify) {
+    public synchronized void loadData(String ipv4DataPath,@Nullable String ipv6DataPath, boolean verify) {
         File ipv4File = new File(ipv4DataPath);
         if (ipv4File.isFile() && ipv4File.exists()) {
             try {
@@ -48,14 +51,14 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
                     try {
                         oldSearcherIpv4.close();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        log.error("关闭旧的ipv4查询对象失败：", e);
                     }
                 }
             } catch (IOException | XdbException e) {
-                throw new RuntimeException("ipv4数据包加载失败", e);
+                throw new IllegalArgumentException("ipv4数据包加载失败", e);
             }
         } else {
-            throw new RuntimeException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
+            throw new IllegalArgumentException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
         }
         if (ipv6DataPath == null) return;
         File ipv6File = new File(ipv6DataPath);
@@ -70,11 +73,11 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
                     try {
                         oldSearcherIpv6.close();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        log.error("关闭旧的ipv6查询对象失败：", e);
                     }
                 }
             } catch (IOException | XdbException e) {
-                throw new RuntimeException("ipv6数据包加载失败", e);
+                throw new IllegalArgumentException("ipv6数据包加载失败", e);
             }
         } else {
             if (log.isDebugEnabled()) log.debug("未找到ipv6数据包，如需查询ipv6信息，请将其放置在{}，如不需要可忽略", ipv6File.getAbsolutePath());
@@ -93,10 +96,6 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
                 }
                 ipInfo = searcherIpv6.search(ip).split("\\|");
             } else {
-                if (searcherIpv4 == null) {
-                    log.error("未加载ipv4数据包，无法查询ipv4信息");
-                    return defaultInfo(ip);
-                }
                 ipInfo = searcherIpv4.search(ip).split("\\|");
             }
             if (ipInfo.length > 0) {
@@ -116,10 +115,6 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
     @Override
     public IpInfo getInfoForIpv4(String ip) {
         if (!StringUtils.hasText(ip)) return defaultInfo(ip);
-        if (searcherIpv4 == null) {
-            log.error("未加载ipv4数据包，无法查询ipv4信息");
-            return defaultInfo(ip);
-        }
         try {
             String[] ipInfo = searcherIpv4.search(ip).split("\\|");
             if (ipInfo.length > 0) {
@@ -161,12 +156,10 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
 
     @Override
     public void destroy() {
-        if (searcherIpv4 != null) {
-            try {
-                searcherIpv4.close();
-            } catch (IOException e) {
-                log.error("关闭ipv4查询对象失败：", e);
-            }
+        try {
+            searcherIpv4.close();
+        } catch (IOException e) {
+            log.error("关闭ipv4查询对象失败：", e);
         }
         if (searcherIpv6 != null) {
             try {

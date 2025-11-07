@@ -2,6 +2,7 @@ package io.github.dengchen2020.ip.service.impl.dat;
 
 import io.github.dengchen2020.ip.model.IpInfo;
 import io.github.dengchen2020.ip.service.IpService;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,7 @@ import static io.github.dengchen2020.core.utils.StrUtils.getValue;
  * @author xiaochen
  * @since 2023/5/5
  */
+@NullMarked
 public class IpDatServiceImpl implements IpService {
 
     private static final Logger log = LoggerFactory.getLogger(IpDatServiceImpl.class);
@@ -36,19 +38,19 @@ public class IpDatServiceImpl implements IpService {
                 ipLocation = new IPLocation(Files.readAllBytes(ipv4File.toPath()));
                 log.info("ipv4数据包加载完成，占用{}MB", DataSize.ofBytes(ipv4File.length()).toMegabytes());
             } catch (Exception e) {
-                throw new RuntimeException("ipv4数据包加载失败", e);
+                throw new IllegalArgumentException("ipv4数据包加载失败", e);
             }
             return;
         }
         try (InputStream inputStream = getClass().getResourceAsStream("/ip.dat")) {
             if (inputStream == null) {
-                throw new RuntimeException("未找到ipv4数据包，请将ipv4数据包ip.dat放置在resources目录下或" + ipv4File.getAbsolutePath());
+                throw new IllegalArgumentException("未找到ipv4数据包，请将ipv4数据包ip.dat放置在resources目录下或" + ipv4File.getAbsolutePath());
             }
             byte[] data = inputStream.readAllBytes();
             ipLocation = new IPLocation(data);
             log.info("ipv4数据包加载完成，占用{}MB", DataSize.ofBytes(data.length).toMegabytes());
         } catch (Exception e) {
-            throw new RuntimeException("ipv4数据包加载失败", e);
+            throw new IllegalArgumentException("ipv4数据包加载失败", e);
         }
     }
 
