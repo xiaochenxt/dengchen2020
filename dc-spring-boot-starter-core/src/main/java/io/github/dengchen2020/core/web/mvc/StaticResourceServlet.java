@@ -138,7 +138,7 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         if (uri.isBlank() || uri.equals("/")) {
             uri = indexPath;
         } else {
-            if (notFoundHtmlEnabled && notFoundPath.equals(uri)) {
+            if (notFoundHtmlEnabled && notFoundPath.equals(uri)) { // 启用自定义404页面时不能直接访问404.html，因为直接访问404.html（提供直接访问的能力意义不大）后再访问导致404的页面后会导致缓存期间的http状态码为200（正确状态应为404）
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
