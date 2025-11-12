@@ -25,6 +25,11 @@
       "description": "是否启用静态资源处理的servlet.",
       "defaultValue": true
     },{
+      "name": "dc.static.servlet.support-history",
+      "type": "java.lang.Boolean",
+      "description": "静态资源处理是否支持history模式，原理是在404时将请求转发到首页.",
+      "defaultValue": false
+    },{
       "name": "dc.frequency-control.enabled",
       "type": "java.lang.Boolean",
       "description": "是否启用请求频控.",

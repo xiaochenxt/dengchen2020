@@ -28,9 +28,9 @@ public abstract class DateTimeUtils {
 
     public static final String DEFAULT_TIME_PATTERN = "HH:mm:ss";
 
-    public static final String[] DATETIME_PARSE_PATTERN = {"yyyy-MM-dd'T'HH:mm:ss.SSS+08:00", "yyyy-MM-dd'T'HH:mm:ss+08:00", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss"};
+    public static final String[] DATETIME_PARSE_PATTERN = {"yyyy-MM-dd'T'HH:mm:ssX", "yyyy-MM-dd'T'HH:mm:ssXXX", "yyyy-MM-dd HH:mm:ss.SSS","yyyy-MM-dd'T'HH:mm:ss.SSSXXX", "yyyy-MM-dd'T'HH:mm:ss.SSSX"};
 
-    public static final String[] DATETIME_PARSE_PATTERN_19 = {DEFAULT_DATETIME_PATTERN, "yyyy/MM/dd HH:mm:ss"};
+    public static final String[] DATETIME_PARSE_PATTERN_19 = {DEFAULT_DATETIME_PATTERN, "yyyy-MM-dd'T'HH:mm:ss", "yyyy/MM/dd HH:mm:ss"};
 
     public static final String[] DATETIME_PARSE_PATTERN_16 = {"yyyy-MM-dd HH:mm"};
 
@@ -366,7 +366,7 @@ public abstract class DateTimeUtils {
      * @return {@link String}
      */
     public static String format(ZonedDateTime zonedDateTime) {
-        return dateTimeFormatterCache.computeIfAbsent(DEFAULT_DATETIME_PATTERN, DateTimeFormatter::ofPattern).format(zonedDateTime);
+        return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     /**
@@ -461,6 +461,13 @@ public abstract class DateTimeUtils {
      * @return {@link LocalDateTime}
      */
     public static LocalDateTime parseDateTime(String dateStr,@Nullable String... pattern) {
+        if (dateStr.length() == 20) {
+            try {
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr);
+                // 转换为系统默认时区的LocalDateTime
+                return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+            } catch (Exception ignored) {}
+        }
         if (pattern.length == 0) {
             int len = dateStr.length();
             switch (len) {

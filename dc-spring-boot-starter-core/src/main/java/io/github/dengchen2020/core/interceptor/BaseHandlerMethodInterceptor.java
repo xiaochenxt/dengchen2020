@@ -4,6 +4,7 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -15,9 +16,20 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @NullMarked
 public class BaseHandlerMethodInterceptor implements HandlerInterceptor {
 
+    /**
+     * <p>跳过{@link DispatcherType#ERROR}请求是因为当没有配置对应的异常处理时会两次进入拦截器，
+     * 第二次会执行到{@link BasicErrorController#errorHtml(HttpServletRequest, HttpServletResponse)}，该错误页面不需要拦截处理</p>
+     * <p>跳过{@link DispatcherType#ASYNC}请求是因为异步请求会两次进入拦截器，不需要重复拦截处理</p>
+     * @param request 当前 HTTP 请求
+     * @param response 当前 HTTP 响应
+     * @param handler 选择要执行的处理程序，用于类型和/或实例评估
+     * @return
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if(!(handler instanceof HandlerMethod handlerMethod) || DispatcherType.ERROR == request.getDispatcherType() || DispatcherType.ASYNC == request.getDispatcherType()) return true;
+        if(!(handler instanceof HandlerMethod handlerMethod)
+                || DispatcherType.ERROR == request.getDispatcherType()
+                || DispatcherType.ASYNC == request.getDispatcherType()) return true;
         return preHandle(request, response, handlerMethod);
     }
 

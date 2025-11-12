@@ -6,13 +6,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.jspecify.annotations.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -34,6 +35,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 
 /**
  * 为静态资源提供访问缓存（为避免内存占用过多，超过一定大小的资源不会缓存）
+ *
  * @author xiaochen
  * @since 2025/8/1
  */
@@ -43,22 +45,26 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     private final ResourceUrlProvider resourceUrlProvider;
 
     public StaticResourceServlet(Environment environment, ResourceUrlProvider resourceUrlProvider) {
-        this.staticPathPattern  = environment.getProperty("spring.mvc.static-path-pattern","/**");
+        this.staticPathPattern = environment.getProperty("spring.mvc.static-path-pattern", "/**");
         this.forwardStaticPathPattern = staticPathPattern.replace("/**", "/");
         this.resourceUrlProvider = resourceUrlProvider;
+        this.supportHistory = environment.getProperty("dc.static.servlet.support-history", boolean.class, false);
     }
 
     private static final MethodHandle getResourceMethod;
     private ResourceHttpRequestHandler handler;
     private final String staticPathPattern;
     private final String forwardStaticPathPattern;
+    private final boolean supportHistory;
 
     private final Map<String, CacheEntry> cache = new ConcurrentReferenceHashMap<>();
     private static final int CACHE_EXPIRE_SECONDS = 5;
     private static final int MAX_CACHE_ENTRIES = 2048;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("static-resource-cache-cleaner").factory());
+    public static final String indexPath = "/index.html";
 
-    public record ResourceInfo(int status, String contentType, byte[] data, long lastModified, String cacheControl) {}
+    public record ResourceInfo(int status, String contentType, byte[] data, long lastModified, String cacheControl) {
+    }
 
     private record CacheEntry(ResourceInfo resourceInfo, long expireTime) {
         boolean isExpired(long now) {
@@ -89,10 +95,11 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     /**
      * <p>{@code handlerMap}是在{@code ContextRefreshedEvent}事件中初始化</p>
      * 详见：{@link ResourceUrlProvider#detectResourceHandlers(ApplicationContext)}
+     *
      * @param event
      */
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         handler = resourceUrlProvider.getHandlerMap().get(staticPathPattern);
     }
 
@@ -117,41 +124,64 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
-        if (uri.isBlank() || uri.equals("/")) uri = "/index.html";
-        CacheEntry entry = cache.get(uri);
-        if (entry != null) {
-            ResourceInfo info = entry.resourceInfo;
-            if (req.getHeader(HttpHeaders.RANGE) == null || info.status == HttpServletResponse.SC_NOT_FOUND) {
-                handleCachedResource(info, req, resp);
-                return;
-            }
-        }
+        if (uri.isBlank() || uri.equals("/")) uri = indexPath;
+        if (useCacheIfPresent(req, resp, uri) != null) return;
         req.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
-        req.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, resourceUrlProvider.getPathMatcher().extractPathWithinPattern(staticPathPattern, forwardStaticPathPattern+uri));
+        handleRequest(req, resp, uri);
+    }
+
+    private void handleRequest(HttpServletRequest req, HttpServletResponse resp, String uri) throws ServletException, IOException {
+        req.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, resourceUrlProvider.getPathMatcher().extractPathWithinPattern(staticPathPattern, forwardStaticPathPattern + uri));
         try {
             handler.handleRequest(req, resp);
         } catch (NoResourceFoundException e) {
-            ResourceInfo info = new ResourceInfo(
-                    HttpServletResponse.SC_NOT_FOUND,
-                    resp.getContentType(),
-                    EMPTY_BYTE_ARRAY,
-                    -1,
-                    null
-            );
-            long expireTime = System.currentTimeMillis() + (CACHE_EXPIRE_SECONDS * 1000);
-            cache.put(uri, new CacheEntry(info, expireTime));
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            if (supportHistory && !uri.equals(indexPath)) {
+                var entry = useCacheIfPresent(req, resp, indexPath);
+                cache.put(uri, entry);
+                if (entry != null) return;
+                handleRequest(req, resp, indexPath);
+            } else {
+                handleNotFound(resp, uri);
+                return;
+            }
         }
         Resource resource = null;
         try {
             resource = (Resource) getResourceMethod.invokeExact(handler, req);
             processAndCacheResource(uri, req, resp, resource);
         } catch (Throwable e) {
-            throw new ServletException("资源缓存失败", e);
+            throw new ServletException(uri + "资源缓存失败", e);
         } finally {
             if (resource != null) resource.getInputStream().close();
         }
+    }
+
+    /**
+     * 如果存在缓存就使用它并返回，否则返回null
+     */
+    private CacheEntry useCacheIfPresent(HttpServletRequest req, HttpServletResponse resp, String uri) throws IOException {
+        CacheEntry entry = cache.get(uri);
+        if (entry != null) {
+            ResourceInfo info = entry.resourceInfo;
+            if (req.getHeader(HttpHeaders.RANGE) == null || info.status == HttpServletResponse.SC_NOT_FOUND) {
+                handleCachedResource(info, req, resp);
+                return entry;
+            }
+        }
+        return entry;
+    }
+
+    private void handleNotFound(HttpServletResponse resp, String uri) {
+        ResourceInfo info = new ResourceInfo(
+                HttpServletResponse.SC_NOT_FOUND,
+                resp.getContentType(),
+                EMPTY_BYTE_ARRAY,
+                -1,
+                null
+        );
+        long expireTime = System.currentTimeMillis() + (CACHE_EXPIRE_SECONDS * 1000);
+        cache.put(uri, new CacheEntry(info, expireTime));
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
 
     private void handleCachedResource(ResourceInfo info, HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -210,13 +240,14 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     }
 
     @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {}
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
+    }
 
     protected int maxCacheContentLength() {
         return 1024 * 1024;
     }
 
-    private static final String[] DATE_FORMATS = new String[] {
+    private static final String[] DATE_FORMATS = new String[]{
             "EEE, dd MMM yyyy HH:mm:ss zzz",
             "EEE, dd-MMM-yy HH:mm:ss zzz",
             "EEE MMM dd HH:mm:ss yyyy"
