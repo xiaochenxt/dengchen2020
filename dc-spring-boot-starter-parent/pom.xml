@@ -64,7 +64,7 @@
         <protostuff.version>1.8.0</protostuff.version>
         <spring-ai.version>1.0.3</spring-ai.version>
         <graalvm.version>25.0.1</graalvm.version>
-        <zxing.version>3.5.3</zxing.version>
+        <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
         <libphonenumber.version>9.0.18</libphonenumber.version>
         <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
