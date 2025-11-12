@@ -51,7 +51,11 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         this.forwardStaticPathPattern = staticPathPattern.replace("/**", "");
         this.resourceUrlProvider = resourceUrlProvider;
         this.supportHistory = environment.getProperty("dc.static.servlet.support-history", boolean.class, false);
-        this.notFoundHtmlEnabled = environment.getProperty("dc.static.servlet.404-html.enabled", boolean.class, false);
+        if (this.supportHistory) {
+            this.notFoundHtmlEnabled = false;
+        } else {
+            this.notFoundHtmlEnabled = environment.getProperty("dc.static.servlet.404-html.enabled", boolean.class, false);
+        }
         this.fullNotFoundPath = forwardStaticPathPattern + notFoundPath;
     }
 
@@ -131,7 +135,14 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
-        if (uri.isBlank() || uri.equals("/")) uri = indexPath;
+        if (uri.isBlank() || uri.equals("/")) {
+            uri = indexPath;
+        } else {
+            if (notFoundHtmlEnabled && notFoundPath.equals(uri)) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        }
         if (useCacheIfPresent(req, resp, uri) != null) return;
         req.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
         handleRequest(req, resp, uri);
