@@ -216,7 +216,6 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     }
 
     private void handleCachedResource(ResourceInfo info, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType(info.contentType);
         if (info.status == HttpServletResponse.SC_NOT_FOUND) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             if (notFoundHtmlEnabled && info.data.length > 0) {
@@ -225,6 +224,7 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
             }
             return;
         }
+        resp.setContentType(info.contentType);
         long lastModified = parseDateHeader(req);
         if (lastModified != -1 && lastModified >= info.lastModified) {
             resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
