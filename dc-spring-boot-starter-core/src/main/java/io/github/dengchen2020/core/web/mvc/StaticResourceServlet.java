@@ -14,6 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -46,9 +47,12 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
 
     public StaticResourceServlet(Environment environment, ResourceUrlProvider resourceUrlProvider) {
         this.staticPathPattern = environment.getProperty("spring.mvc.static-path-pattern", "/**");
-        this.forwardStaticPathPattern = staticPathPattern.replace("/**", "/");
+        if ("/**".equals(this.staticPathPattern)) throw new IllegalArgumentException("spring.mvc.static-path-pattern不允许为/**，请使用/${自定义前缀}/**");
+        this.forwardStaticPathPattern = staticPathPattern.replace("/**", "");
         this.resourceUrlProvider = resourceUrlProvider;
         this.supportHistory = environment.getProperty("dc.static.servlet.support-history", boolean.class, false);
+        this.notFoundHtmlEnabled = environment.getProperty("dc.static.servlet.404-html.enabled", boolean.class, false);
+        this.fullNotFoundPath = forwardStaticPathPattern + notFoundPath;
     }
 
     private static final MethodHandle getResourceMethod;
@@ -56,12 +60,15 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     private final String staticPathPattern;
     private final String forwardStaticPathPattern;
     private final boolean supportHistory;
+    private final boolean notFoundHtmlEnabled;
+    private final String fullNotFoundPath;
 
     private final Map<String, CacheEntry> cache = new ConcurrentReferenceHashMap<>();
     private static final int CACHE_EXPIRE_SECONDS = 5;
     private static final int MAX_CACHE_ENTRIES = 2048;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("static-resource-cache-cleaner").factory());
     public static final String indexPath = "/index.html";
+    public static final String notFoundPath = "/404.html";
 
     public record ResourceInfo(int status, String contentType, byte[] data, long lastModified, String cacheControl) {
     }
@@ -137,11 +144,13 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         } catch (NoResourceFoundException e) {
             if (supportHistory && !uri.equals(indexPath)) {
                 var entry = useCacheIfPresent(req, resp, indexPath);
-                cache.put(uri, entry);
-                if (entry != null) return;
+                if (entry != null) {
+                    cache.put(uri, entry);
+                    return;
+                }
                 handleRequest(req, resp, indexPath);
             } else {
-                handleNotFound(resp, uri);
+                handleNotFound(req, resp, uri);
                 return;
             }
         }
@@ -171,11 +180,33 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         return entry;
     }
 
-    private void handleNotFound(HttpServletResponse resp, String uri) {
+    private void handleNotFound(HttpServletRequest req, HttpServletResponse resp, String uri) throws ServletException, IOException {
+        byte[] content = EMPTY_BYTE_ARRAY;
+        if (notFoundHtmlEnabled) {
+            var entry = useCacheIfPresent(req, resp, notFoundPath);
+            if (entry != null) {
+                cache.put(uri, entry);
+                return;
+            }
+            req.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, resourceUrlProvider.getPathMatcher().extractPathWithinPattern(staticPathPattern, fullNotFoundPath));
+            Resource resource = null;
+            try {
+                resource = (Resource) getResourceMethod.invokeExact(handler, req);
+                if (resource != null) {
+                    content = resource.getContentAsByteArray();
+                    resp.setContentType(MediaType.TEXT_HTML_VALUE);
+                    resp.getOutputStream().write(content);
+                }
+            } catch (Throwable e) {
+                throw new ServletException(uri + "资源缓存失败", e);
+            } finally {
+                if (resource != null) resource.getInputStream().close();
+            }
+        }
         ResourceInfo info = new ResourceInfo(
                 HttpServletResponse.SC_NOT_FOUND,
-                resp.getContentType(),
-                EMPTY_BYTE_ARRAY,
+                MediaType.TEXT_HTML_VALUE,
+                content,
                 -1,
                 null
         );
@@ -188,6 +219,10 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         resp.setContentType(info.contentType);
         if (info.status == HttpServletResponse.SC_NOT_FOUND) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            if (notFoundHtmlEnabled && info.data.length > 0) {
+                resp.setContentType(MediaType.TEXT_HTML_VALUE);
+                resp.getOutputStream().write(info.data);
+            }
             return;
         }
         long lastModified = parseDateHeader(req);
