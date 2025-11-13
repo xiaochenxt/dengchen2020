@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.exception.call;
 
 import io.github.dengchen2020.core.exception.BaseException;
-import org.slf4j.helpers.MessageFormatter;
 
 /**
  * 前端弹框提示异常：前端无法预处理的异常
@@ -16,16 +15,16 @@ public class ViewToastException extends BaseException {
         super(message, CODE);
     }
 
-    public ViewToastException(String message, Object... args) {
-        super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE);
+    public ViewToastException(String message, int code) {
+        super(message, code);
     }
 
-    public ViewToastException(Throwable cause, String message) {
+    public ViewToastException(String message, Throwable cause) {
         super(message, CODE, cause);
     }
 
-    public ViewToastException(Throwable cause, String message, Object... args) {
-        super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE, cause);
+    public ViewToastException(String message, int code, Throwable cause) {
+        super(message, code, cause);
     }
 
     public ViewToastException(String message, int code, Throwable cause, boolean writableStackTrace) {

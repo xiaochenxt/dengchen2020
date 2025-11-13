@@ -11,8 +11,8 @@ public interface Page {
         return of(page, size, true);
     }
 
-    static Page of(int page, int size, boolean selectCount){
-        return new PageQuery(page, size, selectCount);
+    static Page of(int page, int size, boolean isSelectCount){
+        return new PageQuery(page, size, isSelectCount);
     }
 
     /**
@@ -33,7 +33,15 @@ public interface Page {
      * 是否查询数量，不需要时设置为false（通过索引字段（例如：id）分页时可始终为false），数据量大时可显著提升查询性能
      */
     default boolean isSelectCount() {
-        return true;
+        Boolean selectCount = selectCount();
+        return selectCount == null || selectCount;
+    }
+
+    /**
+     * {@link #isSelectCount()}
+     */
+    default Boolean selectCount() {
+        return isSelectCount();
     }
 
     /**

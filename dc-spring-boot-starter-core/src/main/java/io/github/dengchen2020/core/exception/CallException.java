@@ -1,7 +1,5 @@
 package io.github.dengchen2020.core.exception;
 
-import org.slf4j.helpers.MessageFormatter;
-
 /**
  * 调用异常-接口调用产生的异常
  *
@@ -21,14 +19,24 @@ public class CallException extends BaseException {
         return alarm;
     }
 
-    //直接实例化构造方法
+    public CallException(String message) {
+        super(message, CODE);
+        this.alarm = true;
+    }
+
     public CallException(String message, Throwable cause) {
         super(message, CODE, cause);
         this.alarm = true;
     }
 
-    public CallException(String message) {
-        this(message, (Throwable) null);
+    protected CallException(String message, int code) {
+        super(message, code);
+        this.alarm = true;
+    }
+
+    protected CallException(String message, int code, Throwable cause) {
+        super(message, code, cause);
+        this.alarm = true;
     }
 
     public CallException(String message, Throwable cause, boolean alarm) {
@@ -37,31 +45,8 @@ public class CallException extends BaseException {
     }
 
     public CallException(String message, boolean alarm) {
-        this(message, null, alarm);
+        super(message, CODE);
+        this.alarm = alarm;
     }
 
-    public CallException(String message, Object... args) {
-        super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE);
-        this.alarm = true;
-    }
-
-    public CallException(Throwable cause, String message) {
-        super(message, CODE, cause);
-        this.alarm = false;
-    }
-
-    public CallException(Throwable cause, String message, Object... args) {
-        super(MessageFormatter.arrayFormat(message, args).getMessage(), CODE, cause);
-        this.alarm = false;
-    }
-
-    //子类继承构造方法
-    protected CallException(String message, int code, Throwable cause) {
-        super(message, code, cause);
-        this.alarm = false;
-    }
-
-    protected CallException(String message, int code) {
-        this(message, null, code);
-    }
 }

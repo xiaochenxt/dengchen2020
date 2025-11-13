@@ -8,15 +8,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
@@ -41,7 +42,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
  * @since 2025/8/1
  */
 @WebServlet(value = "/**", loadOnStartup = 1)
-public class StaticResourceServlet extends HttpServlet implements ApplicationListener<ContextRefreshedEvent> {
+public class StaticResourceServlet extends HttpServlet implements ApplicationListener<WebServerInitializedEvent> {
 
     private final ResourceUrlProvider resourceUrlProvider;
 
@@ -104,14 +105,22 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     }
 
     /**
-     * <p>{@code handlerMap}是在{@code ContextRefreshedEvent}事件中初始化</p>
-     * 详见：{@link ResourceUrlProvider#detectResourceHandlers(ApplicationContext)}
+     * 在web服务准备就绪时查找需要的静态资源处理器 </br>
+     * 静态资源处理器获取代码参考：{@link ResourceUrlProvider#detectResourceHandlers(ApplicationContext)}
      *
      * @param event
      */
     @Override
-    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        handler = resourceUrlProvider.getHandlerMap().get(staticPathPattern);
+    public void onApplicationEvent(@NonNull WebServerInitializedEvent event) {
+        event.getApplicationContext().getBeanProvider(HandlerMapping.class).orderedStream()
+                .filter(AbstractUrlHandlerMapping.class::isInstance)
+                .map(AbstractUrlHandlerMapping.class::cast)
+                .forEach(mapping -> mapping.getHandlerMap().forEach((pattern, handler) -> {
+                    if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
+                        if (pattern.equals(this.staticPathPattern)) this.handler = resourceHandler;
+                    }
+                }));
+        if (this.handler == null) throw new IllegalStateException("未找到处理"+this.staticPathPattern+"的静态资源处理器");
     }
 
     @Override
