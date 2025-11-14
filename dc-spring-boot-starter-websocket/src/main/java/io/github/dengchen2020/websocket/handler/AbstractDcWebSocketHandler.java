@@ -1,5 +1,6 @@
 package io.github.dengchen2020.websocket.handler;
 
+import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.Session;
 import org.jspecify.annotations.NullMarked;
@@ -105,7 +106,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         Principal principal = getClientInfo(session);
-        if (principal == null) {
+        if (principal == null || principal instanceof AnonymousAuthentication) {
             CloseStatus status = CloseStatus.POLICY_VIOLATION.withReason("获取Token认证信息失败，请重新登录");
             onlineFailEvent(session, status);
             close(session, status);

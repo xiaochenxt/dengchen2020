@@ -1,6 +1,7 @@
 package io.github.dengchen2020.core.redis.frequency;
 
 import io.github.dengchen2020.core.interceptor.BaseHandlerMethodInterceptor;
+import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NullMarked;
@@ -30,7 +31,7 @@ public class FrequencyControlInterceptor extends BaseHandlerMethodInterceptor {
             control = handlerMethod.getBeanType().getAnnotation(FrequencyControl.class);
         if (control == null) return true;
         Principal principal = request.getUserPrincipal();
-        if (principal == null) return true;
+        if (principal == null || principal instanceof AnonymousAuthentication) return true;
         long res = frequencyControlSupport.trigger(request.getRequestURI() + ":" + request.getMethod() + ":" + principal.getName(), control.qps(), control.qpm(), control.qpd());
         if (res == 0) return true;
         if (res == 1) {

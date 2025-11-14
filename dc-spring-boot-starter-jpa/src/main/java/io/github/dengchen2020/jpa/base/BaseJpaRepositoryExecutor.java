@@ -68,12 +68,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return IterableUtils.toList(entities);
     }
 
-    /**
-     * selectById 加锁版本
-     *
-     * @param id id
-     * @return T
-     */
     @Nullable
     @Transactional
     @Override
@@ -81,23 +75,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, getHints());
     }
 
-    /**
-     * findById 加锁版本
-     *
-     * @param id id
-     * @return Optional<T>
-     */
     @Transactional
     @Override
     public Optional<T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
-    /**
-     * 根据id查询
-     * @param id id
-     * @return Optional<T>
-     */
     @Nullable
     @Override
     public T selectById(ID id) {
@@ -118,11 +101,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         throw new UnsupportedOperationException("不支持无条件的全量删除，请自行实现");
     }
 
-    /**
-     * 批量逻辑删除
-     * @param ids id集合
-     * @return 受影响的条数
-     */
     @Override
     public int softDelete(Iterable<ID> ids) {
         Query query = entityManager.createQuery(softDeleteInSql)
@@ -182,11 +160,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return authentication.userId();
     }
 
-    /**
-     * 根据id查询（携带租户id）
-     * @param id id
-     * @return T
-     */
     @Nullable
     @Override
     public T selectByIdWithTenantId(ID id) {
@@ -323,11 +296,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return softDeleteWithTenantId(List.of(ids));
     }
 
-    /**
-     * 根据id查询（携带用户id）
-     * @param id id
-     * @return T
-     */
     @Nullable
     @Override
     public T selectByIdWithUserId(ID id) {

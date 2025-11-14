@@ -1,6 +1,7 @@
 package io.github.dengchen2020.ratelimiter;
 
 import io.github.dengchen2020.core.interceptor.BaseHandlerMethodInterceptor;
+import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import io.github.dengchen2020.core.utils.IPUtils;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimit;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimitStrategy;
@@ -45,7 +46,7 @@ public class RateLimiterInterceptor extends BaseHandlerMethodInterceptor {
         switch (strategy) {
             case userAndUri -> {
                 Principal principal = request.getUserPrincipal();
-                if (principal == null) {
+                if (principal == null || principal instanceof AnonymousAuthentication) {
                     limitKey = IPUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
                 } else {
                     limitKey = principal.getName() + request.getRequestURI() + request.getMethod();
@@ -55,7 +56,7 @@ public class RateLimiterInterceptor extends BaseHandlerMethodInterceptor {
             case ipAndUri -> limitKey = IPUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
             case user -> {
                 Principal principal = request.getUserPrincipal();
-                if (principal == null) {
+                if (principal == null || principal instanceof AnonymousAuthentication) {
                     limitKey = IPUtils.getRemoteAddr(request);
                 } else {
                     limitKey = principal.getName();

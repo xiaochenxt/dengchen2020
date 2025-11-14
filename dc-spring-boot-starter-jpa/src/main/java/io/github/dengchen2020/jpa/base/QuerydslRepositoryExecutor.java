@@ -43,7 +43,8 @@ import java.util.stream.Stream;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
+public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T>,
+        EntityManagerRepository<T, ID> {
 
     protected final EntityManager entityManager;
 
@@ -121,6 +122,11 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
         return path;
     }
 
+    @Override
+    public void detach(T entity) {
+        entityManager.detach(entity);
+    }
+
     public JPAQuery<?> query() {
         return queryFactory.query().from(path);
     }
@@ -155,68 +161,33 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
         return queryFactory.selectZero().from(path);
     }
 
-    /**
-     * 单表数据查询
-     * @return JPAQuery<T>
-     */
     @Override
     public JPAQuery<T> selectFrom() {
         return queryFactory.selectFrom(path);
     }
 
-    /**
-     * 更新构造
-     *
-     * @param where 更新条件
-     * @return JPAUpdateClause
-     */
     @Override
     public JPAUpdateClause update(Predicate[] where) {
         Assert.notEmpty(where, "更新必须有条件");
         return queryFactory.update(path).where(where);
     }
 
-    /**
-     * 更新构造
-     *
-     * @param where 更新条件
-     * @return JPAUpdateClause
-     */
     @Override
     public JPAUpdateClause update(Predicate where) {
         return update(new Predicate[]{where});
     }
 
-    /**
-     * 删除构造
-     *
-     * @param where 删除条件
-     * @return 受影响的行数
-     */
     @Override
     public long delete(Predicate[] where) {
         Assert.notEmpty(where, "删除必须有条件");
         return queryFactory.delete(path).where(where).execute();
     }
 
-    /**
-     * 删除构造
-     *
-     * @param where 删除条件
-     * @return 受影响的行数
-     */
     @Override
     public long delete(Predicate where) {
         return delete(new Predicate[]{where});
     }
 
-    /**
-     * Querydsl分页查询
-     * @param query JPAQuery<R>
-     * @param page 分页参数
-     * @param o 排序方式
-     * @return SimplePage<R>
-     */
     @Override
     public <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
         if (page.getSize() == 0) return new SimplePage<>(!page.isSelectCount() ? 0 : query.fetchCount(), Collections.emptyList());
@@ -232,25 +203,11 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
         return new SimplePage<>(result.getTotal(), result.getResults());
     }
 
-    /**
-     * Querydsl分页条件查询
-     *
-     * @param page 分页参数
-     * @param o     排序方式
-     * @return 分页后的数据
-     */
     @Override
     public SimplePage<T> findAll(Predicate predicate, Page page, OrderSpecifier<?>... o){
         return fetchPage(selectFrom().where(predicate), page, o);
     }
 
-    /**
-     * 返回流读取器，调用方需手动关闭以便尽快释放资源
-     * @param query JPAQuery<R>
-     * @param page 查询参数
-     * @param o 排序方式
-     * @return Stream<R>
-     */
     @Override
     public <R> Stream<R> fetchStream(JPAQuery<R> query,@Nullable Page page, OrderSpecifier<?>... o){
         if (o.length > 0) query = query.orderBy(o);
@@ -260,34 +217,16 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
                 .stream();
     }
 
-    /**
-     * 返回流读取器，调用方需手动关闭以便尽快释放资源
-     * @param predicate 条件
-     * @param page 查询参数
-     * @param o 排序方式
-     * @return Stream<T>
-     */
     @Override
-    public Stream<T> findStream(Predicate predicate, Page page, OrderSpecifier<?>... o){
+    public Stream<T> findStream(Predicate predicate,@Nullable Page page, OrderSpecifier<?>... o){
         return fetchStream(selectFrom().where(predicate), page, o);
     }
 
-    /**
-     * 返回流读取器，调用方需手动关闭以便尽快释放资源
-     * @param page 查询参数
-     * @param o 排序方式
-     * @return Stream<T>
-     */
     @Override
-    public Stream<T> findStream(Page page, OrderSpecifier<?>... o){
+    public Stream<T> findStream(@Nullable Page page, OrderSpecifier<?>... o){
         return fetchStream(selectFrom(), page, o);
     }
 
-    /**
-     * 返回流读取器，调用方需手动关闭以便尽快释放资源
-     * @param o 排序方式
-     * @return Stream<T>
-     */
     @Override
     public Stream<T> findStream(OrderSpecifier<?>... o){
         return fetchStream(selectFrom(), null, o);
