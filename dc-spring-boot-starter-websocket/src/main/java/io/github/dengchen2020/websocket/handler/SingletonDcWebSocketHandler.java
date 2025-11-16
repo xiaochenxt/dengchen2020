@@ -8,7 +8,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.nio.ByteBuffer;
 import java.security.Principal;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -22,9 +21,9 @@ import java.util.concurrent.*;
 @NullMarked
 public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
 
-    protected final Map<String, ConcurrentLinkedQueue<WebSocketSession>> userIdSessionMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, ConcurrentLinkedQueue<WebSocketSession>> userIdSessionMap = new ConcurrentHashMap<>();
 
-    protected final Map<Long, ConcurrentLinkedQueue<WebSocketSession>> tenantIdSessionMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<Long, ConcurrentLinkedQueue<WebSocketSession>> tenantIdSessionMap = new ConcurrentHashMap<>();
 
     @Nullable
     private static final ScheduledExecutorService scheduledExecutorService;

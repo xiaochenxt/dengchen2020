@@ -22,7 +22,7 @@ public class RedisRateLimiter implements RateLimiter {
     private static final String RATE_LIMIT_PREFIX = "dc:rate_limit:";
 
     RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
-            String.format(""" 
+            """ 
                     -- 限流Key
                     local rateLimitKey = "%s" .. ARGV[1]
                     local rateLimitNum = tonumber(ARGV[2])
@@ -39,7 +39,7 @@ public class RedisRateLimiter implements RateLimiter {
                         redis.call("SET", rateLimitKey, "1", "EX", rateLimitSecond)
                         return 1
                     end
-                    """, RATE_LIMIT_PREFIX),
+                    """.formatted(RATE_LIMIT_PREFIX),
             Long.class
     );
 
