@@ -140,7 +140,7 @@ public @interface DcScheduled {
     boolean concurrency() default false;
 
     /**
-     * 指定时间内不允许重复执行，默认20秒
+     * 指定时间内不允许其他服务器执行，默认20秒
      */
     long seconds() default 20;
 

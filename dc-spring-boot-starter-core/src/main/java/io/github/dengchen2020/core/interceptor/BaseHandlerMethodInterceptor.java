@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @since 2025/2/25
  */
 @NullMarked
-public class BaseHandlerMethodInterceptor implements HandlerInterceptor {
+public abstract class BaseHandlerMethodInterceptor implements HandlerInterceptor {
 
     /**
      * <p>跳过{@link DispatcherType#ERROR}请求是因为当没有配置对应的异常处理时会两次进入拦截器，
