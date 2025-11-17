@@ -1,6 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -9,10 +9,11 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @author xiaochen
  * @since 2019/2/28 11:03
  */
+@NullMarked
 @NoRepositoryBean
-public interface BaseJpaRepository<T, ID> extends ComplexJpaRepository<@NonNull T> ,
-        QueryDslJpaRepository<@NonNull T>, EntityManagerRepository<@NonNull T,@NonNull ID>,
-        QueryJpaRepository<@NonNull T,@NonNull ID>,
-        CrudJpaRepository<@NonNull T,@NonNull ID> {
+public interface BaseJpaRepository<T, ID> extends ComplexJpaRepository<T> ,
+        QueryDslJpaRepository<T>, EntityManagerRepository<T, ID>,
+        QueryJpaRepository<T, ID>,
+        CrudJpaRepository<T, ID> {
 
 }

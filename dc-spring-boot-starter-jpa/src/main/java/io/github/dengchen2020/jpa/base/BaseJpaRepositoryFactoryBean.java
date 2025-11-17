@@ -92,7 +92,7 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
                     && (QueryDslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
             if (isQueryDslRepository) {
-                var querydslRepositoryExecutor = new QuerydslRepositoryExecutor<>(entityInformation, entityManager, jpaQueryFactory);
+                var querydslRepositoryExecutor = new QuerydslRepositoryExecutor<>(entityInformation, entityManager, resolver, jpaQueryFactory);
                 fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(querydslRepositoryExecutor));
             }
             return fragments.append(super.getRepositoryFragments(metadata, entityManager, resolver, crudMethodMetadata));

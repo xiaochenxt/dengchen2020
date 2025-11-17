@@ -2,7 +2,10 @@ package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -10,13 +13,10 @@ import com.querydsl.jpa.impl.JPAUpdateClause;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.data.querydsl.SimpleEntityPathResolver;
+import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
+public class QuerydslRepositoryExecutor<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
 
     protected final EntityManager entityManager;
 
@@ -44,29 +44,13 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
     protected final PathBuilder<T> builder;
    // protected final Querydsl querydsl;
 
-    public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager em, JPAQueryFactory queryFactory) {
-        super(entityInformation, em);
-        this.entityManager = em;
+    public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver,
+                                      JPAQueryFactory queryFactory) {
+        this.entityManager = entityManager;
         this.queryFactory = queryFactory;
-        this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
+        this.path = resolver.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
        // this.querydsl = new Querydsl(entityManager, builder);
-    }
-
-    /**
-     * 为给定的 {@link Predicate} 创建一个新的 {@link JPAQuery}。
-     *
-     * @param predicate
-     * @return {@link JPAQuery}.
-     */
-    protected JPAQuery<?> createQuery(Predicate... predicate) {
-        JPAQuery<?> query = queryFactory.query().from(path);
-        if (predicate.length > 0) query.where(predicate);
-        getQueryHints().withFetchGraphs(entityManager).forEach(query::setHint);
-        CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
-        if (metadata == null) return query;
-        LockModeType type = metadata.getLockModeType();
-        return type == null ? query : query.setLockMode(type);
     }
 
     public JPAQueryFactory queryFactory() {
