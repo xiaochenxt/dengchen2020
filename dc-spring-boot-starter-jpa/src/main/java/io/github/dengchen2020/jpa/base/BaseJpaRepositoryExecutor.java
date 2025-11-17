@@ -7,12 +7,15 @@ import io.github.dengchen2020.core.utils.IterableUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
+import org.hibernate.jpa.AvailableHints;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +23,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 /**
  * BaseJpaRepository的实现
@@ -32,10 +38,15 @@ import java.util.Optional;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor<T, ID> implements
-        QueryJpaRepository<T, ID>, SoftDeleteRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID> {
+public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
+        QueryJpaRepository<T, ID>, SoftDeleteRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID>,
+        EntityManagerRepository<T, ID> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseJpaRepositoryExecutor.class);
+
+    protected final EntityManager entityManager;
+    protected final JpaEntityInformation<T, ?> entity;
+    protected final PersistenceProvider provider;
 
     final String idFieldName;
     static final String tenantIdFieldName = "tenantId";
@@ -52,13 +63,46 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
     private static final String deletedFieldName = "deleted";
 
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em, final JPAQueryFactory queryFactory) {
-        super(entityInformation, em, queryFactory);
+        super(entityInformation, em);
+        this.entityManager = em;
+        this.entity = entityInformation;
+        this.provider = PersistenceProvider.fromEntityManager(em);
         this.idFieldName = entity.getIdAttribute() == null ? "id" : entity.getIdAttribute().getName();
         this.selectInSql = "from " + entity.getEntityName() + " where "+idFieldName+" in :id";
         this.deleteSql = "delete from " + entity.getEntityName() + " where "+idFieldName+" = :id";
         this.deleteInSql = "delete from " + entity.getEntityName() + " where "+idFieldName+" in :id";
         this.softDeleteSql = "update " + entity.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " = :id";
         this.softDeleteInSql = "update " + entity.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " in :id";
+    }
+
+    protected Map<String, Object> getHints() {
+        Map<String, Object> hints = new HashMap<>();
+        getQueryHints().withFetchGraphs(entityManager).forEach(hints::put);
+        CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
+        if (metadata != null) applyComment(metadata, hints::put);
+        return hints;
+    }
+
+    private void applyComment(CrudMethodMetadata metadata, BiConsumer<String, Object> consumer) {
+        if (metadata.getComment() != null && provider.getCommentHintKey() != null) {
+            consumer.accept(provider.getCommentHintKey(), provider.getCommentHintValue(metadata.getComment()));
+        }
+    }
+
+    protected void applyQueryHintsForCount(Query query) {
+        CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
+        if (metadata == null) return;
+        getQueryHintsForCount().forEach(query::setHint);
+        applyComment(metadata, query::setHint);
+    }
+
+    public EntityManager entityManager() {
+        return entityManager;
+    }
+
+    @Override
+    public void detach(T entity) {
+        entityManager.detach(entity);
     }
 
     @Transactional
@@ -81,6 +125,20 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
+    @Transactional
+    @Override
+    public @Nullable T selectByIdForUpdateNowait(ID id) {
+        var hints = getHints();
+        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, 0);
+        return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, hints);
+    }
+
+    @Transactional
+    @Override
+    public Optional<T> findByIdForUpdateNowait(ID id) {
+        return Optional.ofNullable(selectByIdForUpdateNowait(id));
+    }
+
     @Nullable
     @Override
     public T selectById(ID id) {
@@ -89,6 +147,32 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslRepositoryExecutor
             return entityManager.find(getDomainClass(), id, getHints());
         }
         return entityManager.find(getDomainClass(), id, metadata.getLockModeType(), getHints());
+    }
+
+    @Transactional
+    @Override
+    public @Nullable T selectByIdForShare(ID id) {
+        return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_READ, getHints());
+    }
+
+    @Transactional
+    @Override
+    public Optional<T> findByIdForShare(ID id) {
+        return Optional.ofNullable(selectByIdForShare(id));
+    }
+
+    @Transactional
+    @Override
+    public @Nullable T selectByIdForShareNowait(ID id) {
+        var hints = getHints();
+        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, 0);
+        return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_READ, hints);
+    }
+
+    @Transactional
+    @Override
+    public Optional<T> findByIdForShareNowait(ID id) {
+        return Optional.ofNullable(selectByIdForShareNowait(id));
     }
 
     @Override

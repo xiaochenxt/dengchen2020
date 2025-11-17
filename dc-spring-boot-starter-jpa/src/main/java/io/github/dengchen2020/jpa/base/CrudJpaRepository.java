@@ -21,7 +21,7 @@ import java.util.List;
  */
 @NullMarked
 @NoRepositoryBean
-public interface CrudJpaRepository<T, ID> extends QuerydslPredicateExecutor<T> , JpaRepository<T, ID> {
+public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID>, QuerydslPredicateExecutor<T> {
 
     /**
      * 删除-支持批量

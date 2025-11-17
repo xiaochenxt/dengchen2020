@@ -2,10 +2,7 @@ package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,13 +11,10 @@ import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.Query;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.Querydsl;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.stereotype.Repository;
@@ -29,9 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
@@ -43,51 +34,23 @@ import java.util.stream.Stream;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T>,
-        EntityManagerRepository<T, ID> {
+public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
 
     protected final EntityManager entityManager;
 
     protected  final JPAQueryFactory queryFactory;
 
-    protected final JpaEntityInformation<T, ?> entity;
-
-    protected final PersistenceProvider provider;
-
     protected final EntityPath<T> path;
     protected final PathBuilder<T> builder;
-    protected final Querydsl querydsl;
+   // protected final Querydsl querydsl;
 
     public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager em, JPAQueryFactory queryFactory) {
         super(entityInformation, em);
         this.entityManager = em;
         this.queryFactory = queryFactory;
-        this.entity = entityInformation;
-        this.provider = PersistenceProvider.fromEntityManager(em);
         this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
-        this.querydsl = new Querydsl(entityManager, builder);
-    }
-
-    protected Map<String, Object> getHints() {
-        Map<String, Object> hints = new HashMap<>();
-        getQueryHints().withFetchGraphs(entityManager).forEach(hints::put);
-        CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
-        if (metadata != null) applyComment(metadata, hints::put);
-        return hints;
-    }
-
-    private void applyComment(CrudMethodMetadata metadata, BiConsumer<String, Object> consumer) {
-        if (metadata.getComment() != null && provider.getCommentHintKey() != null) {
-            consumer.accept(provider.getCommentHintKey(), provider.getCommentHintValue(metadata.getComment()));
-        }
-    }
-
-    protected void applyQueryHintsForCount(Query query) {
-        CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
-        if (metadata == null) return;
-        getQueryHintsForCount().forEach(query::setHint);
-        applyComment(metadata, query::setHint);
+       // this.querydsl = new Querydsl(entityManager, builder);
     }
 
     /**
@@ -106,10 +69,6 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
         return type == null ? query : query.setLockMode(type);
     }
 
-    public EntityManager entityManager() {
-        return entityManager;
-    }
-
     public JPAQueryFactory queryFactory() {
         return queryFactory;
     }
@@ -120,11 +79,6 @@ public class QuerydslRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID
 
     public EntityPath<T> path() {
         return path;
-    }
-
-    @Override
-    public void detach(T entity) {
-        entityManager.detach(entity);
     }
 
     public JPAQuery<?> query() {
