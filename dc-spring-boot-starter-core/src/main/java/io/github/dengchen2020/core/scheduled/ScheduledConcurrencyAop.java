@@ -73,10 +73,10 @@ public class ScheduledConcurrencyAop implements SmartLifecycle {
     private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
         Class<?> target = joinPoint.getTarget().getClass();
         String key = "dc:task:" + target.getSimpleName() + ":" + joinPoint.getSignature().getName();
-        keys.add(key);
         String localIpInfo = StringUtils.hasText(port) ? IPUtils.getLocalAddr() + ":" + port : IPUtils.getLocalAddr();
         eventPublisher.publishEvent(new ScheduledHandleBeforeEvent(joinPoint, localIpInfo));
         if (concurrency) return joinPoint.proceed();
+        keys.add(key);
         var str = stringRedisTemplate.opsForValue().get(key);
         if (str != null) return uniqueId.equals(str) ? joinPoint.proceed() : null;
         //获得指定时间内的执行权
