@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -40,6 +40,7 @@
           <artifactId>slf4j-api</artifactId>
           <optional>true</optional>
       </dependency>
+
       <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring-core</artifactId>
@@ -61,10 +62,22 @@
           <optional>true</optional>
       </dependency>
       <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webmvc</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
           <groupId>jakarta.persistence</groupId>
           <artifactId>jakarta.persistence-api</artifactId>
           <optional>true</optional>
       </dependency>
+      <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <optional>true</optional>
+      </dependency>
+
       <dependency>
           <groupId>com.fasterxml.jackson.datatype</groupId>
           <artifactId>jackson-datatype-jsr310</artifactId>
@@ -76,6 +89,12 @@
           <optional>true</optional>
       </dependency>
       <dependency>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-cbor</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
           <groupId>io.protostuff</groupId>
           <artifactId>protostuff-core</artifactId>
           <optional>true</optional>
@@ -83,11 +102,6 @@
       <dependency>
           <groupId>io.protostuff</groupId>
           <artifactId>protostuff-runtime</artifactId>
-          <optional>true</optional>
-      </dependency>
-      <dependency>
-          <groupId>jakarta.servlet</groupId>
-          <artifactId>jakarta.servlet-api</artifactId>
           <optional>true</optional>
       </dependency>
 
@@ -124,20 +138,8 @@
       </dependency>
 
       <dependency>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-cbor</artifactId>
-          <optional>true</optional>
-      </dependency>
-
-      <dependency>
           <groupId>org.graalvm.js</groupId>
           <artifactId>js-scriptengine</artifactId>
-          <optional>true</optional>
-      </dependency>
-
-      <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-webmvc</artifactId>
           <optional>true</optional>
       </dependency>
 

@@ -34,8 +34,7 @@ public class CsvReader implements AutoCloseable {
     public CsvReader(InputStream inputStream) throws IOException {
         this.reader = new BufferedReader(createInputStreamReaderWithAutoDetectCharset(inputStream));
         // 读取第一行作为表头
-        String headerLine = readAndHandleBom();
-        this.fieldNames = parseCsvLine(headerLine);
+        this.fieldNames = readLine();
     }
 
     /**
@@ -52,8 +51,7 @@ public class CsvReader implements AutoCloseable {
     public CsvReader(InputStream inputStream, Charset charset) throws IOException {
         this.reader = new BufferedReader(new InputStreamReader(inputStream, charset));
         // 读取第一行作为表头
-        String headerLine = readAndHandleBom();
-        this.fieldNames = parseCsvLine(headerLine);
+        this.fieldNames = readLine();
     }
 
     /**
@@ -135,6 +133,14 @@ public class CsvReader implements AutoCloseable {
      */
     public boolean hasNext() {
         return hasNext;
+    }
+
+    /**
+     * 读取下一行表头
+     * @throws IOException
+     */
+    public String[] readLine() throws IOException {
+        return parseCsvLine(readAndHandleBom());
     }
 
     /**

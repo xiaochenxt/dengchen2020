@@ -29,9 +29,10 @@ public final class SchedulingAutoConfiguration implements SchedulingConfigurer {
         ThreadPoolTaskScheduler taskScheduler = threadPoolTaskSchedulerBuilder != null ? threadPoolTaskSchedulerBuilder.build() : new ThreadPoolTaskScheduler();
         int size = taskRegistrar.getCronTaskList().size() + taskRegistrar.getFixedDelayTaskList().size() + taskRegistrar.getFixedRateTaskList().size() + taskRegistrar.getTriggerTaskList().size();
         taskScheduler.setPoolSize(size == 0 ? 1 : size);
-        taskScheduler.setThreadFactory(Thread.ofVirtual().name("scheduling-",0).factory());
+       // taskScheduler.setThreadFactory(Thread.ofVirtual().name(taskScheduler.getThreadNamePrefix(),0).factory()); // 与setVirtualThreads效果一致
+        taskScheduler.setVirtualThreads(true); // 设置使用虚拟线程，Spring6.1才添加
         taskScheduler.afterPropertiesSet();
-        taskRegistrar.setScheduler(taskScheduler);
+        taskRegistrar.setScheduler(taskScheduler); // 使用虚拟线程时确保cron和fixedRate能等待上一次任务执行完成后再执行下一次任务的关键设置
     }
 
 }
