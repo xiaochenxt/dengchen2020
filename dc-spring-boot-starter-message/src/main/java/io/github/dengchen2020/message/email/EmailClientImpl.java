@@ -3,16 +3,17 @@ package io.github.dengchen2020.message.email;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
@@ -35,21 +36,32 @@ public class EmailClientImpl implements EmailClient {
 
     private final JavaMailSender javaMailSender;
 
+    private final String username;
     private final String[] to;
 
     public EmailClientImpl(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
-        this.to = EMPTY_STRING_ARRAY;
-        this.executor = defaultExecutor;
+        this(javaMailSender, EMPTY_STRING_ARRAY, defaultExecutor);
     }
 
     public EmailClientImpl(JavaMailSender javaMailSender, String... to) {
-        this.javaMailSender = javaMailSender;
-        this.to = to;
-        this.executor = defaultExecutor;
+        this(javaMailSender, to, defaultExecutor);
     }
 
     public EmailClientImpl(JavaMailSender javaMailSender, String[] to, AsyncTaskExecutor executor) {
+        this(javaMailSender, null, to, executor);
+    }
+
+    public EmailClientImpl(JavaMailSender javaMailSender,@Nullable String username, String[] to, AsyncTaskExecutor executor) {
+        if (StringUtils.hasText(username)) {
+            this.username = username;
+        } else {
+            if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
+                if (!StringUtils.hasText(javaMailSenderImpl.getUsername())) throw new IllegalArgumentException("邮箱邮箱发件人用户名不能为空");
+                this.username = javaMailSenderImpl.getUsername();
+            }else {
+                throw new IllegalArgumentException("邮箱发件人用户名不能为空");
+            }
+        }
         this.javaMailSender = javaMailSender;
         this.to = to;
         this.executor = executor;
@@ -72,9 +84,7 @@ public class EmailClientImpl implements EmailClient {
     public boolean sendTextSync(String subject, String text, String... to) {
         try {
             SimpleMailMessage mail = new SimpleMailMessage();
-            if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
-                mail.setFrom(javaMailSenderImpl.getUsername());
-            }
+            mail.setFrom(username);
             mail.setTo(to);
             mail.setSentDate(new Date());
             mail.setSubject(subject);
@@ -114,9 +124,7 @@ public class EmailClientImpl implements EmailClient {
     public boolean sendMimeSync(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable[] inlines, String... to) {
         try {
             MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
-            if (javaMailSender instanceof JavaMailSenderImpl javaMailSenderImpl) {
-                mime.setFrom(javaMailSenderImpl.getUsername());
-            }
+            mime.setFrom(username);
             mime.setTo(to);
             mime.setSubject(subject);
             mime.setText(html, true);

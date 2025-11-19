@@ -336,7 +336,6 @@ public class FeatureUtils extends CollectUtils {
         for (String cs : classes) {
             Class<?> c = loadClass(cs);
             if (c == null) continue;
-            if (!Serializable.class.isAssignableFrom(c)) continue;
             RuntimeProxyCreation.register(c);
             if (debug) System.out.println("registering proxy " + c.getName());
         }

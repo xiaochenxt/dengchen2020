@@ -39,18 +39,14 @@ public class DingTalkClientImpl implements DingTalkClient {
     private final String secret;
 
     public DingTalkClientImpl(String webhook) {
-        this.webhook = webhook;
-        this.secret = null;
-        this.executor = defaultExecutor;
+        this(webhook, null, defaultExecutor);
     }
 
-    public DingTalkClientImpl(String webhook, String secret) {
-        this.webhook = webhook;
-        this.secret = secret;
-        this.executor = defaultExecutor;
+    public DingTalkClientImpl(String webhook,@Nullable String secret) {
+        this(webhook, secret, defaultExecutor);
     }
 
-    public DingTalkClientImpl(String webhook, String secret, AsyncTaskExecutor executor) {
+    public DingTalkClientImpl(String webhook,@Nullable String secret, AsyncTaskExecutor executor) {
         this.webhook = webhook;
         this.secret = secret;
         this.executor = executor;

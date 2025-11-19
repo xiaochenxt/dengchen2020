@@ -37,16 +37,14 @@ public class FeiShuClientImpl implements FeiShuClient {
     private final String secret;
 
     public FeiShuClientImpl(String webhook) {
-        this.webhook = webhook;
-        this.secret = null;
-        this.executor = defaultExecutor;
+        this(webhook, null, defaultExecutor);
     }
 
-    public FeiShuClientImpl(String webhook, String secret) {
+    public FeiShuClientImpl(String webhook,@Nullable String secret) {
         this(webhook, secret, defaultExecutor);
     }
 
-    public FeiShuClientImpl(String webhook, String secret, AsyncTaskExecutor executor) {
+    public FeiShuClientImpl(String webhook,@Nullable String secret, AsyncTaskExecutor executor) {
         this.webhook = webhook;
         this.secret = secret;
         this.executor = executor;

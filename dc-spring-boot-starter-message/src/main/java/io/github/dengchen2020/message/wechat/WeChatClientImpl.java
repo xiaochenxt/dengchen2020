@@ -31,8 +31,7 @@ public class WeChatClientImpl implements WeChatClient {
     private final String webhook;
 
     public WeChatClientImpl(String webhook) {
-        this.webhook = webhook;
-        this.executor = defaultExecutor;
+        this(webhook, defaultExecutor);
     }
 
     public WeChatClientImpl(String webhook, AsyncTaskExecutor executor) {
