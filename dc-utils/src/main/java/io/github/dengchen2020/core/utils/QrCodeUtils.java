@@ -3,7 +3,6 @@ package io.github.dengchen2020.core.utils;
 import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -17,6 +16,8 @@ import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.Map;
 
+import static io.github.dengchen2020.core.utils.QRCodeGenerator.reader;
+
 /**
  * 二维码工具类
  *
@@ -28,10 +29,6 @@ public abstract class QrCodeUtils {
 
     private static final int BLACK = 0xFF000000;//用于设置图案的颜色
     private static final int WHITE = 0xFFFFFFFF; //用于背景色
-    /**
-     * 创建二维码读取器，{@link QRCodeReader#reset()} 实现为空，证明是线程安全的，可单例使用
-     */
-    public static final QRCodeReader reader = new QRCodeReader();
 
     /**
      * 生成二维码写入{@link OutputStream}
