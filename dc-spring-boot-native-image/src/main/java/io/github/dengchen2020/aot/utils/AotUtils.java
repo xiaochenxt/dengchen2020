@@ -168,6 +168,7 @@ public class AotUtils extends CollectUtils {
     @SafeVarargs
     public final void registerSerializable(Class<? extends Serializable>... classes) {
         for (Class<? extends Serializable> c : classes) {
+            if (c.getCanonicalName() == null) continue;
             hints.serialization().registerType(c);
             if (debug) System.out.println("registering serializable " + c.getName());
         }
@@ -176,7 +177,7 @@ public class AotUtils extends CollectUtils {
     @SuppressWarnings("unchecked")
     public void registerSerializable(Collection<Class<?>> classes) {
         for (Class<?> c : classes) {
-            if (!Serializable.class.isAssignableFrom(c)) continue;
+            if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
             hints.serialization().registerType((Class<? extends Serializable>) c);
             if (debug) System.out.println("registering serializable " + c.getName());
         }
@@ -184,11 +185,11 @@ public class AotUtils extends CollectUtils {
 
     @SuppressWarnings("unchecked")
     public void registerSerializableIfPresent(String... classes) {
-        for (String c : classes) {
+        for (String cs : classes) {
             try {
-                Class<?> clazz = classLoader.loadClass(c);
-                if (!Serializable.class.isAssignableFrom(clazz)) continue;
-                hints.serialization().registerType((Class<? extends Serializable>) clazz);
+                Class<?> c = classLoader.loadClass(cs);
+                if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
+                hints.serialization().registerType((Class<? extends Serializable>) c);
                 if (debug) System.out.println("registering serializable " + c);
             } catch (ClassNotFoundException ignored) {}
         }
