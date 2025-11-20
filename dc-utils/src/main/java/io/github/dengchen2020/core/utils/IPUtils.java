@@ -1,13 +1,8 @@
 package io.github.dengchen2020.core.utils;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -26,7 +21,7 @@ public abstract class IPUtils {
     public static final String UNKNOWN = "unknown";
     public static final String LOCALHOST_IP1 = "127.0.0.1";
     private static String localHostIp;
-    private static final String REAL_CLIENT_IP_HEADER = System.getProperty("dc.real.client.ip.header", "X-Real-IP");
+
     // IPv4正则表达式
     private static final Pattern IPV4_PATTERN = Pattern.compile(
             "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
@@ -60,41 +55,6 @@ public abstract class IPUtils {
                 if (log.isWarnEnabled()) log.warn("获取本机IP失败：{}，回退为：{}", e, localHostIp);
             }
         }
-    }
-
-    /**
-     * 获取远程客户端ip地址
-     * <p>
-     * 使用Nginx等反向代理软件， 则不能通过request.getRemoteAddr()获取IP地址
-     * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
-     * </p>
-     */
-    public static String getRemoteAddr(@NonNull HttpServletRequest request) {
-        String ip = null;
-        try {
-            //获取nginx等代理服务器配置的自定义ip请求头的ip
-            ip = request.getHeader(REAL_CLIENT_IP_HEADER);
-            if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
-            ip = request.getRemoteAddr();
-        } catch (Exception e) {
-            log.error("获取客户端IP失败: {}", e.toString());
-        }
-        return ip;
-    }
-
-    /**
-     * 获取远程客户端ip地址
-     * <p>
-     * 使用Nginx等反向代理软件， 则不能通过request.getRemoteAddr()获取IP地址
-     * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
-     * </p>
-     */
-    public static String getRemoteAddr() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null) return "";
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
-        HttpServletRequest request = servletRequestAttributes.getRequest();
-        return getRemoteAddr(request);
     }
 
     /**

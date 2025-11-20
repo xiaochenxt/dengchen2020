@@ -1,7 +1,5 @@
 package io.github.dengchen2020.core.utils.random;
 
-import org.springframework.util.Assert;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -101,7 +99,7 @@ public class RandomUtils {
      * @throws IllegalArgumentException if {@code count} is negative
      */
     public byte[] randomBytes(final int count) {
-        Assert.isTrue(count >= 0, "Count cannot be negative.");
+        if(!(count >= 0)) throw new IllegalArgumentException("Count cannot be negative.");
         final byte[] result = new byte[count];
         random().nextBytes(result);
         return result;
@@ -126,8 +124,8 @@ public class RandomUtils {
      * @return 随机双精度小数
      */
     public double randomDouble(final double startInclusive, final double endExclusive) {
-        Assert.isTrue(endExclusive >= startInclusive, "Start value must be smaller or equal to end value.");
-        Assert.isTrue(startInclusive >= 0, "Both range values must be non-negative.");
+        if(!(endExclusive >= startInclusive)) throw new IllegalArgumentException("Start value must be smaller or equal to end value.");
+        if (!(startInclusive >= 0)) throw new IllegalArgumentException("Both range values must be non-negative.");
         if (startInclusive == endExclusive) return startInclusive;
         return startInclusive + (endExclusive - startInclusive) * random().nextDouble();
     }
@@ -151,8 +149,8 @@ public class RandomUtils {
      * @return 随机浮点数
      */
     public float randomFloat(final float startInclusive, final float endExclusive) {
-        Assert.isTrue(endExclusive >= startInclusive, "Start value must be smaller or equal to end value.");
-        Assert.isTrue(startInclusive >= 0, "Both range values must be non-negative.");
+        if (!(endExclusive >= startInclusive)) throw new IllegalArgumentException("Start value must be smaller or equal to end value.");
+        if (!(startInclusive >= 0)) throw new IllegalArgumentException("Both range values must be non-negative.");
         if (startInclusive == endExclusive) return startInclusive;
         return startInclusive + (endExclusive - startInclusive) * random().nextFloat();
     }
@@ -176,8 +174,8 @@ public class RandomUtils {
      * @return 随机整数
      */
     public int randomInt(final int startInclusive, final int endExclusive) {
-        Assert.isTrue(endExclusive >= startInclusive, "Start value must be smaller or equal to end value.");
-        Assert.isTrue(startInclusive >= 0, "Both range values must be non-negative.");
+        if (!(endExclusive >= startInclusive)) throw new IllegalArgumentException("Start value must be smaller or equal to end value.");
+        if (!(startInclusive >= 0)) throw new IllegalArgumentException("Both range values must be non-negative.");
         if (startInclusive == endExclusive) return startInclusive;
         return startInclusive + random().nextInt(endExclusive - startInclusive);
     }
@@ -218,8 +216,8 @@ public class RandomUtils {
      * @return 随机 long
      */
     public long randomLong(final long startInclusive, final long endExclusive) {
-        Assert.isTrue(endExclusive >= startInclusive, "Start value must be smaller or equal to end value.");
-        Assert.isTrue(startInclusive >= 0, "Both range values must be non-negative.");
+        if (!(endExclusive >= startInclusive)) throw new IllegalArgumentException("Start value must be smaller or equal to end value.");
+        if (!(startInclusive >= 0)) throw new IllegalArgumentException("Both range values must be non-negative.");
         if (startInclusive == endExclusive) return startInclusive;
         return startInclusive + randomLong(endExclusive - startInclusive);
     }

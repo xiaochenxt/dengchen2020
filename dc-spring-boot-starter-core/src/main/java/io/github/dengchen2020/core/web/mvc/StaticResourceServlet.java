@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.web.mvc;
 
+import io.github.dengchen2020.core.utils.DateTimeParseUtils;
 import io.github.dengchen2020.core.utils.DateTimeUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -331,7 +332,7 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         if (headerValue == null) return -1;
         if (headerValue.length() >= 3) {
             try {
-                return DateTimeUtils.timestamp(DateTimeUtils.parseZoneDateTime(headerValue, GMT, DATE_FORMATS));
+                return DateTimeUtils.timestamp(DateTimeParseUtils.parseZoneDateTime(headerValue, GMT, DATE_FORMATS));
             } catch (Exception _) {
             }
         }

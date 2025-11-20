@@ -126,7 +126,7 @@
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-utils</artifactId>
-                <version>0.0.5</version>
+                <version>0.0.6</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>

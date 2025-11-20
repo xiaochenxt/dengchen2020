@@ -1,7 +1,5 @@
 package io.github.dengchen2020.core.utils;
 
-import org.springframework.util.FastByteArrayOutputStream;
-
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -386,10 +384,9 @@ public class ImageProcessor {
      * @param inputStream 源图片输入流
      */
     public String toBase64(InputStream inputStream) {
-        try (FastByteArrayOutputStream baos = new FastByteArrayOutputStream()) {
-            toStream(inputStream, baos);
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
-        }
+        var baos = new ByteArrayOutputStream(256);
+        toStream(inputStream, baos);
+        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -397,10 +394,9 @@ public class ImageProcessor {
      * @param file 源图片文件
      */
     public String toBase64(File file) {
-        try (FastByteArrayOutputStream baos = new FastByteArrayOutputStream()) {
-            toStream(file, baos);
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
-        }
+        var baos = new ByteArrayOutputStream(256);
+        toStream(file, baos);
+        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -408,10 +404,9 @@ public class ImageProcessor {
      * @param image 源图片
      */
     public String toBase64(BufferedImage image) {
-        try (FastByteArrayOutputStream baos = new FastByteArrayOutputStream()) {
-            toStream(image, baos);
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
-        }
+        var baos = new ByteArrayOutputStream(256);
+        toStream(image, baos);
+        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**

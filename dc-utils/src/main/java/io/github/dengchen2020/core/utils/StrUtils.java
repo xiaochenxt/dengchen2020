@@ -1,8 +1,8 @@
 package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
-import org.springframework.util.StringUtils;
 
 import java.util.HexFormat;
 import java.util.Iterator;
@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 字符串工具类，扩展Spring的{@link StringUtils}
+ * 字符串工具类
  * @author xiaochen
  * @since 2022/8/19
  */
-public abstract class StrUtils extends StringUtils {
+public abstract class StrUtils {
 
     /**
      * 字符串格式化输出
@@ -57,7 +57,7 @@ public abstract class StrUtils extends StringUtils {
      * @return json数组字符串
      */
     public static String checkJsonArrayStr(String jsonStr) {
-        if (!StringUtils.hasText(jsonStr)) return "[]";
+        if (!hasText(jsonStr)) return "[]";
         return jsonStr;
     }
 
@@ -144,17 +144,17 @@ public abstract class StrUtils extends StringUtils {
      * 请注意，该方法不允许使用正号或负号。此外，如果 String 通过了数值测试，则在由 Integer.parseInt 或 Long.parseLong 解析时，它仍可能生成 NumberFormatException，例如，如果值分别超出 int 或 long 的范围。
      *
      * <pre>
-     * StringUtils.isNumeric(null)   = false
-     * StringUtils.isNumeric("")     = false
-     * StringUtils.isNumeric("  ")   = false
-     * StringUtils.isNumeric("123")  = true
-     * StringUtils.isNumeric("\u0967\u0968\u0969")  = true
-     * StringUtils.isNumeric("12 3") = false
-     * StringUtils.isNumeric("ab2c") = false
-     * StringUtils.isNumeric("12-3") = false
-     * StringUtils.isNumeric("12.3") = false
-     * StringUtils.isNumeric("-123") = false
-     * StringUtils.isNumeric("+123") = false
+     * isNumeric(null)   = false
+     * isNumeric("")     = false
+     * isNumeric("  ")   = false
+     * isNumeric("123")  = true
+     * isNumeric("\u0967\u0968\u0969")  = true
+     * isNumeric("12 3") = false
+     * isNumeric("ab2c") = false
+     * isNumeric("12-3") = false
+     * isNumeric("12.3") = false
+     * isNumeric("-123") = false
+     * isNumeric("+123") = false
      * </pre>
      *
      * @param cs  要检查的 CharSequence，可能为 null
@@ -203,6 +203,36 @@ public abstract class StrUtils extends StringUtils {
     public static String getValue(String @NonNull[] arr, int i) {
         if (arr.length >= i + 1) return arr[i];
         return "";
+    }
+
+    /**
+     * 检查给定的{@code str}是否包含实际<em>文本</em>。
+     * <p>更具体地说，如果
+     * {@code str}不是{@code null}，其长度大于0，
+     * 并且至少包含一个非空白字符。
+     * @param str 检查{@code String} （可能是 {@code null}）
+     * @return {@code true} 如果 {@code str} 不是 {@code null}，且其长度大于 0，且不包含仅有空白
+     */
+    public static boolean hasText(@Nullable CharSequence str) {
+        if (str == null) return false;
+        int strLen = str.length();
+        if (strLen == 0) return false;
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) return true;
+        }
+        return false;
+    }
+
+    /**
+     * 检查给定的{@code str}是否包含实际<em>文本</em>。
+     * <p>更具体地说，如果
+     * {@code str}不是{@code null}，其长度大于0，
+     * 并且至少包含一个非空白字符。
+     * @param str 检查{@code String} （可能是 {@code null}）
+     * @return {@code true} 如果 {@code str} 不是 {@code null}，且其长度大于 0，且不包含仅有空白
+     */
+    public static boolean hasText(@Nullable String str) {
+        return (str != null && !str.isBlank());
     }
 
 }

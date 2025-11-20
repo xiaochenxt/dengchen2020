@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NullMarked;
-import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -10,10 +9,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Base64;
 
 /**
@@ -97,10 +93,9 @@ public abstract class ImageUtils {
      * @return Base64字符串
      */
     private static String imgToBase64(BufferedImage image, float quality, boolean lossless) {
-        try (FastByteArrayOutputStream baos = new FastByteArrayOutputStream()) {
-            compression(image, quality, lossless, baos);
-            return Base64.getEncoder().encodeToString(baos.toByteArray());
-        }
+        var baos = new ByteArrayOutputStream(256);
+        compression(image, quality, lossless, baos);
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**

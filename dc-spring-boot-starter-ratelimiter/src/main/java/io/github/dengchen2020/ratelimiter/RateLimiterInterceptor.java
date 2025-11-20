@@ -2,7 +2,7 @@ package io.github.dengchen2020.ratelimiter;
 
 import io.github.dengchen2020.core.interceptor.BaseHandlerMethodInterceptor;
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
-import io.github.dengchen2020.core.utils.IPUtils;
+import io.github.dengchen2020.core.utils.RequestUtils;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimit;
 import io.github.dengchen2020.ratelimiter.annotation.RateLimitStrategy;
 import io.github.dengchen2020.ratelimiter.exception.RateLimitException;
@@ -47,23 +47,23 @@ public class RateLimiterInterceptor extends BaseHandlerMethodInterceptor {
             case userAndUri -> {
                 Principal principal = request.getUserPrincipal();
                 if (principal == null || principal instanceof AnonymousAuthentication) {
-                    limitKey = IPUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
+                    limitKey = RequestUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
                 } else {
                     limitKey = principal.getName() + request.getRequestURI() + request.getMethod();
                 }
             }
-            case ip -> limitKey = IPUtils.getRemoteAddr(request);
-            case ipAndUri -> limitKey = IPUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
+            case ip -> limitKey = RequestUtils.getRemoteAddr(request);
+            case ipAndUri -> limitKey = RequestUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
             case user -> {
                 Principal principal = request.getUserPrincipal();
                 if (principal == null || principal instanceof AnonymousAuthentication) {
-                    limitKey = IPUtils.getRemoteAddr(request);
+                    limitKey = RequestUtils.getRemoteAddr(request);
                 } else {
                     limitKey = principal.getName();
                 }
             }
             case uri -> limitKey = request.getRequestURI() + request.getMethod();
-            case null, default -> limitKey = IPUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
+            case null, default -> limitKey = RequestUtils.getRemoteAddr(request) + request.getRequestURI() + request.getMethod();
         }
         RateLimiter rateLimiter;
         if (rateLimit.timeUnit() == TimeUnit.MINUTES) {

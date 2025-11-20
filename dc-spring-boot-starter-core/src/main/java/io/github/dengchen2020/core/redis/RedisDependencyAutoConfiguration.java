@@ -3,7 +3,6 @@ package io.github.dengchen2020.core.redis;
 import io.github.dengchen2020.core.redis.annotation.RedisMessageListener;
 import io.github.dengchen2020.core.redis.annotation.TopicType;
 import io.github.dengchen2020.core.scheduled.ScheduledConcurrencyAop;
-import io.github.dengchen2020.core.utils.MethodUtils;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -66,14 +66,19 @@ public final class RedisDependencyAutoConfiguration {
         RedisMessageListenerRegistrar(RedisMessageListenerContainer redisMessageListenerContainer, @Nullable List<MessageListener> messageListeners, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
             if (messageListeners != null) {
                 for (MessageListener messageListener : messageListeners) {
-                    Topic topic;
-                    Method[] methods = MethodUtils.getMethodsWithAnnotation(messageListener.getClass(), RedisMessageListener.class);
-                    if(methods.length == 0) continue;
-                    Method method = methods[0];
-                    if(methods.length > 1){
-                        log.warn("检测到多个方法,只有一个能生效，实际映射到：{}", method.toString());
+                    Method method = null;
+                    for (Method m : messageListener.getClass().getDeclaredMethods()) {
+                        if (m.getParameterCount() == 0 || !Modifier.isPublic(m.getModifiers())) continue;
+                        RedisMessageListener redisMessageListener = m.getAnnotation(RedisMessageListener.class);
+                        if (redisMessageListener == null) continue;
+                        if (method != null) {
+                            throw new IllegalArgumentException(messageListener.getClass() + " 检测到多个使用@RedisMessageListener的方法");
+                        }
+                        method = m;
                     }
+                    if (method == null) continue;
                     RedisMessageListener redisMessageListener = method.getAnnotation(RedisMessageListener.class);
+                    Topic topic;
                     if (redisMessageListener.type() == TopicType.channel) {
                         topic = ChannelTopic.of(redisMessageListener.value());
                     } else {
@@ -91,6 +96,7 @@ public final class RedisDependencyAutoConfiguration {
                         }
                     }
                     redisMessageListenerContainer.addMessageListener(messageListener, topic);
+                    if (log.isDebugEnabled()) log.debug("redis消息订阅：{}，频道：{}", method, topic);
                 }
             }
         }

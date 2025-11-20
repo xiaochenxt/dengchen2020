@@ -2,10 +2,7 @@ package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -20,43 +17,6 @@ import java.util.regex.Pattern;
  */
 @NullMarked
 public abstract class FileUtils {
-
-    /**
-     * 写入临时文件，临时文件将在虚拟机退出时自动删除
-     *
-     * @param file   文件对象
-     * @param prefix 文件名前缀，字符长度不能小于3
-     * @param directory 临时文件夹 为null则为对应系统的临时文件所在文件夹
-     * @return 临时文件对象
-     */
-    public static File writeTempFile(MultipartFile file, String prefix,@Nullable File directory) throws IOException {
-        String filenameExtension = getFilenameExtension(file.getOriginalFilename());
-        File tempFile = File.createTempFile(prefix, "." + filenameExtension, directory);
-        file.transferTo(tempFile);
-        tempFile.deleteOnExit();
-        return tempFile;
-    }
-
-    /**
-     * 写入临时文件
-     *
-     * @param file 文件对象
-     * @param prefix 文件名前缀，字符长度不能小于3
-     * @return 临时文件对象
-     */
-    public static File writeTempFile(MultipartFile file, String prefix) throws IOException {
-        return writeTempFile(file, prefix, null);
-    }
-
-    /**
-     * 写入临时文件
-     *
-     * @param file 文件对象
-     * @return 临时文件对象
-     */
-    public static File writeTempFile(MultipartFile file) throws IOException {
-        return writeTempFile(file, "tmp-");
-    }
 
     /**
      * 返回文件名称不包含扩展名，例如 a.jpg -> a
