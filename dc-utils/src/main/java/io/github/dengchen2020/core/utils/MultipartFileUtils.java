@@ -10,12 +10,12 @@ import java.io.IOException;
 import static io.github.dengchen2020.core.utils.FileUtils.getFilenameExtension;
 
 /**
- * 文件写入工具类
+ * {@link MultipartFile}工具类
  * @author xiaochen
  * @since 2025/11/19
  */
 @NullMarked
-public abstract class FileWriteUtils {
+public abstract class MultipartFileUtils {
 
     /**
      * 写入临时文件，临时文件将在虚拟机退出时自动删除
