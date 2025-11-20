@@ -119,7 +119,7 @@ public abstract class CaptchaUtils {
         try {
             specCaptcha.setFont(1, fontSize);
         } catch (IOException | FontFormatException e) {
-            throw new RuntimeException("生成验证码失败", e);
+            throw new RuntimeException("设置验证码字体失败", e);
         }
         return specCaptcha;
     }
@@ -147,7 +147,7 @@ public abstract class CaptchaUtils {
         try {
             captcha.setFont(1, fontSize);
         } catch (IOException | FontFormatException e) {
-            throw new RuntimeException("生成数字验证码失败", e);
+            throw new RuntimeException("设置数字验证码字体失败", e);
         }
         return captcha;
     }
@@ -223,7 +223,7 @@ public abstract class CaptchaUtils {
         try {
             captcha.setFont(1, fontSize);
         } catch (IOException | FontFormatException e) {
-            throw new RuntimeException("生成验证码失败", e);
+            throw new RuntimeException("设置动图验证码字体失败", e);
         }
         return captcha;
     }

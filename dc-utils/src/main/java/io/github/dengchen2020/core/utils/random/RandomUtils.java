@@ -22,7 +22,7 @@ public class RandomUtils {
         try {
             return SecureRandom.getInstanceStrong();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("获取SecureRandom失败", e);
         }
     });
 

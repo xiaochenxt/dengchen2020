@@ -73,7 +73,7 @@ public class WebSocketClientUtils {
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException("无法访问字段：org.apache.tomcat.websocket.WsWebSocketContainer.asynchronousChannelGroup", e);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("设置asynchronousChannelGroup为虚拟线程失败", e);
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(container::destroy, "ws-client-shutdown"));
             } else {

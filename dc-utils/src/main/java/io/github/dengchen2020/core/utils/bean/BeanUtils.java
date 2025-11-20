@@ -155,7 +155,7 @@ public abstract class BeanUtils {
                 if (srcValue == null) emptyFieldNames.add(pd.getName());
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("获取对象中为null的字段失败", e);
         }
         return emptyFieldNames;
     }

@@ -146,7 +146,7 @@ public abstract class QrCodeUtils {
                     height, //条形码的高度
                     hints);
         } catch (WriterException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("生成二维码数据失败", e);
         }
     }
 

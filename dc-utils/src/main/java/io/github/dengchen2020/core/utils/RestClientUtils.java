@@ -204,7 +204,7 @@ public abstract class RestClientUtils {
                     .build();
             return create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), true);
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("创建无需SSL证书校验的RestClient失败", e);
         }
     }
 
