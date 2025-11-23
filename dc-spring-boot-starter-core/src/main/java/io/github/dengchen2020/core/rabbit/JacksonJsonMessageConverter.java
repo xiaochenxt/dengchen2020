@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.rabbit;
 
-import com.fasterxml.jackson.databind.JavaType;
+import tools.jackson.databind.JavaType;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.support.converter.MessageConversionException;
@@ -9,12 +9,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 /**
- * 增强{@link org.springframework.amqp.support.converter.Jackson2JsonMessageConverter}，兼容byes[]和String和Object之间的互相转换
+ * 增强{@link org.springframework.amqp.support.converter.JacksonJsonMessageConverter}，兼容byes[]和String和Object之间的互相转换
  *
  * @author xiaochen
  * @since 2024/8/21
  */
-public class Jackson2JsonMessageConverter extends org.springframework.amqp.support.converter.Jackson2JsonMessageConverter {
+public class JacksonJsonMessageConverter extends org.springframework.amqp.support.converter.JacksonJsonMessageConverter {
 
     @Override
     public Object fromMessage(Message message) throws MessageConversionException {

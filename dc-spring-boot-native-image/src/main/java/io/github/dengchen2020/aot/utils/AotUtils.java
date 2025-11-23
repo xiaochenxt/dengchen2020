@@ -36,7 +36,7 @@ public class AotUtils extends CollectUtils {
         return classLoader;
     }
 
-    public static final MemberCategory[] defaultMemberCategory = new MemberCategory[]{MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_CLASSES, MemberCategory.UNSAFE_ALLOCATED};
+    public static final MemberCategory[] defaultMemberCategory = new MemberCategory[]{MemberCategory.ACCESS_DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.UNSAFE_ALLOCATED};
 
     public void registerPattern(String... resources) {
         for (String resource : resources) {
@@ -66,20 +66,6 @@ public class AotUtils extends CollectUtils {
             if (classLoader.getResource(resource) == null) continue;
             hints.resources().registerPattern(resource);
             if (debug) System.out.println("include resource " + resource);
-        }
-    }
-
-    public void excludePattern(String... resources) {
-        for (String resource : resources) {
-            hints.resources().registerPattern(builder -> builder.excludes(resource));
-            if (debug) System.out.println("exclude resource " + resource);
-        }
-    }
-
-    public void excludePattern(TypeReference typeReference, String... resources) {
-        for (String resource : resources) {
-            hints.resources().registerPattern(builder -> builder.excludes(typeReference, resource));
-            if (debug) System.out.println("exclude reachableType "+typeReference.getName()+" resource " + resource);
         }
     }
 

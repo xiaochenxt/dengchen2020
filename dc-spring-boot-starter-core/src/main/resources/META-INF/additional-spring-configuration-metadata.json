@@ -22,7 +22,7 @@
     {
       "name": "dc.static.servlet.enabled",
       "type": "java.lang.Boolean",
-      "description": "是否启用静态资源处理的servlet.",
+      "description": "是否启用静态资源处理的servlet，如果未配置spring.mvc.servlet.path或配置了server.servlet.context-path则依旧不会启用.",
       "defaultValue": true
     },{
       "name": "dc.static.servlet.support-history",
@@ -34,6 +34,21 @@
       "type": "java.lang.Boolean",
       "description": "静态资源处理是否启用自定义的404.html页面作为状态码404时的错误页面，当启用了dc.static.servlet.support-history时无效.",
       "defaultValue": false
+    },{
+      "name": "dc.static.resource.cache.maximum-size",
+      "type": "java.lang.Integer",
+      "description": "静态资源缓存的最大容量（数量），最小值：100.",
+      "defaultValue": 1000
+    },{
+      "name": "dc.static.resource.cache.max-content-length",
+      "type": "org.springframework.util.unit.DataSize",
+      "description": "静态资源缓存时对文件系统资源内容的大小限制，超过则不缓存，最小值：1KB.",
+      "defaultValue": "256KB"
+    },{
+      "name": "dc.static.resource.cache.ttl",
+      "type": "java.time.Duration",
+      "description": "静态资源缓存的有效期.",
+      "defaultValue": "5s"
     },{
       "name": "dc.frequency-control.enabled",
       "type": "java.lang.Boolean",

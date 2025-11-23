@@ -125,11 +125,6 @@ public class CacheSpecBuilder {
         private boolean expireAfterAccess = false;
 
         /**
-         * 是否允许缓存空值
-         */
-        private boolean allowNullValues = true;
-
-        /**
          * 是否使用软引用包装value（内存不足时会被垃圾回收），生成的缓存将使用 == 比较来确定值的相等性，详见：{@link com.github.benmanes.caffeine.cache.Caffeine#softValues()}
          */
         private boolean softValues = false;
@@ -171,14 +166,6 @@ public class CacheSpecBuilder {
             this.expireAfterAccess = expireAfterAccess;
         }
 
-        public boolean isAllowNullValues() {
-            return allowNullValues;
-        }
-
-        public void setAllowNullValues(boolean allowNullValues) {
-            this.allowNullValues = allowNullValues;
-        }
-
         public boolean isSoftValues() {
             return softValues;
         }
@@ -212,11 +199,6 @@ public class CacheSpecBuilder {
             private Boolean expireAfterAccess;
 
             /**
-             * 是否允许缓存空值
-             */
-            private Boolean allowNullValues;
-
-            /**
              * 是否使用软引用包装value（内存不足时会被垃圾回收），生成的缓存将使用 == 比较来确定值的相等性，详见：{@link com.github.benmanes.caffeine.cache.Caffeine#softValues()}
              */
             private Boolean softValues;
@@ -243,14 +225,6 @@ public class CacheSpecBuilder {
 
             public void setMax(Integer max) {
                 this.max = max;
-            }
-
-            public Boolean getAllowNullValues() {
-                return allowNullValues;
-            }
-
-            public void setAllowNullValues(Boolean allowNullValues) {
-                this.allowNullValues = allowNullValues;
             }
 
             public Boolean getSoftValues() {

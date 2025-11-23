@@ -1,7 +1,7 @@
 package io.github.dengchen2020.message.feishu;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ArrayNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import org.jspecify.annotations.NullMarked;
 

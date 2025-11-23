@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public final class ClusterDcWebSocketAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     static final class ClusterWebSocketHandlerRegistrar {
-        ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJackson2JsonRedisSerializer redisSerializer) {
+        ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJacksonJsonRedisSerializer redisSerializer) {
             for (ClusterDcWebSocketHandler dcWebSocketHandler : clusterDcWebSocketHandler) {
                 MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(dcWebSocketHandler);
                 messageListenerAdapter.setSerializer(redisSerializer);

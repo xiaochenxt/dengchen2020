@@ -17,7 +17,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  */
 @NullMarked
 @NoRepositoryBean
-public interface QueryDslJpaRepository<T> {
+public interface QuerydslJpaRepository<T> {
 
     <R> JPAQuery<R> select(Expression<R> expr);
 
@@ -51,7 +51,9 @@ public interface QueryDslJpaRepository<T> {
      * @param where 更新条件
      * @return {@link JPAUpdateClause}
      */
-    JPAUpdateClause update(Predicate where);
+    default JPAUpdateClause update(Predicate where){
+        return update(new Predicate[]{where});
+    }
 
     /**
      * 删除构造
@@ -67,6 +69,8 @@ public interface QueryDslJpaRepository<T> {
      * @param where 删除条件
      * @return 受影响的行数
      */
-    long delete(Predicate where);
+    default long delete(Predicate where){
+        return delete(new Predicate[]{where});
+    }
 
 }

@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.IterableUtils;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +36,7 @@ import java.util.function.BiConsumer;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
+public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecutor<T, ID> implements
         QueryJpaRepository<T, ID>, SoftDeleteRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID>,
         EntityManagerRepository<T, ID> {
 
@@ -62,7 +60,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     private static final String userIdSqlFragment = " and " + userIdFieldName + " = :userId";
     private static final String deletedFieldName = "deleted";
 
-    public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em, final JPAQueryFactory queryFactory) {
+    public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager em) {
         super(entityInformation, em);
         this.entityManager = em;
         this.entity = entityInformation;
@@ -143,7 +141,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public T selectById(ID id) {
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
-        if (metadata == null) {
+        if (metadata == null || metadata.getLockModeType() == null) {
             return entityManager.find(getDomainClass(), id, getHints());
         }
         return entityManager.find(getDomainClass(), id, metadata.getLockModeType(), getHints());

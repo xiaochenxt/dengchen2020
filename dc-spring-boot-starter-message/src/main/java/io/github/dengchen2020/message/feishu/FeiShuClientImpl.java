@@ -1,7 +1,7 @@
 package io.github.dengchen2020.message.feishu;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import io.github.dengchen2020.core.utils.sign.HMACUtils;

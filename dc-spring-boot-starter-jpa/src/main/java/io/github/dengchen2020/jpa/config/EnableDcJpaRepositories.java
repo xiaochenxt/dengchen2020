@@ -1,16 +1,16 @@
 package io.github.dengchen2020.jpa.config;
 
-import io.github.dengchen2020.jpa.base.BaseJpaRepositoryFactoryBean;
-import io.github.dengchen2020.jpa.base.JpaRepositoryTypeFilter;
+import io.github.dengchen2020.jpa.base.BaseJpaRepositoryExecutor;
 import jakarta.persistence.EntityManagerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.jpa.repository.query.QueryEnhancerSelector;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.repository.config.BootstrapMode;
-import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -21,7 +21,7 @@ import java.lang.annotation.*;
  * @author xiaochen
  * @since 2025/8/15
  */
-@EnableJpaRepositories(includeFilters = {@ComponentScan.Filter(type = FilterType.CUSTOM, value = {JpaRepositoryTypeFilter.class})}, repositoryFactoryBeanClass = BaseJpaRepositoryFactoryBean.class)
+@EnableJpaRepositories(repositoryBaseClass = BaseJpaRepositoryExecutor.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -48,6 +48,12 @@ public @interface EnableDcJpaRepositories {
      */
     @AliasFor(annotation = EnableJpaRepositories.class)
     Class<?>[] basePackageClasses() default {};
+
+    /**
+     * 指定哪些类型有资格进行组件扫描。进一步缩小候选分量范围
+     * {@link #basePackages（）} 中的全部内容，映射为基础包中与给定过滤器匹配的所有内容。
+     */
+    ComponentScan.Filter[] includeFilters() default {};
 
     /**
      * 指定哪些类型不符合组件扫描的条件。
@@ -84,13 +90,10 @@ public @interface EnableDcJpaRepositories {
     QueryLookupStrategy.Key queryLookupStrategy() default QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND;
 
     /**
-     * 配置要用于为此特定配置创建存储库代理的存储库基类。
-     *
-     * @return
-     * @since 1.9
+     * 返回每个仓库实例使用的{@link FactoryBean}类。默认
+     * {@link JpaRepositoryFactoryBean}。
      */
-    @AliasFor(annotation = EnableJpaRepositories.class)
-    Class<?> repositoryBaseClass() default DefaultRepositoryBaseClass.class;
+    Class<?> repositoryFactoryBeanClass() default JpaRepositoryFactoryBean.class;
 
     /**
      * 配置一个特定的 {@link BeanNameGenerator} 在创建存储库 Bean 时使用。
@@ -161,5 +164,12 @@ public @interface EnableDcJpaRepositories {
     @AliasFor(annotation = EnableJpaRepositories.class)
     char escapeCharacter() default '\\';
 
+    /**
+     * 配置{@link QueryEnhancerSelector}以选择查询增强器进行查询内省和转换。
+     *
+     * @return {@link QueryEnhancerSelector} 类提供无 args 构造函数。
+     * @since 4.0
+     */
+    Class<? extends QueryEnhancerSelector> queryEnhancerSelector() default QueryEnhancerSelector.DefaultQueryEnhancerSelector.class;
 
 }

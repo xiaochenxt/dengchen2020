@@ -1,12 +1,12 @@
 package io.github.dengchen2020.core.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.dataformat.xml.XmlMapper;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -40,8 +40,8 @@ public class XmlHelper {
 
     public XmlHelper(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
-        this.nonNullXmlMapper = new XmlMapper.Builder(xmlMapper)
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
+        this.nonNullXmlMapper = xmlMapper.rebuild()
+                .changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL))
                 .build();
     }
 

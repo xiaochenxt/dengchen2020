@@ -4,7 +4,7 @@ import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.WebSocketContainer;
 import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.ee10.websocket.jakarta.client.JakartaWebSocketClientContainerProvider;
+import org.eclipse.jetty.ee11.websocket.jakarta.client.JakartaWebSocketClientContainerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;

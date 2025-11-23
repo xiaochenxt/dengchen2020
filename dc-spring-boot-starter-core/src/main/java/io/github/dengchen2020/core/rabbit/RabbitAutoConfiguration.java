@@ -7,7 +7,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -34,8 +34,8 @@ public final class RabbitAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    MessageConverter jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    MessageConverter jacksonJsonMessageConverter() {
+        return new JacksonJsonMessageConverter();
     }
 
     @ConditionalOnMissingBean

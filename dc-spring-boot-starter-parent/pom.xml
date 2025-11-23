@@ -5,18 +5,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.0.0</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.1.7</version>
+    <version>0.4.0</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
     <url>https://github.com/xiaochenxt/dengchen2020</url>
-    <description>dc项目pom</description>
+    <description>dc项目pom，基于SpringBoot4</description>
 
     <developers>
         <developer>
@@ -57,7 +57,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dc.version>0.1.7</dc.version>
+        <dc.version>0.4.0</dc.version>
         <querydsl.version>5.1.0</querydsl.version>
         <redisson.version>3.52.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -65,7 +65,7 @@
         <spring-ai.version>1.1.0</spring-ai.version>
         <graalvm.version>25.0.1</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
-        <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
+        <openfeign.querydsl.version>7.1</openfeign.querydsl.version>
         <libphonenumber.version>9.0.18</libphonenumber.version>
         <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
         <ip2region.version>3.1.1</ip2region.version>
@@ -126,12 +126,12 @@
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-utils</artifactId>
-                <version>0.0.6</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-native-image</artifactId>
-                <version>0.0.6</version>
+                <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.protostuff</groupId>
@@ -248,11 +248,6 @@
                 <artifactId>js-scriptengine</artifactId>
                 <version>${graalvm.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson-bom.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -278,7 +273,7 @@
                                 <groupId>io.github.openfeign.querydsl</groupId>
                                 <artifactId>querydsl-apt</artifactId>
                                 <classifier>jakarta</classifier>
-                                <version>6.12</version>
+                                <version>${openfeign.querydsl.version}</version>
                             </annotationProcessorPath>
                             <annotationProcessorPath>
                                 <groupId>org.springframework.boot</groupId>

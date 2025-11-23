@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.1.7</version>
+    <version>0.4.0</version>
   </parent>
 
   <artifactId>dc-spring-boot-starter-websocket</artifactId>
@@ -48,8 +48,8 @@
     </dependency>
 
       <dependency>
-          <groupId>org.eclipse.jetty.ee10.websocket</groupId>
-          <artifactId>jetty-ee10-websocket-jakarta-client</artifactId>
+          <groupId>org.eclipse.jetty.ee11.websocket</groupId>
+          <artifactId>jetty-ee11-websocket-jakarta-client</artifactId>
           <optional>true</optional>
       </dependency>
 

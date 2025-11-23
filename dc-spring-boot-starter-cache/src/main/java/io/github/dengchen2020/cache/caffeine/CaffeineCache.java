@@ -14,13 +14,13 @@ public class CaffeineCache extends org.springframework.cache.caffeine.CaffeineCa
 
     private final CaffeineCacheHelper cacheHelper;
 
-    public CaffeineCache(String name, AsyncCache<Object, Object> cache, boolean allowNullValues, CaffeineCacheHelper cacheHelper) {
-        super(name, cache, allowNullValues);
+    public CaffeineCache(String name, Cache<Object, Object> cache, CaffeineCacheHelper cacheHelper) {
+        super(name, cache);
         this.cacheHelper = cacheHelper;
     }
 
-    public CaffeineCache(String name, Cache<Object, Object> cache, boolean allowNullValues, CaffeineCacheHelper cacheHelper) {
-        super(name, cache, allowNullValues);
+    public CaffeineCache(String name, AsyncCache<Object, Object> cache, CaffeineCacheHelper cacheHelper) {
+        super(name, cache, true);
         this.cacheHelper = cacheHelper;
     }
 

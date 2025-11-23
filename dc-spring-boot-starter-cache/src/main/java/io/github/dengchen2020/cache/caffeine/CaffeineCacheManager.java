@@ -45,7 +45,6 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         if (cacheSpec.getExpireAfterAccess() == null) cacheSpec.setExpireAfterAccess(builder.isExpireAfterAccess());
         if (cacheSpec.getExpireTime() == null || cacheSpec.getExpireTime().compareTo(Duration.ofSeconds(1)) < 0) cacheSpec.setExpireTime(builder.getExpireTime());
         if (cacheSpec.getMax() == null || cacheSpec.getMax() < 1) cacheSpec.setMax(builder.getMax());
-        if (cacheSpec.getAllowNullValues() == null) cacheSpec.setAllowNullValues(builder.isAllowNullValues());
         if (cacheSpec.getSoftValues() == null) cacheSpec.setSoftValues(builder.isSoftValues());
         if (log.isDebugEnabled()) {
             log.debug("缓存名：{}，策略：{}，最大容量：{}", name, cacheSpec.getExpireAfterAccess() ? "读取后" + cacheSpec.getExpireTime().getSeconds() + "秒后过期" : "写入后" + cacheSpec.getExpireTime().getSeconds() + "秒后过期", cacheSpec.getMax());
@@ -63,8 +62,8 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
                 .maximumSize(cacheSpec.getMax());
         if (cacheSpec.getSoftValues()) caffeine.softValues();
         com.github.benmanes.caffeine.cache.Cache<Object, Object> cache = caffeine.build();
-        if(cacheHelper == null) return new org.springframework.cache.caffeine.CaffeineCache(name, cache, cacheSpec.getAllowNullValues());
-        return new CaffeineCache(name, cache, cacheSpec.getAllowNullValues(), cacheHelper);
+        if(cacheHelper == null) return new org.springframework.cache.caffeine.CaffeineCache(name, cache);
+        return new CaffeineCache(name, cache, cacheHelper);
     }
 
     @Override

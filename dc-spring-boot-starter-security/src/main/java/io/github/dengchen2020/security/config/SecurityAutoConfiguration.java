@@ -7,11 +7,12 @@ import io.github.dengchen2020.security.authentication.interceptor.Authentication
 import io.github.dengchen2020.security.authentication.token.TokenService;
 import io.github.dengchen2020.security.event.listener.SecurityScheduledTaskHandleListener;
 import io.github.dengchen2020.security.properties.SecurityProperties;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.servlet.filter.OrderedFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
@@ -45,8 +46,8 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
 
     @ConditionalOnMissingBean(value = AuthenticationFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Bean
-    public FilterRegistrationBean<AuthenticationFilter> authenticationFilter() {
-        FilterRegistrationBean<AuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+    public FilterRegistrationBean<@NonNull AuthenticationFilter> authenticationFilter() {
+        FilterRegistrationBean<@NonNull AuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new AuthenticationFilter(tokenService));
         filterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 300);
         return filterRegistrationBean;

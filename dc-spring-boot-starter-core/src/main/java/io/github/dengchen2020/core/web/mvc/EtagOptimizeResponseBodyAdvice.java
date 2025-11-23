@@ -9,11 +9,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
+import org.springframework.http.converter.*;
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -44,7 +40,7 @@ public class EtagOptimizeResponseBodyAdvice implements ResponseBodyAdvice<Object
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        if (!AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) && !StringHttpMessageConverter.class.isAssignableFrom(converterType) && !AbstractJsonHttpMessageConverter.class.isAssignableFrom(converterType)
+        if (!AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType) && !StringHttpMessageConverter.class.isAssignableFrom(converterType) && !AbstractJsonHttpMessageConverter.class.isAssignableFrom(converterType)
                 && !ResourceHttpMessageConverter.class.isAssignableFrom(converterType) && !ByteArrayHttpMessageConverter.class.isAssignableFrom(converterType)) {
             ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
             return false;

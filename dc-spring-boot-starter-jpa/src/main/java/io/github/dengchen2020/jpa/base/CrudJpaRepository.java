@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
@@ -21,7 +20,7 @@ import java.util.List;
  */
 @NullMarked
 @NoRepositoryBean
-public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID>, QuerydslPredicateExecutor<T> {
+public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
 
     /**
      * 删除-支持批量

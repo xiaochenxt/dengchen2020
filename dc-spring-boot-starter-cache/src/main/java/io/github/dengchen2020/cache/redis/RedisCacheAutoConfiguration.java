@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
@@ -32,18 +32,18 @@ public final class RedisCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
+    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer) {
         String prefixCacheName = "dc:cache:";
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         CacheSpecBuilder.Redis builder = cacheSpecBuilder.getRedis();
         builder.getSpecs().forEach((s, cacheSpec) -> {
             if (cacheSpec.getExpireTime() == null || cacheSpec.getExpireTime().compareTo(Duration.ofSeconds(1)) < 0) cacheSpec.setExpireTime(builder.getExpireTime());
             RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().prefixCacheNameWith(prefixCacheName).entryTtl(cacheSpec.getExpireTime())
-                    .serializeValuesWith(RedisSerializationContext.fromSerializer(genericJackson2JsonRedisSerializer).getValueSerializationPair());
+                    .serializeValuesWith(RedisSerializationContext.fromSerializer(genericJacksonJsonRedisSerializer).getValueSerializationPair());
             cacheConfigurations.put(s, redisCacheConfiguration);
         });
         RedisCacheConfiguration defaultCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().prefixCacheNameWith(prefixCacheName).entryTtl(builder.getExpireTime())
-                .serializeValuesWith(RedisSerializationContext.fromSerializer(genericJackson2JsonRedisSerializer).getValueSerializationPair());
+                .serializeValuesWith(RedisSerializationContext.fromSerializer(genericJacksonJsonRedisSerializer).getValueSerializationPair());
         RedisCacheManager.RedisCacheManagerBuilder redisCacheManagerBuilder = RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultCacheConfiguration).withInitialCacheConfigurations(cacheConfigurations);
         if (builder.isTransactionAware()) redisCacheManagerBuilder.transactionAware();

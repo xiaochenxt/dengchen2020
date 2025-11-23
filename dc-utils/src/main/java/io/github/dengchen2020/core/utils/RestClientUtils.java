@@ -16,9 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 
 import java.nio.charset.StandardCharsets;
@@ -26,8 +24,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -106,28 +102,7 @@ public abstract class RestClientUtils {
         return RestClient.builder()
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE)
                 .requestFactory(factory)
-                .messageConverters(RestClientUtils::moveXmlConverterToLast);
-    }
-
-    /**
-     * 3.4.4版本RestClient新增了很多http消息转换器，其中包含xml，而xml被排在了json前面，请求优先以xml数据传输导致只接收json数据的接口报错，而json更为流行，应比xml优先级高才对
-     *
-     * @param converters
-     */
-    private static void moveXmlConverterToLast(List<HttpMessageConverter<?>> converters) {
-        for (Iterator<HttpMessageConverter<?>> iterator = converters.iterator(); iterator.hasNext(); ) {
-            HttpMessageConverter<?> httpMessageConverter = iterator.next();
-            if (httpMessageConverter instanceof StringHttpMessageConverter stringHttpMessageConverter) {
-                stringHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
-                continue;
-            }
-            // todo spring7.0开始，重新进行了排序，json在xml之前，因此从springboot4.0开始，不再需要排序
-            if (httpMessageConverter instanceof MappingJackson2XmlHttpMessageConverter) {
-                iterator.remove();
-                converters.addLast(httpMessageConverter);
-                break;
-            }
-        }
+                .configureMessageConverters(messageConverters -> messageConverters.withStringConverter(new StringHttpMessageConverter(StandardCharsets.UTF_8)));
     }
 
 
