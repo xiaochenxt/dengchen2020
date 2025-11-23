@@ -9,11 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
-import org.springframework.core.task.VirtualThreadTaskExecutor;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
@@ -32,7 +30,7 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         this.cacheHelper = cacheHelper;
     }
 
-    Executor executor = new VirtualThreadTaskExecutor("caffeine-async-");
+   // Executor executor = new VirtualThreadTaskExecutor("caffeine-async-");
 
     Scheduler scheduler = Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("caffeine-cleaner",0).factory()));
 
@@ -45,7 +43,6 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         if (cacheSpec.getExpireAfterAccess() == null) cacheSpec.setExpireAfterAccess(builder.isExpireAfterAccess());
         if (cacheSpec.getExpireTime() == null || cacheSpec.getExpireTime().compareTo(Duration.ofSeconds(1)) < 0) cacheSpec.setExpireTime(builder.getExpireTime());
         if (cacheSpec.getMax() == null || cacheSpec.getMax() < 1) cacheSpec.setMax(builder.getMax());
-        if (cacheSpec.getAllowNullValues() == null) cacheSpec.setAllowNullValues(builder.isAllowNullValues());
         if (cacheSpec.getSoftValues() == null) cacheSpec.setSoftValues(builder.isSoftValues());
         if (log.isDebugEnabled()) {
             log.debug("缓存名：{}，策略：{}，最大容量：{}", name, cacheSpec.getExpireAfterAccess() ? "读取后" + cacheSpec.getExpireTime().getSeconds() + "秒后过期" : "写入后" + cacheSpec.getExpireTime().getSeconds() + "秒后过期", cacheSpec.getMax());
@@ -59,12 +56,12 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         }
         Caffeine<Object, Object> caffeine = caffeineBuilder
                 .scheduler(scheduler)
-                .executor(executor)
+               // .executor(executor) // 使用同步模式，因此不需要异步执行器
                 .maximumSize(cacheSpec.getMax());
         if (cacheSpec.getSoftValues()) caffeine.softValues();
         com.github.benmanes.caffeine.cache.Cache<Object, Object> cache = caffeine.build();
-        if(cacheHelper == null) return new org.springframework.cache.caffeine.CaffeineCache(name, cache, cacheSpec.getAllowNullValues());
-        return new CaffeineCache(name, cache, cacheSpec.getAllowNullValues(), cacheHelper);
+        if(cacheHelper == null) return new org.springframework.cache.caffeine.CaffeineCache(name, cache);
+        return new CaffeineCache(name, cache, cacheHelper);
     }
 
     @Override
