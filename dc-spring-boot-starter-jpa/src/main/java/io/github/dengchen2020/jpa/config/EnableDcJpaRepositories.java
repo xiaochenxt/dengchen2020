@@ -1,11 +1,9 @@
 package io.github.dengchen2020.jpa.config;
 
 import io.github.dengchen2020.jpa.base.BaseJpaRepositoryFactoryBean;
-import io.github.dengchen2020.jpa.base.JpaRepositoryTypeFilter;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -21,7 +19,7 @@ import java.lang.annotation.*;
  * @author xiaochen
  * @since 2025/8/15
  */
-@EnableJpaRepositories(includeFilters = {@ComponentScan.Filter(type = FilterType.CUSTOM, value = {JpaRepositoryTypeFilter.class})}, repositoryFactoryBeanClass = BaseJpaRepositoryFactoryBean.class)
+@EnableJpaRepositories(repositoryFactoryBeanClass = BaseJpaRepositoryFactoryBean.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -48,6 +46,12 @@ public @interface EnableDcJpaRepositories {
      */
     @AliasFor(annotation = EnableJpaRepositories.class)
     Class<?>[] basePackageClasses() default {};
+
+    /**
+     * 指定哪些类型有资格进行组件扫描。进一步缩小候选分量范围
+     * {@link #basePackages（）} 中的全部内容，映射为基础包中与给定过滤器匹配的所有内容。
+     */
+    ComponentScan.Filter[] includeFilters() default {};
 
     /**
      * 指定哪些类型不符合组件扫描的条件。

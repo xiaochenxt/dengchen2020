@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NullMarked;
@@ -25,14 +24,7 @@ import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
  */
 public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> extends JpaRepositoryFactoryBean<T, S, ID> {
 
-    private JPAQueryFactory jpaQueryFactory;
-
     private List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer;
-
-    @Autowired
-    public void setJpaQueryFactory(JPAQueryFactory jpaQueryFactory) {
-        this.jpaQueryFactory = jpaQueryFactory;
-    }
 
     @Autowired
     public void setRepositoryFragmentsCustomizer(@jakarta.annotation.Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer) {
@@ -46,28 +38,25 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
     @Nonnull
     @Override
     protected RepositoryFactorySupport createRepositoryFactory(@Nonnull EntityManager em) {
-        return new BaseRepositoryFactory(em, jpaQueryFactory, repositoryFragmentsCustomizer);
+        return new BaseRepositoryFactory(em, repositoryFragmentsCustomizer);
     }
 
     @NullMarked
     private static class BaseRepositoryFactory
             extends JpaRepositoryFactory {
 
-        private final JPAQueryFactory jpaQueryFactory;
-
         @Nullable
         private final List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer;
 
-        public BaseRepositoryFactory(EntityManager em, JPAQueryFactory jpaQueryFactory,@Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizers) {
+        public BaseRepositoryFactory(EntityManager em,@Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizers) {
             super(em);
-            this.jpaQueryFactory = jpaQueryFactory;
             this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizers;
         }
 
         @Override
         protected JpaRepositoryImplementation<?, ?> getTargetRepository(final RepositoryInformation information, final EntityManager entityManager) {
             JpaEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
-            return getTargetRepositoryViaReflection(information,entityInformation,entityManager,jpaQueryFactory);
+            return getTargetRepositoryViaReflection(information,entityInformation,entityManager);
         }
 
         /**
@@ -92,7 +81,7 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
                     && (QueryDslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
             if (isQueryDslRepository) {
-                var querydslRepositoryExecutor = new QuerydslRepositoryExecutor<>(entityInformation, entityManager, resolver, jpaQueryFactory);
+                var querydslRepositoryExecutor = new QuerydslRepositoryExecutor<>(entityInformation, entityManager, resolver);
                 fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(querydslRepositoryExecutor));
             }
             return fragments.append(super.getRepositoryFragments(metadata, entityManager, resolver, crudMethodMetadata));

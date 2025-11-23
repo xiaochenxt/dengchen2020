@@ -1,6 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
 import org.jspecify.annotations.NullMarked;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -14,6 +15,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 public interface BaseJpaRepository<T, ID> extends ComplexJpaRepository<T> ,
         QueryDslJpaRepository<T>, EntityManagerRepository<T, ID>,
         QueryJpaRepository<T, ID>,
-        CrudJpaRepository<T, ID> {
+        CrudJpaRepository<T, ID>, ListQuerydslPredicateExecutor<T> {
 
 }

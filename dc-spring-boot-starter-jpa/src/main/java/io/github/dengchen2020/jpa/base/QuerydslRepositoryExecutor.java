@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.Querydsl;
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -44,13 +45,12 @@ public class QuerydslRepositoryExecutor<T, ID> implements QueryDslJpaRepository<
     protected final PathBuilder<T> builder;
    // protected final Querydsl querydsl;
 
-    public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver,
-                                      JPAQueryFactory queryFactory) {
+    public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
         this.entityManager = entityManager;
-        this.queryFactory = queryFactory;
         this.path = resolver.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
-       // this.querydsl = new Querydsl(entityManager, builder);
+        var querydsl = new Querydsl(entityManager, builder);
+        this.queryFactory = new JPAQueryFactory(querydsl.getTemplates(), entityManager);
     }
 
     public JPAQueryFactory queryFactory() {
@@ -111,19 +111,9 @@ public class QuerydslRepositoryExecutor<T, ID> implements QueryDslJpaRepository<
     }
 
     @Override
-    public JPAUpdateClause update(Predicate where) {
-        return update(new Predicate[]{where});
-    }
-
-    @Override
     public long delete(Predicate[] where) {
         Assert.notEmpty(where, "删除必须有条件");
         return queryFactory.delete(path).where(where).execute();
-    }
-
-    @Override
-    public long delete(Predicate where) {
-        return delete(new Predicate[]{where});
     }
 
     @Override

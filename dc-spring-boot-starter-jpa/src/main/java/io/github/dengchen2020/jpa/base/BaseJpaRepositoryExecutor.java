@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.IterableUtils;
@@ -62,7 +61,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     private static final String userIdSqlFragment = " and " + userIdFieldName + " = :userId";
     private static final String deletedFieldName = "deleted";
 
-    public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em, final JPAQueryFactory queryFactory) {
+    public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
         this.entityManager = em;
         this.entity = entityInformation;
@@ -143,7 +142,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public T selectById(ID id) {
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
-        if (metadata == null) {
+        if (metadata == null || metadata.getLockModeType() == null) {
             return entityManager.find(getDomainClass(), id, getHints());
         }
         return entityManager.find(getDomainClass(), id, metadata.getLockModeType(), getHints());
