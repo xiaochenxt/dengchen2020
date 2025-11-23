@@ -1,6 +1,5 @@
 package io.github.dengchen2020.id.snowflake;
 
-import io.github.dengchen2020.id.properties.IdGeneratorBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,14 +20,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * @since 2024/7/2
  */
 @ConditionalOnBean(RedisConnectionFactory.class)
-@EnableConfigurationProperties(IdGeneratorBuilder.class)
+@EnableConfigurationProperties(SnowflakeIdGeneratorOptions.class)
 @ConditionalOnProperty(value = "dc.id.type",matchIfMissing = true,havingValue = "snowflake")
 @Configuration(proxyBeanMethods = false)
 public final class SnowflakeAutoConfiguration {
 
     @Bean
-    SnowflakeSmartLifecycle snowflakeSmartLifecycle(RedisConnectionFactory redisConnectionFactory, IdGeneratorBuilder idGeneratorBuilder){
-        return new SnowflakeSmartLifecycle(new StringRedisTemplate(redisConnectionFactory),idGeneratorBuilder.getSnowflake());
+    SnowflakeSmartLifecycle snowflakeSmartLifecycle(RedisConnectionFactory redisConnectionFactory, SnowflakeIdGeneratorOptions snowflakeIdGeneratorOptions){
+        return new SnowflakeSmartLifecycle(new StringRedisTemplate(redisConnectionFactory), snowflakeIdGeneratorOptions);
     }
 
 }
