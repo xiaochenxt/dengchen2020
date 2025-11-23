@@ -30,7 +30,7 @@ public final class JacksonAutoConfiguration {
             return GenericJackson2JsonRedisSerializer.builder()
                     .defaultTyping(true)
                     .objectMapper(jackson2ObjectMapperBuilder.createXmlMapper(false)
-                            .failOnUnknownProperties(true)
+                            .failOnUnknownProperties(false)
                             .serializationInclusion(JsonInclude.Include.NON_NULL)
                             .build()
                     )
