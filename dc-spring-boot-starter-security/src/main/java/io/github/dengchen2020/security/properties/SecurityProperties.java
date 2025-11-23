@@ -2,7 +2,6 @@ package io.github.dengchen2020.security.properties;
 
 import io.github.dengchen2020.security.permission.PermissionVerifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.List;
  * @author xiaochen
  * @since 2019/10/8 13:06
  */
-@Validated
 @ConfigurationProperties(prefix = "dc.security")
 public class SecurityProperties {
 
