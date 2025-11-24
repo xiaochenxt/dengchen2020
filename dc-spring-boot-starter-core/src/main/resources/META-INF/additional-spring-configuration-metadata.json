@@ -50,6 +50,11 @@
       "description": "静态资源缓存的有效期.",
       "defaultValue": "5s"
     },{
+      "name": "dc.static.resource-content-codings",
+      "type": "java.lang.String[]",
+      "description": "当启用spring.web.resources.chain.compressed（需要同时准备源文件和压缩后带gz或br后缀的文件，如果只有源文件，不应该启用）时支持的编码，例如gzip、br，建议保持默认.",
+      "defaultValue": "gzip"
+    },{
       "name": "dc.frequency-control.enabled",
       "type": "java.lang.Boolean",
       "description": "是否启用请求频控.",
