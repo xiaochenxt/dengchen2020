@@ -30,6 +30,7 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
+import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHandlerUtils;
 
 import java.time.Duration;
@@ -172,9 +173,15 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
                 .setUseLastModified(resources.getCache().isUseLastModified());
         if (cachePeriod != null) registration.setCachePeriod((int) cachePeriod.getSeconds());
         if (cacheControl != null) registration.setCacheControl(cacheControl);
-        registration.resourceChain(false)
+        var resourceChainRegistration = registration.resourceChain(false)
                 .addResolver(new DcCachingResourceResolver(cache, Math.max(maxContentLength, 1024)))
                 .addTransformer(new CachingResourceTransformer(cache));
+        if (resources.getChain().isCompressed()) {
+            var contentCodings = environment.getProperty("dc.static.resource-content-codings", String[].class, new String[]{"gzip"});
+            var encodedResourceResolver = new EncodedResourceResolver();
+            encodedResourceResolver.setContentCodings(List.of(contentCodings));
+            resourceChainRegistration.addResolver(encodedResourceResolver);
+        }
     }
 
 }
