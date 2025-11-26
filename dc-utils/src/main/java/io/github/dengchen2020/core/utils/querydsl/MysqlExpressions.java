@@ -1,19 +1,21 @@
-package io.github.dengchen2020.core.querydsl;
+package io.github.dengchen2020.core.utils.querydsl;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
+import org.jspecify.annotations.NullMarked;
 
 import java.time.LocalDate;
 import java.util.Collection;
 
 /**
- * 扩充querydsl的sql表达式
+ * 扩充querydsl的专用于mysql的sql表达式
  * @author xiaochen
  * @since 2024/4/2
  */
-public final class ExpressionConstant {
+@NullMarked
+public final class MysqlExpressions {
 
-    private ExpressionConstant() {}
+    private MysqlExpressions() {}
 
     /**
      * 检查,分割存储的字符串字段中是否包含特定值
@@ -121,7 +123,7 @@ public final class ExpressionConstant {
      * @return
      */
     public static DateExpression<LocalDate> date(DateTimePath<java.time.LocalDateTime> dateTimePath) {
-        return Expressions.dateTemplate(java.time.LocalDate.class, "date({0})", dateTimePath);
+        return Expressions.dateTemplate(LocalDate.class, "date({0})", dateTimePath);
     }
 
 }

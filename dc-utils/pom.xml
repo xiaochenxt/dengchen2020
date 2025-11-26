@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.8</version>
+        <version>0.1.9</version>
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.7</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -140,6 +140,12 @@
       <dependency>
           <groupId>org.graalvm.js</groupId>
           <artifactId>js-scriptengine</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>io.github.openfeign.querydsl</groupId>
+          <artifactId>querydsl-core</artifactId>
           <optional>true</optional>
       </dependency>
 

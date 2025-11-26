@@ -1,19 +1,22 @@
-package io.github.dengchen2020.core.querydsl;
+package io.github.dengchen2020.core.utils.querydsl;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.StringTemplate;
 import io.github.dengchen2020.core.utils.JsonUtils;
+import org.jspecify.annotations.NullMarked;
 
 import java.time.LocalDate;
 import java.util.Collection;
 
 /**
- * 扩充querydsl的sql表达式
+ * 扩充querydsl的专用于postgresql的sql表达式
  *
  * @author xiaochen
  * @since 2024/4/2
  */
-public class ExpressionPostgresqlConstant {
+@NullMarked
+public class PostgresqlExpressions {
 
     /**
      * 检查,分割存储的字符串字段中是否包含特定值
