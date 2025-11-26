@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.8</version>
+        <version>0.1.9</version>
     </parent>
 
     <artifactId>dc-spring-boot-starter-core</artifactId>
@@ -46,22 +46,36 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- 咖啡因缓存-->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.dengchen2020</groupId>
+            <artifactId>dc-utils</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.dengchen2020</groupId>
+            <artifactId>dc-spring-boot-native-image</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <!-- apache提供的对象池实现，https://commons.apache.org/proper/commons-pool/ -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 咖啡因缓存-->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
         </dependency>
 
         <!-- springboot4中因为spring-retry核心功能迁移到了spring-core中，不再需要该依赖-->
@@ -70,14 +84,14 @@
             <artifactId>spring-retry</artifactId>
         </dependency>
 
-        <!-- apache提供的对象池实现，https://commons.apache.org/proper/commons-pool/ -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
-            <groupId>com.querydsl</groupId>
+            <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-core</artifactId>
             <optional>true</optional>
         </dependency>
@@ -92,21 +106,6 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.dengchen2020</groupId>
-            <artifactId>dc-utils</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.dengchen2020</groupId>
-            <artifactId>dc-spring-boot-native-image</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
         </dependency>
 
         <dependency>
