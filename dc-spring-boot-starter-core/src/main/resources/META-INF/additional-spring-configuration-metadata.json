@@ -52,7 +52,7 @@
     },{
       "name": "dc.static.resource-content-codings",
       "type": "java.lang.String[]",
-      "description": "当启用spring.web.resources.chain.compressed（需要同时准备源文件和压缩后带gz或br后缀的文件，如果只有源文件，不应该启用）时支持的编码，例如gzip、br，建议保持默认.",
+      "description": "当启用spring.web.resources.chain.compressed（需要提前准备压缩后的带gz或br后缀的文件（不再需要源文件），如果只有源文件，不应该启用）时支持的编码，例如gzip、br，建议保持默认.",
       "defaultValue": "gzip"
     },{
       "name": "dc.frequency-control.enabled",
