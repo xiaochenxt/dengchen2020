@@ -23,12 +23,7 @@ public class SecurityScheduledTaskHandleListener {
     public void handle(ScheduledHandleBeforeEvent event) {
         ProceedingJoinPoint joinPoint = event.joinPoint();
         Class<?> target = joinPoint.getTarget().getClass();
-        String key;
-        if (target.getDeclaredMethods().length == 1) {
-            key = event.localIpInfo() + ":" + "task:" + target.getSimpleName();
-        } else {
-            key = event.localIpInfo() + ":" + "task:" + target.getSimpleName() + ":" + joinPoint.getSignature().getName();
-        }
+        String key = event.localIpInfo() + ":" + "task:" + target.getSimpleName() + ":" + joinPoint.getSignature().getName();
         if (SecurityContextHolder.getAuthentication() == null) {
             SecurityContextHolder.setAuthentication(new AnonymousAuthentication(key.substring(0, Math.min(key.length(), 64))));
         }

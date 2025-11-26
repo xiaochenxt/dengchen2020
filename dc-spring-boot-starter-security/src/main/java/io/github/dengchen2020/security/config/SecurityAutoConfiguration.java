@@ -1,7 +1,5 @@
 package io.github.dengchen2020.security.config;
 
-import io.github.dengchen2020.core.security.password.BCryptPasswordEncoder;
-import io.github.dengchen2020.core.security.password.PasswordEncoder;
 import io.github.dengchen2020.security.authentication.filter.AuthenticationFilter;
 import io.github.dengchen2020.security.authentication.interceptor.AuthenticationInterceptor;
 import io.github.dengchen2020.security.authentication.token.TokenService;
@@ -14,6 +12,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -39,7 +38,7 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
 
     @ConditionalOnMissingBean
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(4);
     }
 
