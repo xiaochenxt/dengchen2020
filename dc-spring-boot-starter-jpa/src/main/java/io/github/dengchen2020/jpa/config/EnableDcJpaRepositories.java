@@ -51,6 +51,7 @@ public @interface EnableDcJpaRepositories {
      * 指定哪些类型有资格进行组件扫描。进一步缩小候选分量范围
      * {@link #basePackages（）} 中的全部内容，映射为基础包中与给定过滤器匹配的所有内容。
      */
+    @AliasFor(annotation = EnableJpaRepositories.class)
     ComponentScan.Filter[] includeFilters() default {};
 
     /**
