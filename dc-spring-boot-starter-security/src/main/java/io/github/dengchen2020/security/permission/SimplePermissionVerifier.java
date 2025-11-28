@@ -1,6 +1,7 @@
 package io.github.dengchen2020.security.permission;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.security.principal.PermissionsInfo;
 
 import java.util.Set;
 
@@ -21,10 +22,11 @@ public class SimplePermissionVerifier implements PermissionVerifier {
      */
     @Override
     public boolean hasPermission(Authentication authentication, String[] permissions) {
-        if (authentication.permissions() == null) return true;
-        if (authentication.permissions().isEmpty()) return false;
+        if (!(authentication instanceof PermissionsInfo permissionsInfo)) return true;
+        if (permissionsInfo.permissions() == null) return true;
+        if (permissionsInfo.permissions().isEmpty()) return false;
         Set<String> permissionSet = Set.of(permissions);
-        for (String s : authentication.permissions()) {
+        for (String s : permissionsInfo.permissions()) {
             if (permissionSet.contains(s)) return true;
         }
         return false;

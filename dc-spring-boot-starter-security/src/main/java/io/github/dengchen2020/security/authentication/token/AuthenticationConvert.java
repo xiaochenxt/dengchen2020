@@ -11,14 +11,14 @@ import io.github.dengchen2020.core.security.principal.Authentication;
  */
 public interface AuthenticationConvert {
 
-    Class<? extends Authentication> convertType();
+    Class<? extends Authentication> type();
 
     default String serialize(Authentication authentication) {
         return JsonUtils.toJson(authentication);
     }
 
     default Authentication deserialize(String tokenInfo) {
-        return JsonUtils.fromJson(tokenInfo, convertType());
+        return JsonUtils.fromJson(tokenInfo, type());
     }
 
 }

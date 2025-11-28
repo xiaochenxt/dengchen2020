@@ -1,2 +1,3 @@
+io.github.dengchen2020.security.config.TokenAutoConfiguration
 io.github.dengchen2020.security.config.SecurityAutoConfiguration
 io.github.dengchen2020.security.config.PermissionVerifierAutoConfiguration

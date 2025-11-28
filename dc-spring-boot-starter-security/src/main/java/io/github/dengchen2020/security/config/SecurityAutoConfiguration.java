@@ -5,7 +5,6 @@ import io.github.dengchen2020.security.authentication.interceptor.Authentication
 import io.github.dengchen2020.security.authentication.token.TokenService;
 import io.github.dengchen2020.security.event.listener.SecurityScheduledTaskHandleListener;
 import io.github.dengchen2020.security.properties.SecurityProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -23,9 +22,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author xiaochen
  * @since 2024/4/25
  */
-@ConditionalOnBean(TokenService.class)
 @EnableConfigurationProperties(SecurityProperties.class)
-public class SecurityAutoConfiguration implements WebMvcConfigurer {
+public final class SecurityAutoConfiguration implements WebMvcConfigurer {
 
     private final TokenService tokenService;
 
@@ -38,13 +36,13 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
 
     @ConditionalOnMissingBean
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(4);
     }
 
     @ConditionalOnMissingBean(value = AuthenticationFilter.class, parameterizedContainer = FilterRegistrationBean.class)
     @Bean
-    public FilterRegistrationBean<AuthenticationFilter> authenticationFilter() {
+    FilterRegistrationBean<AuthenticationFilter> authenticationFilter() {
         FilterRegistrationBean<AuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new AuthenticationFilter(tokenService));
         filterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 300);
@@ -59,7 +57,7 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public SecurityScheduledTaskHandleListener securityScheduledTaskHandleListener(){
+    SecurityScheduledTaskHandleListener securityScheduledTaskHandleListener(){
         return new SecurityScheduledTaskHandleListener();
     }
 

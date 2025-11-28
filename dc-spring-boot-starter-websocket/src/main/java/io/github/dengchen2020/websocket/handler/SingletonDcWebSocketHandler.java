@@ -1,6 +1,7 @@
 package io.github.dengchen2020.websocket.handler;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.security.principal.TenantInfo;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.web.socket.CloseStatus;
@@ -52,11 +53,13 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
                 return sessions.isEmpty() ? null : sessions;
             });
         }
-        if (authentication.tenantId() != null) {
-            tenantIdSessionMap.computeIfPresent(authentication.tenantId(), (tenantId, sessions) -> {
-                sessions.removeIf(s -> s.getId().equals(session.getId()));
-                return sessions.isEmpty() ? null : sessions;
-            });
+        if (authentication instanceof TenantInfo tenantInfo) {
+            if (tenantInfo.tenantId() != null) {
+                tenantIdSessionMap.computeIfPresent(tenantInfo.tenantId(), (tenantId, sessions) -> {
+                    sessions.removeIf(s -> s.getId().equals(session.getId()));
+                    return sessions.isEmpty() ? null : sessions;
+                });
+            }
         }
     }
 
@@ -72,8 +75,10 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
             if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
         }
         sessionQueue.add(session);
-        if (authentication.tenantId() != null) {
-            tenantIdSessionMap.computeIfAbsent(authentication.tenantId(), (tenantId) -> new ConcurrentLinkedQueue<>()).add(session);
+        if (authentication instanceof TenantInfo tenantInfo) {
+            if (tenantInfo.tenantId() != null) {
+                tenantIdSessionMap.computeIfAbsent(tenantInfo.tenantId(), (tenantId) -> new ConcurrentLinkedQueue<>()).add(session);
+            }
         }
     }
 
