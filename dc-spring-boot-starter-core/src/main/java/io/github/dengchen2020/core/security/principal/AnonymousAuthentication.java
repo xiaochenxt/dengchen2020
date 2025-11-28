@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.security.principal;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,6 +10,9 @@ import java.io.Serializable;
  * @since 2025/2/25
  */
 public record AnonymousAuthentication(String name) implements Authentication, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public static final AnonymousAuthentication INSTANCE = new AnonymousAuthentication();
 
