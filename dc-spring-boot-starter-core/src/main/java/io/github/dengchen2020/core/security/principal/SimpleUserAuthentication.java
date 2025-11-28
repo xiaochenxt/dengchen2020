@@ -14,7 +14,7 @@ import java.util.Set;
  * @since 2024/4/28
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record SimpleUserAuthentication(String userId, Long tenantId, Set<String> permissions, Map<String, Object> info) implements Authentication, Serializable {
+public record SimpleUserAuthentication(String userId, Long tenantId, Set<String> permissions, Map<String, Object> info) implements Authentication, TenantInfo, PermissionsInfo, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
