@@ -1,5 +1,7 @@
 package io.github.dengchen2020.security.config;
 
+import io.github.dengchen2020.core.security.principal.PermissionsInfo;
+import io.github.dengchen2020.security.authentication.token.AuthenticationConvert;
 import io.github.dengchen2020.security.permission.PermissionVerifyInterceptor;
 import io.github.dengchen2020.security.permission.PermissionVerifier;
 import io.github.dengchen2020.security.permission.SimplePermissionVerifier;
@@ -25,12 +27,15 @@ public final class PermissionVerifierAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    PermissionVerifier permissionVerifier() {
+    PermissionVerifier permissionVerifier(AuthenticationConvert authenticationConvert) {
+        if (!PermissionsInfo.class.isAssignableFrom(authenticationConvert.type())) {
+            throw new IllegalArgumentException(authenticationConvert.type() +" 未实现 " + PermissionsInfo.class.getName());
+        }
         return new SimplePermissionVerifier();
     }
 
     @Configuration(proxyBeanMethods = false)
-    static class InterceptorConfiguration implements WebMvcConfigurer {
+    static final class InterceptorConfiguration implements WebMvcConfigurer {
 
         private final SecurityProperties securityProperties;
 

@@ -2,6 +2,7 @@ package io.github.dengchen2020.jpa.base;
 
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.security.principal.TenantInfo;
 import io.github.dengchen2020.core.utils.IterableUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -213,7 +214,10 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
     private Long getTenantIdNonNull(){
         Authentication authentication = SecurityContextHolder.getAuthentication();
         Assert.notNull(authentication, "未设置authentication，无法获取tenantId");
-        Long tenantId = authentication.tenantId();
+        if (!(authentication instanceof TenantInfo tenantInfo)) {
+            throw new IllegalArgumentException(authentication.getName() + "未实现 " + TenantInfo.class.getName());
+        }
+        Long tenantId = tenantInfo.tenantId();
         Assert.notNull(tenantId, "tenantId must not be null");
         return tenantId;
     }
@@ -230,8 +234,8 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
     private Long getTenantId(){
         if (strictVerifyAuthentication) return getTenantIdNonNull();
         Authentication authentication = SecurityContextHolder.getAuthentication();
-        if (authentication == null || authentication.tenantId() == null) return null;
-        return authentication.tenantId();
+        if (!(authentication instanceof TenantInfo tenantInfo)) return null;
+        return tenantInfo.tenantId();
     }
 
     @Nullable

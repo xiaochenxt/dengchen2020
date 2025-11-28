@@ -102,7 +102,7 @@ public class JwtTokenServiceImpl implements TokenService {
      * @return {@link Authentication}
      */
     private Authentication readJwt(JWT jwt) {
-        return JsonUtils.convertValue(jwt.getOtherClaims().get(TokenConstant.PAYLOAD), authenticationConvert.convertType());
+        return JsonUtils.convertValue(jwt.getOtherClaims().get(TokenConstant.PAYLOAD), authenticationConvert.type());
     }
 
 }

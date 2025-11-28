@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.security.principal;
 
 import java.io.Serializable;
-import java.util.Set;
 
 /**
  * 匿名用户认证信息
@@ -23,16 +22,6 @@ public record AnonymousAuthentication(String name) implements Authentication, Se
 
     @Override
     public String userId() {
-        return null;
-    }
-
-    @Override
-    public Long tenantId() {
-        return null;
-    }
-
-    @Override
-    public Set<String> permissions() {
         return null;
     }
 

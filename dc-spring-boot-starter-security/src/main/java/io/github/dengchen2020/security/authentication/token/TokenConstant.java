@@ -18,6 +18,6 @@ public final class TokenConstant {
     /**
      * token生成时userId和随机字符串之间的分隔符
      */
-    public static final String SEPARATOR = "-";
+    public static final String SEPARATOR = ":";
 
 }
