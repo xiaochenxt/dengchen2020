@@ -23,7 +23,11 @@ public abstract class RequestUtils extends RequestContextHolder {
 
     private static final Logger log = LoggerFactory.getLogger(RequestUtils.class);
 
-    private static final String REAL_CLIENT_IP_HEADER = System.getProperty("dc.real.client.ip.header", "X-Real-IP");
+    private static final String DEFAULT_REAL_IP_HEADER = System.getProperty("dc.real.ip.header","");
+    public static final String NGINX_REAL_IP_HEADER = "x-real-ip";
+    public static final String CLOUDFLARE_REAL_IP_HEADER = "cf-connecting-ip";
+    public static final boolean USE_NGINX = Boolean.parseBoolean(System.getProperty("dc.use-nginx","true"));
+    public static final boolean USE_CLOUDFLARE = Boolean.parseBoolean(System.getProperty("dc.use-cloudflare","true"));
 
     /**
      * 获取当前请求上下文属性
@@ -82,16 +86,27 @@ public abstract class RequestUtils extends RequestContextHolder {
     /**
      * 获取远程客户端ip地址
      * <p>
-     * 使用Nginx等反向代理软件， 则不能通过request.getRemoteAddr()获取IP地址
-     * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
+     * 使用cloudflare的cdn、或Nginx的代理时，不能直接通过request.getRemoteAddr()获取IP地址，获得的ip是代理的ip，
+     * 需要从指定请求头中获取，这里默认尝试从cloudflare的ip请求头、nginx的ip请求头、指定请求头中获取用户的真实ip
      * </p>
      */
     public static String getRemoteAddr(@NonNull HttpServletRequest request) {
         String ip = null;
         try {
-            //获取nginx等代理服务器配置的自定义ip请求头的ip
-            ip = request.getHeader(REAL_CLIENT_IP_HEADER);
-            if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
+            if (USE_CLOUDFLARE) {
+                //从cloudflare的ip请求头中获取真实用户的ip
+                ip = request.getHeader(CLOUDFLARE_REAL_IP_HEADER);
+                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
+            }
+            if (USE_NGINX) {
+                //从nginx的ip请求头中获取真实用户的ip
+                ip = request.getHeader(NGINX_REAL_IP_HEADER);
+                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
+            }
+            if (!DEFAULT_REAL_IP_HEADER.isBlank()) {
+                ip = request.getHeader(DEFAULT_REAL_IP_HEADER);
+                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
+            }
             ip = request.getRemoteAddr();
         } catch (Exception e) {
             log.error("获取客户端IP失败: {}", e.toString());
@@ -102,8 +117,8 @@ public abstract class RequestUtils extends RequestContextHolder {
     /**
      * 获取远程客户端ip地址
      * <p>
-     * 使用Nginx等反向代理软件， 则不能通过request.getRemoteAddr()获取IP地址
-     * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
+     * 使用cloudflare的cdn、或Nginx的代理时，不能直接通过request.getRemoteAddr()获取IP地址，获得的ip是代理的ip，
+     * 需要从指定请求头中获取，这里默认尝试从cloudflare的ip请求头、nginx的ip请求头、指定请求头中获取用户的真实ip
      * </p>
      */
     public static String getRemoteAddr() {
