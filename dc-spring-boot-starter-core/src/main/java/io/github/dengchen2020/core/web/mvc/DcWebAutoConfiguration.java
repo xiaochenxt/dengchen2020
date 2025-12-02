@@ -85,6 +85,8 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
         }
         if (!CollectionUtils.isEmpty(builder.getExposedHeaders())) {
             config.setExposedHeaders(builder.getExposedHeaders());
+        } else {
+            config.addExposedHeader("*");
         }
         if (!CollectionUtils.isEmpty(builder.getAllowedMethods())) {
             config.setAllowedMethods(builder.getAllowedMethods());
