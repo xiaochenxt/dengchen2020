@@ -1,11 +1,11 @@
 package io.github.dengchen2020.ip.service.impl.xdb;
 
-import io.github.dengchen2020.core.utils.IPUtils;
 import io.github.dengchen2020.ip.model.IpInfo;
 import io.github.dengchen2020.ip.service.IpService;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.lionsoul.ip2region.xdb.Util;
 import org.lionsoul.ip2region.xdb.Version;
 import org.lionsoul.ip2region.xdb.XdbException;
 import org.slf4j.Logger;
@@ -89,14 +89,15 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
         if (!StringUtils.hasText(ip)) return defaultInfo(ip);
         try {
             String[] ipInfo;
-            if (IPUtils.isIpv6(ip)) {
+            var data = Util.parseIP(ip);
+            if (data.length == 16) {
                 if (searcherIpv6 == null) {
                     log.error("未加载ipv6数据包，无法查询ipv6信息");
                     return defaultInfo(ip);
                 }
-                ipInfo = searcherIpv6.search(ip).split("\\|");
+                ipInfo = searcherIpv6.search(data).split("\\|");
             } else {
-                ipInfo = searcherIpv4.search(ip).split("\\|");
+                ipInfo = searcherIpv4.search(data).split("\\|");
             }
             if (ipInfo.length > 0) {
                 return new IpInfo(ip, getValue(ipInfo, 0), getValue(ipInfo, 1),
@@ -108,48 +109,6 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
             }
         } catch (Exception e) {
             log.error("获取ip信息失败：{}", e.toString());
-        }
-        return defaultInfo(ip);
-    }
-
-    @Override
-    public IpInfo getInfoForIpv4(String ip) {
-        if (!StringUtils.hasText(ip)) return defaultInfo(ip);
-        try {
-            String[] ipInfo = searcherIpv4.search(ip).split("\\|");
-            if (ipInfo.length > 0) {
-                return new IpInfo(ip, getValue(ipInfo, 0), getValue(ipInfo, 1),
-                        getValue(ipInfo, 2), getValue(ipInfo, 3), getValue(ipInfo, 4),
-                        getValue(ipInfo, 5), getValue(ipInfo, 6), getValue(ipInfo, 7),
-                        getValue(ipInfo, 8), getValue(ipInfo, 9), getValue(ipInfo, 10),
-                        getValue(ipInfo, 11), getValue(ipInfo, 12), getValue(ipInfo, 13))
-                        ;
-            }
-        } catch (Exception e) {
-            log.error("获取ipv4信息失败：{}", e.toString());
-        }
-        return defaultInfo(ip);
-    }
-
-    @Override
-    public IpInfo getInfoForIpv6(String ip) {
-        if (!StringUtils.hasText(ip)) return defaultInfo(ip);
-        try {
-            if (searcherIpv6 == null) {
-                log.error("未加载ipv6数据包，无法查询ipv6信息");
-                return defaultInfo(ip);
-            }
-            String[] ipInfo = searcherIpv6.search(ip).split("\\|");
-            if (ipInfo.length > 0) {
-                return new IpInfo(ip, getValue(ipInfo, 0), getValue(ipInfo, 1),
-                        getValue(ipInfo, 2), getValue(ipInfo, 3), getValue(ipInfo, 4),
-                        getValue(ipInfo, 5), getValue(ipInfo, 6), getValue(ipInfo, 7),
-                        getValue(ipInfo, 8), getValue(ipInfo, 9), getValue(ipInfo, 10),
-                        getValue(ipInfo, 11), getValue(ipInfo, 12), getValue(ipInfo, 13))
-                        ;
-            }
-        } catch (Exception e) {
-            log.error("获取ipv6信息失败：{}", e.toString());
         }
         return defaultInfo(ip);
     }

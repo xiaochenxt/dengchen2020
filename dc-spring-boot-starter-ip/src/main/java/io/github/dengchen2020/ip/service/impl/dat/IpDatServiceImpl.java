@@ -71,13 +71,4 @@ public class IpDatServiceImpl implements IpService {
         return new IpInfo(ip);
     }
 
-    @Override
-    public IpInfo getInfoForIpv4(String ip) {
-        return getInfo(ip);
-    }
-
-    @Override
-    public IpInfo getInfoForIpv6(String ip) {
-        throw new UnsupportedOperationException("不支持ipv6查询");
-    }
 }
