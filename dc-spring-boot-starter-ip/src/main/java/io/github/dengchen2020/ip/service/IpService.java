@@ -16,14 +16,4 @@ public interface IpService {
      */
     IpInfo getInfo(String ip);
 
-    /**
-     * 获取ipv4信息
-     */
-    IpInfo getInfoForIpv4(String ip);
-
-    /**
-     * 获取ipv6信息
-     */
-    IpInfo getInfoForIpv6(String ip);
-
 }

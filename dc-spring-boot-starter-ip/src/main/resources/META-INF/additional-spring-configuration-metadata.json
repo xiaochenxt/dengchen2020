@@ -12,10 +12,30 @@
       "description": "ipv6数据包的文件目录地址，例如：C:/Users/devloper/ip/ipv6.xdb 或 /home/devloper/ip/ipv6.xdb .",
       "defaultValue": "ipv6.xdb"
     },{
+      "name": "dc.ip.use-v2",
+      "type": "java.lang.Boolean",
+      "description": "使用v2版本（需要2025年10月后生成的新的xdb数据包） .",
+      "defaultValue": "false"
+    },{
       "name": "dc.ip.verify",
       "type": "java.lang.Boolean",
-      "description": "是否验证ip数据包的有效性.",
+      "description": "是否验证ip数据包的有效性，以适配新版本（版本和数据包都未变动的情况下，只需验证一次即可更改为false）.",
+      "defaultValue": false
+    },{
+      "name": "dc.ip.buffer-cache.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用全内存缓存模式，仅V2有效.",
       "defaultValue": true
+    },{
+      "name": "dc.ip.v4.searcher-count",
+      "type": "java.lang.Integer",
+      "description": "ipv4的searcher数量（启用全内存缓存时无效），仅V2有效 .",
+      "defaultValue": "20"
+    },{
+      "name": "dc.ip.v6.searcher-count",
+      "type": "java.lang.Integer",
+      "description": "ipv6的searcher数量（启用全量缓存时无效），仅V2有效 .",
+      "defaultValue": "20"
     }
   ]
 }
