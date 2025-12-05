@@ -366,8 +366,12 @@ public abstract class DateTimeUtils {
      * @return 如果当前时间在范围内返回 true，否则返回 false
      */
     public static boolean isWithinTimeRange(LocalTime startTime, LocalTime endTime, LocalTime currentTime) {
+        if (startTime.equals(endTime)) {
+            // 00:00:00-00:00:00 代表一整天，返回true
+            return startTime.equals(LocalTime.MIDNIGHT);
+        }
+        // 正常时间范围，不跨天
         if (startTime.isBefore(endTime)) {
-            // 正常时间范围，不跨天
             return currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
         } else {
             // 跨天时间范围
