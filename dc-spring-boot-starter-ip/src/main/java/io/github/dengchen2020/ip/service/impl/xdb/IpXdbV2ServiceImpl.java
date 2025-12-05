@@ -62,11 +62,11 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
         if (ipv6DataPath != null) {
             File ipv6File = new File(ipv6DataPath);
             if (ipv6File.isFile() && ipv6File.exists()) {
-                ipv6Config = Config.custom().setXdbPath(ipv6DataPath).setSeachers(v6Searchers).asV6();
+                ipv6Config = Config.custom().setXdbPath(ipv6DataPath).setSearchers(v6Searchers).asV6();
                 if (verify) Searcher.verifyFromFile(ipv6DataPath);
             }
         }
-        load(Config.custom().setXdbPath(ipv4DataPath).setSeachers(v4Searchers).asV4(), ipv6Config);
+        load(Config.custom().setXdbPath(ipv4DataPath).setSearchers(v4Searchers).asV4(), ipv6Config);
     }
 
     private void load(Config v4,@Nullable Config v6) throws IOException, InterruptedException {
