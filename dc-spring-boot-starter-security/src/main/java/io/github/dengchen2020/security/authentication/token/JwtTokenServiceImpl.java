@@ -67,13 +67,24 @@ public class JwtTokenServiceImpl implements TokenService {
         String token = jwtHelper.createToken(authentication, expiresIn);
         long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
         String refreshToken = jwtHelper.refreshToken(token, refreshTokenExpiresIn);
+        storeRefreshToken(authentication, refreshToken, refreshExpireSeconds);
         return new TokenInfo(token, expiresIn, refreshToken, refreshTokenExpiresIn);
+    }
+
+    /**
+     * 存储刷新token
+     * @param authentication 认证信息对象
+     * @param refreshToken 刷新token
+     * @param expiresIn 有效期（秒）
+     */
+    protected void storeRefreshToken(Authentication authentication, String refreshToken, long expiresIn) {
+
     }
 
     public TokenInfo refreshToken(String refreshToken) {
         try {
             JWT jwt = jwtHelper.parseToken(refreshToken);
-            if (jwtHelper.isRefreshToken(jwt)) return createToken(readJwt(jwt));
+            if (jwtHelper.isRefreshToken(jwt) && checkRefreshToken(refreshToken)) return createToken(readJwt(jwt));
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 switch (e) {
@@ -86,6 +97,15 @@ public class JwtTokenServiceImpl implements TokenService {
             throw new SessionTimeOutException();
         }
         throw new SessionTimeOutException("不是一个刷新token，" + refreshToken);
+    }
+
+    /**
+     * 检查刷新token是否有效
+     * @param refreshToken 刷新token
+     * @return
+     */
+    protected boolean checkRefreshToken(String refreshToken) {
+        return true;
     }
 
     @Override
