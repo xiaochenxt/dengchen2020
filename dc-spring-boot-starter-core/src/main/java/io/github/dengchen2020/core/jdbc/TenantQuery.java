@@ -1,4 +1,4 @@
-package io.github.dengchen2020.jpa.base;
+package io.github.dengchen2020.core.jdbc;
 
 /**
  * 租户查询
