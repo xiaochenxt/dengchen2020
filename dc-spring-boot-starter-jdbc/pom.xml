@@ -75,7 +75,7 @@
             <annotationProcessorPath>
               <groupId>io.github.dengchen2020</groupId>
               <artifactId>querydsl-sql-spring-annotation-apt</artifactId>
-              <version>0.0.1</version>
+              <version>0.0.2</version>
             </annotationProcessorPath>
           </annotationProcessorPaths>
         </configuration>
