@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class QuerydslRepositoryExecutor<T, ID> implements QueryDslJpaRepository<T>, ComplexJpaRepository<T> {
+public class QuerydslJpaRepositoryExecutor<T, ID> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
 
     protected final EntityManager entityManager;
 
@@ -45,7 +45,7 @@ public class QuerydslRepositoryExecutor<T, ID> implements QueryDslJpaRepository<
     protected final PathBuilder<T> builder;
    // protected final Querydsl querydsl;
 
-    public QuerydslRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
+    public QuerydslJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
         this.entityManager = entityManager;
         this.path = resolver.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());

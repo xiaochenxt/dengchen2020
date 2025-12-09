@@ -5,10 +5,11 @@ import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.*;
+import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
@@ -53,12 +54,6 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizers;
         }
 
-        @Override
-        protected JpaRepositoryImplementation<?, ?> getTargetRepository(final RepositoryInformation information, final EntityManager entityManager) {
-            JpaEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
-            return getTargetRepositoryViaReflection(information,entityInformation,entityManager);
-        }
-
         /**
          * 设置具体的实现类的class
          * @param metadata 存储库接口的元数据
@@ -79,9 +74,9 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
                 }
             }
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
-                    && (QueryDslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
+                    && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
             if (isQueryDslRepository) {
-                var querydslRepositoryExecutor = new QuerydslRepositoryExecutor<>(entityInformation, entityManager, resolver);
+                var querydslRepositoryExecutor = new QuerydslJpaRepositoryExecutor<>(entityInformation, entityManager, resolver);
                 fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(querydslRepositoryExecutor));
             }
             return fragments.append(super.getRepositoryFragments(metadata, entityManager, resolver, crudMethodMetadata));

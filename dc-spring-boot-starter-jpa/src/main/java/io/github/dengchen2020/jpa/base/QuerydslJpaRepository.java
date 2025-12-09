@@ -17,7 +17,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  */
 @NullMarked
 @NoRepositoryBean
-public interface QueryDslJpaRepository<T> {
+public interface QuerydslJpaRepository<T> {
 
     <R> JPAQuery<R> select(Expression<R> expr);
 
