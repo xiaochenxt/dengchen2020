@@ -10,7 +10,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  */
 @NullMarked
 @NoRepositoryBean
-public interface SoftDeleteRepository<T, ID> {
+public interface SoftDeleteJpaRepository<T, ID> {
 
     /**
      * 批量逻辑删除

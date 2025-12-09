@@ -1,8 +1,7 @@
-package io.github.dengchen2020.core.utils.querydsl;
+package io.github.dengchen2020.jpa.querydsl;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
-import com.querydsl.core.types.dsl.StringTemplate;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import org.jspecify.annotations.NullMarked;
 

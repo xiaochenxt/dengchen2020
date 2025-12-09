@@ -1,5 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
+import io.github.dengchen2020.core.jdbc.TenantQuery;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.security.principal.TenantInfo;
@@ -38,7 +39,7 @@ import java.util.function.BiConsumer;
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecutor<T, ID> implements
-        QueryJpaRepository<T, ID>, SoftDeleteRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID>,
+        QueryJpaRepository<T, ID>, SoftDeleteJpaRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID>,
         EntityManagerRepository<T, ID> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseJpaRepositoryExecutor.class);
@@ -389,7 +390,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
         T t = selectById(id);
         if (t == null) return null;
         if (userId == null) return t;
-        if (t instanceof UserQuery<?> userQuery) {
+        if (t instanceof io.github.dengchen2020.core.jdbc.UserQuery<?> userQuery) {
             Object dataUserId = userQuery.getUserId();
             if (dataUserId == null){
                 if (log.isWarnEnabled()) log.warn("id：{}，{}.getUserId()返回null，条件无法携带userId", id, getDomainClass());
