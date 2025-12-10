@@ -52,23 +52,6 @@ public class AotUtils extends CollectUtils {
         }
     }
 
-    public void registerPatternIfPresent(String location, String... resources) {
-        if (classLoader.getResource(location) == null) return;
-        registerPattern(resources);
-    }
-
-    /**
-     * 与{@code registerPattern}不同，不支持模糊匹配路径注册
-     * @param resources
-     */
-    public void registerResourcesIfPresent(String... resources) {
-        for (String resource : resources) {
-            if (classLoader.getResource(resource) == null) continue;
-            hints.resources().registerPattern(resource);
-            if (debug) System.out.println("include resource " + resource);
-        }
-    }
-
     public void registerReflectionIfPresent(MemberCategory[] memberCategories, String... classes) {
         for (String clazz : classes) {
             try {

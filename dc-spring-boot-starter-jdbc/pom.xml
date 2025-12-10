@@ -62,24 +62,24 @@
 
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <parameters>true</parameters>
-          <proc>full</proc>
-          <annotationProcessorPaths>
-            // 生成Q类的关键
-            <annotationProcessorPath>
-              <groupId>io.github.dengchen2020</groupId>
-              <artifactId>querydsl-sql-spring-annotation-apt</artifactId>
-              <version>0.0.2</version>
-            </annotationProcessorPath>
-          </annotationProcessorPaths>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+<!--  <build>-->
+<!--    <plugins>-->
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-compiler-plugin</artifactId>-->
+<!--        <configuration>-->
+<!--          <parameters>true</parameters>-->
+<!--          <proc>full</proc>-->
+<!--          <annotationProcessorPaths>-->
+<!--            // 生成Q类的关键-->
+<!--            <annotationProcessorPath>-->
+<!--              <groupId>io.github.dengchen2020</groupId>-->
+<!--              <artifactId>querydsl-sql-spring-annotation-apt</artifactId>-->
+<!--              <version>0.0.2</version>-->
+<!--            </annotationProcessorPath>-->
+<!--          </annotationProcessorPaths>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+<!--    </plugins>-->
+<!--  </build>-->
 </project>
