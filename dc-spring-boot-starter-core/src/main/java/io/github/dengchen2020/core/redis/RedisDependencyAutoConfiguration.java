@@ -104,7 +104,7 @@ public final class RedisDependencyAutoConfiguration {
     }
 
     @Bean
-    ScheduledPreventConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
+    ScheduledPreventConcurrencyAop scheduledPreventConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
         return new ScheduledPreventConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
     }
 
