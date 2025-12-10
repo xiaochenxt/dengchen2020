@@ -1,5 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
+import io.github.dengchen2020.core.jdbc.BeforeInsertCallback;
+import io.github.dengchen2020.core.jdbc.BeforeUpdateCallback;
 import io.github.dengchen2020.core.jdbc.TenantQuery;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
@@ -46,7 +48,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     private static final Logger log = LoggerFactory.getLogger(BaseJpaRepositoryExecutor.class);
 
     protected final EntityManager entityManager;
-    protected final JpaEntityInformation<T, ?> entity;
+    protected final JpaEntityInformation<T, ?> entityInformation;
     protected final PersistenceProvider provider;
 
     final String idFieldName;
@@ -66,14 +68,14 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
         this.entityManager = em;
-        this.entity = entityInformation;
+        this.entityInformation = entityInformation;
         this.provider = PersistenceProvider.fromEntityManager(em);
-        this.idFieldName = entity.getIdAttribute() == null ? "id" : entity.getIdAttribute().getName();
-        this.selectInSql = "from " + entity.getEntityName() + " where "+idFieldName+" in :id";
-        this.deleteSql = "delete from " + entity.getEntityName() + " where "+idFieldName+" = :id";
-        this.deleteInSql = "delete from " + entity.getEntityName() + " where "+idFieldName+" in :id";
-        this.softDeleteSql = "update " + entity.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " = :id";
-        this.softDeleteInSql = "update " + entity.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " in :id";
+        this.idFieldName = entityInformation.getIdAttribute() == null ? "id" : entityInformation.getIdAttribute().getName();
+        this.selectInSql = "from " + entityInformation.getEntityName() + " where "+idFieldName+" in :id";
+        this.deleteSql = "delete from " + entityInformation.getEntityName() + " where "+idFieldName+" = :id";
+        this.deleteInSql = "delete from " + entityInformation.getEntityName() + " where "+idFieldName+" in :id";
+        this.softDeleteSql = "update " + entityInformation.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " = :id";
+        this.softDeleteInSql = "update " + entityInformation.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " in :id";
     }
 
     protected Map<String, Object> getHints() {
@@ -104,6 +106,25 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public void detach(T entity) {
         entityManager.detach(entity);
+    }
+
+    @Transactional
+    @Override
+    public <S extends T> S save(S entity) {
+        Assert.notNull(entity, "Entity must not be null");
+
+        if (entityInformation.isNew(entity)) {
+            if (entity instanceof BeforeInsertCallback beforeInsertCallback) {
+                beforeInsertCallback.beforeInsert();
+            }
+            entityManager.persist(entity);
+            return entity;
+        } else {
+            if (entity instanceof BeforeUpdateCallback beforeUpdateCallback) {
+                beforeUpdateCallback.beforeUpdate();
+            }
+            return entityManager.merge(entity);
+        }
     }
 
     @Transactional
