@@ -2,7 +2,7 @@ package io.github.dengchen2020.core.redis;
 
 import io.github.dengchen2020.core.redis.annotation.RedisMessageListener;
 import io.github.dengchen2020.core.redis.annotation.TopicType;
-import io.github.dengchen2020.core.scheduled.ScheduledConcurrencyAop;
+import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,8 +104,8 @@ public final class RedisDependencyAutoConfiguration {
     }
 
     @Bean
-    ScheduledConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
-        return new ScheduledConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
+    ScheduledPreventConcurrencyAop scheduledConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
+        return new ScheduledPreventConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
     }
 
 }

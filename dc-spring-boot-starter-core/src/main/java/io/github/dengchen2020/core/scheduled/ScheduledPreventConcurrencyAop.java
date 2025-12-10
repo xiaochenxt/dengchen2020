@@ -20,13 +20,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 定时任务多台服务器并发处理
+ * 定时任务多台服务器避免并行执行
  *
  * @author xiaochen
  * @since 2022/4/1 11:18
  */
 @Aspect
-public class ScheduledConcurrencyAop implements SmartLifecycle {
+public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
 
     public static final int PHASE = 20000;
 
@@ -38,7 +38,7 @@ public class ScheduledConcurrencyAop implements SmartLifecycle {
     private final String uniqueId;
     private final ConcurrentHashMap.KeySetView<String, Boolean> keys = ConcurrentHashMap.newKeySet();
 
-    public ScheduledConcurrencyAop(StringRedisTemplate stringRedisTemplate, Environment environment, ApplicationEventPublisher eventPublisher) {
+    public ScheduledPreventConcurrencyAop(StringRedisTemplate stringRedisTemplate, Environment environment, ApplicationEventPublisher eventPublisher) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.eventPublisher = eventPublisher;
         this.uniqueId = UUID.randomUUID().toString().replace("-", "");
