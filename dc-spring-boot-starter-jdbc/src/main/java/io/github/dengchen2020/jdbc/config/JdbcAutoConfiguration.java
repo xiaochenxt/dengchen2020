@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
+import org.springframework.data.relational.core.mapping.RelationalMappingContext;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.ClassUtils;
 
@@ -53,6 +54,11 @@ public final class JdbcAutoConfiguration extends AbstractJdbcConfiguration {
             }
         });
         return new SQLQueryFactory(configuration, provider);
+    }
+
+    @Bean
+    DcEntityCallback entityBeforeConvertCallback(RelationalMappingContext context) {
+        return new DcEntityCallback<>(context);
     }
 
 }
