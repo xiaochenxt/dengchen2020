@@ -132,7 +132,7 @@
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-spring-boot-native-image</artifactId>
-                <version>0.0.6</version>
+                <version>0.0.7</version>
             </dependency>
             <dependency>
                 <groupId>io.protostuff</groupId>

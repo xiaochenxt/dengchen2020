@@ -20,6 +20,7 @@ public class JdbcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
         aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, PathBuilder.class, SQLQuery.class);
         aotUtils.registerReflection(BaseJdbcRepositoryExecutor.class);
+        aotUtils.registerPattern("keywords/*");
     }
 
 }
