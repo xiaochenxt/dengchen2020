@@ -17,7 +17,12 @@ public final class JpaAutoConfiguration {
     @Bean
     HibernatePropertiesCustomizer dcHibernatePropertiesCustomizer(@Value("${spring.profiles.active:null}") String active) {
         return hibernateProperties -> {
-            if (!"dev".equals(active)) hibernateProperties.remove(AvailableSettings.HBM2DDL_AUTO);
+            if (!"dev".equals(active)) {
+                // 禁用自动建表
+                hibernateProperties.remove(AvailableSettings.HBM2DDL_AUTO);
+                // 禁用启动时检查命名查询
+                hibernateProperties.put("hibernate.query.startup_check", false);
+            }
         };
     }
 
