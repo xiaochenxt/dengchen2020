@@ -4,12 +4,15 @@ import io.github.dengchen2020.core.utils.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -119,6 +122,15 @@ public final class RabbitAutoConfiguration {
     @Bean
     DirectExchange deadLetterExchange() {
         return new DirectExchange(RabbitConstant.DEAD_LETTER_EXCHANGE);
+    }
+
+    /**
+     * 避免spring.main.lazy-initialization=true时的警告，详见：<a href="https://github.com/spring-projects/spring-amqp/issues/3251">When spring.main.lazy-initialization=true is enabled, warning logs appear during startup</a>
+     */
+    @ConditionalOnProperty(value = "spring.main.lazy-initialization", havingValue = "true")
+    @Bean
+    LazyInitializationExcludeFilter dcRabbitLazyInitializationExcludeFilter() {
+        return LazyInitializationExcludeFilter.forBeanTypes(CachingConnectionFactory.class);
     }
 
 }
