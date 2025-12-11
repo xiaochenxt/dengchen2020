@@ -12,9 +12,12 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Set;
 
+import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_CLASS_ARRAY;
 import static io.github.dengchen2020.aot.utils.CollectUtils.debug;
 
 /**
@@ -47,6 +50,7 @@ class BasicFeature implements Feature {
         dns(featureUtils, access);
         ssl(featureUtils, access);
         precompute(featureUtils, access);
+        playwright(featureUtils, access);
     }
 
     /**
@@ -283,6 +287,45 @@ class BasicFeature implements Feature {
                 }
             },  webSocketClientUtils);
         }
+    }
+
+    /**
+     * 用于驱动浏览器实现自动化测试
+     */
+    private void playwright(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> playwright = featureUtils.loadClass("com.microsoft.playwright.Playwright");
+        if (playwright == null) return;
+        access.registerReachabilityHandler(duringAnalysisAccess -> {
+            try {
+                String dir = "playwright";
+                featureUtils.registerSystemProperty("playwright.cli.dir", dir);
+                featureUtils.registerReflection(featureUtils.collectClass("com.microsoft.playwright").toArray(EMPTY_CLASS_ARRAY));
+                // 需要将驱动文件放入resources中的playwright目录下，默认会生成驱动文件到C:\Users\用户目录\AppData\Local\Temp\playwright-java-{随机数}文件夹中，可以复制它
+                URL url = featureUtils.classLoader().getResource(dir);
+                if (url != null) {
+                    String playwrightPath = url.getPath();
+                    Path sourceDirectory = new File(playwrightPath).toPath();
+                    String targetPath = new File(playwrightPath).getParentFile().getParentFile().getPath();
+                    Path targetDirectory = Paths.get(targetPath + File.separator + dir);
+                    try (var stream = Files.walk(sourceDirectory)) {
+                        stream.forEach(source -> {
+                            Path target = targetDirectory.resolve(sourceDirectory.relativize(source));
+                            try {
+                                if (Files.isDirectory(source)) {
+                                    Files.createDirectories(target);
+                                } else {
+                                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                }
+            } catch (Exception ignored) {
+
+            }
+        }, playwright);
     }
 
 }

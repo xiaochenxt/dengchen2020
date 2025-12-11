@@ -414,4 +414,10 @@ public class CollectUtils {
         return fields.toArray(EMPTY_FIELD_ARRAY);
     }
 
+    public void runWithIgnoreNoClassDefFoundError(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (NoClassDefFoundError ignored) {}
+    }
+
 }

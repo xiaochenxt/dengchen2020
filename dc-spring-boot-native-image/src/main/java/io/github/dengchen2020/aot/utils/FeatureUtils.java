@@ -53,16 +53,16 @@ public class FeatureUtils extends CollectUtils {
 
     public void registerReflection(Class<?>... classes) {
         for (Class<?> c : classes) {
-            RuntimeReflection.register(c);
-            RuntimeReflection.register(c.getDeclaredConstructors());
-            RuntimeReflection.register(c.getDeclaredMethods());
-            RuntimeReflection.register(c.getDeclaredFields());
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredConstructors()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredMethods()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredFields()));
             if (debug) System.out.println("registering reflect " + c.getName());
         }
     }
 
     public void registerReflection(Method... methods) {
-        RuntimeReflection.register(methods);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(methods));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, methodsLength = methods.length; i < methodsLength; i++) {
@@ -74,7 +74,7 @@ public class FeatureUtils extends CollectUtils {
     }
 
     public void registerReflection(Constructor<?>... constructors) {
-        RuntimeReflection.register(constructors);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(constructors));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, constructorsLength = constructors.length; i < constructorsLength; i++) {
@@ -86,7 +86,7 @@ public class FeatureUtils extends CollectUtils {
     }
 
     public void registerReflection(Field... fields) {
-        RuntimeReflection.register(fields);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(fields));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, fieldsLength = fields.length; i < fieldsLength; i++) {
@@ -99,8 +99,8 @@ public class FeatureUtils extends CollectUtils {
 
     public void registerReflectionConstructors(Class<?>... classes) {
         for (Class<?> c : classes) {
-            RuntimeReflection.register(c);
-            RuntimeReflection.register(c.getDeclaredConstructors());
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredConstructors()));
             if (debug) System.out.println("registering reflect constructors " + c.getName());
         }
     }
@@ -109,10 +109,10 @@ public class FeatureUtils extends CollectUtils {
         for (String cs : classes) {
             Class<?> c = loadClass(cs);
             if (c == null) continue;
-            RuntimeReflection.register(c);
-            RuntimeReflection.register(c.getDeclaredConstructors());
-            RuntimeReflection.register(c.getDeclaredMethods());
-            RuntimeReflection.register(c.getDeclaredFields());
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredConstructors()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredMethods()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredFields()));
             if (debug) System.out.println("registering reflect " + c.getName());
         }
     }
@@ -121,21 +121,21 @@ public class FeatureUtils extends CollectUtils {
         for (String cs : classes) {
             Class<?> c = loadClass(cs);
             if (c == null) continue;
-            RuntimeReflection.register(c);
-            RuntimeReflection.register(c.getDeclaredConstructors());
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c.getDeclaredConstructors()));
             if (debug) System.out.println("registering reflect constructors " + c.getName());
         }
     }
 
     public void registerReflectionMethods(Class<?> c, String... methods) {
-        RuntimeReflection.register(c);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeReflection.register(c));
         registerReflection(collectMethods(c, methods));
         if (!debug) return;
         System.out.println("registering reflect " + c.getName());
     }
 
     public void registerReflectionFields(Class<?> c, String... fields) {
-        RuntimeReflection.register(c);
+        runWithIgnoreNoClassDefFoundError(() ->  RuntimeReflection.register(c));
         registerReflection(collectFields(c, fields));
         if (!debug) return;
         System.out.println("registering reflect " + c.getName());
@@ -155,16 +155,16 @@ public class FeatureUtils extends CollectUtils {
 
     public void registerJni(Class<?>... classes) {
         for (Class<?> c : classes) {
-            RuntimeJNIAccess.register(c);
-            RuntimeJNIAccess.register(c.getDeclaredConstructors());
-            RuntimeJNIAccess.register(c.getDeclaredMethods());
-            RuntimeJNIAccess.register(c.getDeclaredFields());
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredConstructors()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredMethods()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredFields()));
             if (debug) System.out.println("registering jni " + c.getName());
         }
     }
 
     public void registerJni(Method... methods) {
-        RuntimeJNIAccess.register(methods);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(methods));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, methodsLength = methods.length; i < methodsLength; i++) {
@@ -176,7 +176,7 @@ public class FeatureUtils extends CollectUtils {
     }
 
     public void registerJni(Constructor<?>... constructors) {
-        RuntimeJNIAccess.register(constructors);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(constructors));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, constructorsLength = constructors.length; i < constructorsLength; i++) {
@@ -188,7 +188,7 @@ public class FeatureUtils extends CollectUtils {
     }
 
     public void registerJni(Field... fields) {
-        RuntimeJNIAccess.register(fields);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(fields));
         if (!debug) return;
         StringBuilder s = new StringBuilder();
         for (int i = 0, fieldsLength = fields.length; i < fieldsLength; i++) {
@@ -200,14 +200,14 @@ public class FeatureUtils extends CollectUtils {
     }
 
     public void registerJniMethods(Class<?> c, String... methods) {
-        RuntimeJNIAccess.register(c);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c));
         registerJni(collectMethods(c, methods));
         if (!debug) return;
         System.out.println("registering jni " + c.getName());
     }
 
     public void registerJniFields(Class<?> c, String... fields) {
-        RuntimeJNIAccess.register(c);
+        runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c));
         registerJni(collectFields(c, fields));
         if (!debug) return;
         System.out.println("registering jni " + c.getName());
@@ -229,10 +229,10 @@ public class FeatureUtils extends CollectUtils {
         for (String cs : classes) {
             Class<?> c = loadClass(cs);
             if (c == null) continue;
-            RuntimeJNIAccess.register(c);
-            RuntimeJNIAccess.register(c.getDeclaredConstructors());
-            RuntimeJNIAccess.register(c.getDeclaredMethods());
-            RuntimeJNIAccess.register(c.getDeclaredFields());
+            runWithIgnoreNoClassDefFoundError(() ->  RuntimeJNIAccess.register(c));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredConstructors()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredMethods()));
+            runWithIgnoreNoClassDefFoundError(() -> RuntimeJNIAccess.register(c.getDeclaredFields()));
             if (debug) System.out.println("registering jni " + c.getName());
         }
     }
