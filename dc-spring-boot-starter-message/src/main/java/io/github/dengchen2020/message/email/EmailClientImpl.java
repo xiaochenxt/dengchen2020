@@ -37,21 +37,22 @@ public class EmailClientImpl implements EmailClient {
     private final JavaMailSender javaMailSender;
 
     private final String username;
+
     private final String[] to;
 
     public EmailClientImpl(JavaMailSender javaMailSender) {
         this(javaMailSender, EMPTY_STRING_ARRAY, defaultExecutor);
     }
 
-    public EmailClientImpl(JavaMailSender javaMailSender, String... to) {
+    public EmailClientImpl(JavaMailSender javaMailSender, String @Nullable... to) {
         this(javaMailSender, to, defaultExecutor);
     }
 
-    public EmailClientImpl(JavaMailSender javaMailSender, String[] to, AsyncTaskExecutor executor) {
+    public EmailClientImpl(JavaMailSender javaMailSender, String @Nullable[] to, AsyncTaskExecutor executor) {
         this(javaMailSender, null, to, executor);
     }
 
-    public EmailClientImpl(JavaMailSender javaMailSender,@Nullable String username, String[] to, AsyncTaskExecutor executor) {
+    public EmailClientImpl(JavaMailSender javaMailSender,@Nullable String username, String @Nullable[] to, AsyncTaskExecutor executor) {
         if (StringUtils.hasText(username)) {
             this.username = username;
         } else {
@@ -63,7 +64,7 @@ public class EmailClientImpl implements EmailClient {
             }
         }
         this.javaMailSender = javaMailSender;
-        this.to = to;
+        this.to = to == null ? EMPTY_STRING_ARRAY : to;
         this.executor = executor;
     }
 

@@ -3,8 +3,12 @@ package io.github.dengchen2020.core.utils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +114,35 @@ public abstract class FileUtils {
         Path realPath = basePath.resolve(filePathStr).normalize();
         if (!realPath.startsWith(basePath)) throw new IllegalArgumentException("非法路径");
         return realPath;
+    }
+
+    /**
+     * 复制文件夹
+     * @param sourceDirectory 源文件夹
+     * @param targetDirectory 目标文件夹
+     */
+    public static void copyDirectory(File sourceDirectory, File targetDirectory) throws IOException {
+        if (!sourceDirectory.exists()) throw new IllegalArgumentException("源文件夹不存在");
+        Path sourceDirectoryPath = sourceDirectory.toPath();
+        Path targetDirectoryPath = targetDirectory.toPath();
+        try (var stream = Files.walk(sourceDirectoryPath)) {
+            stream.forEach(source -> {
+                Path target = targetDirectoryPath.resolve(sourceDirectoryPath.relativize(source));
+                if (Files.isDirectory(source)) {
+                    try {
+                        Files.createDirectories(target);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException("文件夹复制失败", e);
+                    }
+                } else {
+                    try {
+                        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException("文件夹复制失败", e);
+                    }
+                }
+            });
+        }
     }
 
 }
