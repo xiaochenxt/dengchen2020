@@ -300,6 +300,9 @@ class BasicFeature implements Feature {
                 String dir = "playwright";
                 featureUtils.registerSystemProperty("playwright.cli.dir", dir);
                 featureUtils.registerReflection(featureUtils.collectClass("com.microsoft.playwright").toArray(EMPTY_CLASS_ARRAY));
+                featureUtils.registerJniIfPresent("java.awt.event.InputEvent","java.awt.AWTEvent","sun.awt.Win32GraphicsDevice","java.awt.image.IndexColorModel","sun.awt.SunToolkit","sun.awt.AWTAutoShutdown","sun.java2d.d3d.D3DRenderQueue","sun.java2d.d3d.D3DRenderQueue$1",
+                        "sun.java2d.d3d.D3DGraphicsDevice","sun.java2d.d3d.D3DGraphicsDevice$1");
+                featureUtils.registerReflectionIfPresent("sun.awt.Win32GraphicsDevice");
                 // 需要将驱动文件放入resources中的playwright目录下，默认会生成驱动文件到C:\Users\用户目录\AppData\Local\Temp\playwright-java-{随机数}文件夹中，可以复制它
                 URL url = featureUtils.classLoader().getResource(dir);
                 if (url != null) {
