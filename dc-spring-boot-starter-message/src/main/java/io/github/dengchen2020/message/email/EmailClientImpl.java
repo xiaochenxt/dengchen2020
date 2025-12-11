@@ -37,7 +37,6 @@ public class EmailClientImpl implements EmailClient {
     private final JavaMailSender javaMailSender;
 
     private final String username;
-
     private final String[] to;
 
     public EmailClientImpl(JavaMailSender javaMailSender) {
