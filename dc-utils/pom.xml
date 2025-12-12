@@ -148,6 +148,13 @@
           <optional>true</optional>
       </dependency>
 
+      <dependency>
+          <groupId>com.microsoft.playwright</groupId>
+          <artifactId>playwright</artifactId>
+          <version>1.57.0</version>
+          <optional>true</optional>
+      </dependency>
+
   </dependencies>
 
 </project>
