@@ -5,6 +5,7 @@ import io.github.dengchen2020.ip.service.IpService;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.lionsoul.ip2region.service.Config;
+import org.lionsoul.ip2region.service.InvalidConfigException;
 import org.lionsoul.ip2region.service.Ip2Region;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.lionsoul.ip2region.xdb.XdbException;
@@ -31,42 +32,42 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
 
     private Ip2Region ip2Region;
 
-    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws IOException, XdbException, InterruptedException {
+    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws IOException, XdbException, InterruptedException, InvalidConfigException {
         loadDataWithBufferCache(ipv4DataPath, ipv6DataPath, verify);
     }
 
-    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws IOException, XdbException, InterruptedException {
+    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws IOException, XdbException, InterruptedException, InvalidConfigException {
         loadDataWithVIndexCache(ipv4DataPath, ipv6DataPath, v4Searchers, v6Searchers, verify);
     }
 
-    public synchronized void loadDataWithBufferCache(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws XdbException, IOException, InterruptedException {
+    public synchronized void loadDataWithBufferCache(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws XdbException, IOException, InterruptedException, InvalidConfigException {
         File ipv4File = new File(ipv4DataPath);
         if (!ipv4File.isFile() || !ipv4File.exists()) throw new IllegalArgumentException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
-        if (verify) Searcher.verifyFromFile(ipv4DataPath);
+        if (verify) Searcher.verifyFromFile(ipv4File);
         Config ipv6Config = null;
         if (ipv6DataPath != null) {
             File ipv6File = new File(ipv6DataPath);
             if (ipv6File.isFile() && ipv6File.exists()) {
-                ipv6Config = Config.custom().setXdbPath(ipv6DataPath).setCachePolicy(Config.BufferCache).asV6();
-                if (verify) Searcher.verifyFromFile(ipv6DataPath);
+                ipv6Config = Config.custom().setXdbFile(ipv6File).setCachePolicy(Config.BufferCache).asV6();
+                if (verify) Searcher.verifyFromFile(ipv6File);
             }
         }
-        load(Config.custom().setXdbPath(ipv4DataPath).setCachePolicy(Config.BufferCache).asV4(), ipv6Config);
+        load(Config.custom().setXdbFile(ipv4File).setCachePolicy(Config.BufferCache).asV4(), ipv6Config);
     }
 
-    public synchronized void loadDataWithVIndexCache(String ipv4DataPath,@Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws XdbException, IOException, InterruptedException {
+    public synchronized void loadDataWithVIndexCache(String ipv4DataPath,@Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws XdbException, IOException, InterruptedException, InvalidConfigException {
         File ipv4File = new File(ipv4DataPath);
         if (!ipv4File.isFile() || !ipv4File.exists()) throw new IllegalArgumentException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
-        if (verify) Searcher.verifyFromFile(ipv4DataPath);
+        if (verify) Searcher.verifyFromFile(ipv4File);
         Config ipv6Config = null;
         if (ipv6DataPath != null) {
             File ipv6File = new File(ipv6DataPath);
             if (ipv6File.isFile() && ipv6File.exists()) {
-                ipv6Config = Config.custom().setXdbPath(ipv6DataPath).setSearchers(v6Searchers).asV6();
-                if (verify) Searcher.verifyFromFile(ipv6DataPath);
+                ipv6Config = Config.custom().setXdbFile(ipv6File).setSearchers(v6Searchers).asV6();
+                if (verify) Searcher.verifyFromFile(ipv6File);
             }
         }
-        load(Config.custom().setXdbPath(ipv4DataPath).setSearchers(v4Searchers).asV4(), ipv6Config);
+        load(Config.custom().setXdbFile(ipv4File).setSearchers(v4Searchers).asV4(), ipv6Config);
     }
 
     private void load(Config v4,@Nullable Config v6) throws IOException, InterruptedException {
