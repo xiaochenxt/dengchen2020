@@ -3,6 +3,7 @@ package io.github.dengchen2020.ip.config;
 import io.github.dengchen2020.ip.service.IpService;
 import io.github.dengchen2020.ip.service.impl.xdb.IpXdbServiceImpl;
 import io.github.dengchen2020.ip.service.impl.xdb.IpXdbV2ServiceImpl;
+import org.lionsoul.ip2region.service.InvalidConfigException;
 import org.lionsoul.ip2region.xdb.XdbException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public final class IpAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    IpService ipService(Environment environment) throws IOException, XdbException, InterruptedException {
+    IpService ipService(Environment environment) throws IOException, XdbException, InterruptedException, InvalidConfigException {
         var ipv4Location = environment.getProperty("dc.ip.v4.location","ip.xdb");
         var ipv6Location = environment.getProperty("dc.ip.v6.location","ipv6.xdb");
         var verify = environment.getProperty("dc.ip.verify", boolean.class, false);
