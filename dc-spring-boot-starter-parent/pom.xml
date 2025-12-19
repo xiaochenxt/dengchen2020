@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
@@ -66,10 +66,10 @@
         <graalvm.version>25.0.1</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
-        <libphonenumber.version>9.0.20</libphonenumber.version>
+        <libphonenumber.version>9.0.21</libphonenumber.version>
         <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
         <ip2region.version>3.3.1</ip2region.version>
-        <software.amazon.awssdk.version>2.40.6</software.amazon.awssdk.version>
+        <software.amazon.awssdk.version>2.40.12</software.amazon.awssdk.version>
     </properties>
 
     <dependencyManagement>
