@@ -42,13 +42,14 @@ public final class LockAutoConfiguration implements DisposableBean {
         String host = environment.getProperty("dc.lock.redisson.redis.host", environment.getProperty("spring.data.redis.host","127.0.0.1"));
         int port = environment.getProperty("dc.lock.redisson.redis.port", int.class, environment.getProperty("spring.data.redis.port", int.class, 6379));
         int database = environment.getProperty("dc.lock.redisson.redis.database", int.class, environment.getProperty("spring.data.redis.database", int.class, 0));
-        singleServerConfig.setKeepAlive(true).setAddress("redis://" + host + ":" + port).setDatabase(database);
+        config.setTcpKeepAlive(true);
+        singleServerConfig.setAddress("redis://" + host + ":" + port).setDatabase(database);
         String password = environment.getProperty("dc.lock.redisson.redis.password");
         if (password == null) password = environment.getProperty("spring.data.redis.password");
-        if (password != null) singleServerConfig.setPassword(password);
+        if (password != null) config.setPassword(password);
         String username = environment.getProperty("dc.lock.redisson.redis.username");
         if (username == null) username = environment.getProperty("spring.data.redis.username");
-        if (username != null) singleServerConfig.setUsername(username);
+        if (username != null) config.setUsername(username);
         String applicationName = environment.getProperty("spring.application.name","spring");
         singleServerConfig.setClientName(applicationName + "-redisson-lock");
         if (environment.getProperty("dc.lock.redisson.redis.lazy-initialization", boolean.class, true)) {
