@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
