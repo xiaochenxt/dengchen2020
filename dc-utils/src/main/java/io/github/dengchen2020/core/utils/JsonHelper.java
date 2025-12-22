@@ -118,6 +118,24 @@ public class JsonHelper {
     }
 
     /**
+     * 将对象转换成指定类型的新对象
+     *
+     * @param source 源对象
+     * @param target 类型
+     * @return 指定类型的新对象
+     */
+    @Nullable
+    public <T> T convertValue(@Nullable Object source, TypeReference<T> target) {
+        if (source == null) return null;
+        try {
+            return jsonMapper.convertValue(source, target);
+        } catch (IllegalArgumentException e) {
+            log.error("toJson异常，source：{}，异常信息：", source, e);
+            return null;
+        }
+    }
+
+    /**
      * 将json解析为{@link JsonNode}
      *
      * @param json json
@@ -170,7 +188,7 @@ public class JsonHelper {
 
     /**
      * 对象转ObjectNode
-     * @param src 对象
+     * @param source 对象
      * @return {@link ObjectNode}
      */
     @Nullable
