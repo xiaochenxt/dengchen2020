@@ -112,7 +112,7 @@ public class JsonHelper {
         try {
             return jsonMapper.convertValue(source, target);
         } catch (IllegalArgumentException e) {
-            log.error("toJson异常，source：{}，异常信息：", source, e);
+            log.error("convertValue异常，source：{}，异常信息：", source, e);
             return null;
         }
     }
@@ -130,7 +130,7 @@ public class JsonHelper {
         try {
             return jsonMapper.convertValue(source, target);
         } catch (IllegalArgumentException e) {
-            log.error("toJson异常，source：{}，异常信息：", source, e);
+            log.error("convertValue异常，source：{}，异常信息：", source, e);
             return null;
         }
     }
