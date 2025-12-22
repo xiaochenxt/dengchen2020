@@ -214,35 +214,11 @@ public class CsvReader implements AutoCloseable {
         try {
             // 先转为BigDecimal避免精度丢失
             BigDecimal bigDecimal = new BigDecimal(scientificStr);
-            // 转为纯数字字符串（去掉末尾的.0）
-            return bigDecimal.toPlainString().replace(".0", "");
+            // 转为纯数字字符串
+            return bigDecimal.toPlainString();
         } catch (NumberFormatException e) {
             // 非数字格式则返回原始值
             return scientificStr;
-        }
-    }
-
-    /**
-     * 数字校验（复用CsvWriter的逻辑）
-     */
-    private boolean isNumeric(String str) {
-        if (str.isEmpty()) return false;
-        for (int i = 0; i < str.length(); i++) {
-            if (!Character.isDigit(str.charAt(i))) return false;
-        }
-        return true;
-    }
-
-    /**
-     * 长数字校验（判断是否为超过int范围的Long值）
-     */
-    private boolean isLongValue(String str) {
-        if (!isNumeric(str)) return false;
-        try {
-            long value = Long.parseLong(str);
-            return value > Integer.MAX_VALUE;
-        } catch (NumberFormatException e) {
-            return false;
         }
     }
 
