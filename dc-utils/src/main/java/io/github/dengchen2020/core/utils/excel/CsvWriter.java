@@ -5,6 +5,7 @@ import org.jspecify.annotations.NullMarked;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class CsvWriter implements AutoCloseable {
     private final OutputStreamWriter writer;
     private final String[] fieldNames; // 字段名顺序
     private final String[] headers;
-    private boolean headerWritten = false;
+    private boolean bomWritten = false;
 
     /**
      * 构建标题行，默认写入编码UTF-8
@@ -41,20 +42,27 @@ public class CsvWriter implements AutoCloseable {
         this.headers = headerMap.values().toArray(EMPTY_STRING_ARRAY);
     }
 
-    /**
-     * 写入标题行
-     */
-    public void writeHeader() throws IOException {
-        if (!headerWritten) {
+    private void writeBom() throws IOException {
+        if (!bomWritten) {
             writer.write('\ufeff'); // UTF-8 BOM
-            writeHeader(headers);
+            bomWritten = true;
         }
     }
 
     /**
      * 写入标题行
      */
+    public void writeHeader() throws IOException {
+        writeBom();
+        writeHeader(headers);
+    }
+
+    /**
+     * 写入标题行
+     */
     public void writeHeader(String[] headers) throws IOException {
+        if (headers.length == 0) return;
+        writeBom();
         StringBuilder headerSb = new StringBuilder();
         for (int i = 0; i < headers.length; i++) {
             String header = headers[i];
@@ -68,14 +76,16 @@ public class CsvWriter implements AutoCloseable {
         }
         headerSb.append('\n');
         writer.write(headerSb.toString()); // 写入标题行
-        headerWritten = true;
+        flush();
     }
 
     /**
      * 单条写入
      */
     public void writeRow(Map<String, Object> data) throws IOException {
+        writeBom();
         writeRow(data, new StringBuilder());
+        flush();
     }
 
     /**
@@ -84,12 +94,18 @@ public class CsvWriter implements AutoCloseable {
     private void writeRow(Map<String, Object> data, StringBuilder sb) throws IOException {
         for (int i = 0; i < fieldNames.length; i++) {
             String fieldName = fieldNames[i];
-            Object value = data.getOrDefault(fieldName, "");
-            String strValue = value.toString();
+            Object value = data.get(fieldName);
+            if (value == null) value = "";
+            String strValue;
+            if (value instanceof BigDecimal decimal) {
+                strValue = decimal.toPlainString();
+            } else {
+                strValue = value.toString();
+            }
 
             if (i > 0) sb.append(',');
             // 数字字段添加\t
-            if ((value instanceof Long longValue && longValue > Integer.MAX_VALUE) || isNumeric(strValue)) {
+            if ((value instanceof Long longValue && longValue > Integer.MAX_VALUE) || isLongNumber(strValue)) {
                 sb.append('\t');
             }
 
@@ -102,24 +118,27 @@ public class CsvWriter implements AutoCloseable {
         }
         sb.append('\n');
         writer.write(sb.toString());
+        sb.setLength(0);
     }
 
     /**
      * 批量写入
      */
     public void writeBatch(Iterable<Map<String, Object>> dataList) throws IOException {
+        writeBom();
         StringBuilder sb = new StringBuilder();
         for (Map<String, Object> data : dataList) {
             writeRow(data, sb);
         }
+        flush();
     }
 
     /**
-     * 数字校验
+     * 长数字校验
      */
-    private boolean isNumeric(String str) {
-        if (str.isEmpty()) return false;
-        for (int i = 0; i < str.length(); i++) {
+    private boolean isLongNumber(String str) {
+        if (str.length() < 9) return false;
+        for (int i = 0, len = str.length(); i < len; i++) {
             if (!Character.isDigit(str.charAt(i))) return false;
         }
         return true;
