@@ -25,8 +25,9 @@ public class CsvReader implements AutoCloseable {
     private final BufferedReader reader;
     private final String[] fieldNames; // 字段名（与写入时的fieldNames对应）
     private boolean hasNext = true;     // 是否还有下一行数据
-
-    private static final Pattern SCIENTIFIC_NOTATION_PATTERN = Pattern.compile("[+-]?\\d+(\\.\\d+)?[eE][+-]?\\d+");
+    private boolean bomHandled = false;
+    
+    private static final Pattern SCIENTIFIC_NOTATION_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)[eE][+-]?\\d+");
 
     /**
      * 构造器（默认读取第一行为表头，与CsvWriter的headerMap对应），自动探测编码
@@ -68,14 +69,12 @@ public class CsvReader implements AutoCloseable {
     public Map<String, String> readRow() throws IOException {
         if (!hasNext) return null;
 
-        String dataLine = reader.readLine();
-        if (dataLine == null) {
+        String[] dataValues = readLine();
+        if (dataValues == null) {
             hasNext = false;
             return null;
         }
 
-        // 解析CSV行并匹配字段名
-        String[] dataValues = parseCsvLine(dataLine);
         Map<String, String> rowMap = new LinkedHashMap<>(fieldNames.length);
         for (int i = 0; i < fieldNames.length; i++) {
             String value = (i < dataValues.length) ? dataValues[i] : "";
@@ -88,21 +87,11 @@ public class CsvReader implements AutoCloseable {
      * 回调处理，推荐使用
      */
     public void forEach(Consumer<Map<String, String>> consumer) throws IOException {
-        while (hasNext) {
-            String dataLine = reader.readLine();
-            if (dataLine == null) {
-                hasNext = false;
-                return;
-            }
-            // 解析CSV行并匹配字段名
-            String[] dataValues = parseCsvLine(dataLine);
-            Map<String, String> rowMap = new LinkedHashMap<>(fieldNames.length);
-            for (int i = 0; i < fieldNames.length; i++) {
-                String value = (i < dataValues.length) ? dataValues[i] : "";
-                rowMap.put(fieldNames[i], removeTabPrefix(value));
-            }
-            consumer.accept(rowMap);
+        Map<String, String> row;
+        while ((row = readRow()) != null) {
+            consumer.accept(row);
         }
+        hasNext = false;
     }
 
     /**
@@ -124,7 +113,7 @@ public class CsvReader implements AutoCloseable {
      */
     public void skipLines(int lineCount) throws IOException {
         for (int i = 0; i < lineCount && hasNext; i++) {
-            if (reader.readLine() == null) hasNext = false;
+            if (readLine() == null) hasNext = false;
         }
     }
 
@@ -136,11 +125,13 @@ public class CsvReader implements AutoCloseable {
     }
 
     /**
-     * 读取下一行表头
+     * 读取下一行记录
      * @throws IOException
      */
     public String[] readLine() throws IOException {
-        return parseCsvLine(readAndHandleBom());
+        String line = readAndHandleBom();
+        if (line == null) return null;
+        return parseCsvLineWithMultiline(line);
     }
 
     /**
@@ -148,46 +139,67 @@ public class CsvReader implements AutoCloseable {
      */
     private String readAndHandleBom() throws IOException {
         String line = reader.readLine();
-        if (line == null) return "";
-        // 移除BOM头（\uFEFF）
-        return line.startsWith("\uFEFF") ? line.substring(1) : line;
+        if (line == null) return null;
+        if (bomHandled) return line;
+        if (line.startsWith("\uFEFF")) {
+            bomHandled = true;
+            return line.substring(1); // 移除BOM头（\uFEFF）
+        }
+        return line;
     }
 
     /**
-     * 解析CSV行（处理双引号包裹、逗号分隔等规则）
+     * 解析CSV行（处理双引号包裹、逗号分隔等规则，支持跨行字段）
      */
-    private String[] parseCsvLine(String line) {
-        if (line == null || line.isEmpty()) return EMPTY_STRING_ARRAY;
-
+    private String[] parseCsvLineWithMultiline(String firstLine) throws IOException {
         List<String> values = new ArrayList<>();
         StringBuilder currentValue = new StringBuilder();
         boolean inQuotes = false;
+        String line = firstLine;
 
-        for (char c : line.toCharArray()) {
-            if (inQuotes) {
-                if (c == '"') {
-                    inQuotes = false;
+        do {
+            for (int i = 0; i < line.length(); i++) {
+                char c = line.charAt(i);
+                if (inQuotes) {
+                    if (c == '"' && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        // 处理转义的双引号
+                        currentValue.append('"');
+                        i++; // 跳过下一个引号
+                    } else if (c == '"') {
+                        // 结束引号
+                        inQuotes = false;
+                    } else {
+                        currentValue.append(c);
+                    }
                 } else {
-                    currentValue.append(c);
-                }
-            } else {
-                if (c == '"') {
-                    inQuotes = true;
-                } else if (c == ',') {
-                    values.add(currentValue.toString());
-                    currentValue.setLength(0);
-                } else {
-                    currentValue.append(c);
+                    if (c == '"') {
+                        // 开始引号
+                        inQuotes = true;
+                    } else if (c == ',') {
+                        // 字段分隔符
+                        values.add(currentValue.toString());
+                        currentValue.setLength(0);
+                    } else {
+                        currentValue.append(c);
+                    }
                 }
             }
-        }
 
-        // 添加最后一个字段并处理双引号转义
+            // 如果仍在引号内，需要读取下一行
+            if (inQuotes) {
+                line = reader.readLine();
+                if (line == null) {
+                    // 文件结束但引号未闭合，将剩余内容作为最后一个字段
+                    values.add(currentValue.toString());
+                    break;
+                }
+                // 添加换行符分隔多行内容
+                currentValue.append("\n");
+            }
+        } while (inQuotes);
+
+        // 添加最后一个字段
         values.add(currentValue.toString());
-        for (int i = 0; i < values.size(); i++) {
-            values.set(i, values.get(i).replace("\"\"", "\""));
-        }
-
         return values.toArray(EMPTY_STRING_ARRAY);
     }
 
