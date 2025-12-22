@@ -105,7 +105,7 @@ public class CsvWriter implements AutoCloseable {
 
             if (i > 0) sb.append(',');
             // 数字字段添加\t
-            if ((value instanceof Long longValue && longValue > Integer.MAX_VALUE) || isNumeric(strValue)) {
+            if ((value instanceof Long longValue && longValue > Integer.MAX_VALUE) || isLongNumber(strValue)) {
                 sb.append('\t');
             }
 
@@ -134,10 +134,10 @@ public class CsvWriter implements AutoCloseable {
     }
 
     /**
-     * 数字校验
+     * 长数字校验
      */
-    private boolean isNumeric(String str) {
-        if (str.isEmpty()) return false;
+    private boolean isLongNumber(String str) {
+        if (str.length() < 9) return false;
         for (int i = 0, len = str.length(); i < len; i++) {
             if (!Character.isDigit(str.charAt(i))) return false;
         }
