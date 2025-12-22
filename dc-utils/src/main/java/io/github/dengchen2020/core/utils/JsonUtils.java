@@ -71,6 +71,18 @@ public abstract class JsonUtils {
     }
 
     /**
+     * 将对象转换成指定类型的新对象
+     *
+     * @param source 源对象
+     * @param target 类型
+     * @return 指定类型的新对象
+     */
+    @Nullable
+    public static <T> T convertValue(@Nullable Object source, TypeReference<T> target) {
+        return JsonHelper.INSTANCE.convertValue(source, target);
+    }
+
+    /**
      * 将json解析为{@link JsonNode}
      *
      * @param json json

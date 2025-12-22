@@ -112,7 +112,25 @@ public class JsonHelper {
         try {
             return jsonMapper.convertValue(source, target);
         } catch (IllegalArgumentException e) {
-            log.error("toJson异常，source：{}，异常信息：", source, e);
+            log.error("convertValue异常，source：{}，异常信息：", source, e);
+            return null;
+        }
+    }
+
+    /**
+     * 将对象转换成指定类型的新对象
+     *
+     * @param source 源对象
+     * @param target 类型
+     * @return 指定类型的新对象
+     */
+    @Nullable
+    public <T> T convertValue(@Nullable Object source, TypeReference<T> target) {
+        if (source == null) return null;
+        try {
+            return jsonMapper.convertValue(source, target);
+        } catch (IllegalArgumentException e) {
+            log.error("convertValue异常，source：{}，异常信息：", source, e);
             return null;
         }
     }
@@ -170,7 +188,7 @@ public class JsonHelper {
 
     /**
      * 对象转ObjectNode
-     * @param src 对象
+     * @param source 对象
      * @return {@link ObjectNode}
      */
     @Nullable
@@ -252,7 +270,7 @@ public class JsonHelper {
             JsonNode tree = readTree(new String(data));
             if (tree == null) return null;
             JsonNode classNode = tree.get("@class");
-            if (classNode != null) return nonNullJsonMapper.readValue(data, nonNullJsonMapper.getTypeFactory().constructFromCanonical(classNode.asText()));
+            if (classNode != null) return nonNullJsonMapper.readValue(data, nonNullJsonMapper.getTypeFactory().constructFromCanonical(classNode.asString()));
         } catch (Exception e) {
             log.error("反序列化异常，data：{}，异常信息：", new String(data), e);
         }

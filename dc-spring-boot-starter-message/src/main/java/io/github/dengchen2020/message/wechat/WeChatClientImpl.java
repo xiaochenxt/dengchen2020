@@ -81,6 +81,6 @@ public class WeChatClientImpl implements WeChatClient {
             log.error("微信机器人上传文件失败：{}", res);
             return null;
         }
-        return res.path("media_id").asText();
+        return res.path("media_id").asString();
     }
 }
