@@ -4,6 +4,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,11 +29,11 @@ public abstract class StrUtils {
     }
 
     /**
-     * 是否是数组
-     * @param obj 对象
-     * @return true | false
+     * 检查对象是否为数组
+     * @param obj 待检查的对象
+     * @return 如果是数组返回true，否则返回false
      */
-    private static boolean isArray(@Nullable Object obj) {
+    public static boolean isArray(@Nullable Object obj) {
         return null != obj && obj.getClass().isArray();
     }
 
@@ -49,16 +50,26 @@ public abstract class StrUtils {
      * @return 去除-后的uuid字符串
      */
     public static String uuidSimplified(){
-        return UUID.randomUUID().toString().replaceAll("-","");
+        return UUID.randomUUID().toString().replace("-","");
     }
 
     /**
-     * 当字段存json数组字符串时，做简单校验
+     * 当字段存json数组字符串时，做预处理
      * @param jsonStr json数组字符串
      * @return json数组字符串
      */
-    public static String checkJsonArrayStr(String jsonStr) {
+    public static String pretreatmentJsonArray(String jsonStr) {
         if (!hasText(jsonStr)) return "[]";
+        return jsonStr;
+    }
+
+    /**
+     * 当字段存json对象字符串时，做预处理
+     * @param jsonStr json对象字符串
+     * @return json对象字符串
+     */
+    public static String pretreatmentJsonObject(String jsonStr) {
+        if (!hasText(jsonStr)) return "{}";
         return jsonStr;
     }
 
@@ -70,19 +81,19 @@ public abstract class StrUtils {
      * @return key对应的value，如果不存在则返回null
      */
     @Nullable
-    public static String getValue(@Nullable String query,@Nullable String key) {
+    public static String getValue(@Nullable String query, @Nullable String key) {
         if (query == null || key == null || query.isEmpty() || key.isEmpty()) return null;
         final int keyLen = key.length();
         final int queryLen = query.length();
         int currentKeyPos = 0; // 目标key在query中的起始位置（初始为0，用于循环查找）
         // 直接定位所有可能的key位置（跳过无关参数，减少遍历）
         while ((currentKeyPos = query.indexOf(key, currentKeyPos)) != -1) {
-            // 验证当前key位置是否是“独立参数”（避免匹配子串，如"username"匹配"name"）
+            // 验证当前key位置是否是"独立参数"（避免匹配子串，如"username"匹配"name"）
             boolean isValidStart = (currentKeyPos == 0) || (query.charAt(currentKeyPos - 1) == '&');
-            // 验证key后面是否有足够空间（至少有“=”，避免key在query末尾的情况）
+            // 验证key后面是否有足够空间（至少有"="，避免key在query末尾的情况）
             boolean hasSpaceForEqual = (currentKeyPos + keyLen) < queryLen;
             if (isValidStart && hasSpaceForEqual) {
-                // 验证key后面是否是“=”（确保是key=value格式，而非key&xxx）
+                // 验证key后面是否是"="（确保是key=value格式，而非key&xxx）
                 if (query.charAt(currentKeyPos + keyLen) == '=') {
                     int valueStart = currentKeyPos + keyLen + 1; // value的起始位置（跳过key和=）
                     // 定位value的结束位置（下一个&或query末尾）
@@ -105,23 +116,74 @@ public abstract class StrUtils {
      * @return 缩短字节后的字符串
      */
     public static String shortenString(String str, int targetByteLength) {
+        if (targetByteLength <= 0) return "";
         try {
-            byte[] bytes = str.getBytes();
-            int originalByteLength = bytes.length;
-            if (originalByteLength <= targetByteLength) return str;
-            int endIndex = str.length() - 1;
-            int totalByteLength = originalByteLength;
-            while (totalByteLength > targetByteLength && endIndex >= 0) {
-                char ch = str.charAt(endIndex);
-                int byteLength = ch < 128 ? 1 : 3;
-                totalByteLength -= byteLength;
-                endIndex--;
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            if (bytes.length <= targetByteLength) return str;
+            // 二分法查找最大的结束索引
+            int left = 0;
+            int right = str.length() - 1;
+            int endIndex = 0;
+            while (left <= right) {
+                int mid = (left + right) >>> 1;
+                int midBytesLen = str.substring(0, mid + 1).getBytes(StandardCharsets.UTF_8).length;
+                if (midBytesLen <= targetByteLength) {
+                    endIndex = mid + 1;
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
             }
-            if (endIndex < 0) endIndex = 0;
-            return str.substring(0, endIndex + 1);
+            return endIndex == 0 ? "" : str.substring(0, endIndex);
         } catch (Exception e) {
             return str;
         }
+    }
+
+    /**
+     * 转化成蛇形下划线命名格式（改进版，支持更智能的转换，参考Hibernate命名策略（Hibernate是复制的SpringBoot的））
+     * 例如: "userName" -> "user_name", "URLPath" -> "url_path", "XMLHttpRequest" -> "xml_http_request"
+     *
+     * @param name 原字段名
+     * @return 新字段名
+     */
+    public static String convertToSpringSnakeCase(String name) {
+        if (name.isEmpty()) return name;
+        
+        StringBuilder result = new StringBuilder();
+        String input = name.replace('.', '_');
+        
+        for (int i = 0; i < input.length(); i++) {
+            char current = input.charAt(i);
+            
+            if (Character.isUpperCase(current)) {
+                // 检查是否需要在前面添加下划线
+                if (i > 0) {
+                    boolean needUnderscore = false;
+                    
+                    // 情况1：前一个字符是小写 (如 userName 中的 u 和 N)
+                    if (Character.isLowerCase(input.charAt(i - 1))) {
+                        needUnderscore = true;
+                    } 
+                    // 情况2：当前是连续大写字母序列的结尾，且后一个字符是小写 (如 XMLHttpRequest 中的 T 和 R)
+                    else if (i < input.length() - 1 && 
+                             Character.isUpperCase(input.charAt(i - 1)) && 
+                             Character.isLowerCase(input.charAt(i + 1))) {
+                        needUnderscore = true;
+                    }
+                    
+                    if (needUnderscore) {
+                        result.append('_');
+                    }
+                }
+                
+                result.append(Character.toLowerCase(current));
+            } else {
+                result.append(current);
+            }
+        }
+        
+        return result.toString();
     }
 
     /**
@@ -132,7 +194,7 @@ public abstract class StrUtils {
      */
     public static String convertToSnakeCase(String name) {
         StringBuilder result = new StringBuilder();
-        for (int i = 0,len = name.length(); i < len; i++) {
+        for (int i = 0, len = name.length(); i < len; i++) {
             char c = name.charAt(i);
             if (Character.isUpperCase(c) && i > 0) result.append("_");
             result.append(Character.toLowerCase(c));
@@ -181,7 +243,8 @@ public abstract class StrUtils {
             Map.Entry<String, ?> entry = iterator.next();
             String key = entry.getKey();
             Object value = entry.getValue();
-            query.append(key).append("=").append(value);
+            query.append(key).append("=");
+            if (value != null) query.append(value);
             if (iterator.hasNext()) query.append("&");
         }
         return query.toString();
@@ -203,7 +266,7 @@ public abstract class StrUtils {
      * @return 值
      */
     public static String getValue(String[] arr, int i) {
-        if (arr.length >= i + 1) return arr[i];
+        if (i >= 0 && i < arr.length) return arr[i];
         return "";
     }
 
@@ -236,5 +299,4 @@ public abstract class StrUtils {
     public static boolean hasText(@Nullable String str) {
         return (str != null && !str.isBlank());
     }
-
 }
