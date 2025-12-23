@@ -18,15 +18,15 @@ public abstract class SpringUtils {
     }
 
     public static Environment getEnvironment() {
-        return applicationContext.getEnvironment();
+        return getApplicationContext().getEnvironment();
     }
 
     public static <T> T getBean(Class<T> clazz) {
-        return applicationContext.getBean(clazz);
+        return getApplicationContext().getBean(clazz);
     }
 
     public static void publishEvent(Object event) {
-        applicationContext.publishEvent(event);
+        getApplicationContext().publishEvent(event);
     }
 
 }
