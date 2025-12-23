@@ -77,7 +77,7 @@ public abstract class JsUtils {
     /**
      * 调用JS函数
      */
-    public static Object call(@NonNull String funcScript,@NonNull String funcName, Object... params) {
+    public static Object call(@NonNull String funcScript, @NonNull String funcName, Object... params) {
         ScriptEngine engine = engineLocal.get();
         try {
             engine.eval(funcScript);
@@ -89,7 +89,7 @@ public abstract class JsUtils {
         } catch (ScriptException e) {
             throw new IllegalArgumentException("js代码执行发生异常", e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("js代码执行不存在的函数", e);
+            throw new IllegalArgumentException("js代码执行不存在的函数: " + funcName, e);
         }
     }
 
