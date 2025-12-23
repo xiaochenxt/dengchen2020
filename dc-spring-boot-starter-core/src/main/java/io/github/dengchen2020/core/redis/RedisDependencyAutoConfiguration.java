@@ -13,6 +13,7 @@ import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfigurat
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.data.redis.connection.MessageListener;
@@ -58,6 +59,7 @@ public final class RedisDependencyAutoConfiguration {
         return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJacksonJsonRedisSerializer);
     }
 
+    @Lazy(false)
     @Configuration(proxyBeanMethods = false)
     static final class RedisMessageListenerRegistrar {
 

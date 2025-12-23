@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * 静态资源Servlet自动配置
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Import;
  * @author xiaochen
  * @since 2025/6/23
  */
+@Lazy(false)
 @ConditionalOnProperty(value = "dc.static.servlet.enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(StaticServletBeanRegistrar.class)
