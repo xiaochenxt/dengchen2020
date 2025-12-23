@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.16</version>
+        <version>0.1.17</version>
     </parent>
 
     <artifactId>dc-spring-boot-starter-jdbc</artifactId>
@@ -75,7 +75,7 @@
 <!--                        <annotationProcessorPath>-->
 <!--                            <groupId>io.github.dengchen2020</groupId>-->
 <!--                            <artifactId>querydsl-sql-spring-annotation-apt</artifactId>-->
-<!--                            <version>0.0.2</version>-->
+<!--                            <version>0.0.3</version>-->
 <!--                        </annotationProcessorPath>-->
 <!--                    </annotationProcessorPaths>-->
 <!--                </configuration>-->
