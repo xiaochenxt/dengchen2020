@@ -68,11 +68,6 @@
       </dependency>
 
       <dependency>
-          <groupId>jakarta.persistence</groupId>
-          <artifactId>jakarta.persistence-api</artifactId>
-          <optional>true</optional>
-      </dependency>
-      <dependency>
           <groupId>jakarta.servlet</groupId>
           <artifactId>jakarta.servlet-api</artifactId>
           <optional>true</optional>
