@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -30,6 +31,7 @@ public final class ClusterDcWebSocketAutoConfiguration {
         return new WebSocketHelper(redisMessagePublisher);
     }
 
+    @Lazy(false)
     @Configuration(proxyBeanMethods = false)
     static final class ClusterWebSocketHandlerRegistrar {
         ClusterWebSocketHandlerRegistrar(List<ClusterDcWebSocketHandler> clusterDcWebSocketHandler, RedisMessageListenerContainer redisMessageListenerContainer, GenericJacksonJsonRedisSerializer redisSerializer) {
