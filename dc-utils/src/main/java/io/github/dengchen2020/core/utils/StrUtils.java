@@ -110,31 +110,45 @@ public abstract class StrUtils {
     }
 
     /**
-     * 缩短字符串
+     * 按指定字节数截断字符串
      * @param str 字符串
      * @param targetByteLength 目标字节数
-     * @return 缩短字节后的字符串
+     * @return 按字节数截断后的字符串
      */
     public static String shortenString(String str, int targetByteLength) {
         if (targetByteLength <= 0) return "";
         try {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             if (bytes.length <= targetByteLength) return str;
-            // 二分法查找最大的结束索引
-            int left = 0;
-            int right = str.length() - 1;
-            int endIndex = 0;
-            while (left <= right) {
-                int mid = (left + right) >>> 1;
-                int midBytesLen = str.substring(0, mid + 1).getBytes(StandardCharsets.UTF_8).length;
-                if (midBytesLen <= targetByteLength) {
-                    endIndex = mid + 1;
-                    left = mid + 1;
+            
+            // 找到最大字节位置，确保不截断多字节字符
+            int maxByteIndex = 0;
+            for (int i = 0; i < bytes.length && i < targetByteLength; ) {
+                int charByteLength;
+                if ((bytes[i] & 0x80) == 0) { // 0xxxxxxx - 1字节字符 (ASCII)
+                    charByteLength = 1;
+                } else if ((bytes[i] & 0xE0) == 0xC0) { // 110xxxxx - 2字节字符
+                    charByteLength = 2;
+                } else if ((bytes[i] & 0xF0) == 0xE0) { // 1110xxxx - 3字节字符
+                    charByteLength = 3;
+                } else if ((bytes[i] & 0xF8) == 0xF0) { // 11110xxx - 4字节字符
+                    charByteLength = 4;
                 } else {
-                    right = mid - 1;
+                    // 无效的UTF-8字节，按1字节处理
+                    charByteLength = 1;
                 }
+                
+                // 如果加上当前字符会超出目标长度，则停止
+                if (i + charByteLength > targetByteLength) {
+                    break;
+                }
+                
+                maxByteIndex = i + charByteLength;
+                i = maxByteIndex;
             }
-            return endIndex == 0 ? "" : str.substring(0, endIndex);
+            
+            // 使用字节数组构造截断后的字符串
+            return new String(bytes, 0, maxByteIndex, StandardCharsets.UTF_8);
         } catch (Exception e) {
             return str;
         }
