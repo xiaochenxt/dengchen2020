@@ -155,68 +155,6 @@ public abstract class StrUtils {
     }
 
     /**
-     * 转化成蛇形下划线命名格式（改进版，支持更智能的转换，参考Hibernate命名策略（Hibernate是复制的SpringBoot的））
-     * 例如: "userName" -> "user_name", "URLPath" -> "url_path", "XMLHttpRequest" -> "xml_http_request"
-     *
-     * @param name 原字段名
-     * @return 新字段名
-     */
-    public static String convertToSpringSnakeCase(String name) {
-        if (name.isEmpty()) return name;
-
-        StringBuilder result = new StringBuilder();
-        String input = name.replace('.', '_');
-
-        for (int i = 0; i < input.length(); i++) {
-            char current = input.charAt(i);
-
-            if (Character.isUpperCase(current)) {
-                // 检查是否需要在前面添加下划线
-                if (i > 0) {
-                    boolean needUnderscore = false;
-
-                    // 情况1：前一个字符是小写 (如 userName 中的 u 和 N)
-                    if (Character.isLowerCase(input.charAt(i - 1))) {
-                        needUnderscore = true;
-                    }
-                    // 情况2：当前是连续大写字母序列的结尾，且后一个字符是小写 (如 XMLHttpRequest 中的 T 和 R)
-                    else if (i < input.length() - 1 &&
-                            Character.isUpperCase(input.charAt(i - 1)) &&
-                            Character.isLowerCase(input.charAt(i + 1))) {
-                        needUnderscore = true;
-                    }
-
-                    if (needUnderscore) {
-                        result.append('_');
-                    }
-                }
-
-                result.append(Character.toLowerCase(current));
-            } else {
-                result.append(current);
-            }
-        }
-
-        return result.toString();
-    }
-
-    /**
-     * 转化成蛇形下划线命名格式
-     *
-     * @param name 原字段名
-     * @return 新字段名
-     */
-    public static String convertToSnakeCase(String name) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0, len = name.length(); i < len; i++) {
-            char c = name.charAt(i);
-            if (Character.isUpperCase(c) && i > 0) result.append("_");
-            result.append(Character.toLowerCase(c));
-        }
-        return result.toString();
-    }
-
-    /**
      * 检查 CharSequence 是否仅包含 Unicode 数字。小数点不是 Unicode 数字，返回 false。
      * null 将返回 false.一个空的 CharSequence （length（）=0） 将返回 false。
      * 请注意，该方法不允许使用正号或负号。此外，如果 String 通过了数值测试，则在由 Integer.parseInt 或 Long.parseLong 解析时，它仍可能生成 NumberFormatException，例如，如果值分别超出 int 或 long 的范围。
