@@ -102,7 +102,10 @@ public abstract class RestClientUtils {
         return RestClient.builder()
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE)
                 .requestFactory(factory)
-                .configureMessageConverters(messageConverters -> messageConverters.withStringConverter(new StringHttpMessageConverter(StandardCharsets.UTF_8)));
+                .configureMessageConverters(messageConverters -> {
+                    messageConverters.registerDefaults();
+                    messageConverters.withStringConverter(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+                });
     }
 
 
