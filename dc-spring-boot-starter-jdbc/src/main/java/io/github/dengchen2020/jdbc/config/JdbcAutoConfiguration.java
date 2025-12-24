@@ -32,6 +32,16 @@ public final class JdbcAutoConfiguration extends AbstractJdbcConfiguration {
         return super.userConverters();
     }
 
+//    /**
+//     * SpringBoot4.0.0开始，引入了Spring Data Aot，aot时需要自行提供方言（后续官方会优化），详见：<a href="https://github.com/spring-projects/spring-boot/issues/48240">Spring Data JDBC 和 AOT 时需要 JdbcDialect</a>
+//     * <a href="https://github.com/spring-projects/spring-boot/issues/47781">允许无需 DataSource 初始化 即可实现 Data JDBC 方言解析</a>
+//     * @return
+//     */
+//    @Bean
+//    JdbcPostgresDialect jdbcDialect() {
+//        return JdbcPostgresDialect.INSTANCE;
+//    }
+
     @ConditionalOnMissingBean
     @Bean
     SQLQueryFactory sqlQueryFactory(DataSource dataSource) throws SQLException {
