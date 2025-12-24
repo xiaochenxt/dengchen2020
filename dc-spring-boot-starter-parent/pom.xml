@@ -69,7 +69,7 @@
         <libphonenumber.version>9.0.21</libphonenumber.version>
         <mybatis.springboot.version>4.0.0</mybatis.springboot.version>
         <ip2region.version>3.3.1</ip2region.version>
-        <software.amazon.awssdk.version>2.40.14</software.amazon.awssdk.version>
+        <software.amazon.awssdk.version>2.40.15</software.amazon.awssdk.version>
     </properties>
 
     <dependencyManagement>
