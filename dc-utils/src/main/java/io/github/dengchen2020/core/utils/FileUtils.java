@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,7 +135,7 @@ public abstract class FileUtils {
                     }
                 } else {
                     try {
-                        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(source, target);
                     } catch (IOException e) {
                         throw new IllegalArgumentException("文件夹复制失败", e);
                     }
