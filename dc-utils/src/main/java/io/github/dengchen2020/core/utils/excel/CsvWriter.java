@@ -144,13 +144,12 @@ public class CsvWriter implements AutoCloseable {
         return true;
     }
 
-    public void flush() throws IOException {
+    private void flush() throws IOException {
         writer.flush();
     }
 
     @Override
     public void close() throws IOException {
-        flush();
         writer.close();
     }
 }
