@@ -110,6 +110,111 @@ public abstract class RestClientUtils {
     }
 
     /**
+     * 使用 {@link BufferingClientHttpRequestFactory} 包装以设置contentLength，但会增加内存占用
+     *
+     * @param maxConnPerRoute 每个路由的最大连接数
+     * @return {@link RestClient}
+     */
+    public static RestClient create(int maxConnPerRoute) {
+        return create(httpClientBuilder(maxConnPerRoute).build(), false);
+    }
+
+    /**
+     * 使用 {@link BufferingClientHttpRequestFactory} 包装以设置contentLength，但会增加内存占用
+     *
+     * @param maxConnPerRoute 每个路由的最大连接数
+     * @param readTimeout 读取超时时间，默认10秒
+     * @return {@link RestClient}
+     */
+    public static RestClient create(int maxConnPerRoute, Duration readTimeout) {
+        return create(httpClientBuilder(maxConnPerRoute).build(), false, readTimeout);
+    }
+
+    /**
+     * 不会设置contentLength，如果第三方post或put接口要求必须携带contentLength会导致报错，为false对第三方接口兼容性好但会增加内存占用
+     *
+     * @param maxConnPerRoute 每个路由的最大连接数
+     * @return {@link RestClient}
+     */
+    public static RestClient createNoBuffering(int maxConnPerRoute) {
+        return create(httpClientBuilder(maxConnPerRoute).build(), true);
+    }
+
+    /**
+     * 不会设置contentLength，如果第三方post或put接口要求必须携带contentLength会导致报错，为false对第三方接口兼容性好但会增加内存占用
+     *
+     * @param maxConnPerRoute 每个路由的最大连接数
+     * @param readTimeout 读取超时时间，默认10秒
+     * @return {@link RestClient}
+     */
+    public static RestClient createNoBuffering(int maxConnPerRoute, Duration readTimeout) {
+        return create(httpClientBuilder(maxConnPerRoute).build(), true, readTimeout);
+    }
+
+    /**
+     * 使用 {@link BufferingClientHttpRequestFactory} 包装以设置contentLength，但会增加内存占用
+     *
+     * @param httpClient {@link HttpClient}
+     * @param noBuffering 是否不使用缓冲区，为true时如果第三方post或put接口要求必须携带contentLength会导致报错，为false对第三方接口兼容性好但会增加内存占用
+     * @param readTimeout 读取超时时间，默认10秒
+     * @return {@link RestClient}
+     */
+    private static RestClient create(HttpClient httpClient, boolean noBuffering, Duration readTimeout) {
+        ClientHttpRequestFactory factory = createFactory(httpClient, readTimeout);
+        RestClient.Builder builder = builder(noBuffering ? factory : new BufferingClientHttpRequestFactory(factory));
+        return builder.build();
+    }
+
+    private static RestClient createNoSSL() {
+        try {
+            HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create().setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
+                    .setMaxConnPerRoute(DEFAULT_MAX_CONN_PER_ROUTE)
+                    .setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()))
+                    .build();
+            return create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), true);
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+            throw new RuntimeException("创建无需SSL证书校验的RestClient失败", e);
+        }
+    }
+
+    static final RestClient noSSL = createNoSSL();
+
+    /**
+     * 不校验SSL证书，非测试环境或内网环境禁止使用
+     * @return {@link RestClient}
+     */
+    public static RestClient noSSL() {
+        return noSSL;
+    }
+
+    private static RestClient create(HttpClient httpClient, boolean noBuffering) {
+        return create(httpClient, noBuffering, DEFAULT_READ_TIMEOUT);
+    }
+
+    /**
+     * 获取一个{@link HttpClientBuilder}
+     *
+     * @param maxConnPerRoute 每个路由的最大连接数
+     * @return {@link HttpClientBuilder}
+     */
+    private static HttpClientBuilder httpClientBuilder(int maxConnPerRoute) {
+        HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
+                .setMaxConnPerRoute(maxConnPerRoute <= 0 ? DEFAULT_MAX_CONN_PER_ROUTE : maxConnPerRoute)
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toSeconds(), TimeUnit.SECONDS)
+                        .build())
+                .build();
+        return HttpClientBuilder.create().setConnectionManager(manager);
+    }
+
+    private static HttpComponentsClientHttpRequestFactory createFactory(HttpClient httpClient, Duration readTimeout) {
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setReadTimeout(readTimeout);
+        return factory;
+    }
+
+    /**
      * 3.4.4版本RestClient新增了很多http消息转换器，其中包含xml，而xml被排在了json前面，请求优先以xml数据传输导致只接收json数据的接口报错，而json更为流行，应比xml优先级高才对
      *
      * @param converters
@@ -127,84 +232,6 @@ public abstract class RestClientUtils {
                 converters.addLast(httpMessageConverter);
                 break;
             }
-        }
-    }
-
-
-    static final RestClient noSSL = createNoSSL();
-
-    /**
-     * 不校验SSL证书，非测试环境或内网环境禁止使用
-     * @return {@link RestClient}
-     */
-    public static RestClient noSSL() {
-        return noSSL;
-    }
-
-    /**
-     * 创建一个HttpClient
-     *
-     * @param maxConnPerRoute 每个路由的最大连接数
-     * @return {@link RestClient}
-     */
-    private static HttpClientBuilder httpClientBuilder(int maxConnPerRoute) {
-        HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                .setMaxConnPerRoute(maxConnPerRoute <= 0 ? DEFAULT_MAX_CONN_PER_ROUTE : maxConnPerRoute)
-                .setDefaultConnectionConfig(ConnectionConfig.custom()
-                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toSeconds(), TimeUnit.SECONDS)
-                        .build())
-                .build();
-        return HttpClientBuilder.create().setConnectionManager(manager);
-    }
-
-    private static HttpComponentsClientHttpRequestFactory createFactory(HttpClient httpClient) {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        factory.setReadTimeout(DEFAULT_READ_TIMEOUT);
-        return factory;
-    }
-
-    /**
-     * 使用 {@link BufferingClientHttpRequestFactory} 包装以设置contentLength，但会增加内存占用
-     *
-     * @param maxConnPerRoute 每个路由的最大连接数
-     * @return {@link RestClient}
-     */
-    public static RestClient create(int maxConnPerRoute) {
-        return create(httpClientBuilder(maxConnPerRoute).build(), false);
-    }
-
-    /**
-     * 不会设置contentLength，可能会导致请求部分第三方接口报错，因为要求需要携带contentLength
-     *
-     * @param maxConnPerRoute 每个路由的最大连接数
-     * @return {@link RestClient}
-     */
-    public static RestClient createNoBuffering(int maxConnPerRoute) {
-        return create(httpClientBuilder(maxConnPerRoute).build(), true);
-    }
-
-    /**
-     * 使用 {@link BufferingClientHttpRequestFactory} 包装以设置contentLength，但会增加内存占用
-     *
-     * @param httpClient {@link HttpClient}
-     * @return {@link RestClient}
-     */
-    private static RestClient create(HttpClient httpClient, boolean noBuffering) {
-        ClientHttpRequestFactory factory = createFactory(httpClient);
-        RestClient.Builder builder = builder(noBuffering ? factory : new BufferingClientHttpRequestFactory(factory));
-        return builder.build();
-    }
-
-    private static RestClient createNoSSL() {
-        try {
-            HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create().setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                    .setMaxConnPerRoute(DEFAULT_MAX_CONN_PER_ROUTE)
-                    .setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()))
-                    .build();
-            return create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), true);
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            throw new RuntimeException("创建无需SSL证书校验的RestClient失败", e);
         }
     }
 
