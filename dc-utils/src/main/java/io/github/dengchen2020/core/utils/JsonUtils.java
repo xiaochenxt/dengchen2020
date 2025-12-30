@@ -180,4 +180,32 @@ public abstract class JsonUtils {
         return JsonHelper.INSTANCE.toStream(arrayNode);
     }
 
+    /**
+     * 流式校验 JSON 合法性（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON
+     */
+    public static boolean isJson(String jsonStr) {
+        return JsonHelper.INSTANCE.isJson(jsonStr);
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 对象（{...} 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON 对象
+     */
+    public static boolean isJsonObject(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonObject(jsonStr);
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 数组（[...] 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 数组字符串
+     * @return 是否为合法 JSON 数组
+     */
+    public static boolean isJsonArray(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonArray(jsonStr);
+    }
+
+
 }
