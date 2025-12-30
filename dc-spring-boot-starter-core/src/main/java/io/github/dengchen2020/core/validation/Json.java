@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {JsonValidator.class})
 public @interface Json {
 
-    String message() default "{validation.io.github.dengchen2020.core.validation.Json.message}";
+    String message() default "{io.github.dengchen2020.core.validation.Json.message}";
 
     Class<?>[] groups() default {};
 
