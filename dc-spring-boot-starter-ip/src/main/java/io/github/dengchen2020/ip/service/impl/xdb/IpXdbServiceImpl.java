@@ -42,7 +42,7 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
         File ipv4File = new File(ipv4DataPath);
         if (ipv4File.isFile() && ipv4File.exists()) {
             try {
-                Searcher newSearcherIpv4 = Searcher.newWithBuffer(Version.IPv4, Searcher.loadContentFromFile(ipv4DataPath));
+                Searcher newSearcherIpv4 = Searcher.newWithBuffer(Version.IPv4, Searcher.loadContentFromFile(ipv4File));
                 if (verify) Searcher.verifyFromFile(ipv4File);
                 log.info("ipv4数据包加载完成，占用{}MB", DataSize.ofBytes(ipv4File.length()).toMegabytes());
                 var oldSearcherIpv4 = searcherIpv4;
@@ -64,7 +64,7 @@ public class IpXdbServiceImpl implements IpService, DisposableBean {
         File ipv6File = new File(ipv6DataPath);
         if (ipv6File.isFile() && ipv6File.exists()) {
             try {
-                Searcher newSearcherIpv6 = Searcher.newWithBuffer(Version.IPv6, Searcher.loadContentFromFile(ipv6DataPath));
+                Searcher newSearcherIpv6 = Searcher.newWithBuffer(Version.IPv6, Searcher.loadContentFromFile(ipv6File));
                 if (verify) Searcher.verifyFromFile(ipv6File);
                 log.info("ipv6数据包加载完成，占用{}MB", DataSize.ofBytes(ipv6File.length()).toMegabytes());
                 var oldSearcherIpv6 = searcherIpv6;
