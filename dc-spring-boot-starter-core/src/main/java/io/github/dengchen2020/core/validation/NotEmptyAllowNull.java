@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {NotEmptyAllowNullValidatorForString.class})
 public @interface NotEmptyAllowNull {
 
-    String message() default "{io.github.dengchen2020.core.support.valid.NotEmptyAllowNull.message}";
+    String message() default "{io.github.dengchen2020.core.validation.NotEmptyAllowNull.message}";
 
     Class<?>[] groups() default {};
 

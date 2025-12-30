@@ -5,16 +5,16 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
- * json字符串校验器
+ * json对象字符串校验器
  * @author xiaochen
  * @since 2022/12/28
  */
-public class JsonValidator implements ConstraintValidator<Json, String> {
+public class JsonObjectValidator implements ConstraintValidator<JsonObject, String> {
 
     private int maxLength = 0;
 
     @Override
-    public void initialize(Json jsonAnnotation) {
+    public void initialize(JsonObject jsonAnnotation) {
         maxLength = jsonAnnotation.maxLength();
     }
 
@@ -27,7 +27,7 @@ public class JsonValidator implements ConstraintValidator<Json, String> {
                     .addConstraintViolation().disableDefaultConstraintViolation();
             return false;
         }
-        return JsonUtils.isJson(value);
+        return JsonUtils.isJsonObject(value);
     }
 
 }

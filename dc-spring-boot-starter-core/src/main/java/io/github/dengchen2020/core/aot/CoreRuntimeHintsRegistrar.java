@@ -22,7 +22,9 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         AotUtils aotUtils = AotUtils.newInstance(hints, classLoader);
-        aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, AllowedValuesValidator.class, JsonValidator.class, NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
+        aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, AllowedValuesValidator.class,
+                JsonValidator.class, JsonObjectValidator.class, JsonArrayValidator.class,
+                NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
                 Page.class, PageParam.class, SimplePage.class, StatsPage.class, ScheduledHandleBeforeEvent.class);
         aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
     }
