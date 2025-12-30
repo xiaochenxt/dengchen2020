@@ -1,17 +1,22 @@
 package io.github.dengchen2020.core.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -284,6 +289,81 @@ public class JsonHelper {
      */
     public Stream<JsonNode> toStream(ArrayNode arrayNode){
         return StreamSupport.stream(arrayNode.spliterator(),false);
+    }
+
+    /**
+     * 流式校验 JSON 合法性（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON
+     */
+    public boolean isJson(String jsonStr) {
+        if (!StringUtils.hasText(jsonStr)) return false;
+        // 去除首尾空白（避免因空格导致误判）
+        String trimmed = jsonStr.trim();
+        // 快速前置校验：JSON 必须以 { 或 [ 开头，以 } 或 ] 结尾
+        if (!(trimmed.startsWith("{") || trimmed.startsWith("["))
+                || !(trimmed.endsWith("}") || trimmed.endsWith("]"))) {
+            return false;
+        }
+        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+            // 遍历所有 token 直到结束，若过程中无异常则为合法 JSON
+            while (parser.nextToken() != null) {
+                // 仅遍历，不做任何处理
+            }
+            return true;
+        } catch (JacksonException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 对象（{...} 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON 对象
+     */
+    public boolean isJsonObject(String jsonStr) {
+        if (!StringUtils.hasText(jsonStr)) return false;
+        String trimmed = jsonStr.trim();
+        // 前置校验：必须以 { 开头 和 } 结尾
+        if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return false;
+        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+            // 校验第一个 token 是 OBJECT_START（{）
+            JsonToken firstToken = parser.nextToken();
+            if (firstToken != JsonToken.START_OBJECT) return false;
+            // 遍历剩余 token 确保无语法错误
+            while (parser.nextToken() != null) {
+                // 仅遍历，不做任何处理
+            }
+            return true;
+        } catch (JacksonException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 数组（[...] 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON 数组
+     */
+    public boolean isJsonArray(String jsonStr) {
+        if (!StringUtils.hasText(jsonStr)) return false;
+        String trimmed = jsonStr.trim();
+        // 前置校验：必须以 [ 开头 和 ] 结尾
+        if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+            return false;
+        }
+        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+            // 校验第一个 token 是 ARRAY_START（[）
+            JsonToken firstToken = parser.nextToken();
+            if (firstToken != JsonToken.START_ARRAY) return false;
+            // 遍历剩余 token 确保无语法错误
+            while (parser.nextToken() != null) {
+                // 仅遍历，不做任何处理
+            }
+            return true;
+        } catch (JacksonException e) {
+            return false;
+        }
     }
 
 }

@@ -1,11 +1,8 @@
 package io.github.dengchen2020.message.config;
 
-import io.github.dengchen2020.message.dingtalk.DingTalkClient;
 import io.github.dengchen2020.message.dingtalk.DingTalkClientImpl;
-import io.github.dengchen2020.message.feishu.FeiShuClient;
 import io.github.dengchen2020.message.feishu.FeiShuClientImpl;
 import io.github.dengchen2020.message.properties.DcMessageBuilder;
-import io.github.dengchen2020.message.wechat.WeChatClient;
 import io.github.dengchen2020.message.wechat.WeChatClientImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,19 +32,19 @@ public final class MessageAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    FeiShuClient feiShuService(){
+    FeiShuClientImpl feiShuService(){
         return new FeiShuClientImpl(feiShu.getWebhook(), feiShu.getSecret());
     }
 
     @ConditionalOnMissingBean
     @Bean
-    DingTalkClient dingTalkService(){
+    DingTalkClientImpl dingTalkService(){
         return new DingTalkClientImpl(dingTalk.getWebhook(), dingTalk.getSecret());
     }
 
     @ConditionalOnMissingBean
     @Bean
-    WeChatClient weChatClient(){
+    WeChatClientImpl weChatClient(){
         return new WeChatClientImpl(weChat.getWebhook());
     }
 

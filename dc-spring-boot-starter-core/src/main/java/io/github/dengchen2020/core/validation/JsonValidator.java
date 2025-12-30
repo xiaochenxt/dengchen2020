@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.validation;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
+import io.github.dengchen2020.core.utils.JsonUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -11,8 +10,6 @@ import jakarta.validation.ConstraintValidatorContext;
  * @since 2022/12/28
  */
 public class JsonValidator implements ConstraintValidator<Json, String> {
-
-    private static final JsonMapper JSON = new JsonMapper();
 
     private int maxLength = 0;
 
@@ -30,12 +27,7 @@ public class JsonValidator implements ConstraintValidator<Json, String> {
                     .addConstraintViolation().disableDefaultConstraintViolation();
             return false;
         }
-        try {
-            JSON.readTree(value);
-            return true;
-        } catch (JacksonException e) {
-            return false;
-        }
+        return JsonUtils.isJson(value);
     }
 
 }
