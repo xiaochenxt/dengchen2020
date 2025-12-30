@@ -1,6 +1,5 @@
 package io.github.dengchen2020.message.config;
 
-import io.github.dengchen2020.message.email.EmailClient;
 import io.github.dengchen2020.message.email.EmailClientImpl;
 import io.github.dengchen2020.message.properties.DcMessageBuilder;
 import jakarta.mail.internet.MimeMessage;
@@ -26,7 +25,7 @@ public final class EmailClientAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    EmailClient emailService(JavaMailSender javaMailSender, DcMessageBuilder dcMessageBuilder){
+    EmailClientImpl emailService(JavaMailSender javaMailSender, DcMessageBuilder dcMessageBuilder){
         return new EmailClientImpl(javaMailSender, dcMessageBuilder.getEmail().getTo());
     }
 
