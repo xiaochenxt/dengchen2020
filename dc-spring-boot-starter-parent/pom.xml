@@ -11,7 +11,7 @@
 
     <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.4.11</version>
+    <version>0.4.12</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -57,7 +57,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dc.version>0.4.11</dc.version>
+        <dc.version>0.4.12</dc.version>
         <querydsl.version>5.1.0</querydsl.version>
         <redisson.version>4.0.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -67,9 +67,9 @@
         <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>7.1</openfeign.querydsl.version>
         <libphonenumber.version>9.0.21</libphonenumber.version>
-        <mybatis.springboot.version>4.0.0</mybatis.springboot.version>
-        <ip2region.version>3.3.1</ip2region.version>
-        <software.amazon.awssdk.version>2.40.15</software.amazon.awssdk.version>
+        <mybatis.springboot.version>4.0.1</mybatis.springboot.version>
+        <ip2region.version>3.3.3</ip2region.version>
+        <software.amazon.awssdk.version>2.40.17</software.amazon.awssdk.version>
     </properties>
 
     <dependencyManagement>
