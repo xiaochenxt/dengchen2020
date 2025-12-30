@@ -1,6 +1,5 @@
-package io.github.dengchen2020.jdbc.querydsl;
+package io.github.dengchen2020.jdbc.querydsl.mysql;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
 import org.jspecify.annotations.NullMarked;
 
@@ -23,7 +22,7 @@ public final class MysqlExpressions {
      * @param value
      * @return
      */
-    public static Predicate findInSet(StringPath stringPath, String value) {
+    public static BooleanExpression findInSet(StringPath stringPath, String value) {
         return Expressions.numberTemplate(Integer.class, "find_in_set({0}, {1})", stringPath, value).gt(0);
     }
 
@@ -33,7 +32,7 @@ public final class MysqlExpressions {
      * @param value
      * @return
      */
-    public static Predicate findInSet(StringPath stringPath, String... value) {
+    public static BooleanExpression findInSet(StringPath stringPath, String... value) {
         return findInSet(stringPath, String.join(",", value));
     }
 
@@ -43,16 +42,8 @@ public final class MysqlExpressions {
      * @param value
      * @return
      */
-    public static Predicate findInSet(StringPath stringPath, Collection<String> value) {
+    public static BooleanExpression findInSet(StringPath stringPath, Collection<String> value) {
         return findInSet(stringPath, String.join(",", value));
-    }
-
-    /**
-     * 随机数
-     * @return
-     */
-    public static StringPath rand() {
-        return Expressions.stringPath("rand()");
     }
 
     /**
@@ -61,7 +52,7 @@ public final class MysqlExpressions {
      * @param value
      * @return
      */
-    public static Predicate jsonContains(StringPath stringPath, Number value) {
+    public static BooleanExpression jsonContains(StringPath stringPath, Number value) {
         return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, value.toString()).gt(0);
     }
 
@@ -71,7 +62,7 @@ public final class MysqlExpressions {
      * @param value
      * @return
      */
-    public static Predicate jsonContains(StringPath stringPath, String value) {
+    public static BooleanExpression jsonContains(StringPath stringPath, String value) {
         return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, "\"" + value + "\"").gt(0);
     }
 
@@ -81,7 +72,7 @@ public final class MysqlExpressions {
      * @param numberPath
      * @return
      */
-    public static Predicate jsonContains(StringPath stringPath, NumberPath<?> numberPath) {
+    public static BooleanExpression jsonContains(StringPath stringPath, NumberPath<?> numberPath) {
         return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, numberPath.stringValue()).gt(0);
     }
 
@@ -91,7 +82,7 @@ public final class MysqlExpressions {
      * @param stringPath2
      * @return
      */
-    public static Predicate jsonContains(StringPath stringPath, StringPath stringPath2) {
+    public static BooleanExpression jsonContains(StringPath stringPath, StringPath stringPath2) {
         return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, stringPath2.stringValue().prepend("\"").append("\"")).gt(0);
     }
 
@@ -102,7 +93,7 @@ public final class MysqlExpressions {
      * @param path
      * @return
      */
-    public static Predicate jsonContains(StringExpression stringExpression, String value, String path) {
+    public static BooleanExpression jsonContains(StringExpression stringExpression, String value, String path) {
         return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1}, {2})", stringExpression, "\"" + value + "\"", path).gt(0);
     }
 
