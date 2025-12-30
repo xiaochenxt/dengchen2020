@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.19</version>
+        <version>0.1.20</version>
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.13</version>
+    <version>0.0.14</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -143,9 +143,10 @@
           <artifactId>querydsl-core</artifactId>
           <optional>true</optional>
       </dependency>
+
       <dependency>
-          <groupId>io.github.openfeign.querydsl</groupId>
-          <artifactId>querydsl-sql</artifactId>
+          <groupId>org.hibernate.orm</groupId>
+          <artifactId>hibernate-spatial</artifactId>
           <optional>true</optional>
       </dependency>
 
