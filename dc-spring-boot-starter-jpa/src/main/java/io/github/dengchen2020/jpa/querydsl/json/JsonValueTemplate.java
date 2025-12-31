@@ -16,14 +16,14 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Json模板
+ * Json值
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public class JsonTemplate extends StringTemplate {
+public class JsonValueTemplate extends StringTemplate {
 
-    protected JsonTemplate(String template, Object... args) {
+    public JsonValueTemplate(String template, Object... args) {
         super(TemplateFactory.DEFAULT.create(template), List.of(args));
     }
 

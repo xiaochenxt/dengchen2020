@@ -3,7 +3,6 @@ package io.github.dengchen2020.jpa.querydsl;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Ops;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
 import org.hibernate.type.spi.TypeConfiguration;
 import org.jspecify.annotations.NullMarked;
@@ -33,7 +32,7 @@ public final class JpaExpressions {
      *
      * @param expr
      * @param values
-     * @return {@link Predicate}
+     * @return {@link BooleanExpression}
      */
     @Deprecated
     public static BooleanExpression findInSet(Expression<String> expr, boolean withQuote, Object... values) {
@@ -56,7 +55,7 @@ public final class JpaExpressions {
      *
      * @param expr
      * @param value
-     * @return {@link Predicate}
+     * @return {@link BooleanExpression}
      */
     @Deprecated
     public static BooleanExpression findInSet(StringExpression expr, String... value) {
@@ -68,7 +67,7 @@ public final class JpaExpressions {
      *
      * @param expr
      * @param value
-     * @return {@link Predicate}
+     * @return {@link BooleanExpression}
      */
     @Deprecated
     public static BooleanExpression findInSet(StringExpression expr, Number... value) {
@@ -83,10 +82,36 @@ public final class JpaExpressions {
     }
 
     /**
+     * json_value函数，用于从json字段中提取标量值（字符串|数字|布尔）
+     * @param expr json字段值
+     * @param path 路径
+     */
+    public static StringExpression jsonValue(StringExpression expr, String path) {
+        return Expressions.stringTemplate("json_value({0},{1})", expr, path);
+    }
+
+    /**
+     * json_query函数，用于从json字段中提取非标量值（json片段，字符串）
+     * @param expr json字段值
+     * @param path 路径
+     */
+    public static StringExpression jsonQuery(StringExpression expr, String path) {
+        return Expressions.stringTemplate("json_query({0},{1})", expr, path);
+    }
+
+    /**
+     * json_exists函数，判断json中是否包含指定路径
+     * @param expr json字段值
+     * @param path 路径
+     */
+    public static BooleanExpression jsonExists(StringExpression expr, String path) {
+        return Expressions.booleanTemplate("json_exists({0},{1})", expr, path);
+    }
+
+    /**
      * 将日期时间转日期，datetime转date
      *
      * @param dateTimePath
-     * @return
      */
     public static DateExpression<LocalDate> date(DateTimePath<LocalDateTime> dateTimePath) {
         return Expressions.dateTemplate(LocalDate.class, "date({0})", dateTimePath);

@@ -1,9 +1,11 @@
 package io.github.dengchen2020.jdbc.querydsl.mysql;
 
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import org.jspecify.annotations.NullMarked;
 
-import java.time.LocalDate;
 import java.util.Collection;
 
 /**
@@ -47,74 +49,40 @@ public final class MysqlExpressions {
     }
 
     /**
-     * 检查JSON字段中是否包含特定值
-     * @param stringPath
-     * @param value
-     * @return
-     */
-    public static BooleanExpression jsonContains(StringPath stringPath, Number value) {
-        return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, value.toString()).gt(0);
-    }
-
-    /**
-     * 检查JSON字段中是否包含特定值
-     * @param stringPath
-     * @param value
-     * @return
-     */
-    public static BooleanExpression jsonContains(StringPath stringPath, String value) {
-        return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, "\"" + value + "\"").gt(0);
-    }
-
-    /**
-     * 检查JSON字段中是否包含特定值
-     * @param stringPath
-     * @param numberPath
-     * @return
-     */
-    public static BooleanExpression jsonContains(StringPath stringPath, NumberPath<?> numberPath) {
-        return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, numberPath.stringValue()).gt(0);
-    }
-
-    /**
-     * 检查JSON字段中是否包含特定值
-     * @param stringPath
-     * @param stringPath2
-     * @return
-     */
-    public static BooleanExpression jsonContains(StringPath stringPath, StringPath stringPath2) {
-        return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1})", stringPath, stringPath2.stringValue().prepend("\"").append("\"")).gt(0);
-    }
-
-    /**
-     * 检查JSON对象字段中是否包含特定值，示例：jsonContains(details, "5G", "$.features")
-     * @param stringExpression
-     * @param value
-     * @param path
-     * @return
-     */
-    public static BooleanExpression jsonContains(StringExpression stringExpression, String value, String path) {
-        return Expressions.numberTemplate(Integer.class, "json_contains({0}, {1}, {2})", stringExpression, "\"" + value + "\"", path).gt(0);
-    }
-
-    /**
-     * 提取JSON字段中的值，示例：{@code jsonExtract(path, "$.name")}
+     * 提取json字段中的值，示例：{@code json_column ->> '$.name'}
      *
-     * @param stringPath
-     * @param value
-     * @return
+     * @param expr json字段
+     * @param path 路径
      */
-    public static StringExpression jsonExtract(StringPath stringPath, String value) {
-        return Expressions.stringTemplate("json_unquote(json_extract({0}, {1}))", stringPath, Expressions.stringPath("'" + value + "'")).concat("");
+    public static StringExpression jsonExtract(StringExpression expr, String path) {
+        return Expressions.stringTemplate("{0} ->> {1})", expr, path);
     }
 
     /**
-     * 将日期时间转日期，datetime转date
-     * @param dateTimePath
-     * @return
+     * json_value函数，用于从json字段中提取标量值（字符串|数字|布尔）
+     * @param expr json字段
+     * @param path 路径
      */
-    public static DateExpression<LocalDate> date(DateTimePath<java.time.LocalDateTime> dateTimePath) {
-        return Expressions.dateTemplate(LocalDate.class, "date({0})", dateTimePath);
+    public static StringExpression jsonValue(StringExpression expr, String path) {
+        return Expressions.stringTemplate("json_value({0},{1})", expr, path);
+    }
+
+    /**
+     * json_query函数，用于从json字段中提取非标量值（json片段，字符串）
+     * @param expr json字段
+     * @param path 路径
+     */
+    public static StringExpression jsonQuery(StringExpression expr, String path) {
+        return Expressions.stringTemplate("{0} -> {1}", expr, path);
+    }
+
+    /**
+     * json_exists函数，判断json中是否包含指定路径
+     * @param expr json字段
+     * @param path 路径
+     */
+    public static BooleanExpression jsonExists(StringExpression expr, String path) {
+        return Expressions.booleanTemplate("json_contains_path({0},'all',{1})", expr, path);
     }
 
 }

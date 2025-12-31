@@ -36,6 +36,33 @@ public final class SqlExpressions {
         return NumberExpression.random();
     }
 
+    /**
+     * json_value函数，用于从json字段中提取标量值（字符串|数字|布尔），大部分数据库支持
+     * @param expr json字段
+     * @param path 路径
+     */
+    public static StringExpression jsonValue(StringExpression expr, String path) {
+        return Expressions.stringTemplate("json_value({0},{1})", expr, path);
+    }
+
+    /**
+     * json_query函数，用于从json字段中提取非标量值（json片段，字符串），部分数据库支持
+     * @param expr json字段
+     * @param path 路径
+     */
+    public static StringExpression jsonQuery(StringExpression expr, String path) {
+        return Expressions.stringTemplate("json_query({0},{1})", expr, path);
+    }
+
+    /**
+     * json_exists函数，判断json中是否包含指定路径，部分数据库支持
+     * @param expr json字段
+     * @param path 路径
+     */
+    public static BooleanExpression jsonExists(StringExpression expr, String path) {
+        return Expressions.booleanTemplate("json_exists({0},{1})", expr, path);
+    }
+
     public static  <N extends Number & Comparable<?>> NumberExpression<N> num(Expression<?> expr, Class<N> type) {
         var casted = Expressions.numberOperation(type, Ops.NUMCAST, expr, ConstantImpl.create(type));
         if (type.isPrimitive()) return Expressions.numberTemplate(type, "coalesce({0},0)", casted, 0);
