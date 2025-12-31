@@ -149,7 +149,7 @@ class BasicFeature implements Feature {
     }
 
     private void lettuce(FeatureUtils featureUtils) {
-        if (featureUtils.isPresent("io.lettuce.core.RedisClient")) RuntimeSystemProperties.register("io.lettuce.core.jfr", "false");
+        if (featureUtils.isPresent("io.lettuce.core.RedisClient")) featureUtils.registerSystemProperty("io.lettuce.core.jfr", "false");
     }
 
     private void aliyuncs(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
@@ -343,14 +343,14 @@ class BasicFeature implements Feature {
         if(mybatisOgnl != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
                 // 详见：org.apache.ibatis.ognl.OgnlRuntime 881行
-                RuntimeSystemProperties.register("org.apache.ibatis.ognl.security.manager","forceDisableOnInit");
-                RuntimeSystemProperties.register("ognl.security.manager","forceDisableOnInit");
+                featureUtils.registerSystemProperty("org.apache.ibatis.ognl.security.manager","forceDisableOnInit");
+                featureUtils.registerSystemProperty("ognl.security.manager","forceDisableOnInit");
             }, mybatisOgnl);
         }
         Class<?> ognlSecurityManager = featureUtils.loadClass("ognl.security.OgnlSecurityManagerFactory");
         if (ognlSecurityManager != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
-                RuntimeSystemProperties.register("ognl.security.manager","forceDisableOnInit");
+                featureUtils.registerSystemProperty("ognl.security.manager","forceDisableOnInit");
             }, ognlSecurityManager);
         }
     }
