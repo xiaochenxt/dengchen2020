@@ -1,18 +1,19 @@
-package io.github.dengchen2020.jpa.querydsl.json;
+package io.github.dengchen2020.jdbc.querydsl.jsonb;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import io.github.dengchen2020.jdbc.querydsl.json.JsonValueTemplate;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Map;
 
 /**
- * JSON对象操作
+ * jsonb对象查询
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public interface JsonObjectOperation {
+public interface JsonbObjectOperation {
 
     /**
      * 检查JSON字段中是否包含特定值
@@ -47,12 +48,20 @@ public interface JsonObjectOperation {
      */
     BooleanExpression containsKey(String key);
 
-    JsonObjectTemplate getObject(String key);
+    JsonbObjectTemplate getObject(String key);
 
-    JsonArrayTemplate getArray(String key);
+    JsonbArrayTemplate getArray(String key);
 
-    JsonTemplate get(String key);
+    JsonValueTemplate get(String key);
 
-    JsonTemplate get(String... pathArr);
+    JsonbObjectTemplate getObject(String... pathArr);
+
+    JsonValueTemplate get(String... pathArr);
+
+    BooleanExpression containsPath(String path);
+
+    JsonValueTemplate query(String path);
+
+    JsonbObjectTemplate queryObject(String path);
 
 }

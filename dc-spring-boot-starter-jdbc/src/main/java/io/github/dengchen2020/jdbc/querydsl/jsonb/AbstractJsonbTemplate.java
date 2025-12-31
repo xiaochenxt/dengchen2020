@@ -1,4 +1,4 @@
-package io.github.dengchen2020.jpa.querydsl.json;
+package io.github.dengchen2020.jdbc.querydsl.jsonb;
 
 import com.querydsl.core.types.TemplateFactory;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -10,14 +10,14 @@ import org.jspecify.annotations.NullMarked;
 import java.util.List;
 
 /**
- * Json模板
+ * jsonb查询
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public sealed class AbstartJsonTemplate extends DslTemplate<String> permits JsonObjectTemplate, JsonArrayTemplate {
+public sealed abstract class AbstractJsonbTemplate extends DslTemplate<String> permits JsonbObjectTemplate, JsonbArrayTemplate {
 
-    protected AbstartJsonTemplate(String template, Object... args) {
+    protected AbstractJsonbTemplate(String template, Object... args) {
         super(String.class,TemplateFactory.DEFAULT.create(template), List.of(args));
     }
 
@@ -29,7 +29,7 @@ public sealed class AbstartJsonTemplate extends DslTemplate<String> permits Json
      */
     public BooleanExpression contains(String json) {
         if (!JsonUtils.isJson(json)) throw new IllegalArgumentException(json + "is not a json");
-        return Expressions.booleanTemplate("sql('? @> ?::jsonb',{0},{1})", mixin, json).isTrue();
+        return Expressions.booleanTemplate("{0} @> {1}::jsonb", mixin, json).isTrue();
     }
 
 }

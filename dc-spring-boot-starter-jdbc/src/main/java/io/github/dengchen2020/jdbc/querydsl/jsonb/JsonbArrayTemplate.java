@@ -1,22 +1,23 @@
-package io.github.dengchen2020.jdbc.querydsl.json;
+package io.github.dengchen2020.jdbc.querydsl.jsonb;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import io.github.dengchen2020.core.utils.JsonUtils;
+import io.github.dengchen2020.jdbc.querydsl.json.JsonValueTemplate;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Collection;
 
 /**
- * Json模板
+ * jsonb数组查询实现
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public final class JsonArrayTemplate extends AbstarctJsonTemplate implements JsonArrayOperation {
+public final class JsonbArrayTemplate extends AbstractJsonbTemplate implements JsonbArrayOperation {
 
-    public JsonArrayTemplate(String template, Object... args) {
+    public JsonbArrayTemplate(String template, Object... args) {
         super(template, args);
     }
 
@@ -26,6 +27,7 @@ public final class JsonArrayTemplate extends AbstarctJsonTemplate implements Jso
      * @param json
      * @return {@link BooleanExpression}
      */
+    @Override
     public BooleanExpression contains(ArrayNode json) {
         return Expressions.booleanTemplate("{0} @> {1}::jsonb", mixin, json.toString()).isTrue();
     }
@@ -36,20 +38,23 @@ public final class JsonArrayTemplate extends AbstarctJsonTemplate implements Jso
      * @param json
      * @return {@link BooleanExpression}
      */
+    @Override
     public BooleanExpression contains(Collection<?> json) {
         return Expressions.booleanTemplate("{0} @> {1}::jsonb", mixin, JsonUtils.toJson(json)).isTrue();
     }
 
-    public JsonObjectTemplate getObject(int index){
-        return new JsonObjectTemplate("{0} -> {1}", mixin, index);
-    }
-
-    public JsonArrayTemplate getArray(int index){
-        return new JsonArrayTemplate("{0} -> {1}", mixin, index);
+    @Override
+    public JsonbObjectTemplate getObject(int index){
+        return new JsonbObjectTemplate("{0} -> {1}", mixin, index);
     }
 
     @Override
-    public JsonTemplate get(int index) {
-        return new JsonTemplate("{0} ->> {1}", mixin, index);
+    public JsonbArrayTemplate getArray(int index){
+        return new JsonbArrayTemplate("{0} -> {1}", mixin, index);
+    }
+
+    @Override
+    public JsonValueTemplate get(int index) {
+        return new JsonValueTemplate("{0} ->> {1}", mixin, index);
     }
 }

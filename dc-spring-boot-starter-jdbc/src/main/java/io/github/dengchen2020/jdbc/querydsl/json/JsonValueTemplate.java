@@ -13,14 +13,14 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Json模板
+ * json值
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public class JsonTemplate extends StringTemplate {
+public class JsonValueTemplate extends StringTemplate {
 
-    protected JsonTemplate(String template, Object... args) {
+    public JsonValueTemplate(String template, Object... args) {
         super(TemplateFactory.DEFAULT.create(template), List.of(args));
     }
 
@@ -37,7 +37,7 @@ public class JsonTemplate extends StringTemplate {
         return Expressions.booleanTemplate( "cast({0} as boolean)", mixin);
     }
 
-    public JsonTemplate string() {
+    public JsonValueTemplate string() {
         return this;
     }
 

@@ -1,18 +1,19 @@
-package io.github.dengchen2020.jdbc.querydsl.json;
+package io.github.dengchen2020.jdbc.querydsl.jsonb;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import io.github.dengchen2020.jdbc.querydsl.json.JsonValueTemplate;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Collection;
 
 /**
- * JSON数组操作
+ * jsonb数组查询
  * @author xiaochen
  * @since 2025/12/28
  */
 @NullMarked
-public interface JsonArrayOperation {
+public interface JsonbArrayOperation {
 
     /**
      * 检查JSON字段中是否包含特定值
@@ -30,10 +31,10 @@ public interface JsonArrayOperation {
      */
     BooleanExpression contains(Collection<?> json);
 
-    JsonObjectTemplate getObject(int index);
+    JsonbObjectTemplate getObject(int index);
 
-    JsonArrayTemplate getArray(int index);
+    JsonbArrayTemplate getArray(int index);
 
-    JsonTemplate get(int index);
+    JsonValueTemplate get(int index);
 
 }
