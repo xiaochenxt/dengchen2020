@@ -51,6 +51,7 @@ class BasicFeature implements Feature {
         ssl(featureUtils, access);
         precompute(featureUtils, access);
         playwright(featureUtils, access);
+        ognl(featureUtils, access);
     }
 
     /**
@@ -331,6 +332,27 @@ class BasicFeature implements Feature {
 
             }
         }, playwright);
+    }
+
+    /**
+     * 解决ognl3.5.0以下版本的性能问题 </br>
+     * 禁用ognl的securityManager（3.5.0移除了securityManager），默认情况下也没启用，但是会有大量无效的系统属性空查询调用，导致线程阻塞而产生性能问题
+     */
+    private void ognl(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> mybatisOgnl = featureUtils.loadClass("org.apache.ibatis.ognl.security.OgnlSecurityManagerFactory");
+        if(mybatisOgnl != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                // 详见：org.apache.ibatis.ognl.OgnlRuntime 881行
+                RuntimeSystemProperties.register("org.apache.ibatis.ognl.security.manager","forceDisableOnInit");
+                RuntimeSystemProperties.register("ognl.security.manager","forceDisableOnInit");
+            }, mybatisOgnl);
+        }
+        Class<?> ognlSecurityManager = featureUtils.loadClass("ognl.security.OgnlSecurityManagerFactory");
+        if (ognlSecurityManager != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                RuntimeSystemProperties.register("ognl.security.manager","forceDisableOnInit");
+            }, ognlSecurityManager);
+        }
     }
 
 }
