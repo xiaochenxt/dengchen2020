@@ -31,6 +31,9 @@ class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
             aotUtils.registerReflection(classes);
             aotUtils.registerPattern("*.properties");
             aotUtils.registerSerializable(classes);
+            aotUtils.registerPattern(aotUtils.findResources("",
+                    name -> !name.startsWith("META-INF/native-image/"))
+                    .toArray(EMPTY_STRING_ARRAY)); // 注册用户所有的资源文件
         } catch (IOException ignored) {}
     }
 

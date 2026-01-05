@@ -2,8 +2,6 @@ package io.github.dengchen2020.aot.utils;
 
 import org.graalvm.nativeimage.RuntimeOptions;
 import org.graalvm.nativeimage.hosted.*;
-import org.graalvm.nativeimage.impl.ConfigurationCondition;
-import org.graalvm.nativeimage.impl.RuntimeResourceSupport;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -265,28 +263,28 @@ public class FeatureUtils extends CollectUtils {
         if (debug) System.out.println("registering resourceBundle module " + module.getName() + " beanName " + beanName + " locales " + Arrays.toString(locales));
     }
 
-    /**
-     * 需要{@code --add-exports org.graalvm.nativeimage.impl}才能使用
-     * <p>详见：<a href="https://github.com/oracle/graal/issues/5013">我们不希望将该 API 设为公共，因为它违反了本机映像配置元数据中资源包含的可组合性</a></p>
-     * @param resources
-     */
-    public void ignoreResources(String... resources) {
-        for (String resource : resources) {
-            RuntimeResourceSupport.singleton().ignoreResources(ConfigurationCondition.alwaysTrue(), resource);
-            if (debug) System.out.println("ignore resource " + resource);
-        }
-    }
+//    /**
+//     * 需要{@code --add-exports org.graalvm.nativeimage.impl}才能使用
+//     * <p>详见：<a href="https://github.com/oracle/graal/issues/5013">我们不希望将该 API 设为公共，因为它违反了本机映像配置元数据中资源包含的可组合性</a></p>
+//     * @param resources
+//     */
+//    public void ignoreResources(String... resources) {
+//        for (String resource : resources) {
+//            RuntimeResourceSupport.singleton().ignoreResources(ConfigurationCondition.alwaysTrue(), resource);
+//            if (debug) System.out.println("ignore resource " + resource);
+//        }
+//    }
 
-    /**
-     * 需要{@code --add-exports org.graalvm.nativeimage.impl}才能使用
-     * <p>详见：<a href="https://github.com/oracle/graal/issues/5013">我们不希望将该 API 设为公共，因为它违反了本机映像配置元数据中资源包含的可组合性</a></p>
-     * @param resources
-     */
-    public void ignoreResources(ConfigurationCondition condition,String... resources) {
-        for (String resource : resources) {
-            RuntimeResourceSupport.singleton().ignoreResources(condition, resource);
-        }
-    }
+//    /**
+//     * 需要{@code --add-exports org.graalvm.nativeimage.impl}才能使用
+//     * <p>详见：<a href="https://github.com/oracle/graal/issues/5013">我们不希望将该 API 设为公共，因为它违反了本机映像配置元数据中资源包含的可组合性</a></p>
+//     * @param resources
+//     */
+//    public void ignoreResources(ConfigurationCondition condition,String... resources) {
+//        for (String resource : resources) {
+//            RuntimeResourceSupport.singleton().ignoreResources(condition, resource);
+//        }
+//    }
 
     public void registerSerialization(Class<?>... classes) {
         for (Class<?> c : classes) {
