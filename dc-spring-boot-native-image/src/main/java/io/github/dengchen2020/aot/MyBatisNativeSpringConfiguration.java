@@ -6,29 +6,10 @@ import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
-import org.apache.ibatis.cache.decorators.FifoCache;
-import org.apache.ibatis.cache.decorators.LruCache;
-import org.apache.ibatis.cache.decorators.SoftCache;
-import org.apache.ibatis.cache.decorators.WeakCache;
-import org.apache.ibatis.cache.impl.PerpetualCache;
-import org.apache.ibatis.javassist.util.proxy.ProxyFactory;
-import org.apache.ibatis.javassist.util.proxy.RuntimeSupport;
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl;
-import org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl;
-import org.apache.ibatis.logging.log4j2.Log4j2Impl;
-import org.apache.ibatis.logging.nologging.NoLoggingImpl;
-import org.apache.ibatis.logging.slf4j.Slf4jImpl;
-import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.reflection.TypeParameterResolver;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
-import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -50,6 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
+import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -59,18 +41,19 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
- * 解决mybatis-spring-boot-starter的aot编译运行问题（同时支持mybatis-plus）
+ * 解决mybatis-spring-boot-starter的native-image编译运行问题（同时支持mybatis-plus）
  */
-@ConditionalOnProperty(value = "dc.aot.mybatis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = AbstractAotProcessor.AOT_PROCESSING, havingValue = "true")
 @ConditionalOnClass(org.mybatis.spring.mapper.MapperFactoryBean.class)
-@ImportRuntimeHints(MyBatisNativeConfiguration.MyBaitsRuntimeHintsRegistrar.class)
+@ImportRuntimeHints(MyBatisNativeSpringConfiguration.MyBaitsRuntimeHintsRegistrar.class)
 @Configuration(proxyBeanMethods = false)
-public final class MyBatisNativeConfiguration {
+public final class MyBatisNativeSpringConfiguration {
 
     @Bean
     MyBatisBeanFactoryInitializationAotProcessor myBatisBeanFactoryInitializationAotProcessor() {
@@ -86,67 +69,16 @@ public final class MyBatisNativeConfiguration {
 
         @Override
         public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-            Stream.of(RawLanguageDriver.class,
-                    XMLLanguageDriver.class,
-                    RuntimeSupport.class,
-                    ProxyFactory.class,
-                    Slf4jImpl.class,
-                    Log.class,
-                    JakartaCommonsLoggingImpl.class,
-                    Log4j2Impl.class,
-                    Jdk14LoggingImpl.class,
-                    StdOutImpl.class,
-                    NoLoggingImpl.class,
-                    SqlSessionFactory.class,
-                    PerpetualCache.class,
-                    FifoCache.class,
-                    LruCache.class,
-                    SoftCache.class,
-                    WeakCache.class,
-                    SqlSessionFactoryBean.class,
-                    ArrayList.class,
-                    HashMap.class,
-                    TreeSet.class,
-                    HashSet.class
-            ).forEach(x -> hints.reflection().registerType(x, MemberCategory.values()));
-            Stream.of("org/apache/ibatis/builder/xml/*.dtd", "org/apache/ibatis/builder/xml/*.xsd")
-                    .forEach(hints.resources()::registerPattern);
             AotUtils aotUtils = new AotUtils(hints, classLoader);
-            Class<?> executor = aotUtils.loadClass("org.apache.ibatis.executor.Executor");
-            MemberCategory[] memberCategories = new MemberCategory[]{MemberCategory.INVOKE_PUBLIC_METHODS};
-            if (executor != null) {
-                hints.reflection().registerType(executor, memberCategories);
-                hints.proxies().registerJdkProxy(executor);
-            }
-            Class<?> statementHandler = aotUtils.loadClass("org.apache.ibatis.executor.statement.StatementHandler");
-            if (statementHandler != null) {
-                hints.reflection().registerType(statementHandler, memberCategories);
-                hints.proxies().registerJdkProxy(statementHandler);
-            }
-            supportMybatisPlus(aotUtils);
+            registerXml(aotUtils);
         }
 
-        /**
-         * mybatis-plus有一定的使用率，给予支持
-         * @param aotUtils
-         */
-        private void supportMybatisPlus(AotUtils aotUtils) {
-            Class<?> wrapper = aotUtils.loadClass("com.baomidou.mybatisplus.core.conditions.Wrapper");
-            if (wrapper != null) {
-                aotUtils.registerSerializableIfPresent("com.baomidou.mybatisplus.core.toolkit.support.SFunction");
-                aotUtils.registerReflectionIfPresent("com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver",
-                        "com.baomidou.mybatisplus.core.conditions.ISqlSegment");
-                for (Class<?> c : aotUtils.collectClass(wrapper::isAssignableFrom, "com.baomidou.mybatisplus")) {
-                    aotUtils.registerReflection(c);
-                }
-                Class<?> mybatisMapperProxy = aotUtils.loadClass("com.baomidou.mybatisplus.core.override.MybatisMapperProxy");
-                if (mybatisMapperProxy != null) {
-                    aotUtils.registerReflection(new MemberCategory[]{MemberCategory.DECLARED_FIELDS}, mybatisMapperProxy);
-                    try {
-                        aotUtils.hints().reflection().registerMethod(mybatisMapperProxy.getMethod("getMapperInterface"), ExecutableMode.INVOKE);
-                        aotUtils.hints().reflection().registerMethod(mybatisMapperProxy.getMethod("getSqlSession"), ExecutableMode.INVOKE);
-                    } catch (NoSuchMethodException ignored) {}
-                }
+        private void registerXml(AotUtils aotUtils) {
+            try {
+                aotUtils.registerPattern(aotUtils.findResources("",
+                        name -> name.endsWith(".xml")).toArray(AotUtils.EMPTY_STRING_ARRAY));
+            } catch (IOException e) {
+                throw new RuntimeException("注册用户目录的xml文件失败", e);
             }
         }
 
@@ -181,18 +113,6 @@ public final class MyBatisNativeConfiguration {
                             hints.proxies().registerJdkProxy(mapperInterfaceType);
                             hints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(mapperInterfaceType));
                             registerMapperRelationships(mapperInterfaceType, hints);
-                            String simpleName = mapperInterfaceType.getSimpleName();
-                            String resourceName = simpleName.concat(".xml");
-                            AotUtils aotUtils = new AotUtils(hints, ClassUtils.getDefaultClassLoader());
-                            try {
-                                Set<String> resources = aotUtils.findResources();
-                                for (String resource : resources) {
-                                    if (resource.endsWith(resourceName)) {
-                                        hints.resources().registerPattern(resource);
-                                        break;
-                                    }
-                                }
-                            } catch (IOException ignored) {}
                         }
                     }
                 }
@@ -235,9 +155,7 @@ public final class MyBatisNativeConfiguration {
     }
 
     static class MyBatisMapperTypeUtils {
-        private MyBatisMapperTypeUtils() {
-            // NOP
-        }
+        private MyBatisMapperTypeUtils() {}
 
         static Class<?> resolveReturnClass(Class<?> mapperInterface, Method method) {
             Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
@@ -304,7 +222,7 @@ public final class MyBatisNativeConfiguration {
             if (beanDefinition.getResolvableType().hasUnresolvableGenerics()) {
                 Class<?> mapperInterface = getMapperInterface(beanDefinition);
                 if (mapperInterface != null) {
-                    // Exposes a generic type information to context for prevent early initializing
+                    // 将通用类型信息暴露给上下文，以防止早期初始化
                     beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(beanDefinition.getBeanClass(), mapperInterface));
                     ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
                     constructorArgumentValues.addGenericArgumentValue(mapperInterface);
@@ -318,7 +236,7 @@ public final class MyBatisNativeConfiguration {
                 return (Class<?>) beanDefinition.getPropertyValues().get("mapperInterface");
             }
             catch (Exception e) {
-                LOG.debug("Fail getting mapper interface type.", e);
+                LOG.debug("获取映射器接口类型失败。", e);
                 return null;
             }
         }

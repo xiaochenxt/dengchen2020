@@ -71,16 +71,13 @@ public class CollectUtils {
         Set<Class<?>> classes = new HashSet<>();
         for (String basePackage : packages) {
             try {
-                Set<String> classNames = findClassNames(basePackage);
+                // 过滤掉Spring相关的生成类
+                // 详见：org.springframework.aot.generate.ClassNameGenerator
+                Set<String> classNames = findClassNames(basePackage, name -> !name.contains("__"));
                 for (String className : classNames) {
-                    // 过滤掉Spring相关的生成类
-                    // 详见：org.springframework.aot.generate.ClassNameGenerator
-                    if (className.contains("__")) continue;
                     try {
                         Class<?> clazz = Class.forName(className);
-                        if (predicate == null || predicate.test(clazz)) {
-                            classes.add(clazz);
-                        }
+                        if (predicate == null || predicate.test(clazz)) classes.add(clazz);
                     } catch (ClassNotFoundException | LinkageError e) {
                         // 忽略无法加载的类
                     }
@@ -138,7 +135,11 @@ public class CollectUtils {
         return result;
     }
 
-    public void findClassesInDirectory(File directory, String packageName, Set<String> classNames) {
+    public void findClassesInDirectory(File directory, String packageName, Set<String> classNames){
+        findClassesInDirectory(directory, packageName, classNames, name -> true);
+    }
+
+    public void findClassesInDirectory(File directory, String packageName, Set<String> classNames, Predicate<String> filter) {
         File[] files = directory.listFiles();
         if (files == null) {
             return;
@@ -147,16 +148,20 @@ public class CollectUtils {
             String filename = file.getName();
             if (file.isDirectory()) {
                 String newPackage = packageName.isEmpty() ? filename : (packageName + "." + filename);
-                findClassesInDirectory(file, newPackage, classNames);
+                findClassesInDirectory(file, newPackage, classNames, filter);
             } else if (filename.endsWith(".class")) {
-                String fullClassName = filename.substring(0, filename.length() - 6);
-                String className = packageName.isEmpty() ? fullClassName : packageName + '.' + fullClassName;
-                classNames.add(className);
+                String className = filename.substring(0, filename.length() - 6);
+                String fullClassName = packageName.isEmpty() ? className : packageName + '.' + className;
+                if (filter.test(fullClassName)) classNames.add(fullClassName);
             }
         }
     }
 
     public void findResourcesInDirectory(File directory, String parentPath, Set<String> resources) {
+        findResourcesInDirectory(directory, parentPath, resources, name -> true);
+    }
+
+    public void findResourcesInDirectory(File directory, String parentPath, Set<String> resources, Predicate<String> filter) {
         File[] files = directory.listFiles();
         if (files == null) {
             return;
@@ -166,10 +171,10 @@ public class CollectUtils {
             String currentPath = parentPath.isEmpty() ? fileName : parentPath + "/" + fileName;
 
             if (file.isDirectory()) {
-                findResourcesInDirectory(file, currentPath, resources);
+                findResourcesInDirectory(file, currentPath, resources, filter);
             } else {
                 if (!fileName.endsWith(".class")) {
-                    resources.add(currentPath);
+                    if (filter.test(currentPath)) resources.add(currentPath);
                 }
             }
         }
@@ -182,6 +187,16 @@ public class CollectUtils {
      * @throws IOException
      */
     public Set<String> findClassNames(String packageName) throws IOException {
+        return findClassNames(packageName, name -> true);
+    }
+
+    /**
+     * 查找指定包下的类
+     * @param packageName
+     * @return
+     * @throws IOException
+     */
+    public Set<String> findClassNames(String packageName, Predicate<String> filter) throws IOException {
         Set<String> classNames = new HashSet<>();
         String path = packageName.replace('.', '/');
         Enumeration<URL> resources = classLoader.getResources(path);
@@ -192,7 +207,7 @@ public class CollectUtils {
                 try {
                     File directory = new File(URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8));
                     if (directory.exists()) {
-                        findClassesInDirectory(directory, packageName, classNames);
+                        findClassesInDirectory(directory, packageName, classNames, filter);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -206,7 +221,7 @@ public class CollectUtils {
                         String entryName = entry.getName();
                         if (entryName.endsWith(".class") && !entry.isDirectory()) {
                             String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);
-                            classNames.add(className);
+                            if (filter.test(className)) classNames.add(className);
                         }
                     }
                 } catch (Exception e) {
@@ -233,6 +248,16 @@ public class CollectUtils {
      * @throws IOException
      */
     public Set<String> findResources(String packageName) throws IOException {
+        return findResources(packageName, (name) -> true);
+    }
+
+    /**
+     * 查找指定包下的资源
+     * @param packageName
+     * @return
+     * @throws IOException
+     */
+    public Set<String> findResources(String packageName, Predicate<String> filter) throws IOException {
         Set<String> resources = new HashSet<>();
         String path = packageName.replace('.', '/');
         Enumeration<URL> roots = classLoader.getResources(path);
@@ -246,7 +271,7 @@ public class CollectUtils {
                     File rootDir = new File(decodedPath);
 
                     if (rootDir.exists() && rootDir.isDirectory()) {
-                        findResourcesInDirectory(rootDir, "", resources);
+                        findResourcesInDirectory(rootDir, "", resources, filter);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -259,7 +284,7 @@ public class CollectUtils {
                         JarEntry entry = entries.nextElement();
                         String entryName = entry.getName();
                         if (!entryName.endsWith(".class") && !entry.isDirectory()) {
-                            resources.add(entryName);
+                            if (filter.test(entryName)) resources.add(entryName);
                         }
                     }
                 } catch (Exception e) {
@@ -272,7 +297,7 @@ public class CollectUtils {
     }
 
     /**
-     * 查找根目录的资源
+     * 查找根目录的资源（用户的resources资源目录）
      * @return
      * @throws IOException
      */
