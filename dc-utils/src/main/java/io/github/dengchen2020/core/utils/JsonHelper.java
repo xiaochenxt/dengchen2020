@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -305,7 +304,7 @@ public class JsonHelper {
                 || !(trimmed.endsWith("}") || trimmed.endsWith("]"))) {
             return false;
         }
-        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
             // 遍历所有 token 直到结束，若过程中无异常则为合法 JSON
             while (parser.nextToken() != null) {
                 // 仅遍历，不做任何处理
@@ -326,7 +325,7 @@ public class JsonHelper {
         String trimmed = jsonStr.trim();
         // 前置校验：必须以 { 开头 和 } 结尾
         if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return false;
-        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 OBJECT_START（{）
             JsonToken firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_OBJECT) return false;
@@ -352,7 +351,7 @@ public class JsonHelper {
         if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
             return false;
         }
-        try (JsonParser parser = defaultJsonMapper.createParser(new StringReader(trimmed))) {
+        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 ARRAY_START（[）
             JsonToken firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_ARRAY) return false;
