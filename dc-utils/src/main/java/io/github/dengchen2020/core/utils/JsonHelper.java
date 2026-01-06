@@ -16,6 +16,9 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.io.InputStream;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -42,6 +45,10 @@ public class JsonHelper {
 
     public JsonMapper getMapper() {
         return jsonMapper;
+    }
+
+    public JsonMapper getNonNullMapper() {
+        return nonNullJsonMapper;
     }
 
     public JsonHelper(JsonMapper jsonMapper) {
@@ -362,6 +369,63 @@ public class JsonHelper {
             return true;
         } catch (JacksonException e) {
             return false;
+        }
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public <T> void readStreamHandleObject(InputStream inputStream, Class<T> objectType, Consumer<T> consumer) {
+        readStream(inputStream, (parser, token) -> {
+            if (token != JsonToken.START_OBJECT) return;
+            try {
+                consumer.accept(parser.readValueAs(objectType));
+            } catch (JacksonException e) {
+                throw new IllegalArgumentException("无法将json数据转换为" + objectType, e);
+            }
+        });
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public <T> void readStreamHandleObject(InputStream inputStream, TypeReference<T> objectType, Consumer<T> consumer) {
+        readStream(inputStream, (parser, token) -> {
+            if (token != JsonToken.START_OBJECT) return;
+            try {
+                consumer.accept(parser.readValueAs(objectType));
+            } catch (JacksonException e) {
+                throw new IllegalArgumentException("无法将json数据转换为" + objectType, e);
+            }
+        });
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public void readStreamHandleObject(InputStream inputStream, Consumer<ObjectNode> consumer) {
+        readStreamHandleObject(inputStream, ObjectNode.class, consumer);
+    }
+
+    /**
+     * 流式读取并处理json数据，处理完后会关闭输入流
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public void readStream(InputStream inputStream, BiConsumer<JsonParser, JsonToken> consumer) {
+        try (var parser = nonNullJsonMapper.createParser(inputStream)) {
+            JsonToken token;
+            while ((token = parser.nextToken()) != null) consumer.accept(parser, token);
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException("输入流错误，可能不是有效的json数据", e);
         }
     }
 
