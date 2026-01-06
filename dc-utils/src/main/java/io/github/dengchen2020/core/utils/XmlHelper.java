@@ -38,6 +38,10 @@ public class XmlHelper {
         return xmlMapper;
     }
 
+    public XmlMapper getNonNullMapper() {
+        return nonNullXmlMapper;
+    }
+
     public XmlHelper(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
         this.nonNullXmlMapper = new XmlMapper.Builder(xmlMapper)

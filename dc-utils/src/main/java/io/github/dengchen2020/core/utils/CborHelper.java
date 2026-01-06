@@ -41,6 +41,10 @@ public class CborHelper {
         return cborMapper;
     }
 
+    public CBORMapper getNonNullMapper() {
+        return nonNullCborMapper;
+    }
+
     public CborHelper(CBORMapper cborMapper) {
         this.cborMapper = cborMapper;
         this.nonNullCborMapper = new CBORMapper.Builder(cborMapper)

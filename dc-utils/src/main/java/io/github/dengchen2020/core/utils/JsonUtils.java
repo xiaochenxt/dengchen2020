@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -7,6 +9,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.InputStream;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -207,5 +212,42 @@ public abstract class JsonUtils {
         return JsonHelper.INSTANCE.isJsonArray(jsonStr);
     }
 
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public static <T> void readStreamHandleObject(InputStream inputStream, Class<T> objectType, Consumer<T> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public static <T> void readStreamHandleObject(InputStream inputStream, TypeReference<T> objectType, Consumer<T> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public static void readStreamHandleObject(InputStream inputStream, Consumer<ObjectNode> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, consumer);
+    }
+
+    /**
+     * 流式读取并处理json数据，处理完后会关闭输入流
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public static void readStream(InputStream inputStream, BiConsumer<JsonParser, JsonToken> consumer) {
+        JsonHelper.INSTANCE.readStream(inputStream, consumer);
+    }
 
 }
