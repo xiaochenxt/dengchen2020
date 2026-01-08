@@ -466,7 +466,7 @@ class FontRequiredRegister {
                 "sun/awt/resources/awt_zh.properties",
                 "sun/awt/resources/awt_zh_Hans.properties",
                 "sun/awt/resources/awt_zh_Hans_CN.properties");
-        featureUtils.registerResourceBundle(Font.class, "sun.awt.resources.awt", Locale.ENGLISH, Locale.CHINESE);
+        featureUtils.registerResourceBundle(Font.class, "sun.awt.resources.awt", Locale.getDefault(), Locale.ENGLISH, Locale.CHINESE);
     }
 
 }

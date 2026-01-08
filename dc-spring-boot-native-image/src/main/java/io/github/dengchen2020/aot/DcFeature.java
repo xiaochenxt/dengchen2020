@@ -1,26 +1,7 @@
 package io.github.dengchen2020.aot;
 
 import io.github.dengchen2020.aot.utils.FeatureUtils;
-import org.apache.ibatis.builder.xml.XMLStatementBuilder;
-import org.apache.ibatis.cache.decorators.FifoCache;
-import org.apache.ibatis.cache.decorators.LruCache;
-import org.apache.ibatis.cache.decorators.SoftCache;
-import org.apache.ibatis.cache.decorators.WeakCache;
-import org.apache.ibatis.cache.impl.PerpetualCache;
-import org.apache.ibatis.javassist.util.proxy.ProxyFactory;
-import org.apache.ibatis.javassist.util.proxy.RuntimeSupport;
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl;
-import org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl;
-import org.apache.ibatis.logging.log4j2.Log4j2Impl;
-import org.apache.ibatis.logging.nologging.NoLoggingImpl;
-import org.apache.ibatis.logging.slf4j.Slf4jImpl;
-import org.apache.ibatis.logging.stdout.StdOutImpl;
-import org.apache.ibatis.scripting.defaults.RawLanguageDriver;
-import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.graalvm.nativeimage.hosted.*;
-import org.mybatis.spring.SqlSessionFactoryBean;
 
 import java.awt.*;
 import java.io.File;
@@ -33,8 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Set;
 
 import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_CLASS_ARRAY;
 import static io.github.dengchen2020.aot.utils.CollectUtils.debug;
@@ -232,32 +213,21 @@ class DcFeature implements Feature {
 
     private void mybatis(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
         var sqlSessionFactory = featureUtils.loadClass("org.apache.ibatis.session.SqlSessionFactory");
+        if (sqlSessionFactory == null) return;
         access.registerReachabilityHandler(duringAnalysisAccess -> {
-            Stream.of(RawLanguageDriver.class,
-                    XMLLanguageDriver.class,
-                    RuntimeSupport.class,
-                    ProxyFactory.class,
-                    Slf4jImpl.class,
-                    Log.class,
-                    JakartaCommonsLoggingImpl.class,
-                    Log4j2Impl.class,
-                    Jdk14LoggingImpl.class,
-                    StdOutImpl.class,
-                    NoLoggingImpl.class,
-                    SqlSessionFactory.class,
-                    PerpetualCache.class,
-                    FifoCache.class,
-                    LruCache.class,
-                    SoftCache.class,
-                    WeakCache.class,
-                    SqlSessionFactoryBean.class,
-                    ArrayList.class,
-                    HashMap.class,
-                    TreeSet.class,
-                    HashSet.class
-            ).forEach(featureUtils::registerReflection);
+            featureUtils.registerReflectionIfPresent("org.apache.ibatis.scripting.defaults.RawLanguageDriver",
+                    "org.apache.ibatis.scripting.xmltags.XMLLanguageDriver","org.apache.ibatis.javassist.util.proxy.RuntimeSupport",
+                    "org.apache.ibatis.javassist.util.proxy.ProxyFactory","org.apache.ibatis.logging.slf4j.Slf4jImpl",
+                    "org.apache.ibatis.logging.Log","org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl",
+                    "org.apache.ibatis.logging.log4j2.Log4j2Impl","org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl",
+                    "org.apache.ibatis.logging.stdout.StdOutImpl","org.apache.ibatis.logging.nologging.NoLoggingImpl",
+                    "org.apache.ibatis.session.SqlSessionFactory","org.apache.ibatis.cache.impl.PerpetualCache",
+                    "org.apache.ibatis.cache.decorators.FifoCache","org.apache.ibatis.cache.decorators.LruCache",
+                    "org.apache.ibatis.cache.decorators.SoftCache","org.apache.ibatis.cache.decorators.WeakCache",
+                    "org.mybatis.spring.SqlSessionFactoryBean","java.util.ArrayList","java.util.HashMap","java.util.TreeSet",
+                    "java.util.HashSet");
             try {
-                featureUtils.registerResource(XMLStatementBuilder.class, featureUtils.findResources("org/apache/ibatis/builder/xml",
+                featureUtils.registerResource(sqlSessionFactory, featureUtils.findResources("org/apache/ibatis/builder/xml",
                         name -> name.endsWith(".dtd") || name.endsWith(".xsd")).toArray(FeatureUtils.EMPTY_STRING_ARRAY));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -279,18 +249,18 @@ class DcFeature implements Feature {
 
     private void mybatisPlus(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
         Class<?> wrapper = featureUtils.loadClass("com.baomidou.mybatisplus.core.conditions.Wrapper");
+        if (wrapper == null) return;
         var sqlSessionFactory = featureUtils.loadClass("org.apache.ibatis.session.SqlSessionFactory");
-        if (wrapper != null && sqlSessionFactory != null) {
-            access.registerReachabilityHandler(duringAnalysisAccess -> {
-                featureUtils.registerSerializationIfPresent("com.baomidou.mybatisplus.core.toolkit.support.SFunction");
-                featureUtils.registerReflectionIfPresent("com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver",
-                        "com.baomidou.mybatisplus.core.conditions.ISqlSegment");
-                for (Class<?> c : featureUtils.collectClass(wrapper::isAssignableFrom, "com.baomidou.mybatisplus")) {
-                    featureUtils.registerReflection(c);
-                }
-                featureUtils.registerReflectionIfPresent("com.baomidou.mybatisplus.core.override.MybatisMapperProxy");
-            }, sqlSessionFactory);
-        }
+        if (sqlSessionFactory == null) return;
+        access.registerReachabilityHandler(duringAnalysisAccess -> {
+            featureUtils.registerSerializationIfPresent("com.baomidou.mybatisplus.core.toolkit.support.SFunction");
+            featureUtils.registerReflectionIfPresent("com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver",
+                    "com.baomidou.mybatisplus.core.conditions.ISqlSegment");
+            for (Class<?> c : featureUtils.collectClass(wrapper::isAssignableFrom, "com.baomidou.mybatisplus")) {
+                featureUtils.registerReflection(c);
+            }
+            featureUtils.registerReflectionIfPresent("com.baomidou.mybatisplus.core.override.MybatisMapperProxy");
+        }, sqlSessionFactory);
     }
 
     private void graalJs(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
