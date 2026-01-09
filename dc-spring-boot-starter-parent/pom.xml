@@ -336,7 +336,7 @@
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>true</autoPublish>
-                    <waitForPublishCompletion>false</waitForPublishCompletion>
+                    <waitUntil>UPLOADED</waitUntil>
                 </configuration>
             </plugin>
             <plugin>
