@@ -11,7 +11,7 @@
 
     <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.4.14</version>
+    <version>0.4.15</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -57,7 +57,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dc.version>0.4.14</dc.version>
+        <dc.version>0.4.15</dc.version>
         <querydsl.version>5.1.0</querydsl.version>
         <redisson.version>4.1.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -179,6 +179,11 @@
             <dependency>
                 <groupId>io.fusionauth</groupId>
                 <artifactId>fusionauth-jwt</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dengchen2020</groupId>
+                <artifactId>fusionauth-jwt-jackson3</artifactId>
                 <version>6.0.0</version>
             </dependency>
             <dependency>
@@ -331,7 +336,7 @@
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>true</autoPublish>
-                    <waitForPublishCompletion>false</waitForPublishCompletion>
+                    <waitUntil>UPLOADED</waitUntil>
                 </configuration>
             </plugin>
             <plugin>
