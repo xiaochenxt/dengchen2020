@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,11 +56,13 @@ import java.util.function.Function;
 @Configuration(proxyBeanMethods = false)
 public final class MyBatisNativeSpringConfiguration {
 
+    @ConditionalOnMissingBean(name = "myBatisBeanFactoryInitializationAotProcessor")
     @Bean
     MyBatisBeanFactoryInitializationAotProcessor myBatisBeanFactoryInitializationAotProcessor() {
         return new MyBatisBeanFactoryInitializationAotProcessor();
     }
 
+    @ConditionalOnMissingBean(name = "myBatisMapperFactoryBeanPostProcessor")
     @Bean
     static MyBatisMapperFactoryBeanPostProcessor myBatisMapperFactoryBeanPostProcessor() {
         return new MyBatisMapperFactoryBeanPostProcessor();
