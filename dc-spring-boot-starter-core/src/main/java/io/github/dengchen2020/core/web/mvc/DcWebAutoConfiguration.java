@@ -5,9 +5,13 @@ import com.github.benmanes.caffeine.cache.Scheduler;
 import io.github.dengchen2020.core.filter.DcShallowEtagHeaderFilter;
 import io.github.dengchen2020.core.properties.DcCorsProperties;
 import io.github.dengchen2020.core.properties.DcETagProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -19,14 +23,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.FrameworkServlet;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
@@ -59,6 +68,7 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
 
     public DcWebAutoConfiguration(WebProperties webProperties) {
         this.resources = webProperties.getResources();
+        if (resources.isAddMappings()) throw new IllegalStateException("请配置spring.web.resources.add-mappings=false");
     }
 
     @Override
@@ -183,6 +193,21 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
             var encodedResourceResolver = new EncodedResourceResolver();
             encodedResourceResolver.setContentCodings(List.of(contentCodings));
             resourceChainRegistration.addResolver(encodedResourceResolver);
+        }
+    }
+
+    /**
+     * 大部分场景用不到这个，{@link DispatcherServlet} 已经包含了该过滤器的功能，详见{@link FrameworkServlet#initContextHolders(HttpServletRequest, LocaleContext, RequestAttributes)}和{@link FrameworkServlet#resetContextHolders(HttpServletRequest, LocaleContext, RequestAttributes)}
+     */
+    @ConditionalOnProperty(value = "dc.request-context-filter.remove",havingValue = "true", matchIfMissing = true)
+    @ConditionalOnBean(RequestContextFilter.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class DcWebBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+        @Override
+        public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+            if (registry.containsBeanDefinition("requestContextFilter")) {
+                registry.removeBeanDefinition("requestContextFilter");
+            }
         }
     }
 
