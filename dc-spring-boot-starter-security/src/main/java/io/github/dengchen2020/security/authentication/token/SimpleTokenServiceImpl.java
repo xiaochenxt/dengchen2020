@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
@@ -82,56 +82,54 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
         onlineScript = new DefaultRedisScript<>(
                 """
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local payload = ARGV[3]
-                local expireTimeInSec = tonumber(ARGV[4])
-                local userTokenKey = "%s" .. userId
+                local payload = ARGV[2]
+                local expireTimeInSec = tonumber(ARGV[3])
+                local userTokenKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 redis.call("SET", userTokenKey, token, "EX", expireTimeInSec)
-                redis.call("SET", "%s" .. userId, payload, "EX", expireTimeInSec);
-                """.formatted(tokenPrefix, tokenInfoPrefix), Void.class);
+                redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
+                """, Void.class);
         offlineScript = new DefaultRedisScript<>(
-                """ 
-                local userId = ARGV[1]
-                local userTokenKey = "%s" .. userId
+                """
+                local userTokenKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 redis.call("UNLINK", userTokenKey)
-                redis.call("UNLINK", "%s" .. userId)
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                redis.call("UNLINK", userInfoKey)
+                """,
                 Void.class
         );
         readTokenScript = new DefaultRedisScript<>(
                 """ 
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local userTokenKey = "%s" .. userId
+                local userTokenKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 local storedToken = redis.call("GET", userTokenKey)
                 if storedToken and storedToken == token then
-                    return redis.call("GET", "%s" .. userId)
+                    return redis.call("GET", userInfoKey)
                 end
                 return nil
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                """,
                 String.class
         );
         readTokenAutorenewalScript = new DefaultRedisScript<>(
                 """ 
-                local TOKEN_PREFIX = "%s"
-                local TOKEN_INFO_PREFIX = "%s"
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local userTokenKey = TOKEN_PREFIX .. userId
+                local userTokenKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 local storedToken = redis.call("GET", userTokenKey)
                 if storedToken and storedToken == token then
                     local ttl = redis.call('TTL', userTokenKey)
-                    local refreshThreshold = tonumber(ARGV[3])
+                    local refreshThreshold = tonumber(ARGV[2])
                     if ttl ~= -1 and ttl < refreshThreshold then
-                        local newTtl = tonumber(ARGV[4])
+                        local newTtl = tonumber(ARGV[3])
                         redis.call('EXPIRE', userTokenKey, newTtl)
-                        redis.call('EXPIRE', TOKEN_INFO_PREFIX .. userId, newTtl)
+                        redis.call('EXPIRE', userInfoKey, newTtl)
                         ttl = newTtl
                     end
-                    return redis.call("GET", TOKEN_INFO_PREFIX .. userId)
+                    return redis.call("GET", userInfoKey)
                 end
                 return nil
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                """,
                 String.class
         );
     }
@@ -167,7 +165,8 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
         String token = authentication.getName() + SEPARATOR + UUID.randomUUID().toString().replace("-", "");
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        stringRedisTemplate.execute(onlineScript, Collections.emptyList(), token, authentication.getName(), payload, String.valueOf(expireSeconds));
+        var slot = slot(authentication.getName());
+        stringRedisTemplate.execute(onlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot), token, payload, String.valueOf(expireSeconds));
         return new TokenInfo(token, expiresIn);
     }
 
@@ -177,7 +176,7 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
      */
     public void refreshAuthentication(Authentication authentication) {
         try {
-            stringRedisTemplate.opsForValue().setIfPresent(tokenInfoPrefix + authentication.getName(), authenticationConvert.serialize(authentication));
+            stringRedisTemplate.opsForValue().setIfPresent(tokenInfoPrefix + slot(authentication.getName()), authenticationConvert.serialize(authentication));
         } catch (IllegalArgumentException _) {
             if (log.isDebugEnabled()) log.debug("token已失效，认证信息无法刷新");
         }
@@ -186,10 +185,12 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
     @Override
     public Authentication readToken(String token) {
         String tokenInfo;
+        var slot = slot(getName(token));
+        var keys = List.of(tokenPrefix + slot, tokenInfoPrefix + slot);
         if (autorenewal) {
-            tokenInfo = stringRedisTemplate.execute(readTokenAutorenewalScript, Collections.emptyList(), token, getName(token), autorenewalSeconds, String.valueOf(expireSeconds));
+            tokenInfo = stringRedisTemplate.execute(readTokenAutorenewalScript, keys, token, autorenewalSeconds, String.valueOf(expireSeconds));
         }else {
-            tokenInfo = stringRedisTemplate.execute(readTokenScript, Collections.emptyList(), token, getName(token));
+            tokenInfo = stringRedisTemplate.execute(readTokenScript, keys, token);
         }
         if (!StringUtils.hasText(tokenInfo)) return null;
         return authenticationConvert.deserialize(tokenInfo);
@@ -197,18 +198,23 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
 
     @Override
     public void removeToken(String token) {
-        String tokenSetKey = tokenPrefix + getName(token);
-        stringRedisTemplate.opsForZSet().remove(tokenSetKey, token);
+        String userTokenKey = tokenPrefix + slot(getName(token));
+        stringRedisTemplate.unlink(userTokenKey);
     }
 
     @Override
     public void offline(String userId) {
-        stringRedisTemplate.execute(offlineScript, Collections.emptyList(), userId);
+        var slot = slot(userId);
+        stringRedisTemplate.execute(offlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
     }
 
     public String getName(String token) {
         if (token == null) return "";
         return token.split(SEPARATOR)[0];
+    }
+
+    private String slot(String userId) {
+        return "{" + userId + "}";
     }
 
 }
