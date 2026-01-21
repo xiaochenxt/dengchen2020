@@ -16,8 +16,6 @@ import org.springframework.core.annotation.Order;
  */
 public class SecurityScheduledTaskHandleListener {
 
-    public static final String scheduledTaskHandle = SecurityScheduledTaskHandleListener.class.getName()+".handle";
-
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @EventListener
     public void handle(ScheduledHandleBeforeEvent event) {
@@ -27,7 +25,6 @@ public class SecurityScheduledTaskHandleListener {
         if (SecurityContextHolder.getAuthentication() == null) {
             SecurityContextHolder.setAuthentication(new AnonymousAuthentication(key.substring(0, Math.min(key.length(), 64))));
         }
-        SecurityContextHolder.bindResource(scheduledTaskHandle, true);
     }
 
 }
