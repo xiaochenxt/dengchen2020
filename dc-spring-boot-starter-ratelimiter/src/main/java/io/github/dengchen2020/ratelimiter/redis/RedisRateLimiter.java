@@ -6,7 +6,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * 基于Redis实现的分布式限流实现
@@ -24,9 +24,9 @@ public class RedisRateLimiter implements RateLimiter {
     RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
             """ 
                     -- 限流Key
-                    local rateLimitKey = "%s" .. ARGV[1]
-                    local rateLimitNum = tonumber(ARGV[2])
-                    local rateLimitSecond = tonumber(ARGV[3])
+                    local rateLimitKey = KEYS[1]
+                    local rateLimitNum = tonumber(ARGV[1])
+                    local rateLimitSecond = tonumber(ARGV[2])
                     local rateLimitValue = redis.call("GET", rateLimitKey)
                     if rateLimitValue then
                         local limitNum = tonumber(rateLimitValue);
@@ -39,7 +39,7 @@ public class RedisRateLimiter implements RateLimiter {
                         redis.call("SET", rateLimitKey, "1", "EX", rateLimitSecond)
                         return 1
                     end
-                    """.formatted(RATE_LIMIT_PREFIX),
+                    """,
             Long.class
     );
 
@@ -63,7 +63,7 @@ public class RedisRateLimiter implements RateLimiter {
      */
     @Override
     public boolean limit(String limitKey, int limitNum) {
-        Long count = redisTemplate.execute(rateLimitScript, Collections.emptyList(), limitKey, String.valueOf(limitNum), seconds);
+        Long count = redisTemplate.execute(rateLimitScript, List.of(RATE_LIMIT_PREFIX + limitKey), String.valueOf(limitNum), seconds);
         return count > limitNum;
     }
 }
