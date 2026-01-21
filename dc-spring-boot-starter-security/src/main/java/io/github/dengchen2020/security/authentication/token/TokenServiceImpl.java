@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
@@ -90,27 +90,28 @@ public class TokenServiceImpl implements TokenService, StateToken {
         onlineScript = new DefaultRedisScript<>(
                 """
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local payload = ARGV[3]
-                local maxOnlineNum = tonumber(ARGV[4])
-                local expireTimeInSec = tonumber(ARGV[5])
-                local userListKey = "%s" .. userId
+                local payload = ARGV[2]
+                local maxOnlineNum = tonumber(ARGV[3])
+                local expireTimeInSec = tonumber(ARGV[4])
+                local userListKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 redis.call("RPUSH", userListKey, token)
                 redis.call("EXPIRE", userListKey, expireTimeInSec)
-                redis.call("SET", "%s" .. userId, payload, "EX", expireTimeInSec);
+                redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
                 local onlineNum = redis.call("LLEN", userListKey)
                 if onlineNum > maxOnlineNum then
                     redis.call("LPOP", userListKey)
                 end
-                """.formatted(tokenPrefix, tokenInfoPrefix), Void.class);
+                """, Void.class);
 
         // 清空userId对应的tokenList，删除关联的payload
         offlineScript = new DefaultRedisScript<>(
                 """ 
-                local userId = ARGV[1]
-                redis.call("UNLINK", "%s" .. userId)
-                redis.call("UNLINK", "%s" .. userId)
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                local userListKey = KEYS[1]
+                local userInfoKey = KEYS[2]
+                redis.call("UNLINK", userListKey)
+                redis.call("UNLINK", userInfoKey)
+                """,
                 Void.class
         );
 
@@ -118,15 +119,16 @@ public class TokenServiceImpl implements TokenService, StateToken {
         readTokenScript = new DefaultRedisScript<>(
                 """ 
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local tokens = redis.call("LRANGE", "%s" .. userId, 0, -1)
+                local userListKey = KEYS[1]
+                local userInfoKey = KEYS[2]
+                local tokens = redis.call("LRANGE", userListKey, 0, -1)
                 for _, t in ipairs(tokens) do
                     if t == token then
-                        return redis.call("GET", "%s" .. userId)
+                        return redis.call("GET", userInfoKey)
                     end
                 end
                 return nil
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                """,
                 String.class
         );
 
@@ -134,9 +136,8 @@ public class TokenServiceImpl implements TokenService, StateToken {
         readTokenAutorenewalScript = new DefaultRedisScript<>(
                 """ 
                 local token = ARGV[1]
-                local userId = ARGV[2]
-                local userListKey = "%s" .. userId
-                local tokenInfoKey = "%s" .. userId
+                local userListKey = KEYS[1]
+                local userInfoKey = KEYS[2]
                 local tokenFound = 0
                 local tokens = redis.call("LRANGE", userListKey, 0, -1)
                 for _, t in ipairs(tokens) do
@@ -147,16 +148,16 @@ public class TokenServiceImpl implements TokenService, StateToken {
                 end
                 if tokenFound == 1 then
                     local ttl = redis.call('TTL', userListKey)
-                    local refreshThreshold = tonumber(ARGV[3])
+                    local refreshThreshold = tonumber(ARGV[2])
                     if ttl ~= -1 and ttl < refreshThreshold then
-                        local newTtl = tonumber(ARGV[4])
+                        local newTtl = tonumber(ARGV[3])
                         redis.call('EXPIRE', userListKey, newTtl)
-                        redis.call('EXPIRE', tokenInfoKey, newTtl)
+                        redis.call('EXPIRE', userInfoKey, newTtl)
                     end
-                    return redis.call("GET", tokenInfoKey)
+                    return redis.call("GET", userInfoKey)
                 end
                 return nil
-                """.formatted(tokenPrefix, tokenInfoPrefix),
+                """,
                 String.class
         );
     }
@@ -209,7 +210,8 @@ public class TokenServiceImpl implements TokenService, StateToken {
         String token = authentication.getName() + SEPARATOR + UUID.randomUUID().toString().replace("-", "");
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        stringRedisTemplate.execute(onlineScript, Collections.emptyList(), token, authentication.getName(), payload, String.valueOf(maxOnlineNum), String.valueOf(expireSeconds), String.valueOf(System.currentTimeMillis()));
+        var slot = slot(authentication.getName());
+        stringRedisTemplate.execute(onlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot), token, payload, String.valueOf(maxOnlineNum), String.valueOf(expireSeconds), String.valueOf(System.currentTimeMillis()));
         return new TokenInfo(token, expiresIn);
     }
 
@@ -219,7 +221,7 @@ public class TokenServiceImpl implements TokenService, StateToken {
      */
     public void refreshAuthentication(Authentication authentication) {
         try {
-            stringRedisTemplate.opsForValue().setIfPresent(tokenInfoPrefix + authentication.getName(), authenticationConvert.serialize(authentication));
+            stringRedisTemplate.opsForValue().setIfPresent(tokenInfoPrefix + slot(authentication.getName()), authenticationConvert.serialize(authentication));
         } catch (IllegalArgumentException _) {
             if (log.isDebugEnabled()) log.debug("token已失效，认证信息无法刷新");
         }
@@ -228,10 +230,12 @@ public class TokenServiceImpl implements TokenService, StateToken {
     @Override
     public Authentication readToken(String token) {
         String tokenInfo;
+        var slot = slot(getName(token));
+        var keys = List.of(tokenPrefix + slot, tokenInfoPrefix + slot);
         if (autorenewal) {
-            tokenInfo = stringRedisTemplate.execute(readTokenAutorenewalScript, Collections.emptyList(), token, getName(token), autorenewalSeconds, String.valueOf(expireSeconds));
+            tokenInfo = stringRedisTemplate.execute(readTokenAutorenewalScript, keys, token, autorenewalSeconds, String.valueOf(expireSeconds));
         }else {
-            tokenInfo = stringRedisTemplate.execute(readTokenScript, Collections.emptyList(), token, getName(token));
+            tokenInfo = stringRedisTemplate.execute(readTokenScript, keys, token);
         }
         if (!StringUtils.hasText(tokenInfo)) return null;
         return authenticationConvert.deserialize(tokenInfo);
@@ -239,13 +243,14 @@ public class TokenServiceImpl implements TokenService, StateToken {
 
     @Override
     public void removeToken(String token) {
-        String tokenSetKey = tokenPrefix + getName(token);
+        String tokenSetKey = tokenPrefix + slot(getName(token));
         stringRedisTemplate.opsForList().remove(tokenSetKey, 1, token);
     }
 
     @Override
     public void offline(String userId) {
-        stringRedisTemplate.execute(offlineScript, Collections.emptyList(), userId);
+        var slot = slot(userId);
+        stringRedisTemplate.execute(offlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
     }
 
     public String getName(String token) {
@@ -253,8 +258,12 @@ public class TokenServiceImpl implements TokenService, StateToken {
         return token.split(SEPARATOR)[0];
     }
 
+    private String slot(String userId) {
+        return "{" + userId + "}";
+    }
+
     public long onlineNum(String token) {
-        Long num = stringRedisTemplate.opsForList().size(tokenPrefix + getName(token));
+        Long num = stringRedisTemplate.opsForList().size(tokenPrefix + slot(getName(token)));
         return num == null ? 0 : num;
     }
 
