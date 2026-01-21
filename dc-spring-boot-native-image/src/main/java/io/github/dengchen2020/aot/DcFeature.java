@@ -54,6 +54,8 @@ class DcFeature implements Feature {
         precompute(featureUtils, access);
         playwright(featureUtils, access);
         ognl(featureUtils, access);
+        jackson(featureUtils, access);
+        geom(featureUtils, access);
     }
 
     /**
@@ -406,6 +408,41 @@ class DcFeature implements Feature {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
                 featureUtils.registerSystemProperty("ognl.security.manager","forceDisableOnInit");
             }, ognlSecurityManager);
+        }
+    }
+
+    private void jackson(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        var objectMapper = featureUtils.loadClass("com.fasterxml.jackson.databind.ObjectMapper");
+        if (objectMapper != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerSerialization(featureUtils.collectClass("com.fasterxml.jackson.databind.node").toArray(EMPTY_CLASS_ARRAY));
+            }, objectMapper);
+        }
+        var toolsObjectMapper = featureUtils.loadClass("tools.jackson.databind.ObjectMapper");
+        if (toolsObjectMapper != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerSerialization(featureUtils.collectClass("tools.jackson.databind.node").toArray(EMPTY_CLASS_ARRAY));
+            }, toolsObjectMapper);
+        }
+    }
+
+    private void geom(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        var geometry = featureUtils.loadClass("org.geolatte.geom.Geometry");
+        if (geometry != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                var classes = featureUtils.collectClass("org.geolatte.geom.codec");
+                var wkbDecoder = featureUtils.loadClass("org.geolatte.geom.codec.WkbDecoder");
+                if (wkbDecoder != null) {
+                    featureUtils.registerReflectionConstructors(classes.stream().filter(wkbDecoder::isAssignableFrom).toArray(Class[]::new));
+                    featureUtils.registerResource(wkbDecoder, "spatial_ref_sys.txt");
+                }
+                var wktDecoder = featureUtils.loadClass("org.geolatte.geom.codec.WktEncoder");
+                if (wktDecoder != null) featureUtils.registerReflectionConstructors(classes.stream().filter(wktDecoder::isAssignableFrom).toArray(Class[]::new));
+                var wkbEncoder = featureUtils.loadClass("org.geolatte.geom.codec.WkbEncoder");
+                if (wkbEncoder != null) featureUtils.registerReflectionConstructors(classes.stream().filter(wkbEncoder::isAssignableFrom).toArray(Class[]::new));
+                var wktEncoder = featureUtils.loadClass("org.geolatte.geom.codec.WktEncoder");
+                if (wktEncoder != null) featureUtils.registerReflectionConstructors(classes.stream().filter(wktEncoder::isAssignableFrom).toArray(Class[]::new));
+            }, geometry);
         }
     }
 
