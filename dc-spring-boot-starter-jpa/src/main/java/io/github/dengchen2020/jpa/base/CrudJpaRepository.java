@@ -1,7 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
 import jakarta.persistence.Version;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -83,9 +82,8 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @throws OptimisticLockingFailureException 当实体使用乐观锁定并且具有 version 属性
      * 与持久化存储中的值不同。如果实体假定存在，但数据库中不存在。
      */
-    @NonNull
     @Override
-    <S extends T> S save(@NonNull S entity);
+    <S extends T> S save(S entity);
 
     /**
      * 批量保存，详见：{@link BaseJpaRepositoryExecutor#saveAll(Iterable)}
