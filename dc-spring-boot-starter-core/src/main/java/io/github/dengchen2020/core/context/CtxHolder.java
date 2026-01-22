@@ -24,4 +24,8 @@ public final class CtxHolder {
         ScopedValue.where(ctx, value).run(task);
     }
 
+    public static <R, X extends Throwable> R callWith(Ctx value, ScopedValue.CallableOp<? extends R, X> task) throws X {
+        return ScopedValue.where(ctx, value).call(task);
+    }
+
 }
