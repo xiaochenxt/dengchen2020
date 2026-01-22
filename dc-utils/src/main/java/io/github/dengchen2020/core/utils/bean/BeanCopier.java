@@ -22,9 +22,9 @@ public abstract class BeanCopier
     private static final BeanCopierKey KEY_FACTORY =
             (BeanCopierKey) KeyFactory.create(BeanCopierKey.class);
     private static final Type CONVERTER =
-            TypeUtils.parseType("io.github.dengchen2020.core.utils.bean.utils.Converter");
+            TypeUtils.parseType("io.github.dengchen2020.core.utils.bean.Converter");
     private static final Type BEAN_COPIER =
-            TypeUtils.parseType("io.github.dengchen2020.core.utils.bean.utils.BeanCopier");
+            TypeUtils.parseType("io.github.dengchen2020.core.utils.bean.BeanCopier");
     private static final Signature COPY =
             new Signature("copy", Type.VOID_TYPE, new Type[]{ Constants.TYPE_OBJECT, Constants.TYPE_OBJECT, CONVERTER });
     private static final Signature CONVERT =
