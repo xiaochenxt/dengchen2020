@@ -1,6 +1,8 @@
 package io.github.dengchen2020.core.context;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,15 +13,25 @@ import java.util.UUID;
  * @author xiaochen
  * @since 2026/1/20
  */
-final class CtxImpl implements Ctx {
+public final class CtxImpl implements Ctx {
 
     private String id;
-    @JsonProperty private final Map<String, Object> data = new HashMap<>();
+    @JsonProperty private final Map<String, Object> data;
+
+    public CtxImpl() {
+        this(null, new HashMap<>());
+    }
+
+    public CtxImpl(@Nullable String id, @NonNull Map<String, Object> data) {
+        this.id = id;
+        this.data = data;
+    }
 
     @JsonProperty
+    @NonNull
     @Override
     public String id() {
-        if(id == null) id = UUID.randomUUID().toString();
+        if(id == null || id.isBlank()) id = UUID.randomUUID().toString();
         return id;
     }
 

@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.context;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * 上下文存取
  * @author xiaochen
@@ -11,6 +13,7 @@ public interface Ctx {
         return new CtxImpl();
     }
 
+    @NonNull
     String id();
 
     Object put(String key, Object value);
