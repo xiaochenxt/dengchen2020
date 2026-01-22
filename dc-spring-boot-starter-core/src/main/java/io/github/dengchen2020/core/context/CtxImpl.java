@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.context;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,8 +14,9 @@ import java.util.UUID;
 final class CtxImpl implements Ctx {
 
     private String id;
-    private final Map<String, Object> data = new HashMap<>();
+    @JsonProperty private final Map<String, Object> data = new HashMap<>();
 
+    @JsonProperty
     @Override
     public String id() {
         if(id == null) id = UUID.randomUUID().toString();
