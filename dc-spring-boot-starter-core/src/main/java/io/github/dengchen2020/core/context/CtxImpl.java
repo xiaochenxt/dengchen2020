@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.context;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 final class CtxImpl implements Ctx {
 
     private String id;
-    private final Map<String, Object> data = new LinkedHashMap<>();
+    private final Map<String, Object> data = new HashMap<>();
 
     @Override
     public String id() {
