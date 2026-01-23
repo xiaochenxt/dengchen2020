@@ -17,22 +17,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
-import org.springframework.cglib.core.DebuggingClassWriter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @author xiaochen
  * @since 2024/5/31
  */
+@Lazy(false)
 @PropertySource("classpath:application-core.properties")
 @Configuration(proxyBeanMethods = false)
 public final class BaseAutoConfiguration implements InitializingBean {
@@ -56,19 +49,7 @@ public final class BaseAutoConfiguration implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         if (!Charset.defaultCharset().equals(StandardCharsets.UTF_8)) log.warn("JAVA默认字符集：{}，非UTF-8可能导致字符乱码", Charset.defaultCharset());
-        cglibDebug();
         if (!Threading.VIRTUAL.isActive(environment)) throw new IllegalStateException("请配置spring.threads.virtual.enabled=true");
-    }
-
-    private void cglibDebug() {
-        Set<String> activeProfiles = Set.of(environment.getActiveProfiles());
-        if (!activeProfiles.contains("dev")) return;
-        boolean cglibDebug = environment.getProperty("dc.debug.cglib.enabled", Boolean.class, true);
-        if (!cglibDebug) return;
-        String rootDir = System.getProperty("user.dir");
-        String targetDir = rootDir + File.separator + "target";
-        if (!Files.exists(Path.of(targetDir))) return;
-        System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, targetDir + File.separator + "cglib");
     }
 
     @ConditionalOnClass(name = "org.apache.hc.client5.http.classic.HttpClient")

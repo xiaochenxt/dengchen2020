@@ -1,6 +1,6 @@
 package io.github.dengchen2020.lock.exception;
 
-import io.github.dengchen2020.core.exception.call.ViewToastException;
+import io.github.dengchen2020.core.exception.ViewToastException;
 
 /**
  * 获锁失败异常

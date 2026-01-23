@@ -1,6 +1,4 @@
-package io.github.dengchen2020.core.exception.call;
-
-import io.github.dengchen2020.core.exception.BaseException;
+package io.github.dengchen2020.core.exception;
 
 /**
  * 前端弹框提示异常，该异常需提供国际化支持
