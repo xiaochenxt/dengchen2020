@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.redis.frequency;
 
-import io.github.dengchen2020.core.exception.call.ViewToastException;
+import io.github.dengchen2020.core.exception.ViewToastException;
 
 /**
  * 频控触发异常

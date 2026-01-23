@@ -1,6 +1,4 @@
-package io.github.dengchen2020.core.exception.call;
-
-import io.github.dengchen2020.core.exception.BaseException;
+package io.github.dengchen2020.core.exception;
 
 /**
  * 前端弹框提示异常：前端无法预处理的异常
