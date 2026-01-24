@@ -72,7 +72,7 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
      */
     private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
         Class<?> target = joinPoint.getTarget().getClass();
-        String key = "dc:task:{" + target.getSimpleName() + "}:" + joinPoint.getSignature().getName();
+        String key = "{dc:task}:" + target.getSimpleName() + ":" + joinPoint.getSignature().getName();
         if (concurrency) {
             publishEvent(joinPoint);
             return joinPoint.proceed();
