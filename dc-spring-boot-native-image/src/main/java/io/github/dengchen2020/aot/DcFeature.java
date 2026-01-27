@@ -17,8 +17,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Set;
 
-import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_CLASS_ARRAY;
-import static io.github.dengchen2020.aot.utils.CollectUtils.debug;
+import static io.github.dengchen2020.aot.utils.CollectUtils.*;
 
 /**
  * 基本注册，解决了一些代理检测无法自动配置的场景
@@ -41,6 +40,7 @@ class DcFeature implements Feature {
         lettuce(featureUtils);
         if (Boolean.parseBoolean(System.getProperty("font.aot","true"))) font(featureUtils, access);
         aliyuncs(featureUtils, access);
+        alipay(featureUtils, access);
         captcha(featureUtils, access);
         phonenumbers(featureUtils, access);
         serializedLambda(featureUtils, access);
@@ -56,6 +56,7 @@ class DcFeature implements Feature {
         ognl(featureUtils, access);
         jackson(featureUtils, access);
         geom(featureUtils, access);
+        telegram(featureUtils, access);
     }
 
     /**
@@ -176,6 +177,15 @@ class DcFeature implements Feature {
         }
     }
 
+    private void alipay(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> alipayResponse = featureUtils.loadClass("com.alipay.api.AlipayResponse");
+        if (alipayResponse != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerReflection(featureUtils.collectClass(alipayResponse::isAssignableFrom,"com.alipay.api").toArray(EMPTY_CLASS_ARRAY));
+            }, alipayResponse);
+        }
+    }
+
     private void captcha(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
         Class<?> captcha = featureUtils.loadClass("com.wf.captcha.base.Captcha");
         if (captcha != null) {
@@ -230,7 +240,7 @@ class DcFeature implements Feature {
                     "java.util.HashSet");
             try {
                 featureUtils.registerResource(sqlSessionFactory, featureUtils.findResources("org/apache/ibatis/builder/xml",
-                        name -> name.endsWith(".dtd") || name.endsWith(".xsd")).toArray(FeatureUtils.EMPTY_STRING_ARRAY));
+                        name -> name.endsWith(".dtd") || name.endsWith(".xsd")).toArray(EMPTY_STRING_ARRAY));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -241,7 +251,7 @@ class DcFeature implements Feature {
                     featureUtils.registerResource(mainClass.getModule(),
                             featureUtils.findResources("",
                                             name -> name.endsWith(".xml"))
-                                    .toArray(FeatureUtils.EMPTY_STRING_ARRAY));
+                                    .toArray(EMPTY_STRING_ARRAY));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -443,6 +453,15 @@ class DcFeature implements Feature {
                 var wktEncoder = featureUtils.loadClass("org.geolatte.geom.codec.WktEncoder");
                 if (wktEncoder != null) featureUtils.registerReflectionConstructors(classes.stream().filter(wktEncoder::isAssignableFrom).toArray(Class[]::new));
             }, geometry);
+        }
+    }
+
+    private void telegram(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        var apiResponse = featureUtils.loadClass("org.telegram.telegrambots.meta.api.objects.ApiResponse");
+        if (apiResponse != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerReflection(featureUtils.collectClass("org.telegram.telegrambots.meta.api").toArray(EMPTY_CLASS_ARRAY));
+            }, apiResponse);
         }
     }
 
