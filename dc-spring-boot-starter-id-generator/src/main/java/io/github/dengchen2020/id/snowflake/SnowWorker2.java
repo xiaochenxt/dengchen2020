@@ -32,7 +32,7 @@ class SnowWorker2 extends SnowWorker {
             }
 
             if (currentTimeTick < _LastTimeTick) {
-                throw new IdGeneratorException("Time错误 %d 毫秒", _LastTimeTick - currentTimeTick);
+                throw new IdGeneratorException("Time错误 " + (_LastTimeTick - currentTimeTick) + " 毫秒");
             }
 
             _LastTimeTick = currentTimeTick;

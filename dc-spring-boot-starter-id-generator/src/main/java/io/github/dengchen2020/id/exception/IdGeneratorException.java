@@ -15,9 +15,5 @@ public class IdGeneratorException extends RuntimeException {
         super(message, cause);
     }
 
-    public IdGeneratorException(String msgFormat, Object... args) {
-        super(String.format(msgFormat, args));
-    }
-
 }
 
