@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * ip定位(使用byte数据方式读取)
  */
-public class IPLocation {
+class IPLocation {
 
     private static final Logger log = LoggerFactory.getLogger(IPLocation.class);
 
