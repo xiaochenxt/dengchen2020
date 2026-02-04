@@ -14,12 +14,6 @@
       "defaultValue": true
     },
     {
-      "name": "dc.debug.cglib.enabled",
-      "type": "java.lang.Boolean",
-      "description": "是否在target中显示cglib生成的类文件，dev环境下默认启用.",
-      "defaultValue": false
-    },
-    {
       "name": "dc.static.servlet.enabled",
       "type": "java.lang.Boolean",
       "description": "是否启用静态资源处理的servlet，如果未配置spring.mvc.servlet.path或配置了server.servlet.context-path则依旧不会启用.",
