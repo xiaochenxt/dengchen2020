@@ -3,7 +3,7 @@ package io.github.dengchen2020.ip.service.impl.dat;
 /**
  * 位置
  */
-public class Location {
+class Location {
 
     public String country;
 
