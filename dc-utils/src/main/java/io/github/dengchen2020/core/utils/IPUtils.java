@@ -71,7 +71,7 @@ public abstract class IPUtils {
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("无效的IP地址: " + ip, e);
         }
-        if (!(address instanceof Inet4Address)) throw new IllegalArgumentException("不是IPv4地址");
+        if (!(address instanceof Inet4Address)) throw new IllegalArgumentException("不是IPv4地址：" + ip);
         byte[] bytes = address.getAddress();
         long result = 0;
         for (byte b : bytes) {
