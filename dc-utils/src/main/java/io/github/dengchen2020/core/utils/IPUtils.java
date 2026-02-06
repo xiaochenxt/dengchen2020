@@ -4,9 +4,10 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.regex.Pattern;
 
 /**
  * 获取客户端IP
@@ -21,30 +22,6 @@ public abstract class IPUtils {
     public static final String UNKNOWN = "unknown";
     public static final String LOCALHOST_IP1 = "127.0.0.1";
     private static String localHostIp;
-
-    // IPv4正则表达式
-    private static final Pattern IPV4_PATTERN = Pattern.compile(
-            "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                    "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                    "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                    "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-    );
-
-    // IPv6正则表达式
-    private static final Pattern IPV6_PATTERN = Pattern.compile(
-            "^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,7}:$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}$|" +
-                    "^(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}$|" +
-                    "^[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}$|" +
-                    "^:(?::[0-9a-fA-F]{1,4}){1,7}$|" +
-                    "^::(?:ffff(?::0{1,4})?:)?" +
-                    "((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}" +
-                    "(25[0-5]|(2[0-4]|1?[0-9])?[0-9])$"
-    );
 
     static {
         try {
@@ -86,20 +63,19 @@ public abstract class IPUtils {
      * 将 IPv4 地址转换为对应的长整型数字
      * @param ip IPv4 地址字符串，格式为 "xxx.xxx.xxx.xxx"
      * @return 转换后的长整型数字
-     * @throws IllegalArgumentException
      */
-    public static long ipv4ToLong(@NonNull String ip) throws IllegalArgumentException {
-        String[] ipParts = ip.split("\\.");
-        if (ipParts.length != 4) {
-            throw new IllegalArgumentException("输入的 IP 地址格式不正确");
+    public static long ipv4ToLong(@NonNull String ip) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(ip);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("无效的IP地址: " + ip, e);
         }
+        if (!(address instanceof Inet4Address)) throw new IllegalArgumentException("不是IPv4地址");
+        byte[] bytes = address.getAddress();
         long result = 0;
-        for (int i = 0; i < 4; i++) {
-            int part = Integer.parseInt(ipParts[i]);
-            if (part < 0 || part > 255) {
-                throw new IllegalArgumentException("IP 地址的每个部分必须在 0 到 255 之间");
-            }
-            result = (result << 8) | part;
+        for (byte b : bytes) {
+            result = (result << 8) | (b & 0xFF);
         }
         return result;
     }
@@ -125,7 +101,11 @@ public abstract class IPUtils {
      * @return true：是 false：不是
      */
     public static boolean isIpv4(@NonNull String ip) {
-        return IPV4_PATTERN.matcher(ip).matches();
+        try {
+            return InetAddress.getByName(ip) instanceof Inet4Address;
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("无效的IP地址", e);
+        }
     }
 
     /**
@@ -134,7 +114,11 @@ public abstract class IPUtils {
      * @return true：是 false：不是
      */
     public static boolean isIpv6(@NonNull String ip) {
-        return IPV6_PATTERN.matcher(ip).matches();
+        try {
+            return InetAddress.getByName(ip) instanceof Inet6Address;
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("无效的IP地址", e);
+        }
     }
 
 }
