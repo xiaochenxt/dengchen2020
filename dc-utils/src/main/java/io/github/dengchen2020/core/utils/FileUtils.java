@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 文件工具类
@@ -73,20 +71,49 @@ public abstract class FileUtils {
         return baseName + "_" + suffix + extension;
     }
 
-    // 只允许字母、数字、小数点、下划线、&、逗号、(、)、[、]、（、）、【、】（禁止其他所有特殊字符和路径符号）
-    private static final Pattern INVALID_FILENAME_PATTERN = Pattern.compile("[^a-zA-Z0-9._&,=$@+%#()（）\\[\\]【】]");
-
     /**
-     * 校验文件名是否合法（仅含字母、数字、小数点、下划线、&、逗号、(、)、[、]、（、）、【、】），如果合法则正常返回，否则抛出异常
+     * 校验文件名是否安全合规
      * @param filename 待校验的文件名
      * @return 校验通过的文件名
-     * @throws IllegalArgumentException 当包含非法字符时抛出
+     * @throws IllegalArgumentException 当包含路径遍历和禁止的字符时抛出
      */
     public static String getSafeFilename(@Nullable String filename) {
-        if (filename == null || filename.isEmpty()) throw new IllegalArgumentException("文件名不能为空");
-        Matcher matcher = INVALID_FILENAME_PATTERN.matcher(filename);
-        if (matcher.find()) throw new IllegalArgumentException("文件名不合规，包含不允许的字符：" + matcher.group());
-        return filename;
+        if (filename == null || filename.isBlank()) throw new IllegalArgumentException("文件名不能为空");
+        var safeFilename = filename.trim();
+        int len = safeFilename.length();
+        // 检测路径遍历和禁止的字符
+        for (int i = 0; i < len; i++) {
+            char c = safeFilename.charAt(i);
+            if (isForbiddenChar(c)) throw new IllegalArgumentException("文件名：" + safeFilename + "，包含禁止的字符: '" + c + "' (位置: " + i + ")");
+            // 检查连续点号序列
+            if (c == '.') {
+                // 统计连续的点号数量
+                int dotCount = 1;
+                int startIndex = i;
+                int nextIndex = i + 1;
+                while (nextIndex < len && safeFilename.charAt(nextIndex) == '.') {
+                    dotCount++;
+                    nextIndex++;
+                }
+                // 拦截所有连续的点号序列（2个及以上）
+                if (dotCount >= 2) {
+                    String sequence = safeFilename.substring(startIndex, nextIndex);
+                    throw new IllegalArgumentException("文件名：" + safeFilename + "，包含非法的连续点号序列: '" + sequence + "' (位置: " + startIndex + ")");
+                }
+                // 跳过已处理的点号
+                i = nextIndex - 1;
+            }
+        }
+        return safeFilename;
+    }
+    
+    /**
+     * 判断字符是否为禁止的字符
+     */
+    private static boolean isForbiddenChar(char c) {
+        return c == '/' || c == '\\' || c == ':' || c == '*' || 
+               c == '?' || c == '"' || c == '<' || c == '>' || 
+               c == '|' || c == '\0';
     }
 
     /**
