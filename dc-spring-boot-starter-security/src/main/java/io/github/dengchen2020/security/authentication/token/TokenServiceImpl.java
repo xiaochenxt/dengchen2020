@@ -1,6 +1,8 @@
 package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,6 +23,7 @@ import static io.github.dengchen2020.security.authentication.token.TokenConstant
  * @author xiaochen
  * @since 2024/4/24
  */
+@NullMarked
 public class TokenServiceImpl implements TokenService, StateToken {
 
     private static final Logger log = LoggerFactory.getLogger(TokenServiceImpl.class);
@@ -228,7 +231,7 @@ public class TokenServiceImpl implements TokenService, StateToken {
     }
 
     @Override
-    public Authentication readToken(String token) {
+    public @Nullable Authentication readToken(String token) {
         String tokenInfo;
         var slot = slot(getName(token));
         var keys = List.of(tokenPrefix + slot, tokenInfoPrefix + slot);
@@ -254,8 +257,8 @@ public class TokenServiceImpl implements TokenService, StateToken {
     }
 
     public String getName(String token) {
-        if (token == null) return "";
-        return token.split(SEPARATOR)[0];
+        var i = token.indexOf(SEPARATOR);
+        return i != -1 ? token.substring(0, i) : token;
     }
 
     private String slot(String userId) {

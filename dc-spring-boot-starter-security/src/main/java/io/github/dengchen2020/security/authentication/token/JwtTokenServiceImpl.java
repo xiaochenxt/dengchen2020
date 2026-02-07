@@ -7,6 +7,8 @@ import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.security.exception.SessionTimeOutException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpHeaders;
  * @author xiaochen
  * @since 2024/4/28
  */
+@NullMarked
 public class JwtTokenServiceImpl implements TokenService {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenServiceImpl.class);
@@ -109,7 +112,7 @@ public class JwtTokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Authentication readToken(String token) {
+    public @Nullable Authentication readToken(String token) {
         JWT jwt = jwtHelper.parseToken(token);
         if (jwtHelper.isRefreshToken(jwt)) throw new SessionTimeOutException("不是一个请求token，" + token);
         return readJwt(jwt);
@@ -121,7 +124,7 @@ public class JwtTokenServiceImpl implements TokenService {
      * @param jwt jwt
      * @return {@link Authentication}
      */
-    private Authentication readJwt(JWT jwt) {
+    private @Nullable Authentication readJwt(JWT jwt) {
         return JsonUtils.convertValue(jwt.getOtherClaims().get(TokenConstant.PAYLOAD), authenticationConvert.type());
     }
 
