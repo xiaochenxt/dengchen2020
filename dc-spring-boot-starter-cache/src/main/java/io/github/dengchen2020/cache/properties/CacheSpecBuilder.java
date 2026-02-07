@@ -89,6 +89,9 @@ public class CacheSpecBuilder {
              */
             private Duration expireTime;
 
+            /**
+             * 多久后过期
+             */
             public Duration getExpireTime() {
                 return expireTime;
             }
@@ -203,6 +206,9 @@ public class CacheSpecBuilder {
              */
             private Boolean softValues;
 
+            /**
+             * 是否读取后一段时间过期，默认写入后一段时间过期
+             */
             public Boolean getExpireAfterAccess() {
                 return expireAfterAccess;
             }
@@ -211,6 +217,9 @@ public class CacheSpecBuilder {
                 this.expireAfterAccess = expireAfterAccess;
             }
 
+            /**
+             * 多久后过期
+             */
             public Duration getExpireTime() {
                 return expireTime;
             }
@@ -219,6 +228,9 @@ public class CacheSpecBuilder {
                 this.expireTime = expireTime;
             }
 
+            /**
+             * 最大缓存元素个数
+             */
             public Integer getMax() {
                 return max;
             }
@@ -227,6 +239,9 @@ public class CacheSpecBuilder {
                 this.max = max;
             }
 
+            /**
+             * 是否使用软引用包装value（内存不足时会被垃圾回收），生成的缓存将使用 == 比较来确定值的相等性，详见：{@link com.github.benmanes.caffeine.cache.Caffeine#softValues()}
+             */
             public Boolean getSoftValues() {
                 return softValues;
             }
