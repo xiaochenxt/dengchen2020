@@ -69,8 +69,8 @@ public class TokenBucketRateLimiter implements AutoCloseable {
     }
 
     private final ConcurrentHashMap<String, TokenBucket> bucketMap = new ConcurrentHashMap<>();
-    private final ReentrantLock globalLock = new ReentrantLock();
-    private final Condition tokenAvailable = globalLock.newCondition();
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition tokenAvailable = lock.newCondition();
     private final ScheduledExecutorService cleanupExecutor;
     private final int maxKeyCount;
     private volatile boolean isShutdown = false;
@@ -139,7 +139,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
         // 获取或创建令牌桶
         TokenBucket bucket = getOrCreateBucket(key, ratePerSecond);
         long requestStartMs = System.currentTimeMillis();
-        globalLock.lock();
+        lock.lock();
         try {
             while (true) {
                 // 尝试获取令牌
@@ -165,7 +165,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
                 }
             }
         } finally {
-            globalLock.unlock();
+            lock.unlock();
         }
     }
 
