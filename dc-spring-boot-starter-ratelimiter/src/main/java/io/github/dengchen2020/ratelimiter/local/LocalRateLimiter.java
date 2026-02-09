@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 单机限流实现
@@ -61,13 +62,9 @@ public class LocalRateLimiter implements RateLimiter {
     @Override
     public boolean limit(String limitKey, int limitNum) {
         if (limitNum <= 0) return true;
-        WindowCounter counter = counters.compute(limitKey, (k, v) -> {
-            if (v == null) return new WindowCounter(System.currentTimeMillis());
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - v.windowStartTime >= windowMillis) v.reset(currentTime);
-            return v;
-        });
-        return counter.checkAndIncrement(limitNum);
+        long currentTime = System.currentTimeMillis();
+        var counter = counters.computeIfAbsent(limitKey, _ -> new WindowCounter(currentTime));
+        return counter.checkAndIncrement(limitNum, currentTime, windowMillis);
     }
 
     /**
@@ -77,7 +74,7 @@ public class LocalRateLimiter implements RateLimiter {
         if (counters.isEmpty()) return;
         long currentTime = System.currentTimeMillis();
         long expireTime = currentTime - windowMillis;
-        counters.entrySet().removeIf(entry -> entry.getValue().windowStartTime < expireTime);
+        counters.entrySet().removeIf(entry -> entry.getValue().windowStartTime.get() < expireTime);
     }
 
     @Override
@@ -99,37 +96,34 @@ public class LocalRateLimiter implements RateLimiter {
      * 窗口计数器，用于跟踪每个key在当前窗口的请求次数
      */
     private static final class WindowCounter {
-        // 窗口开始时间，使用volatile保证可见性
-        volatile long windowStartTime;
-        // 请求计数
+        // 窗口开始时间
+        private final AtomicLong windowStartTime;
+        // 窗口计数
         private final AtomicInteger count = new AtomicInteger(0);
 
         WindowCounter(long windowStartTime) {
-            this.windowStartTime = windowStartTime;
+            this.windowStartTime = new AtomicLong(windowStartTime);
         }
 
         /**
-         * 重置计数器到新的窗口
+         * 检查并计数
          */
-        void reset(long newWindowStartTime) {
-            this.windowStartTime = newWindowStartTime;
-            count.set(0);
-        }
-
-        /**
-         * 先检查是否超过限制，再决定是否增加计数
-         * 这样可以确保计数与实际允许的请求数一致
-         * @return true: 超过限制，false: 未超过限制
-         */
-        boolean checkAndIncrement(int limitNum) {
-            int current;
+        boolean checkAndIncrement(int limitNum, long currentTime, long windowMillis) {
+            // 检查窗口是否需要重置
+            long currentWindowStart = windowStartTime.get();
+            if (currentTime - currentWindowStart >= windowMillis) {
+                // 窗口重置
+                if (windowStartTime.compareAndSet(currentWindowStart, currentTime)) {
+                    count.set(1);
+                    return false; // 第一次总是允许
+                }
+            }
+            // 窗口有效，尝试增加计数
+            int currentCount;
             do {
-                current = count.get();
-                // 如果当前计数已超过限制，直接返回true
-                if (current >= limitNum) return true;
-                // 否则尝试将计数加1
-            } while (!count.compareAndSet(current, current + 1));
-            // 成功增加计数且未超过限制
+                currentCount = count.get();
+                if (currentCount >= limitNum) return true; // 超过限制
+            } while (!count.compareAndSet(currentCount, currentCount + 1));
             return false;
         }
     }
