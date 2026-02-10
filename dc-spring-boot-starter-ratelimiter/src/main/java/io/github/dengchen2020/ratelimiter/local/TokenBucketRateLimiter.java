@@ -71,7 +71,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
     private final ConcurrentHashMap<String, TokenBucket> bucketMap = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition tokenAvailable = lock.newCondition();
-    private final ScheduledExecutorService cleanupExecutor;
+    private final ScheduledExecutorService cleaner;
     private final int maxKeyCount;
     private volatile boolean isShutdown = false;
 
@@ -86,11 +86,10 @@ public class TokenBucketRateLimiter implements AutoCloseable {
     }
 
     public TokenBucketRateLimiter(Duration tokenDuration, int maxKeyCount) {
-        this.cleanupExecutor = Executors.newSingleThreadScheduledExecutor(
-                r -> Thread.ofVirtual().name("rate-limiter-cleanup-thread").unstarted(r));
+        this.cleaner = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("bucket-rate-limiter-cleaner").factory());
         // 清理间隔（毫秒）
         final long cleanupPeriodMs = 3_000;
-        this.cleanupExecutor.scheduleWithFixedDelay(this::cleanupInactiveBuckets,
+        this.cleaner.scheduleWithFixedDelay(this::cleanupInactiveBuckets,
                 cleanupPeriodMs, cleanupPeriodMs, TimeUnit.MILLISECONDS);
         this.tokenTotalMs = tokenDuration.toMillis();
         if (maxKeyCount <= 0 || maxKeyCount > 100000) throw new IllegalArgumentException("maxKeyCount必须在(0, 100000]范围内，当前值：" + maxKeyCount);
@@ -261,7 +260,7 @@ public class TokenBucketRateLimiter implements AutoCloseable {
     public void close() {
         if (isShutdown) return;
         isShutdown = true;
-        cleanupExecutor.shutdown();
+        cleaner.shutdown();
         bucketMap.clear();
         if (log.isDebugEnabled()) log.debug("限流器已关闭");
     }
