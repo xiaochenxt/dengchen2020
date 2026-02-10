@@ -81,13 +81,6 @@ public class LocalRateLimiter implements RateLimiter {
     public void close() {
         // 关闭定时任务
         cleaner.shutdown();
-        try {
-            if (!cleaner.awaitTermination(30, TimeUnit.SECONDS)) {
-                cleaner.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            cleaner.shutdownNow();
-        }
         // 清理资源
         counters.clear();
     }
