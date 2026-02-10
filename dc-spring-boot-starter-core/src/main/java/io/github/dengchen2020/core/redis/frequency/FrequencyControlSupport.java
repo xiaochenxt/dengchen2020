@@ -1,9 +1,11 @@
 package io.github.dengchen2020.core.redis.frequency;
 
+import io.github.dengchen2020.core.utils.DateTimeUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,6 +27,7 @@ public class FrequencyControlSupport {
                     local qpsNum = tonumber(ARGV[1])
                     local qpmNum = tonumber(ARGV[2])
                     local qpdNum = tonumber(ARGV[3])
+                    local dayS = tonumber(ARGV[4])
                     if qpdNum > 0 then
                         local qpdValue = redis.call("GET", qpdKey)
                         if qpdValue then
@@ -33,7 +36,7 @@ public class FrequencyControlSupport {
                                 return 3
                             end
                         else
-                            redis.call("SET", qpdKey, "0", "EX", 86400)
+                            redis.call("SET", qpdKey, "0", "EX", dayS)
                         end
                     end
                     if qpmNum > 0 then
@@ -81,8 +84,10 @@ public class FrequencyControlSupport {
      * @return
      */
     public long trigger(String key, int qps, int qpm, int qpd) {
+        if (qps <= 0 && qpm <= 0 && qpd <= 0) return 0;
         var slot = "{"+key+"}";
-        return redisTemplate.execute(script, List.of(FREQUENCY_CONTROL_PREFIX+"qps:"+slot, FREQUENCY_CONTROL_PREFIX+"qpm:"+slot, FREQUENCY_CONTROL_PREFIX+"qpd:"+slot), String.valueOf(qps), String.valueOf(qpm), String.valueOf(qpd));
+        var now = LocalDateTime.now();
+        return redisTemplate.execute(script, List.of(FREQUENCY_CONTROL_PREFIX+"qps:"+slot, FREQUENCY_CONTROL_PREFIX+"qpm:"+slot, FREQUENCY_CONTROL_PREFIX+"qpd:"+slot), String.valueOf(qps), String.valueOf(qpm), String.valueOf(qpd), String.valueOf(DateTimeUtils.betweenSecond(now, DateTimeUtils.beginOfNextDay(now))));
     }
 
 }
