@@ -6,8 +6,6 @@ import org.slf4j.helpers.MessageFormatter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -65,42 +63,6 @@ public abstract class StrUtils {
     }
 
     /**
-     * 根据query参数解析出key对应的value
-     *
-     * @param query query查询参数
-     * @param key 要查询的键
-     * @return key对应的value，如果不存在则返回null
-     */
-    @Nullable
-    public static String getValue(@Nullable String query, @Nullable String key) {
-        if (query == null || key == null || query.isEmpty() || key.isEmpty()) return null;
-        final int keyLen = key.length();
-        final int queryLen = query.length();
-        int currentKeyPos = 0; // 目标key在query中的起始位置（初始为0，用于循环查找）
-        // 直接定位所有可能的key位置（跳过无关参数，减少遍历）
-        while ((currentKeyPos = query.indexOf(key, currentKeyPos)) != -1) {
-            // 验证当前key位置是否是"独立参数"（避免匹配子串，如"username"匹配"name"）
-            boolean isValidStart = (currentKeyPos == 0) || (query.charAt(currentKeyPos - 1) == '&');
-            // 验证key后面是否有足够空间（至少有"="，避免key在query末尾的情况）
-            boolean hasSpaceForEqual = (currentKeyPos + keyLen) < queryLen;
-            if (isValidStart && hasSpaceForEqual) {
-                // 验证key后面是否是"="（确保是key=value格式，而非key&xxx）
-                if (query.charAt(currentKeyPos + keyLen) == '=') {
-                    int valueStart = currentKeyPos + keyLen + 1; // value的起始位置（跳过key和=）
-                    // 定位value的结束位置（下一个&或query末尾）
-                    int valueEnd = query.indexOf('&', valueStart);
-                    return valueEnd == -1 ? query.substring(valueStart) : query.substring(valueStart, valueEnd);
-                }
-            }
-            // 找不到有效匹配，从下一个字符继续查找（避免死循环）
-            currentKeyPos += keyLen;
-            // 防止key在query末尾，currentKeyPos超出范围（极端边界）
-            if (currentKeyPos >= queryLen) break;
-        }
-        return null;
-    }
-
-    /**
      * 按指定字节数截断字符串
      * @param str 字符串
      * @param targetByteLength 目标字节数
@@ -111,7 +73,6 @@ public abstract class StrUtils {
         try {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             if (bytes.length <= targetByteLength) return str;
-            
             // 找到最大字节位置，确保不截断多字节字符
             int maxByteIndex = 0;
             for (int i = 0; i < bytes.length && i < targetByteLength; ) {
@@ -128,16 +89,11 @@ public abstract class StrUtils {
                     // 无效的UTF-8字节，按1字节处理
                     charByteLength = 1;
                 }
-                
                 // 如果加上当前字符会超出目标长度，则停止
-                if (i + charByteLength > targetByteLength) {
-                    break;
-                }
-                
+                if (i + charByteLength > targetByteLength) break;
                 maxByteIndex = i + charByteLength;
                 i = maxByteIndex;
             }
-            
             // 使用字节数组构造截断后的字符串
             return new String(bytes, 0, maxByteIndex, StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -155,7 +111,7 @@ public abstract class StrUtils {
      * isNumeric("")     = false
      * isNumeric("  ")   = false
      * isNumeric("123")  = true
-     * isNumeric("\u0967\u0968\u0969")  = true
+     * isNumeric("१२३")  = true
      * isNumeric("12 3") = false
      * isNumeric("ab2c") = false
      * isNumeric("12-3") = false
@@ -174,23 +130,6 @@ public abstract class StrUtils {
             if (!Character.isDigit(cs.charAt(i))) return false;
         }
         return true;
-    }
-
-    /**
-     * 将map转化为query参数，例如{@code a=1&b=2&c=3}
-     * @param params map
-     */
-    public static String toQuery(Map<String, ?> params) {
-        StringBuilder query = new StringBuilder();
-        for (Iterator<? extends Map.Entry<String, ?>> iterator = params.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, ?> entry = iterator.next();
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            query.append(key).append("=");
-            if (value != null) query.append(value);
-            if (iterator.hasNext()) query.append("&");
-        }
-        return query.toString();
     }
 
     /**
