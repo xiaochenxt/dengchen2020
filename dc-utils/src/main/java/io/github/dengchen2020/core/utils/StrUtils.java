@@ -29,15 +29,6 @@ public abstract class StrUtils {
     }
 
     /**
-     * 检查对象是否为数组
-     * @param obj 待检查的对象
-     * @return 如果是数组返回true，否则返回false
-     */
-    public static boolean isArray(@Nullable Object obj) {
-        return null != obj && obj.getClass().isArray();
-    }
-
-    /**
      * 生成uuid
      * @return uuid字符串
      */
