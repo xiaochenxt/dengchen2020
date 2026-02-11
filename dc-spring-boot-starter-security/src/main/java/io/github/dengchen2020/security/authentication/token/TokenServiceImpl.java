@@ -140,7 +140,6 @@ public class TokenServiceImpl implements TokenService, StateToken {
                 """ 
                 local token = ARGV[1]
                 local userListKey = KEYS[1]
-                local userInfoKey = KEYS[2]
                 local tokenFound = 0
                 local tokens = redis.call("LRANGE", userListKey, 0, -1)
                 for _, t in ipairs(tokens) do
@@ -150,6 +149,7 @@ public class TokenServiceImpl implements TokenService, StateToken {
                     end
                 end
                 if tokenFound == 1 then
+                    local userInfoKey = KEYS[2]
                     local ttl = redis.call('TTL', userListKey)
                     local refreshThreshold = tonumber(ARGV[2])
                     if ttl ~= -1 and ttl < refreshThreshold then
