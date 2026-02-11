@@ -105,9 +105,9 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
                 """ 
                 local token = ARGV[1]
                 local userTokenKey = KEYS[1]
-                local userInfoKey = KEYS[2]
                 local storedToken = redis.call("GET", userTokenKey)
                 if storedToken and storedToken == token then
+                    local userInfoKey = KEYS[2]
                     return redis.call("GET", userInfoKey)
                 end
                 return nil
@@ -118,9 +118,9 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
                 """ 
                 local token = ARGV[1]
                 local userTokenKey = KEYS[1]
-                local userInfoKey = KEYS[2]
                 local storedToken = redis.call("GET", userTokenKey)
                 if storedToken and storedToken == token then
+                    local userInfoKey = KEYS[2]
                     local ttl = redis.call('TTL', userTokenKey)
                     local refreshThreshold = tonumber(ARGV[2])
                     if ttl ~= -1 and ttl < refreshThreshold then

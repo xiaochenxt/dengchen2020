@@ -21,13 +21,8 @@ public class FrequencyControlSupport {
 
     RedisScript<Long> script = new DefaultRedisScript<>(
             """ 
-                    local qpsKey = KEYS[1]
-                    local qpmKey = KEYS[2]
                     local qpdKey = KEYS[3]
-                    local qpsNum = tonumber(ARGV[1])
-                    local qpmNum = tonumber(ARGV[2])
                     local qpdNum = tonumber(ARGV[3])
-                    local dayS = tonumber(ARGV[4])
                     if qpdNum > 0 then
                         local qpdValue = redis.call("GET", qpdKey)
                         if qpdValue then
@@ -36,9 +31,12 @@ public class FrequencyControlSupport {
                                 return 3
                             end
                         else
+                            local dayS = tonumber(ARGV[4])
                             redis.call("SET", qpdKey, "0", "EX", dayS)
                         end
                     end
+                    local qpmKey = KEYS[2]
+                    local qpmNum = tonumber(ARGV[2])
                     if qpmNum > 0 then
                         local qpmValue = redis.call("GET", qpmKey)
                         if qpmValue then
@@ -50,6 +48,8 @@ public class FrequencyControlSupport {
                             redis.call("SET", qpmKey, "0", "EX", 60)
                         end
                     end
+                    local qpsKey = KEYS[1]
+                    local qpsNum = tonumber(ARGV[1])
                     if qpsNum > 0 then
                         local qpsValue = redis.call("GET", qpsKey)
                         if qpsValue then
@@ -86,8 +86,14 @@ public class FrequencyControlSupport {
     public long trigger(String key, int qps, int qpm, int qpd) {
         if (qps <= 0 && qpm <= 0 && qpd <= 0) return 0;
         var slot = "{"+key+"}";
-        var now = LocalDateTime.now();
-        return redisTemplate.execute(script, List.of(FREQUENCY_CONTROL_PREFIX+"qps:"+slot, FREQUENCY_CONTROL_PREFIX+"qpm:"+slot, FREQUENCY_CONTROL_PREFIX+"qpd:"+slot), String.valueOf(qps), String.valueOf(qpm), String.valueOf(qpd), String.valueOf(DateTimeUtils.betweenSecond(now, DateTimeUtils.beginOfNextDay(now))));
+        String dayS;
+        if (qpd <= 0) {
+            dayS = "86400";
+        } else {
+            var now = LocalDateTime.now();
+            dayS = String.valueOf(DateTimeUtils.betweenSecond(now, DateTimeUtils.beginOfNextDay(now)));
+        }
+        return redisTemplate.execute(script, List.of(FREQUENCY_CONTROL_PREFIX+"qps:"+slot, FREQUENCY_CONTROL_PREFIX+"qpm:"+slot, FREQUENCY_CONTROL_PREFIX+"qpd:"+slot), String.valueOf(qps), String.valueOf(qpm), String.valueOf(qpd), dayS);
     }
 
 }

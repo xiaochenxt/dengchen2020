@@ -23,19 +23,18 @@ public class RedisRateLimiter implements RateLimiter {
 
     RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
             """ 
-                    -- 限流Key
                     local rateLimitKey = KEYS[1]
-                    local rateLimitNum = tonumber(ARGV[1])
-                    local rateLimitSecond = tonumber(ARGV[2])
                     local rateLimitValue = redis.call("GET", rateLimitKey)
                     if rateLimitValue then
                         local limitNum = tonumber(rateLimitValue);
+                        local rateLimitNum = tonumber(ARGV[1])
                         if limitNum > rateLimitNum then
                             return limitNum
                         else
                             return redis.call("INCR", rateLimitKey)
                         end
                     else
+                        local rateLimitSecond = tonumber(ARGV[2])
                         redis.call("SET", rateLimitKey, "1", "EX", rateLimitSecond)
                         return 1
                     end
