@@ -10,8 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentMap;
 
-import static io.github.dengchen2020.core.utils.DateTimeUtils.date;
-import static io.github.dengchen2020.core.utils.DateTimeUtils.localDateTime;
+import static io.github.dengchen2020.core.utils.DateTimeUtils.*;
 import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
 
 /**
@@ -22,8 +21,6 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY
  */
 @NullMarked
 public abstract class DateTimeParseUtils {
-
-    public static final String DEFAULT_DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
 
