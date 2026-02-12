@@ -106,10 +106,15 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
 
     private static final RedisScript<Void> stopScript = new DefaultRedisScript<>("""
             local uniqueId = ARGV[1]
-            for _, key in ipairs(KEYS) do
-                if redis.call('get', key) == uniqueId then
-                    redis.call('del', key)
+            local values = redis.call('MGET', unpack(KEYS))
+            local keysToDel = {}
+            for i, val in ipairs(values) do
+                if val == uniqueId then
+                    table.insert(keysToDel, KEYS[i])
                 end
+            end
+            if #keysToDel > 0 then
+                redis.call('UNLINK', unpack(keysToDel))
             end
             """, Void.class);
 
