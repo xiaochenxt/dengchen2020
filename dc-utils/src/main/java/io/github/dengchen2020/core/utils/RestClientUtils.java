@@ -18,6 +18,8 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 
@@ -26,6 +28,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -224,12 +227,13 @@ public abstract class RestClientUtils {
             HttpMessageConverter<?> httpMessageConverter = iterator.next();
             if (httpMessageConverter instanceof StringHttpMessageConverter stringHttpMessageConverter) {
                 stringHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
-                continue;
-            }
-            // todo spring7.0开始，重新进行了排序，json在xml之前，因此从springboot4.0开始，不再需要排序
-            if (httpMessageConverter instanceof MappingJackson2XmlHttpMessageConverter) {
+            } else if (httpMessageConverter instanceof AllEncompassingFormHttpMessageConverter allEncompassingFormHttpMessageConverter) {
+                var list = new ArrayList<>(allEncompassingFormHttpMessageConverter.getPartConverters());
+                moveXmlConverterToLast(list);
+                allEncompassingFormHttpMessageConverter.setPartConverters(list);
+            } else if (httpMessageConverter instanceof MappingJackson2XmlHttpMessageConverter || httpMessageConverter instanceof Jaxb2RootElementHttpMessageConverter) {
                 iterator.remove();
-                converters.addLast(httpMessageConverter);
+                converters.addLast(httpMessageConverter); // todo spring7.0开始，重新进行了排序，json在xml之前，因此从springboot4.0开始，不再需要排序
                 break;
             }
         }
