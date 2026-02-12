@@ -112,8 +112,7 @@ public class TokenServiceImpl implements TokenService, StateToken {
                 """ 
                 local userListKey = KEYS[1]
                 local userInfoKey = KEYS[2]
-                redis.call("UNLINK", userListKey)
-                redis.call("UNLINK", userInfoKey)
+                redis.call("UNLINK", userListKey, userInfoKey)
                 """,
                 Void.class
         );

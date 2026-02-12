@@ -96,8 +96,7 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
                 """
                 local userTokenKey = KEYS[1]
                 local userInfoKey = KEYS[2]
-                redis.call("UNLINK", userTokenKey)
-                redis.call("UNLINK", userInfoKey)
+                redis.call("UNLINK", userTokenKey, userInfoKey)
                 """,
                 Void.class
         );
