@@ -4,6 +4,7 @@ import org.jspecify.annotations.NullMarked;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 /**
@@ -140,7 +141,7 @@ public abstract class DateTimeUtils {
      * @return {@link LocalDateTime}
      */
     public static LocalDateTime beginOfNextDay(LocalDateTime localDateTime) {
-        return localDateTime.with(LocalTime.MIN).plusDays(1);
+        return localDateTime.toLocalDate().plusDays(1).atStartOfDay();
     }
 
     /**
@@ -149,8 +150,8 @@ public abstract class DateTimeUtils {
      * @param date 时间
      * @return {@link LocalDateTime}
      */
-    public static LocalDateTime beginOfYestDay(Date date) {
-        return beginOfYestDay(localDateTime(date));
+    public static LocalDateTime beginOfYesterday(Date date) {
+        return beginOfYesterday(localDateTime(date));
     }
 
     /**
@@ -159,8 +160,8 @@ public abstract class DateTimeUtils {
      * @param localDateTime 日期时间
      * @return {@link LocalDateTime}
      */
-    public static LocalDateTime beginOfYestDay(LocalDateTime localDateTime) {
-        return localDateTime.with(LocalTime.MIN).plusDays(-1);
+    public static LocalDateTime beginOfYesterday(LocalDateTime localDateTime) {
+        return localDateTime.toLocalDate().plusDays(-1).atStartOfDay();
     }
 
     /**
@@ -182,7 +183,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenMills(LocalDateTime localDateTime, LocalDateTime localDateTime2) {
-        return Math.abs(timestamp(localDateTime) - timestamp(localDateTime2));
+        return Math.abs(ChronoUnit.MILLIS.between(localDateTime, localDateTime2));
     }
 
     /**
@@ -193,7 +194,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenMills(ZonedDateTime zonedDateTime, ZonedDateTime zonedDateTime2) {
-        return Math.abs(timestamp(zonedDateTime) - timestamp(zonedDateTime2));
+        return betweenMills(zonedDateTime.toInstant(), zonedDateTime2.toInstant());
     }
 
     /**
@@ -204,7 +205,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenMills(Instant instant, Instant instant2) {
-        return Math.abs(timestamp(instant) - timestamp(instant2));
+        return Math.abs(ChronoUnit.MILLIS.between(instant, instant2));
     }
 
     /**
@@ -226,7 +227,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenSecond(LocalDateTime localDateTime, LocalDateTime localDateTime2) {
-        return Math.abs(timestamp(localDateTime) - timestamp(localDateTime2)) / 1000;
+        return Math.abs(ChronoUnit.SECONDS.between(localDateTime, localDateTime2));
     }
 
     /**
@@ -237,7 +238,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenSecond(ZonedDateTime zonedDateTime, ZonedDateTime zonedDateTime2) {
-        return Math.abs(timestamp(zonedDateTime) - timestamp(zonedDateTime2)) / 1000;
+        return Math.abs(zonedDateTime.toInstant().getEpochSecond() - zonedDateTime2.toInstant().getEpochSecond());
     }
 
     /**
@@ -248,7 +249,7 @@ public abstract class DateTimeUtils {
      * @return long
      */
     public static long betweenSecond(Instant instant, Instant instant2) {
-        return Math.abs(timestamp(instant) - timestamp(instant2)) / 1000;
+        return Math.abs(instant.getEpochSecond() - instant2.getEpochSecond());
     }
 
     /**
@@ -294,7 +295,7 @@ public abstract class DateTimeUtils {
     }
 
     /**
-     * {@link ZonedDateTime}转时间戳，使用系统默认时区
+     * 时间戳转{@link ZonedDateTime}，使用系统默认时区
      * @param timestamp 时间戳
      * @return {@link ZonedDateTime}
      */
@@ -303,7 +304,7 @@ public abstract class DateTimeUtils {
     }
 
     /**
-     * {@link ZonedDateTime}转时间戳
+     * 时间戳转{@link ZonedDateTime}
      * @param timestamp 时间戳
      * @param zoneId 时区ID
      * @return {@link ZonedDateTime}
@@ -313,7 +314,7 @@ public abstract class DateTimeUtils {
     }
 
     /**
-     * 时间戳转{@link ZonedDateTime}
+     * {@link ZonedDateTime}转时间戳
      * @param zonedDateTime {@link ZonedDateTime}
      * @return 时间戳
      */
@@ -327,7 +328,7 @@ public abstract class DateTimeUtils {
      * @return {@link LocalDateTime}
      */
     public static LocalDateTime localDateTime(long timestamp){
-        return zonedDateTime(timestamp).toLocalDateTime();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
     }
 
     /**
@@ -336,7 +337,7 @@ public abstract class DateTimeUtils {
      * @return 时间戳
      */
     public static long timestamp(LocalDateTime localDateTime){
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return timestamp(localDateTime, ZoneId.systemDefault());
     }
 
     /**
@@ -350,7 +351,7 @@ public abstract class DateTimeUtils {
     }
 
     /**
-     * {@link LocalDateTime}转时间戳
+     * {@link Instant}转时间戳
      * @param instant {@link Instant}
      * @return 时间戳
      */
