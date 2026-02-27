@@ -41,7 +41,7 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
      */
     private static final String SNOWFLAKE_WORKERID_LIST_KEY = "dc:snowflake:workerid:list";
 
-    RedisScript<Long> script = new DefaultRedisScript<>("""
+    private static final RedisScript<Long> script = new DefaultRedisScript<>("""
             local workerId = tonumber(ARGV[1])
             local maxWorkerIdNumber = tonumber(ARGV[2])
             local key = KEYS[1]

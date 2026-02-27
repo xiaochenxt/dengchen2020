@@ -54,7 +54,6 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
             this.tokenPrefix = TOKEN_COMMON_PREFIX + "simp:";
         }
         this.tokenInfoPrefix = TOKEN_INFO_KEY;
-        initScript();
     }
 
     public SimpleTokenServiceImpl(StringRedisTemplate stringRedisTemplate, AuthenticationConvert authenticationConvert, long expireSeconds, String device) {
@@ -81,72 +80,55 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
         return tokenInfoPrefix;
     }
 
-    private void initScript() {
-        onlineScript = new DefaultRedisScript<>(
-                """
-                local token = ARGV[1]
-                local payload = ARGV[2]
-                local expireTimeInSec = tonumber(ARGV[3])
-                local userTokenKey = KEYS[1]
-                local userInfoKey = KEYS[2]
-                redis.call("SET", userTokenKey, token, "EX", expireTimeInSec)
-                redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
-                """, Void.class);
-        offlineScript = new DefaultRedisScript<>(
-                """
-                local userTokenKey = KEYS[1]
-                local userInfoKey = KEYS[2]
-                redis.call("UNLINK", userTokenKey, userInfoKey)
-                """,
-                Void.class
-        );
-        readTokenScript = new DefaultRedisScript<>(
-                """ 
-                local token = ARGV[1]
-                local userTokenKey = KEYS[1]
-                local storedToken = redis.call("GET", userTokenKey)
-                if storedToken and storedToken == token then
-                    local userInfoKey = KEYS[2]
-                    return redis.call("GET", userInfoKey)
-                end
-                return nil
-                """,
-                String.class
-        );
-        readTokenAutorenewalScript = new DefaultRedisScript<>(
-                """ 
-                local token = ARGV[1]
-                local userTokenKey = KEYS[1]
-                local storedToken = redis.call("GET", userTokenKey)
-                if storedToken and storedToken == token then
-                    local userInfoKey = KEYS[2]
-                    local ttl = redis.call('TTL', userTokenKey)
-                    local refreshThreshold = tonumber(ARGV[2])
-                    if ttl ~= -1 and ttl < refreshThreshold then
-                        local newTtl = tonumber(ARGV[3])
-                        redis.call('EXPIRE', userTokenKey, newTtl)
-                        redis.call('EXPIRE', userInfoKey, newTtl)
-                        ttl = newTtl
-                    end
-                    return redis.call("GET", userInfoKey)
-                end
-                return nil
-                """,
-                String.class
-        );
-    }
-
     // 上线脚本：存储token并处理有效期，只保留最新的一个token
-    RedisScript<Void> onlineScript;
-
-    // 下线脚本：删除用户的token和关联信息
-    RedisScript<Void> offlineScript;
+    private static final RedisScript<Void> onlineScript = new DefaultRedisScript<>(
+            """
+            local token = ARGV[1]
+            local payload = ARGV[2]
+            local expireTimeInSec = tonumber(ARGV[3])
+            local userTokenKey = KEYS[1]
+            local userInfoKey = KEYS[2]
+            redis.call("SET", userTokenKey, token, "EX", expireTimeInSec)
+            redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
+            """, Void.class);
 
     // 读取Token脚本：检查token有效性并返回用户信息
-    RedisScript<String> readTokenScript;
+    private static final RedisScript<String> readTokenScript = new DefaultRedisScript<>(
+            """ 
+            local token = ARGV[1]
+            local userTokenKey = KEYS[1]
+            local storedToken = redis.call("GET", userTokenKey)
+            if storedToken and storedToken == token then
+                local userInfoKey = KEYS[2]
+                return redis.call("GET", userInfoKey)
+            end
+            return nil
+            """,
+            String.class
+    );
 
     // 读取Token脚本：检查token有效性并返回用户信息，在token快过期时自动续期
-    RedisScript<String> readTokenAutorenewalScript;
+    private static final RedisScript<String> readTokenAutorenewalScript = new DefaultRedisScript<>(
+            """ 
+            local token = ARGV[1]
+            local userTokenKey = KEYS[1]
+            local storedToken = redis.call("GET", userTokenKey)
+            if storedToken and storedToken == token then
+                local userInfoKey = KEYS[2]
+                local ttl = redis.call('TTL', userTokenKey)
+                local refreshThreshold = tonumber(ARGV[2])
+                if ttl ~= -1 and ttl < refreshThreshold then
+                    local newTtl = tonumber(ARGV[3])
+                    redis.call('EXPIRE', userTokenKey, newTtl)
+                    redis.call('EXPIRE', userInfoKey, newTtl)
+                    ttl = newTtl
+                end
+                return redis.call("GET", userInfoKey)
+            end
+            return nil
+            """,
+            String.class
+    );;
 
     /**
      * 创建token
@@ -207,7 +189,7 @@ public class SimpleTokenServiceImpl implements TokenService, StateToken {
     @Override
     public void offline(String userId) {
         var slot = slot(userId);
-        stringRedisTemplate.execute(offlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
+        stringRedisTemplate.unlink(List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
     }
 
     public String getName(String token) {

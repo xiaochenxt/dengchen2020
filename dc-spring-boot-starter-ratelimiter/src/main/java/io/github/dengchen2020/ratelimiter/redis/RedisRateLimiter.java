@@ -21,7 +21,7 @@ public class RedisRateLimiter implements RateLimiter {
 
     private static final String RATE_LIMIT_PREFIX = "dc:rate_limit:";
 
-    RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
+    private static final RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
             """ 
                     local rateLimitKey = KEYS[1]
                     local rateLimitValue = redis.call("GET", rateLimitKey)
