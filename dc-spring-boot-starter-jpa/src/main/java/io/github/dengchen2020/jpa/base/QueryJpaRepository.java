@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -62,7 +61,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    Optional<T> findById(@NonNull ID id);
+    Optional<T> findById(ID id);
 
     /**
      * 根据id查询

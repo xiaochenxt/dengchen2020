@@ -15,7 +15,6 @@ import io.github.dengchen2020.core.jdbc.UserQuery;
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.security.principal.TenantInfo;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -34,9 +33,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static io.github.dengchen2020.jdbc.base.CacheSupport.entityPathMap;
@@ -58,7 +61,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     private static final String idFieldName = "id";
     private static final String userIdFieldName = "userId";
-    private static final String deletedFieldName = "deleted";
+    private @Nullable SoftDeleteFunc<?> softDeleteFunc;
     private static final String tenantIdFieldName = "tenantId";
     private static final boolean strictVerifyAuthentication = false;
 
@@ -68,6 +71,56 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
             jdbcAggregateTemplate.setEntityLifecycleEventsEnabled(false);
         }
         this.queryFactory = queryFactory;
+    }
+
+    private record SoftDeleteFunc<T>(String name, Path<T> softDeletePath, Supplier<T> valueSupplier) {}
+
+    @SuppressWarnings("unchecked")
+    private <D> SoftDeleteFunc<D> getSoftDeleteFunc() {
+        if (softDeleteFunc != null) return (SoftDeleteFunc<D>) softDeleteFunc;
+        synchronized (this) {
+            if (softDeleteFunc != null) return (SoftDeleteFunc<D>) softDeleteFunc;
+            var domain = getDomainClass();
+            var softDeletedField = ReflectionUtils.findField(domain, "deleted");
+            String softDeleteFieldName;
+            if (softDeletedField != null && !Modifier.isStatic(softDeletedField.getModifiers())) {
+                softDeleteFieldName = "deleted";
+            } else {
+                softDeletedField = ReflectionUtils.findField(domain, "deletedAt");
+                softDeleteFieldName = "deletedAt";
+            }
+            if (softDeletedField == null) {
+                var softDeletePath = builder().get(softDeleteFieldName);
+                softDeleteFunc = new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, () -> null);
+                return (SoftDeleteFunc<D>) softDeleteFunc;
+            }
+            Class<?> fieldType = softDeletedField.getType();
+            if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
+                var softDeletePath = builder().getBoolean(softDeleteFieldName);
+                softDeleteFunc = new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, () -> true);
+            } else if (fieldType == LocalDateTime.class) {
+                var softDeletePath = builder().getDateTime(softDeleteFieldName, LocalDateTime.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, LocalDateTime::now);
+            } else if (fieldType == Instant.class) {
+                var softDeletePath = builder().getDateTime(softDeleteFieldName, Instant.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, Instant::now);
+            } else if (fieldType == Long.TYPE || fieldType == Long.class) {
+                var softDeletePath = builder().getNumber(softDeleteFieldName, Long.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, System::currentTimeMillis);
+            } else if (fieldType == Integer.TYPE || fieldType == Integer.class) {
+                var softDeletePath = builder().getNumber(softDeleteFieldName, Integer.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, () -> 1);
+            } else if (fieldType == Byte.TYPE || fieldType == Byte.class) {
+                var softDeletePath = builder().getNumber(softDeleteFieldName, Byte.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, () -> (byte) 1);
+            } else if (fieldType == Short.TYPE || fieldType == Short.class) {
+                var softDeletePath = builder().getNumber(softDeleteFieldName, Short.class);
+                softDeleteFunc =  new SoftDeleteFunc<>(softDeleteFieldName, softDeletePath, () -> (short) 1);
+            } else {
+                throw new UnsupportedOperationException("Unsupported softDelete field type: " + softDeletedField.getType().getSimpleName() + " field " + softDeletedField.getDeclaringClass().getTypeName() + "." + softDeletedField.getName());
+            }
+        }
+        return (SoftDeleteFunc<D>) softDeleteFunc;
     }
 
     @SuppressWarnings("unchecked")
@@ -198,12 +251,12 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     @Transactional
     @Override
-    public Optional<T> findByIdForUpdate(ID id) {
+    public Optional<@Nullable T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
     @Override
-    public Optional<T> findById(@NonNull ID id) {
+    public Optional<@Nullable T> findById(ID id) {
         return Optional.ofNullable(selectById(id));
     }
 
@@ -220,19 +273,18 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     @Transactional
     @Override
-    public Optional<T> findByIdForShare(ID id) {
+    public Optional<@Nullable T> findByIdForShare(ID id) {
         return Optional.ofNullable(selectByIdForShare(id));
     }
 
-    @NonNull
     @Transactional
     @Override
-    public <S extends T> S save(@NonNull S entity) {
+    public <S extends T> S save(S entity) {
         return operations.save(entity);
     }
 
     @Override
-    public boolean existsById(@NonNull ID id) {
+    public boolean existsById(ID id) {
         return operations.existsById(id, getDomainClass());
     }
 
@@ -243,13 +295,13 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     @Transactional
     @Override
-    public void deleteById(@NonNull ID id) {
+    public void deleteById(ID id) {
         operations.deleteById(id, getDomainClass());
     }
 
     @Transactional
     @Override
-    public void delete(@NonNull T entity) {
+    public void delete(T entity) {
         operations.delete(entity);
     }
 
@@ -306,19 +358,19 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
     @Override
     public long softDelete(Iterable<ID> ids) {
         var builder = builder();
-        return update(builder.get(idFieldName).in(ids)).set(builder.get(deletedFieldName), true).execute();
+        return update(builder.get(idFieldName).in(ids)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
     }
 
     @Override
     public long softDelete(ID... ids) {
         var builder = builder();
-        return update(builder.get(idFieldName).in(ids)).set(builder.get(deletedFieldName), true).execute();
+        return update(builder.get(idFieldName).in(ids)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
     }
 
     @Override
     public long softDelete(ID id) {
         var builder = builder();
-        return update(builder.get(idFieldName).eq(id)).set(builder.get(deletedFieldName), true).execute();
+        return update(builder.get(idFieldName).eq(id)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
     }
 
     private Long getTenantIdNonNull(){
@@ -403,7 +455,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
     }
 
     @Override
-    public Optional<T> findByIdWithUserId(ID id) {
+    public Optional<@Nullable T> findByIdWithUserId(ID id) {
         return Optional.ofNullable(selectByIdWithUserId(id));
     }
 
@@ -439,9 +491,9 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         String userId = getUserId();
         var builder = builder();
         if (strictVerifyAuthentication || userId != null){
-            return update(builder.get(idFieldName).in(ids).and(builder.get(userIdFieldName).eq(userId))).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).in(ids).and(builder.get(userIdFieldName).eq(userId))).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         } else {
-            return update(builder.get(idFieldName).in(ids)).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).in(ids)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         }
     }
 
@@ -455,9 +507,9 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         String userId = getUserId();
         var builder = builder();
         if (strictVerifyAuthentication || userId != null){
-            return update(builder.get(idFieldName).eq(id).and(builder.get(userIdFieldName).eq(userId))).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).eq(id).and(builder.get(userIdFieldName).eq(userId))).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         } else {
-            return update(builder.get(idFieldName).eq(id)).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).eq(id)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         }
     }
 
@@ -544,9 +596,9 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         Long tenantId = getTenantId();
         var builder = builder();
         if (strictVerifyAuthentication || tenantId != null){
-            return update(builder.get(idFieldName).in(ids).and(builder.get(tenantIdFieldName).eq(tenantId))).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).in(ids).and(builder.get(tenantIdFieldName).eq(tenantId))).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         } else {
-            return update(builder.get(idFieldName).in(ids)).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).in(ids)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         }
     }
 
@@ -560,14 +612,14 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         Long tenantId = getTenantId();
         var builder = builder();
         if (strictVerifyAuthentication || tenantId != null){
-            return update(builder.get(idFieldName).eq(id).and(builder.get(tenantIdFieldName).eq(tenantId))).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).eq(id).and(builder.get(tenantIdFieldName).eq(tenantId))).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         } else {
-            return update(builder.get(idFieldName).eq(id)).set(builder.get(deletedFieldName), true).execute();
+            return update(builder.get(idFieldName).eq(id)).set(getSoftDeleteFunc().softDeletePath, getSoftDeleteFunc().valueSupplier.get()).execute();
         }
     }
 
     @Override
-    public Optional<T> findOne(Predicate predicate) {
+    public Optional<@Nullable T> findOne(Predicate predicate) {
         return Optional.ofNullable(selectFrom().where(predicate).fetchFirst());
     }
 

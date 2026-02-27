@@ -25,12 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * BaseJpaRepository的实现
@@ -63,7 +68,8 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     private final String softDeleteInSql;
     private static final String tenantIdSqlFragment = " and " + tenantIdFieldName + " = :tenantId";
     private static final String userIdSqlFragment = " and " + userIdFieldName + " = :userId";
-    private static final String deletedFieldName = "deleted";
+    private final String softDeleteFieldName;
+    private final @Nullable SoftDeleteFunc<?> softDeleteFunc;
 
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
@@ -74,8 +80,42 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         this.selectInSql = "from " + entityInformation.getEntityName() + " where "+idFieldName+" in :id";
         this.deleteSql = "delete from " + entityInformation.getEntityName() + " where "+idFieldName+" = :id";
         this.deleteInSql = "delete from " + entityInformation.getEntityName() + " where "+idFieldName+" in :id";
-        this.softDeleteSql = "update " + entityInformation.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " = :id";
-        this.softDeleteInSql = "update " + entityInformation.getEntityName() + " set "+deletedFieldName+" = :deleted where " + idFieldName + " in :id";
+        var domain = getDomainClass();
+        var softDeletedField = ReflectionUtils.findField(domain, "deleted");
+        if (softDeletedField != null && !Modifier.isStatic(softDeletedField.getModifiers())) {
+            this.softDeleteFieldName = "deleted";
+        } else {
+            softDeletedField = ReflectionUtils.findField(domain, "deletedAt");
+            this.softDeleteFieldName = "deletedAt";
+        }
+        this.softDeleteSql = "update " + entityInformation.getEntityName() + " set "+softDeleteFieldName+" = :deleted where " + idFieldName + " = :id";
+        this.softDeleteInSql = "update " + entityInformation.getEntityName() + " set "+softDeleteFieldName+" = :deleted where " + idFieldName + " in :id";
+        this.softDeleteFunc = applySoftDeleteFunc(softDeletedField);
+    }
+
+    private record SoftDeleteFunc<T>(String name, Supplier<T> valueSupplier) {}
+
+    @Nullable
+    private SoftDeleteFunc<?> applySoftDeleteFunc(@Nullable Field softDeletedField) {
+        if (softDeletedField == null) return null;
+        Class<?> fieldType = softDeletedField.getType();
+        if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, () -> true);
+        } else if (fieldType == LocalDateTime.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, LocalDateTime::now);
+        } else if (fieldType == Instant.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, Instant::now);
+        } else if (fieldType == Long.TYPE || fieldType == Long.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, System::currentTimeMillis);
+        } else if (fieldType == Integer.TYPE || fieldType == Integer.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, () -> 1);
+        } else if (fieldType == Byte.TYPE || fieldType == Byte.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, () -> (byte) 1);
+        } else if (fieldType == Short.TYPE || fieldType == Short.class) {
+            return new SoftDeleteFunc<>(softDeleteFieldName, () -> (short) 1);
+        } else {
+            throw new UnsupportedOperationException("Unsupported softDelete field type: " + softDeletedField.getType().getSimpleName() + " field " + softDeletedField.getDeclaringClass().getTypeName() + "." + softDeletedField.getName());
+        }
     }
 
     protected Map<String, Object> getHints() {
@@ -143,7 +183,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Transactional
     @Override
-    public Optional<T> findByIdForUpdate(ID id) {
+    public Optional<@Nullable T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
@@ -157,7 +197,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Transactional
     @Override
-    public Optional<T> findByIdForUpdateNowait(ID id) {
+    public Optional<@Nullable T> findByIdForUpdateNowait(ID id) {
         return Optional.ofNullable(selectByIdForUpdateNowait(id));
     }
 
@@ -179,7 +219,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Transactional
     @Override
-    public Optional<T> findByIdForShare(ID id) {
+    public Optional<@Nullable T> findByIdForShare(ID id) {
         return Optional.ofNullable(selectByIdForShare(id));
     }
 
@@ -193,7 +233,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Transactional
     @Override
-    public Optional<T> findByIdForShareNowait(ID id) {
+    public Optional<@Nullable T> findByIdForShareNowait(ID id) {
         return Optional.ofNullable(selectByIdForShareNowait(id));
     }
 
@@ -210,7 +250,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public int softDelete(Iterable<ID> ids) {
         Query query = entityManager.createQuery(softDeleteInSql)
-                .setParameter(deletedFieldName, true)
+                .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                 .setParameter(idFieldName, ids);
         return query.executeUpdate();
     }
@@ -229,7 +269,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public int softDelete(ID id) {
         Query query = entityManager.createQuery(softDeleteSql)
-                .setParameter(deletedFieldName, true)
+                .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                 .setParameter(idFieldName, id);
         return query.executeUpdate();
     }
@@ -325,7 +365,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public Optional<T> findByIdWithTenantId(ID id) {
+    public Optional<@Nullable T> findByIdWithTenantId(ID id) {
         return Optional.ofNullable(selectByIdWithTenantId(id));
     }
 
@@ -371,12 +411,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
             query = entityManager.createQuery(softDeleteSql + tenantIdSqlFragment)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, id)
                     .setParameter(tenantIdFieldName, tenantId);
         }else {
             query = entityManager.createQuery(softDeleteSql)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, id);
         }
         return query.executeUpdate();
@@ -388,12 +428,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         Query query;
         if (strictVerifyAuthentication || tenantId != null){
             query = entityManager.createQuery(softDeleteInSql + tenantIdSqlFragment)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, ids)
                     .setParameter(tenantIdFieldName, tenantId);
         }else {
             query = entityManager.createQuery(softDeleteInSql)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, ids);
         }
         return query.executeUpdate();
@@ -461,7 +501,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public Optional<T> findByIdWithUserId(ID id) {
+    public Optional<@Nullable T> findByIdWithUserId(ID id) {
         return Optional.ofNullable(selectByIdWithUserId(id));
     }
 
@@ -507,12 +547,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         Query query;
         if (strictVerifyAuthentication || userId != null){
             query = entityManager.createQuery(softDeleteSql + userIdSqlFragment)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, id)
                     .setParameter(userIdFieldName, userId);
         }else {
             query = entityManager.createQuery(softDeleteSql)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, id);
         }
         return query.executeUpdate();
@@ -524,12 +564,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         Query query;
         if (strictVerifyAuthentication || userId != null){
             query = entityManager.createQuery(softDeleteInSql + userIdSqlFragment)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, ids)
                     .setParameter(userIdFieldName, userId);
         }else {
             query = entityManager.createQuery(softDeleteInSql)
-                    .setParameter(deletedFieldName, true)
+                    .setParameter(softDeleteFieldName, softDeleteFunc == null ? null : softDeleteFunc.valueSupplier.get())
                     .setParameter(idFieldName, ids);
         }
         return query.executeUpdate();
