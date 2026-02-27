@@ -64,7 +64,6 @@
         <dependency>
             <groupId>io.github.dengchen2020</groupId>
             <artifactId>dc-utils</artifactId>
-            <version>0.0.19</version>
         </dependency>
 
         <dependency>
