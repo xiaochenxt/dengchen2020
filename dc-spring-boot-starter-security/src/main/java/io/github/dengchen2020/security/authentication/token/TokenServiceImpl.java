@@ -57,7 +57,6 @@ public class TokenServiceImpl implements TokenService, StateToken {
             this.tokenPrefix = TOKEN_COMMON_PREFIX;
         }
         this.tokenInfoPrefix = TOKEN_INFO_KEY;
-        initScript();
     }
 
     public TokenServiceImpl(StringRedisTemplate stringRedisTemplate, AuthenticationConvert authenticationConvert, long expireSeconds, String device, boolean autorenewal, int renewalSeconds) {
@@ -88,93 +87,69 @@ public class TokenServiceImpl implements TokenService, StateToken {
         return tokenInfoPrefix;
     }
 
-    private void initScript() {
-        // token存储在list，payload关联用户ID存储，检查在线数量是否超过限制，如果超过限制移除第一个token
-        onlineScript = new DefaultRedisScript<>(
-                """
-                local token = ARGV[1]
-                local payload = ARGV[2]
-                local maxOnlineNum = tonumber(ARGV[3])
-                local expireTimeInSec = tonumber(ARGV[4])
-                local userListKey = KEYS[1]
-                local userInfoKey = KEYS[2]
-                redis.call("RPUSH", userListKey, token)
-                redis.call("EXPIRE", userListKey, expireTimeInSec)
-                redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
-                local onlineNum = redis.call("LLEN", userListKey)
-                if onlineNum > maxOnlineNum then
-                    redis.call("LPOP", userListKey)
-                end
-                """, Void.class);
+    // 上线脚本：token存储在list，payload关联用户ID存储，检查在线数量是否超过限制，如果超过限制移除第一个token
+    private static final RedisScript<Void> onlineScript = new DefaultRedisScript<>(
+            """
+            local token = ARGV[1]
+            local payload = ARGV[2]
+            local maxOnlineNum = tonumber(ARGV[3])
+            local expireTimeInSec = tonumber(ARGV[4])
+            local userListKey = KEYS[1]
+            local userInfoKey = KEYS[2]
+            redis.call("RPUSH", userListKey, token)
+            redis.call("EXPIRE", userListKey, expireTimeInSec)
+            redis.call("SET", userInfoKey, payload, "EX", expireTimeInSec);
+            local onlineNum = redis.call("LLEN", userListKey)
+            if onlineNum > maxOnlineNum then
+                redis.call("LPOP", userListKey)
+            end
+            """, Void.class);
 
-        // 清空userId对应的tokenList，删除关联的payload
-        offlineScript = new DefaultRedisScript<>(
-                """ 
-                local userListKey = KEYS[1]
-                local userInfoKey = KEYS[2]
-                redis.call("UNLINK", userListKey, userInfoKey)
-                """,
-                Void.class
-        );
-
-        // 根据用户id获取token列表，遍历token列表判断token是否存在，存在返回关联的payload，否则返回null
-        readTokenScript = new DefaultRedisScript<>(
-                """ 
-                local token = ARGV[1]
-                local userListKey = KEYS[1]
-                local userInfoKey = KEYS[2]
-                local tokens = redis.call("LRANGE", userListKey, 0, -1)
-                for _, t in ipairs(tokens) do
-                    if t == token then
-                        return redis.call("GET", userInfoKey)
-                    end
-                end
-                return nil
-                """,
-                String.class
-        );
-
-        // 根据用户id获取token列表，遍历token列表判断token是否存在，不存在返回null，存在则查询token有效期，如果快过期则重新设置有效期，最后返回关联的payload
-        readTokenAutorenewalScript = new DefaultRedisScript<>(
-                """ 
-                local token = ARGV[1]
-                local userListKey = KEYS[1]
-                local tokenFound = 0
-                local tokens = redis.call("LRANGE", userListKey, 0, -1)
-                for _, t in ipairs(tokens) do
-                    if t == token then
-                        tokenFound = 1
-                        break
-                    end
-                end
-                if tokenFound == 1 then
-                    local userInfoKey = KEYS[2]
-                    local ttl = redis.call('TTL', userListKey)
-                    local refreshThreshold = tonumber(ARGV[2])
-                    if ttl ~= -1 and ttl < refreshThreshold then
-                        local newTtl = tonumber(ARGV[3])
-                        redis.call('EXPIRE', userListKey, newTtl)
-                        redis.call('EXPIRE', userInfoKey, newTtl)
-                    end
+    // 读取Token信息脚本：根据用户id获取token列表，遍历token列表判断token是否存在，存在返回关联的payload，否则返回null
+    private static final RedisScript<String> readTokenScript = new DefaultRedisScript<>(
+            """ 
+            local token = ARGV[1]
+            local userListKey = KEYS[1]
+            local userInfoKey = KEYS[2]
+            local tokens = redis.call("LRANGE", userListKey, 0, -1)
+            for _, t in ipairs(tokens) do
+                if t == token then
                     return redis.call("GET", userInfoKey)
                 end
-                return nil
-                """,
-                String.class
-        );
-    }
+            end
+            return nil
+            """,
+            String.class
+    );
 
-    // 上线脚本
-    RedisScript<Void> onlineScript;
-
-    // 下线脚本
-    RedisScript<Void> offlineScript;
-
-    // 读取Token信息脚本
-    RedisScript<String> readTokenScript;
-
-    // 读取Token信息并在快过期时续期脚本
-    RedisScript<String> readTokenAutorenewalScript;
+    // 读取Token信息并在快过期时续期脚本：根据用户id获取token列表，遍历token列表判断token是否存在，不存在返回null，存在则查询token有效期，如果快过期则重新设置有效期，最后返回关联的payload
+    private static final RedisScript<String> readTokenAutorenewalScript = new DefaultRedisScript<>(
+            """ 
+            local token = ARGV[1]
+            local userListKey = KEYS[1]
+            local tokenFound = 0
+            local tokens = redis.call("LRANGE", userListKey, 0, -1)
+            for _, t in ipairs(tokens) do
+                if t == token then
+                    tokenFound = 1
+                    break
+                end
+            end
+            if tokenFound == 1 then
+                local userInfoKey = KEYS[2]
+                local ttl = redis.call('TTL', userListKey)
+                local refreshThreshold = tonumber(ARGV[2])
+                if ttl ~= -1 and ttl < refreshThreshold then
+                    local newTtl = tonumber(ARGV[3])
+                    redis.call('EXPIRE', userListKey, newTtl)
+                    redis.call('EXPIRE', userInfoKey, newTtl)
+                end
+                return redis.call("GET", userInfoKey)
+            end
+            return nil
+            """,
+            String.class
+    );
 
 
     @Override
@@ -252,7 +227,7 @@ public class TokenServiceImpl implements TokenService, StateToken {
     @Override
     public void offline(String userId) {
         var slot = slot(userId);
-        stringRedisTemplate.execute(offlineScript, List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
+        stringRedisTemplate.unlink(List.of(tokenPrefix + slot, tokenInfoPrefix + slot));
     }
 
     public String getName(String token) {

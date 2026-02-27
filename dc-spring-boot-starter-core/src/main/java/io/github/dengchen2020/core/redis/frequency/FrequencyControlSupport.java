@@ -19,7 +19,7 @@ public class FrequencyControlSupport {
 
     private static final String FREQUENCY_CONTROL_PREFIX = "dc:frequency_control:";
 
-    RedisScript<Long> script = new DefaultRedisScript<>(
+    private static final RedisScript<Long> script = new DefaultRedisScript<>(
             """ 
                     local qpdKey = KEYS[3]
                     local qpdNum = tonumber(ARGV[3])

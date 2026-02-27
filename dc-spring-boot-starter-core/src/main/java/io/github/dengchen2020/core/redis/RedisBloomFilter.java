@@ -60,7 +60,7 @@ public class RedisBloomFilter extends BloomFilter {
     
     @Override
     public void clear() {
-        redisTemplate.delete(key);
+        redisTemplate.unlink(key);
     }
     
     @Override
