@@ -144,7 +144,7 @@ public class JsonbPath<T> extends SimpleExpression<T> implements JsonbObjectOper
      * @return {@link BooleanExpression}
      */
     public BooleanExpression containsPath(String path) {
-        return Expressions.booleanTemplate("jsonb_exists({0},{1})", path, path).isTrue();
+        return Expressions.booleanTemplate("jsonb_exists({0},{1})", pathImpl, path).isTrue();
     }
 
     public JsonValueTemplate query(String path) {
