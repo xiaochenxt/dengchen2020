@@ -2,13 +2,17 @@ package io.github.dengchen2020.jdbc.config;
 
 import com.querydsl.sql.*;
 import com.querydsl.sql.spring.SpringExceptionTranslator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.data.jdbc.autoconfigure.DataJdbcRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jdbc.core.convert.JdbcCustomConversions;
+import org.springframework.data.jdbc.core.dialect.JdbcDialect;
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
+import org.springframework.data.jdbc.repository.config.JdbcConfiguration;
 import org.springframework.data.relational.core.mapping.RelationalMappingContext;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.util.ClassUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -22,14 +26,16 @@ import java.util.function.Supplier;
  * @since 2025/12/8
  */
 @Configuration(proxyBeanMethods = false)
-public final class JdbcAutoConfiguration extends AbstractJdbcConfiguration {
+public final class JdbcAutoConfiguration {
 
-    public static final boolean pGobjectPresent = ClassUtils.isPresent("org.postgresql.util.PGobject", JdbcAutoConfiguration.class.getClassLoader());
-
-    @Override
-    protected List<?> userConverters() {
-        if (pGobjectPresent) return List.of(new PGobjectToStringConverter());
-        return super.userConverters();
+    /**
+     * 参考：{@link DataJdbcRepositoriesAutoConfiguration.SpringBootJdbcConfiguration#jdbcCustomConversions()} 和 {@link AbstractJdbcConfiguration#jdbcCustomConversions()}
+     */
+    @ConditionalOnClass(name = "org.postgresql.util.PGobject")
+    @Bean
+    @ConditionalOnMissingBean
+    JdbcCustomConversions jdbcCustomConversions(JdbcDialect dialect) {
+        return JdbcConfiguration.createCustomConversions(dialect, List.of(new PGobjectToStringConverter()));
     }
 
 //    /**
