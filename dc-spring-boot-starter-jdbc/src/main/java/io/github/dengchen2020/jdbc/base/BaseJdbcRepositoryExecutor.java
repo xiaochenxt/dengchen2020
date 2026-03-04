@@ -27,6 +27,7 @@ import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.data.relational.core.query.CriteriaDefinition;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -39,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -58,6 +60,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     private final JdbcAggregateOperations operations;
     private final SQLQueryFactory queryFactory;
+    private final JdbcClient jdbcClient;
 
     private static final String idFieldName = "id";
     private static final String userIdFieldName = "userId";
@@ -65,12 +68,13 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
     private static final String tenantIdFieldName = "tenantId";
     private static final boolean strictVerifyAuthentication = false;
 
-    public BaseJdbcRepositoryExecutor(JdbcAggregateOperations operations, SQLQueryFactory queryFactory) {
+    public BaseJdbcRepositoryExecutor(JdbcAggregateOperations operations, SQLQueryFactory queryFactory, JdbcClient jdbcClient) {
         this.operations = operations;
         if (operations instanceof JdbcAggregateTemplate jdbcAggregateTemplate) {
             jdbcAggregateTemplate.setEntityLifecycleEventsEnabled(false);
         }
         this.queryFactory = queryFactory;
+        this.jdbcClient = jdbcClient;
     }
 
     private record SoftDeleteFunc<T>(String name, Path<T> softDeletePath, Supplier<T> valueSupplier) {}
@@ -143,6 +147,11 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     public EntityPath<T> path() {
         return entityPath();
+    }
+
+    @Override
+    public <R> R execute(Function<JdbcClient, R> function) {
+        return function.apply(jdbcClient);
     }
 
     public SQLQuery<?> query() {

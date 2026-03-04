@@ -15,7 +15,7 @@ import java.util.List;
 public interface BaseJdbcRepository<T, ID> extends QuerydslJdbcRepository<T>, ComplexJdbcRepository<T>, QueryJdbcRepository<T, ID>,
         SoftDeleteJdbcRepository<T, ID>, UserIdJdbcRepository<T, ID>, TenantJdbcRepository<T, ID>,
         ListCrudRepository<T, ID>, ListPagingAndSortingRepository<T, ID>,
-        QuerydslPredicateExecutor<T> {
+        QuerydslPredicateExecutor<T>, JdbcClientRepository {
 
     /**
      * 删除-支持批量
