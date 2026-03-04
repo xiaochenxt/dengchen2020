@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -48,7 +49,7 @@ import java.util.function.Supplier;
 @Transactional(propagation = Propagation.SUPPORTS)
 public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
         QueryJpaRepository<T, ID>, SoftDeleteJpaRepository<T, ID>, TenantJpaRepository<T, ID>, UserIdJpaRepository<T, ID>,
-        EntityManagerRepository<T, ID> {
+        EntityManagerRepository {
 
     private static final Logger log = LoggerFactory.getLogger(BaseJpaRepositoryExecutor.class);
 
@@ -144,7 +145,12 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public void detach(T entity) {
+    public <R> R execute(Function<EntityManager, R> function) {
+        return function.apply(entityManager);
+    }
+
+    @Override
+    public void detach(Object entity) {
         entityManager.detach(entity);
     }
 

@@ -13,7 +13,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NullMarked
 @NoRepositoryBean
 public interface BaseJpaRepository<T, ID> extends ComplexJpaRepository<T> ,
-        QuerydslJpaRepository<T>, EntityManagerRepository<T, ID>,
+        QuerydslJpaRepository<T>, EntityManagerRepository,
         QueryJpaRepository<T, ID>,
         CrudJpaRepository<T, ID>, ListQuerydslPredicateExecutor<T> {
 
