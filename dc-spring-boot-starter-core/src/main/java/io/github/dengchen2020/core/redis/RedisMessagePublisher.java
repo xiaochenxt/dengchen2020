@@ -64,12 +64,61 @@ public class RedisMessagePublisher {
 
     private void convertAndSend(String channelName, byte[] message){
         try {
-            reactiveRedisTemplate.convertAndSend(channelName, message).delaySubscription(Duration.ofSeconds(1)).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
-                if (log.isDebugEnabled()) log.debug("发布消息 {} 到通道 {}，收到消息的客户端数量：{}", new String(message), channelName, count);
+            reactiveRedisTemplate.convertAndSend(channelName, message).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
+                if (log.isDebugEnabled()) logMessage(channelName, message, count);
             });
         } catch (Exception e) {
             log.error("convertAndSend error", e);
         }
+    }
+
+    /**
+     * 延迟发布消息
+     * <p>默认使用Json序列化</p>
+     *
+     * @param channelName 频道名称
+     * @param message     消息
+     * @param delay 延迟时长
+     */
+    public void publish(String channelName, Object message, Duration delay) {
+        byte[] bytes = serializer.serialize(message);
+        convertAndSend(channelName, bytes, delay);
+    }
+
+    /**
+     * 延迟发布字符串消息
+     *
+     * @param channelName 频道名称
+     * @param message     消息
+     * @param delay 延迟时长
+     */
+    public void publish(String channelName, String message, Duration delay) {
+        convertAndSend(channelName, message.getBytes(StandardCharsets.UTF_8), delay);
+    }
+
+    /**
+     * 延迟发布字节数组消息
+     *
+     * @param channelName 频道名称
+     * @param message     消息
+     * @param delay 延迟时长
+     */
+    public void publish(String channelName, byte[] message, Duration delay) {
+        convertAndSend(channelName, message, delay);
+    }
+
+    private void convertAndSend(String channelName, byte[] message, Duration delay){
+        try {
+            reactiveRedisTemplate.convertAndSend(channelName, message).delaySubscription(delay).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
+                if (log.isDebugEnabled()) logMessage(channelName, message, count);
+            });
+        } catch (Exception e) {
+            log.error("convertAndSend error", e);
+        }
+    }
+
+    private void logMessage(String channelName, byte[] message, Long count) {
+        log.debug("发布消息 {} 到通道 {}，收到消息的客户端数量：{}", new String(message), channelName, count);
     }
 
 }
