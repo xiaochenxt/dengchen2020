@@ -1,15 +1,13 @@
 package io.github.dengchen2020.core.utils.bean;
 
-import org.jspecify.annotations.NonNull;
-import org.springframework.cglib.core.ReflectUtils;
-import org.springframework.core.NativeDetector;
-import org.springframework.util.ConcurrentReferenceHashMap;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import org.jspecify.annotations.NonNull;
+import org.springframework.core.NativeDetector;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
 
@@ -147,7 +145,7 @@ public abstract class BeanUtils {
      * 查找对象中为空的字段
      */
     public static Set<String> getNullPropertyNameSet(Object source) {
-        java.beans.PropertyDescriptor[] pds = ReflectUtils.getBeanProperties(source.getClass());
+        java.beans.PropertyDescriptor[] pds = org.springframework.beans.BeanUtils.getPropertyDescriptors(source.getClass());
         Set<String> emptyFieldNames = new HashSet<>();
         try {
             for (java.beans.PropertyDescriptor pd : pds) {
