@@ -7,6 +7,7 @@ import org.springframework.cglib.core.*;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,6 +110,17 @@ public abstract class BeanCopier
             Map names = new HashMap();
             for (PropertyDescriptor getter : getters) {
                 names.put(getter.getName(), getter);
+            }
+            if (source.isRecord()) {
+                for (RecordComponent rc : source.getRecordComponents()) {
+                    if (!names.containsKey(rc.getName())) {
+                        try {
+                            names.put(rc.getName(), new PropertyDescriptor(rc.getName(), rc.getAccessor(), null));
+                        } catch (java.beans.IntrospectionException ex) {
+                            throw new IllegalArgumentException("Failed to read Record component accessor: " + rc.getName(), ex);
+                        }
+                    }
+                }
             }
             Local targetLocal = e.make_local();
             Local sourceLocal = e.make_local();
