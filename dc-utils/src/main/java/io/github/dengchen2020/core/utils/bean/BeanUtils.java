@@ -3,9 +3,11 @@ package io.github.dengchen2020.core.utils.bean;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.BeansException;
 import org.springframework.core.NativeDetector;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -88,7 +90,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      * @param ignoreProperties 拷贝时要忽略的属性
      */
-    public static void copyProperties(Object source, Object target,@NonNull String... ignoreProperties) {
+    public static void copyProperties(Object source, Object target,@NonNull String @NonNull... ignoreProperties) {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             Collections.addAll(ignoredProperties, ignoreProperties);
@@ -109,7 +111,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      * @param ignoreProperties 拷贝时要忽略的属性
      */
-    public static void copyProperties(Object source, Object target, Set<String> ignoreProperties) {
+    public static void copyProperties(Object source, Object target,@NonNull Set<@NonNull String> ignoreProperties) {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             ignoredProperties.addAll(ignoreProperties);
@@ -145,17 +147,84 @@ public abstract class BeanUtils {
      * 查找对象中为空的字段
      */
     public static Set<String> getNullPropertyNameSet(Object source) {
-        java.beans.PropertyDescriptor[] pds = org.springframework.beans.BeanUtils.getPropertyDescriptors(source.getClass());
         Set<String> emptyFieldNames = new HashSet<>();
         try {
-            for (java.beans.PropertyDescriptor pd : pds) {
-                Object srcValue =  pd.getReadMethod().invoke(source);
+            var pds = org.springframework.beans.BeanUtils.getPropertyDescriptors(source.getClass());
+            for (var pd : pds) {
+                var readMethod = pd.getReadMethod();
+                if (readMethod == null) continue;
+                var srcValue = readMethod.invoke(source);
                 if (srcValue == null) emptyFieldNames.add(pd.getName());
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("获取对象中为null的字段失败", e);
+        } catch (BeansException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("获取对象中属性为null的字段失败，class：" + source.getClass().getName(), e);
         }
         return emptyFieldNames;
+    }
+
+    /**
+     * 将 source 的属性拷贝到一个新建的 Record 实例中并返回。
+     * <pre>
+     * 注意：
+     * source 中为 null 的属性会被忽略，Record 对应组件保持零值（引用类型为 null，基本类型为 0/false）
+     * source 中没有对应属性的 Record 组件保持零值
+     * </pre>
+     * @param source      源对象
+     * @param targetClass 目标 Record 类型
+     * @param <T>         Record 类型
+     * @return 新建的 Record 实例
+     */
+    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass) {
+        return copyProperties(source, targetClass, Collections.emptySet());
+    }
+
+    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass, @NonNull String @NonNull... ignoreProperties) {
+        return copyProperties(source, targetClass, Set.of(ignoreProperties));
+    }
+
+    private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES = Map.of(
+            boolean.class, false,
+            byte.class, (byte) 0,
+            short.class, (short) 0,
+            int.class, 0,
+            long.class, 0L,
+            float.class, 0F,
+            double.class, 0D,
+            char.class, '\0');
+
+    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass,@NonNull Set<@NonNull String> ignoreProperties) {
+        if (source == null) return null;
+        var sourceClass = source.getClass();
+        var components = targetClass.getRecordComponents();
+        var paramTypes = new Class<?>[components.length];
+        var args = new Object[components.length];
+        for (int i = 0; i < components.length; i++) {
+            var componentType = components[i].getType();
+            paramTypes[i] = componentType;
+            try {
+                var pd = org.springframework.beans.BeanUtils.getPropertyDescriptor(sourceClass, components[i].getName());
+                if (pd == null) {
+                    if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
+                    continue;
+                }
+                var readMethod = pd.getReadMethod();
+                if (readMethod == null) {
+                    if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
+                    continue;
+                }
+                var val = readMethod.invoke(source);
+                if (val != null && !ignoreProperties.contains(components[i].getName())) args[i] = val;
+                else if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
+            } catch (BeansException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("读取source属性失败，field：" + sourceClass.getName() + "." + components[i].getName(), e);
+            }
+        }
+        try {
+            var constructor = targetClass.getDeclaredConstructor(paramTypes);
+            return constructor.newInstance(args);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new RuntimeException("创建Record实例失败，class：" + targetClass.getName(), e);
+        }
     }
 
 }
