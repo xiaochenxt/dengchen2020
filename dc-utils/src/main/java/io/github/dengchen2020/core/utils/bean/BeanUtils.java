@@ -186,8 +186,8 @@ public abstract class BeanUtils {
      * @param <T>         Record 类型
      * @return 新建的 Record 实例
      */
-    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass) {
-        if (NativeDetector.inNativeImage()) return copyPropertiesNative(source, targetClass, Collections.emptySet());
+    public static <T extends Record> T convertValue(Object source, Class<T> targetClass) {
+        if (NativeDetector.inNativeImage()) return convertValueNative(source, targetClass, Collections.emptySet());
         return getRecordCopier(source.getClass(), targetClass, source, null);
     }
 
@@ -201,8 +201,8 @@ public abstract class BeanUtils {
      * @param <T>         Record 类型
      * @return 新建的 Record 实例
      */
-    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass, String... ignoreProperties) {
-        return copyProperties(source, targetClass, Set.of(ignoreProperties));
+    public static <T extends Record> T convertValue(Object source, Class<T> targetClass, String... ignoreProperties) {
+        return convertValue(source, targetClass, Set.of(ignoreProperties));
     }
 
     /**
@@ -215,8 +215,8 @@ public abstract class BeanUtils {
      * @param <T>         Record 类型
      * @return 新建的 Record 实例
      */
-    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
-        if (NativeDetector.inNativeImage()) return copyPropertiesNative(source, targetClass, ignoreProperties);
+    public static <T extends Record> T convertValue(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
+        if (NativeDetector.inNativeImage()) return convertValueNative(source, targetClass, ignoreProperties);
         Converter converter = ignoreProperties.isEmpty() ? null : new IgnorePropertiesConverter(ignoreProperties);
         return getRecordCopier(source.getClass(), targetClass, source, converter);
     }
@@ -234,7 +234,7 @@ public abstract class BeanUtils {
     /**
      * 反射实现拷贝属性到Record类
      */
-    private static <T extends Record> T copyPropertiesNative(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
+    private static <T extends Record> T convertValueNative(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
         var sourceClass = source.getClass();
         var components = targetClass.getRecordComponents();
         var paramTypes = new Class<?>[components.length];
