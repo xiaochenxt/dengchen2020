@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.core.NativeDetector;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -31,9 +32,13 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY
  * @author xiaochen
  * @since 2025/1/6
  */
+@NullMarked
 public abstract class BeanUtils {
 
     private static final ConcurrentMap<String, BeanCopier> CACHE = new ConcurrentReferenceHashMap<>();
+
+    @SuppressWarnings("rawtypes")
+    private static final ConcurrentMap<String, RecordCopier> RECORD_CACHE = new ConcurrentReferenceHashMap<>();
 
     /**
      * 高效的bean拷贝
@@ -53,11 +58,11 @@ public abstract class BeanUtils {
         copyProperties(source, target, (Converter) null);
     }
 
-    private static BeanCopier getBeanCopier(Object source, Object target, Converter converter) {
+    private static BeanCopier getBeanCopier(Object source, Object target,@Nullable Converter converter) {
         return getBeanCopier(source.getClass(), target.getClass(), converter);
     }
 
-    private static BeanCopier getBeanCopier(Class<?> sourceClass, Class<?> targetClass, Converter converter) {
+    private static BeanCopier getBeanCopier(Class<?> sourceClass, Class<?> targetClass,@Nullable Converter converter) {
         boolean useConverter = converter != null;
         String cacheKey = !useConverter ? sourceClass.getName() + "@" + targetClass.getName() : sourceClass.getName() + "@" + targetClass.getName() + "@true";
         return CACHE.computeIfAbsent(cacheKey, key -> BeanCopier.create(sourceClass, targetClass, useConverter));
@@ -74,8 +79,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      * @param converter 自定义转换器
      */
-    protected static void copyProperties(Object source, Object target, Converter converter) {
-        if (source == null || target == null) return;
+    protected static void copyProperties(Object source, Object target,@Nullable Converter converter) {
         getBeanCopier(source, target, converter).copy(source, target, converter);
     }
 
@@ -90,7 +94,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      * @param ignoreProperties 拷贝时要忽略的属性
      */
-    public static void copyProperties(Object source, Object target,@NonNull String @NonNull... ignoreProperties) {
+    public static void copyProperties(Object source, Object target, String... ignoreProperties) {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             Collections.addAll(ignoredProperties, ignoreProperties);
@@ -111,7 +115,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      * @param ignoreProperties 拷贝时要忽略的属性
      */
-    public static void copyProperties(Object source, Object target,@NonNull Set<@NonNull String> ignoreProperties) {
+    public static void copyProperties(Object source, Object target, Set<String> ignoreProperties) {
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             ignoredProperties.addAll(ignoreProperties);
@@ -124,13 +128,13 @@ public abstract class BeanUtils {
     private static class IgnorePropertiesConverter implements Converter {
         private final Set<String> ignoreProperties;
 
-        public IgnorePropertiesConverter(Set<String> ignoreProperties) {
+        public IgnorePropertiesConverter(@Nullable Set<String> ignoreProperties) {
             this.ignoreProperties = ignoreProperties == null ? Collections.emptySet() : ignoreProperties;
         }
 
         @SuppressWarnings("rawtypes")
         @Override
-        public Object convert(Object value, Class target, Object context, String setterFieldName) {
+        public @Nullable Object convert(Object value, Class target, Object context, String setterFieldName) {
             if (ignoreProperties.contains(setterFieldName)) return null;
             return value;
         }
@@ -162,24 +166,59 @@ public abstract class BeanUtils {
         return emptyFieldNames;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static <T extends Record> T getRecordCopier(Class<?> sourceClass, Class<T> targetClass, Object source,@Nullable Converter converter) {
+        boolean useConverter = converter != null;
+        String cacheKey = !useConverter
+                ? sourceClass.getName() + "@" + targetClass.getName()
+                : sourceClass.getName() + "@" + targetClass.getName() + "@true";
+        RecordCopier copier = RECORD_CACHE.computeIfAbsent(cacheKey, key -> RecordCopier.create(sourceClass, targetClass, useConverter));
+        return (T) copier.copy(source, converter);
+    }
+
     /**
      * 将 source 的属性拷贝到一个新建的 Record 实例中并返回。
      * <pre>
-     * 注意：
-     * source 中为 null 的属性会被忽略，Record 对应组件保持零值（引用类型为 null，基本类型为 0/false）
-     * source 中没有对应属性的 Record 组件保持零值
+     * 注意：source 中为 null 的属性会被忽略，Record 对应组件保持零值（引用类型为 null，基本类型为 0/false）
      * </pre>
      * @param source      源对象
      * @param targetClass 目标 Record 类型
      * @param <T>         Record 类型
      * @return 新建的 Record 实例
      */
-    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass) {
-        return copyProperties(source, targetClass, Collections.emptySet());
+    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass) {
+        if (NativeDetector.inNativeImage()) return copyPropertiesNative(source, targetClass, Collections.emptySet());
+        return getRecordCopier(source.getClass(), targetClass, source, null);
     }
 
-    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass, @NonNull String @NonNull... ignoreProperties) {
+    /**
+     * 将 source 的属性拷贝到一个新建的 Record 实例中并返回。
+     * <pre>
+     * 注意：source 中为 null 的属性会被忽略，Record 对应组件保持零值（引用类型为 null，基本类型为 0/false）
+     * </pre>
+     * @param source      源对象
+     * @param targetClass 目标 Record 类型
+     * @param <T>         Record 类型
+     * @return 新建的 Record 实例
+     */
+    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass, String... ignoreProperties) {
         return copyProperties(source, targetClass, Set.of(ignoreProperties));
+    }
+
+    /**
+     * 将 source 的属性拷贝到一个新建的 Record 实例中并返回。
+     * <pre>
+     * 注意：source 中为 null 的属性会被忽略，Record 对应组件保持零值（引用类型为 null，基本类型为 0/false）
+     * </pre>
+     * @param source      源对象
+     * @param targetClass 目标 Record 类型
+     * @param <T>         Record 类型
+     * @return 新建的 Record 实例
+     */
+    public static <T extends Record> T copyProperties(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
+        if (NativeDetector.inNativeImage()) return copyPropertiesNative(source, targetClass, ignoreProperties);
+        Converter converter = ignoreProperties.isEmpty() ? null : new IgnorePropertiesConverter(ignoreProperties);
+        return getRecordCopier(source.getClass(), targetClass, source, converter);
     }
 
     private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES = Map.of(
@@ -192,8 +231,10 @@ public abstract class BeanUtils {
             double.class, 0D,
             char.class, '\0');
 
-    public static <T extends Record> T copyProperties(Object source, @NonNull Class<T> targetClass,@NonNull Set<@NonNull String> ignoreProperties) {
-        if (source == null) return null;
+    /**
+     * 反射实现拷贝属性到Record类
+     */
+    private static <T extends Record> T copyPropertiesNative(Object source, Class<T> targetClass, Set<String> ignoreProperties) {
         var sourceClass = source.getClass();
         var components = targetClass.getRecordComponents();
         var paramTypes = new Class<?>[components.length];
@@ -215,15 +256,14 @@ public abstract class BeanUtils {
                 var val = readMethod.invoke(source);
                 if (val != null && !ignoreProperties.contains(components[i].getName())) args[i] = val;
                 else if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
-            } catch (BeansException | IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("读取source属性失败，field：" + sourceClass.getName() + "." + components[i].getName(), e);
+            } catch (BeansException | IllegalAccessException | InvocationTargetException ex) {
+                throw new RuntimeException("读取source属性失败，field：" + sourceClass.getName() + "." + components[i].getName(), ex);
             }
         }
         try {
-            var constructor = targetClass.getDeclaredConstructor(paramTypes);
-            return constructor.newInstance(args);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException("创建Record实例失败，class：" + targetClass.getName(), e);
+            return targetClass.getDeclaredConstructor(paramTypes).newInstance(args);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new RuntimeException("创建Record实例失败，class：" + targetClass.getName(), ex);
         }
     }
 
