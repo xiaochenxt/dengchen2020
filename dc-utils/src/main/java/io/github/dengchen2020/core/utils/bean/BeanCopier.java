@@ -104,13 +104,9 @@ public abstract class BeanCopier
 
             EmitUtils.null_constructor(ce);
             CodeEmitter e = ce.begin_method(Constants.ACC_PUBLIC, COPY, null);
-            PropertyDescriptor[] getters = ReflectUtils.getBeanGetters(source);
             PropertyDescriptor[] setters = ReflectUtils.getBeanSetters(target);
 
             Map names = new HashMap();
-            for (PropertyDescriptor getter : getters) {
-                names.put(getter.getName(), getter);
-            }
             if (source.isRecord()) {
                 for (RecordComponent rc : source.getRecordComponents()) {
                     if (!names.containsKey(rc.getName())) {
@@ -120,6 +116,11 @@ public abstract class BeanCopier
                             throw new IllegalArgumentException("Failed to read Record component accessor: " + rc.getName(), ex);
                         }
                     }
+                }
+            } else {
+                PropertyDescriptor[] getters = ReflectUtils.getBeanGetters(source);
+                for (PropertyDescriptor getter : getters) {
+                    names.put(getter.getName(), getter);
                 }
             }
             Local targetLocal = e.make_local();
