@@ -5,11 +5,10 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>0.1.29</version>
+        <version>0.1.30</version>
     </parent>
 
     <artifactId>dc-utils</artifactId>
-    <version>0.0.19</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
