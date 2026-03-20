@@ -108,7 +108,6 @@
       <dependency>
           <groupId>org.jspecify</groupId>
           <artifactId>jspecify</artifactId>
-          <version>1.0.0</version>
       </dependency>
 
       <!--二维码-->
@@ -158,7 +157,6 @@
       <dependency>
           <groupId>com.microsoft.playwright</groupId>
           <artifactId>playwright</artifactId>
-          <version>1.57.0</version>
           <optional>true</optional>
       </dependency>
 
