@@ -1,5 +1,13 @@
 package io.github.dengchen2020.core.utils;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -23,16 +31,6 @@ import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConvert
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 /**
  * RestClient工具类
  * @author xiaochen
@@ -54,7 +52,19 @@ public abstract class RestClientUtils {
     /**
      * 默认连接超时时间，30秒钟
      */
-    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.connectTimeout", "30")));;
+    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.connectTimeout", "30")));
+
+    /**
+     * 不携带请求体的HTTP方法
+     */
+    static final Set<HttpMethod> NO_BODY_METHODS = new HashSet<>();
+    static {
+        NO_BODY_METHODS.add(HttpMethod.GET);
+        NO_BODY_METHODS.add(HttpMethod.DELETE);
+        NO_BODY_METHODS.add(HttpMethod.HEAD);
+        NO_BODY_METHODS.add(HttpMethod.OPTIONS);
+        NO_BODY_METHODS.add(HttpMethod.TRACE);
+    }
 
     static final RestClient client = create(DEFAULT_MAX_CONN_PER_ROUTE);
 
@@ -164,7 +174,7 @@ public abstract class RestClientUtils {
      */
     private static RestClient create(HttpClient httpClient, boolean noBuffering, Duration readTimeout) {
         ClientHttpRequestFactory factory = createFactory(httpClient, readTimeout);
-        RestClient.Builder builder = builder(noBuffering ? factory : new BufferingClientHttpRequestFactory(factory));
+        RestClient.Builder builder = builder(noBuffering ? factory : new OptimizedBufferingClientHttpRequestFactory(factory));
         return builder.build();
     }
 
@@ -236,6 +246,24 @@ public abstract class RestClientUtils {
                 converters.addLast(httpMessageConverter); // todo spring7.0开始，重新进行了排序，json在xml之前，因此从springboot4.0开始，不再需要排序
                 break;
             }
+        }
+    }
+
+    /**
+     * 优化后的缓冲区请求工厂，继承自 {@link BufferingClientHttpRequestFactory}，重写了 {@link BufferingClientHttpRequestFactory#shouldBuffer(URI, HttpMethod)} 方法
+     * <p>
+     *     对于GET、DELETE、HEAD、OPTIONS请求，不进行缓冲，其他请求进行缓冲，避免了 {@link BufferingClientHttpRequestFactory} 对于GET、DELETE、HEAD、OPTIONS等请求body和响应body进行缓冲导致的内存占用问题
+     * </p>
+     */
+    static final class OptimizedBufferingClientHttpRequestFactory extends BufferingClientHttpRequestFactory {
+        public OptimizedBufferingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
+            super(requestFactory);
+        }
+
+        @Override
+        protected boolean shouldBuffer(URI uri, HttpMethod httpMethod) {
+            if (NO_BODY_METHODS.contains(httpMethod)) return false;
+            return super.shouldBuffer(uri, httpMethod);
         }
     }
 
