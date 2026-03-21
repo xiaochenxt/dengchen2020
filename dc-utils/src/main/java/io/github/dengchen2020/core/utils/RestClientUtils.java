@@ -5,7 +5,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -53,14 +52,7 @@ public abstract class RestClientUtils {
     /**
      * 不携带请求体的HTTP方法
      */
-    static final Set<HttpMethod> NO_BODY_METHODS = new HashSet<>();
-    static {
-        NO_BODY_METHODS.add(HttpMethod.GET);
-        NO_BODY_METHODS.add(HttpMethod.DELETE);
-        NO_BODY_METHODS.add(HttpMethod.HEAD);
-        NO_BODY_METHODS.add(HttpMethod.OPTIONS);
-        NO_BODY_METHODS.add(HttpMethod.TRACE);
-    }
+    static final Set<HttpMethod> NO_BODY_METHODS = Set.of(HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE);
 
     static final RestClient client = create(DEFAULT_MAX_CONN_PER_ROUTE);
 
