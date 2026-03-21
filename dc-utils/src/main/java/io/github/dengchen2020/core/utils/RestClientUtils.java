@@ -1,5 +1,13 @@
 package io.github.dengchen2020.core.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -18,13 +26,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestClient;
-
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * RestClient工具类
@@ -47,7 +48,19 @@ public abstract class RestClientUtils {
     /**
      * 默认连接超时时间，30秒钟
      */
-    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.connectTimeout", "30")));;
+    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.connectTimeout", "30")));
+
+    /**
+     * 不携带请求体的HTTP方法
+     */
+    static final Set<HttpMethod> NO_BODY_METHODS = new HashSet<>();
+    static {
+        NO_BODY_METHODS.add(HttpMethod.GET);
+        NO_BODY_METHODS.add(HttpMethod.DELETE);
+        NO_BODY_METHODS.add(HttpMethod.HEAD);
+        NO_BODY_METHODS.add(HttpMethod.OPTIONS);
+        NO_BODY_METHODS.add(HttpMethod.TRACE);
+    }
 
     static final RestClient client = create(DEFAULT_MAX_CONN_PER_ROUTE);
 
@@ -160,7 +173,8 @@ public abstract class RestClientUtils {
      */
     private static RestClient create(HttpClient httpClient, boolean noBuffering, Duration readTimeout) {
         ClientHttpRequestFactory factory = createFactory(httpClient, readTimeout);
-        RestClient.Builder builder = builder(noBuffering ? factory : new BufferingClientHttpRequestFactory(factory));
+        RestClient.Builder builder = builder(factory);
+        if (!noBuffering) builder.bufferContent((uri, httpMethod) -> !NO_BODY_METHODS.contains(httpMethod)).build();
         return builder.build();
     }
 
