@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
 import java.util.stream.Stream;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * xml处理工具类
@@ -43,8 +41,7 @@ public abstract class XmlUtils {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public static <T> T fromXml(@Nullable String xml, Class<T> type) {
+    public static <T> T fromXml(String xml, Class<T> type) {
         return XmlHelper.INSTANCE.fromXml(xml, type);
     }
 
@@ -54,8 +51,7 @@ public abstract class XmlUtils {
      * @param xml xml
      * @return 指定类型的对象
      */
-    @Nullable
-    public static <T> T fromXml(@Nullable String xml, TypeReference<T> typeReference) {
+    public static <T> T fromXml(String xml, TypeReference<T> typeReference) {
         return XmlHelper.INSTANCE.fromXml(xml, typeReference);
     }
 
@@ -65,8 +61,7 @@ public abstract class XmlUtils {
      * @param source 对象
      * @return xml
      */
-    @Nullable
-    public static String toXml(@Nullable Object source) {
+    public static String toXml(Object source) {
         return XmlHelper.INSTANCE.toXml(source);
     }
 
@@ -76,9 +71,18 @@ public abstract class XmlUtils {
      * @param source 对象
      * @return xml
      */
-    @Nullable
-    public static String toXmlIgnoreNull(@Nullable Object source) {
+    public static String toXmlIgnoreNull(Object source) {
         return XmlHelper.INSTANCE.toXmlIgnoreNull(source);
+    }
+
+    /**
+     * 将xml解析为{@link JsonNode}
+     *
+     * @param xml xml
+     * @return {@link JsonNode}
+     */
+    public static JsonNode readTree(String xml) {
+        return XmlHelper.INSTANCE.readTree(xml);
     }
 
     /**
