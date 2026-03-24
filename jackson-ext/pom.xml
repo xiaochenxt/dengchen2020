@@ -10,7 +10,7 @@
 
   <artifactId>jackson-ext</artifactId>
   <name>${project.artifactId}</name>
-  <url>https://github.com/xiaochenxt/jackson-ext</url>
+  <url>https://github.com/xiaochenxt/dengchen2020</url>
   <description>Jackson扩展库</description>
 
   <developers>
@@ -22,9 +22,9 @@
   </developers>
 
   <scm>
-    <url>https://github.com/xiaochenxt/jackson-ext</url>
-    <connection>https://github.com/xiaochenxt/jackson-ext.git</connection>
-    <developerConnection>https://github.com/xiaochenxt/jackson-ext.git</developerConnection>
+    <url>https://github.com/xiaochenxt/dengchen2020</url>
+    <connection>https://github.com/xiaochenxt/dengchen2020.git</connection>
+    <developerConnection>https://github.com/xiaochenxt/dengchen2020.git</developerConnection>
   </scm>
 
   <dependencies>
