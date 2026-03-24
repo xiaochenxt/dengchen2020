@@ -1,13 +1,10 @@
 package io.github.dengchen2020.core.utils;
 
-import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.jspecify.annotations.NonNull;
 
 /**
  * 获取客户端IP
@@ -17,8 +14,6 @@ import java.net.UnknownHostException;
  */
 public abstract class IPUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(IPUtils.class);
-
     public static final String UNKNOWN = "unknown";
     public static final String LOCALHOST_IP1 = "127.0.0.1";
     private static String localHostIp;
@@ -27,10 +22,7 @@ public abstract class IPUtils {
         try {
             localHostIp = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            if(localHostIp == null){
-                localHostIp = LOCALHOST_IP1;
-                if (log.isWarnEnabled()) log.warn("获取本机IP失败：{}，回退为：{}", e, localHostIp);
-            }
+            if(localHostIp == null) localHostIp = LOCALHOST_IP1;
         }
     }
 

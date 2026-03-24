@@ -6,14 +6,9 @@ import io.protostuff.Schema;
 import io.protostuff.runtime.DefaultIdStrategy;
 import io.protostuff.runtime.IdStrategy;
 import io.protostuff.runtime.RuntimeSchema;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Protostuff序列化和反序列化工具
@@ -21,9 +16,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author xiaochen
  * @since 2024/6/3
  */
+@NullMarked
 public abstract class ProtostuffUtils {
-
-    private static final Logger log = LoggerFactory.getLogger(ProtostuffUtils.class);
 
     public static final DefaultIdStrategy STRATEGY;
 
@@ -46,18 +40,9 @@ public abstract class ProtostuffUtils {
         WRAPPER_SCHEMA = RuntimeSchema.createFrom(SerializeDeserializeWrapper.class);
         WRAPPER_SET.add(List.class);
         WRAPPER_SET.add(ArrayList.class);
-        WRAPPER_SET.add(CopyOnWriteArrayList.class);
-        WRAPPER_SET.add(LinkedList.class);
         WRAPPER_SET.add(HashSet.class);
-        WRAPPER_SET.add(Stack.class);
-        WRAPPER_SET.add(Vector.class);
         WRAPPER_SET.add(Map.class);
         WRAPPER_SET.add(HashMap.class);
-        WRAPPER_SET.add(TreeMap.class);
-        WRAPPER_SET.add(LinkedHashMap.class);
-        WRAPPER_SET.add(Hashtable.class);
-        WRAPPER_SET.add(SortedMap.class);
-        WRAPPER_SET.add(ConcurrentHashMap.class);
         WRAPPER_SET.add(BigDecimal.class);
     }
 
@@ -79,10 +64,7 @@ public abstract class ProtostuffUtils {
     @SuppressWarnings("unchecked")
     public static <T> byte[] serialize(T o) {
         Class<T> clazz = (Class<T>) o.getClass();
-        if (clazz == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("源对象为字节数组，无需序列化");
-            return (byte[]) o;
-        }
+        if (clazz == byte[].class) return (byte[]) o;
         //设置缓数组缓冲区
         LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
         try {
@@ -106,13 +88,9 @@ public abstract class ProtostuffUtils {
      * @return 对象
      */
     @SuppressWarnings("unchecked")
-    @Nullable
     public static <T> T deserialize(byte[] data, Class<T> type) {
         try {
-            if (type == byte[].class) {
-                if (log.isDebugEnabled()) log.debug("目标为字节数组，无需反序列化");
-                return (T) data;
-            }
+            if (type == byte[].class) return (T) data;
             //判断是否是不可序列化对象，若是不能序列化对象，将对象进行包装
             if (WRAPPER_SET.contains(type)) {
                 SerializeDeserializeWrapper<T> wrapper = WRAPPER_SCHEMA.newMessage();
@@ -124,36 +102,27 @@ public abstract class ProtostuffUtils {
             ProtostuffIOUtil.mergeFrom(data, message, schema);
             return message;
         } catch (Exception e) {
-            T t = JsonUtils.deserialize(data, type);
-            if (t != null) {
-                if (log.isDebugEnabled()) log.debug("反序列化方式错误，已矫正，需修改为使用JsonUtils.deserialize(bytes,clazz)，{}", type);
-                return t;
-            }
-            log.error("反序列化失败，data：{}，type：{}，异常：", new String(data), type, e);
+            throw new IllegalArgumentException("data：" + new String(data) + "，type：" + type, e);
         }
-        return null;
     }
 
     /**
      * 序列化JAVA对象，序列化后的字节数包含类型，因此体积相对较大
      * <p>对应的反序列化：{@link ProtostuffUtils#deserializeJavaObject(byte[])}</p>
      *
-     * @param o 对象
+     * @param source 对象
      * @return 字节数组
      */
     @SuppressWarnings("unchecked")
-    public static <T> byte[] serializeJavaObject(T o) {
-        Class<T> clazz = (Class<T>) o.getClass();
-        if (clazz == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("源对象为字节数组，无需序列化");
-            return (byte[]) o;
-        }
+    public static <T> byte[] serializeJavaObject(T source) {
+        Class<T> clazz = (Class<T>) source.getClass();
+        if (clazz == byte[].class) return (byte[]) source;
         //设置缓数组缓冲区
         LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
         try {
-            return ProtostuffIOUtil.toByteArray(new SerializeDeserializeWrapper<>(o), WRAPPER_SCHEMA, buffer);
+            return ProtostuffIOUtil.toByteArray(new SerializeDeserializeWrapper<>(source), WRAPPER_SCHEMA, buffer);
         } catch (Exception e) {
-            throw new IllegalArgumentException("无法序列化: " + o.getClass(), e);
+            throw new IllegalArgumentException("source：" + source, e);
         } finally {
             buffer.clear();
         }
@@ -166,7 +135,6 @@ public abstract class ProtostuffUtils {
      * @return 对象
      */
     @SuppressWarnings("unchecked")
-    @Nullable
     public static <T> T deserializeJavaObject(byte[] data) {
         SerializeDeserializeWrapper<T> wrapper = WRAPPER_SCHEMA.newMessage();
         ProtostuffIOUtil.mergeFrom(data, wrapper, WRAPPER_SCHEMA);

@@ -13,10 +13,10 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = {JsonValidator.class})
-public @interface Json {
+@Constraint(validatedBy = {JsonObjectOrArrayValidator.class})
+public @interface JsonObjectOrArray {
 
-    String message() default "{io.github.dengchen2020.core.validation.Json.message}";
+    String message() default "{io.github.dengchen2020.core.validation.JsonObjectOrArray.message}";
 
     Class<?>[] groups() default {};
 
