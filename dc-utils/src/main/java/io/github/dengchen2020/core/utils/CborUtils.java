@@ -42,7 +42,7 @@ public abstract class CborUtils {
      * @param source     对象
      * @return byte[]
      */
-    public static byte[] serialize(@Nullable Object source) {
+    public static byte[] serialize(Object source) {
         return CborHelper.INSTANCE.serialize(source);
     }
 
@@ -53,8 +53,7 @@ public abstract class CborUtils {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public static <T> T deserialize(byte @Nullable[] data, Class<T> type) {
+    public static <T> @Nullable T deserialize(byte[] data, Class<T> type) {
         return CborHelper.INSTANCE.deserialize(data, type);
     }
 
@@ -65,8 +64,7 @@ public abstract class CborUtils {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public static  <T> T deserialize(byte @Nullable[] data, TypeReference<T> type) {
+    public static  <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         return CborHelper.INSTANCE.deserialize(data, type);
     }
 

@@ -7,15 +7,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 简化{@link CBORMapper}常用操作的异常处理
@@ -25,7 +20,6 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 @NullMarked
 public class CborHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(CborHelper.class);
     private static final CBORMapper defaultCborMapper = CBORMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
     public static final CborHelper INSTANCE = new CborHelper(defaultCborMapper);
 
@@ -76,17 +70,11 @@ public class CborHelper {
      * @param source 源对象
      * @return byte[]
      */
-    public byte[] serialize(@Nullable Object source) {
-        if (source == null) return EMPTY_BYTE_ARRAY;
-        Class<?> clazz = source.getClass();
-        if (clazz == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("源对象为字节数组，无需序列化");
-            return (byte[]) source;
-        }
+    public byte[] serialize(Object source) {
         try {
             return nonNullCborMapper.writeValueAsBytes(source);
         } catch (Exception e) {
-            throw new IllegalArgumentException("无法序列化: " + source.getClass(), e);
+            throw new IllegalArgumentException("source：" + source + "，type：" + source.getClass(), e);
         }
     }
 
@@ -97,18 +85,12 @@ public class CborHelper {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data, Class<T> type) {
-        if (data == null) return null;
-        if (type == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("目标类型为字节数组，无需反序列化");
-            return (T) data;
-        }
+    public <T> @Nullable T deserialize(byte[] data, Class<T> type) {
+        if (type == byte[].class) return (T) data;
         try {
             return nonNullCborMapper.readValue(data, type);
         } catch (Exception e) {
-            log.error("反序列化异常，data：{}，type：{}，异常信息：", new String(data), type, e);
-            return null;
+            throw new IllegalArgumentException("data：" + new String(data) + "，type：" + type, e);
         }
     }
 
@@ -119,14 +101,11 @@ public class CborHelper {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data, TypeReference<T> type) {
-        if (data == null) return null;
+    public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         try {
             return nonNullCborMapper.readValue(data, type);
         } catch (Exception e) {
-            log.error("反序列化异常，data：{}，type：{}，异常信息：", new String(data), type, e);
-            return null;
+            throw new IllegalArgumentException("data：" + new String(data) + "，type：" + type, e);
         }
     }
 
