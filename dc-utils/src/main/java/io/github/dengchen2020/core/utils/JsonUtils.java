@@ -47,8 +47,7 @@ public abstract class JsonUtils {
      * @param source 源对象
      * @return json
      */
-    @Nullable
-    public static String toJson(@Nullable Object source) {
+    public static String toJson(Object source) {
         return JsonHelper.INSTANCE.toJson(source);
     }
 
@@ -58,8 +57,7 @@ public abstract class JsonUtils {
      * @param source 源对象
      * @return json
      */
-    @Nullable
-    public static String toJsonIgnoreNull(@Nullable Object source) {
+    public static String toJsonIgnoreNull(Object source) {
         return JsonHelper.INSTANCE.toJsonIgnoreNull(source);
     }
 
@@ -70,8 +68,7 @@ public abstract class JsonUtils {
      * @param target 类型
      * @return 指定类型的新对象
      */
-    @Nullable
-    public static <T> T convertValue(@Nullable Object source, Class<T> target) {
+    public static <T> T convertValue(Object source, Class<T> target) {
         return JsonHelper.INSTANCE.convertValue(source, target);
     }
 
@@ -82,8 +79,7 @@ public abstract class JsonUtils {
      * @param target 类型
      * @return 指定类型的新对象
      */
-    @Nullable
-    public static <T> T convertValue(@Nullable Object source, TypeReference<T> target) {
+    public static <T> T convertValue(Object source, TypeReference<T> target) {
         return JsonHelper.INSTANCE.convertValue(source, target);
     }
 
@@ -93,8 +89,7 @@ public abstract class JsonUtils {
      * @param json json
      * @return {@link JsonNode}
      */
-    @Nullable
-    public static JsonNode readTree(@Nullable String json) {
+    public static JsonNode readTree(String json) {
         return JsonHelper.INSTANCE.readTree(json);
     }
 
@@ -104,8 +99,7 @@ public abstract class JsonUtils {
      * @param json json
      * @return 指定类型的对象
      */
-    @Nullable
-    public static <T> T fromJson(@Nullable String json, Class<T> type) {
+    public static <T> @Nullable T fromJson(String json, Class<T> type) {
         return JsonHelper.INSTANCE.fromJson(json, type);
     }
 
@@ -115,8 +109,7 @@ public abstract class JsonUtils {
      * @param json json
      * @return 指定类型的对象
      */
-    @Nullable
-    public static <T> T fromJson(@Nullable String json, TypeReference<T> typeReference) {
+    public static <T> @Nullable T fromJson(String json, TypeReference<T> typeReference) {
         return JsonHelper.INSTANCE.fromJson(json, typeReference);
     }
 
@@ -125,8 +118,7 @@ public abstract class JsonUtils {
      * @param source 对象
      * @return {@link ObjectNode}
      */
-    @Nullable
-    public static ObjectNode valueToTree(Object source) {
+    public static @Nullable ObjectNode valueToTree(Object source) {
         return JsonHelper.INSTANCE.valueToTree(source);
     }
 
@@ -147,8 +139,7 @@ public abstract class JsonUtils {
      * @param type 反序列化数据类型
      * @return 对象
      */
-    @Nullable
-    public static <T> T deserialize(byte @Nullable[] data, Class<T> type) {
+    public static <T> @Nullable T deserialize(byte[] data, Class<T> type) {
         return JsonHelper.INSTANCE.deserialize(data, type);
     }
 
@@ -159,8 +150,7 @@ public abstract class JsonUtils {
      * @param type 反序列化数据类型
      * @return 对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data, TypeReference<T> type) {
+    public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         return JsonHelper.INSTANCE.deserialize(data, type);
     }
 
@@ -171,8 +161,7 @@ public abstract class JsonUtils {
      * @param data 字节数组
      * @return 对象
      */
-    @Nullable
-    public static <T> T deserialize(byte @Nullable[] data) {
+    public static <T> @Nullable T deserialize(byte[] data) {
         return JsonHelper.INSTANCE.deserialize(data);
     }
 
@@ -190,8 +179,8 @@ public abstract class JsonUtils {
      * @param jsonStr 待校验的 JSON 字符串
      * @return 是否为合法 JSON
      */
-    public static boolean isJson(String jsonStr) {
-        return JsonHelper.INSTANCE.isJson(jsonStr);
+    public static boolean isJsonObjectOrArray(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonObjectOrArray(jsonStr);
     }
 
     /**

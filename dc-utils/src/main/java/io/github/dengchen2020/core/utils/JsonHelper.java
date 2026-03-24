@@ -9,20 +9,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * 简化{@link JsonMapper}常用操作的异常处理
@@ -32,7 +28,6 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 @NullMarked
 public class JsonHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(JsonHelper.class);
     private static final JsonMapper defaultJsonMapper = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
     public static final JsonHelper INSTANCE = new JsonHelper(defaultJsonMapper);
 
@@ -82,14 +77,11 @@ public class JsonHelper {
      * @param source 源对象
      * @return json
      */
-    @Nullable
-    public String toJson(@Nullable Object source) {
-        if (source == null) return null;
+    public String toJson(Object source) {
         try {
             return jsonMapper.writeValueAsString(source);
         } catch (Exception e) {
-            log.error("toJson异常，source：{}，异常信息：", source, e);
-            return null;
+            throw new IllegalArgumentException("source：" + source, e);
         }
     }
 
@@ -99,14 +91,11 @@ public class JsonHelper {
      * @param source 源对象
      * @return json
      */
-    @Nullable
-    public String toJsonIgnoreNull(@Nullable Object source) {
-        if (source == null) return null;
+    public String toJsonIgnoreNull(Object source) {
         try {
             return nonNullJsonMapper.writeValueAsString(source);
         } catch (Exception e) {
-            log.error("toJsonIgnoreNull异常，source：{}，异常信息：", source, e);
-            return null;
+            throw new IllegalArgumentException("source：" + source, e);
         }
     }
 
@@ -117,14 +106,11 @@ public class JsonHelper {
      * @param target 类型
      * @return 指定类型的新对象
      */
-    @Nullable
-    public <T> T convertValue(@Nullable Object source, Class<T> target) {
-        if (source == null) return null;
+    public <T> T convertValue(Object source, Class<T> target) {
         try {
             return jsonMapper.convertValue(source, target);
-        } catch (IllegalArgumentException e) {
-            log.error("convertValue异常，source：{}，异常信息：", source, e);
-            return null;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("source：" + source + "，target：" + target, e);
         }
     }
 
@@ -135,14 +121,11 @@ public class JsonHelper {
      * @param target 类型
      * @return 指定类型的新对象
      */
-    @Nullable
-    public <T> T convertValue(@Nullable Object source, TypeReference<T> target) {
-        if (source == null) return null;
+    public <T> T convertValue(Object source, TypeReference<T> target) {
         try {
             return jsonMapper.convertValue(source, target);
-        } catch (IllegalArgumentException e) {
-            log.error("convertValue异常，source：{}，异常信息：", source, e);
-            return null;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("source：" + source + "，target：" + target, e);
         }
     }
 
@@ -152,14 +135,11 @@ public class JsonHelper {
      * @param json json
      * @return {@link JsonNode}
      */
-    @Nullable
-    public JsonNode readTree(@Nullable String json) {
-        if (json == null || json.isBlank()) return null;
+    public JsonNode readTree(String json) {
         try {
             return jsonMapper.readTree(json);
         } catch (Exception e) {
-            log.error("readTree异常，json：{}，异常信息：", json, e);
-            return null;
+            throw new IllegalArgumentException("json：" + json, e);
         }
     }
 
@@ -169,14 +149,11 @@ public class JsonHelper {
      * @param json json
      * @return 指定类型的对象
      */
-    @Nullable
-    public <T> T fromJson(@Nullable String json, Class<T> type) {
-        if (json == null || json.isBlank()) return null;
+    public <T> @Nullable T fromJson(String json, Class<T> type) {
         try {
             return jsonMapper.readValue(json, type);
         } catch (Exception e) {
-            log.error("fromJson异常，json：{}，type：{}，异常信息：", json, type, e);
-            return null;
+            throw new IllegalArgumentException("json：" + json + "，type：" + type, e);
         }
     }
 
@@ -186,14 +163,11 @@ public class JsonHelper {
      * @param json json
      * @return 指定类型的对象
      */
-    @Nullable
-    public <T> T fromJson(@Nullable String json, TypeReference<T> typeReference) {
-        if (json == null || json.isBlank()) return null;
+    public <T> @Nullable T fromJson(String json, TypeReference<T> typeReference) {
         try {
             return jsonMapper.readValue(json, typeReference);
         } catch (Exception e) {
-            log.error("fromJson异常，json：{}，typeReference：{}，异常信息：", json, typeReference, e);
-            return null;
+            throw new IllegalArgumentException("json：" + json + "，typeReference：" + typeReference, e);
         }
     }
 
@@ -202,9 +176,12 @@ public class JsonHelper {
      * @param source 对象
      * @return {@link ObjectNode}
      */
-    @Nullable
-    public ObjectNode valueToTree(Object source) {
-        return jsonMapper.valueToTree(source);
+    public @Nullable ObjectNode valueToTree(Object source) {
+        try {
+            return jsonMapper.valueToTree(source);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("source：" + source, e);
+        }
     }
 
     /**
@@ -213,17 +190,11 @@ public class JsonHelper {
      * @param source 源对象
      * @return 字节数组
      */
-    public byte[] serialize(@Nullable Object source) {
-        if (source == null) return EMPTY_BYTE_ARRAY;
-        Class<?> clazz = source.getClass();
-        if (clazz == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("源对象为字节数组，无需序列化");
-            return (byte[]) source;
-        }
+    public byte[] serialize(Object source) {
         try {
             return nonNullJsonMapper.writeValueAsBytes(source);
         } catch (Exception e) {
-            throw new IllegalArgumentException("无法序列化: " + source.getClass(), e);
+            throw new IllegalArgumentException("source：" + source + "，type：" + source.getClass(), e);
         }
     }
 
@@ -234,19 +205,13 @@ public class JsonHelper {
      * @param type 反序列化数据类型
      * @return 对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data, Class<T> type) {
-        if (data == null) return null;
-        if (type == byte[].class) {
-            if (log.isDebugEnabled()) log.debug("目标类型为字节数组，无需反序列化");
-            return (T) data;
-        }
+    public <T> @Nullable T deserialize(byte[] data, Class<T> type) {
+        if (type == byte[].class) return (T) data;
         try {
             return nonNullJsonMapper.readValue(data, type);
         } catch (Exception e) {
-            log.error("反序列化异常，data：{}，type：{}，异常信息：", new String(data), type, e);
+            throw new IllegalArgumentException("data：" + new String(data, StandardCharsets.UTF_8) + "，type：" + type, e);
         }
-        return null;
     }
 
     /**
@@ -256,15 +221,12 @@ public class JsonHelper {
      * @param type 反序列化数据类型
      * @return 对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data, TypeReference<T> type) {
-        if (data == null) return null;
+    public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         try {
             return nonNullJsonMapper.readValue(data, type);
         } catch (Exception e) {
-            log.error("反序列化异常，data：{}，type：{}，异常信息：", new String(data), type, e);
+            throw new IllegalArgumentException("data：" + new String(data, StandardCharsets.UTF_8) + "，type：" + type, e);
         }
-        return null;
     }
 
     /**
@@ -274,16 +236,14 @@ public class JsonHelper {
      * @param data 字节数组
      * @return 对象
      */
-    @Nullable
-    public <T> T deserialize(byte @Nullable[] data) {
-        if (data == null) return null;
+    public <T> @Nullable T deserialize(byte[] data) {
+        var dataStr = new String(data, StandardCharsets.UTF_8);
         try {
-            JsonNode tree = readTree(new String(data));
-            if (tree == null) return null;
+            JsonNode tree = readTree(dataStr);
             JsonNode classNode = tree.get("@class");
             if (classNode != null) return nonNullJsonMapper.readValue(data, nonNullJsonMapper.getTypeFactory().constructFromCanonical(classNode.asText()));
         } catch (Exception e) {
-            log.error("反序列化异常，data：{}，异常信息：", new String(data), e);
+            throw new IllegalArgumentException("data：" + dataStr, e);
         }
         return null;
     }
@@ -298,11 +258,11 @@ public class JsonHelper {
     }
 
     /**
-     * 流式校验 JSON 合法性（仅遍历，不构建对象），性能好
+     * 流式校验 是否为合法的 JSON 对象（{...} 格式）或 JSON 数组（[...] 格式）（仅遍历，不构建对象），性能好
      * @param jsonStr 待校验的 JSON 字符串
-     * @return 是否为合法 JSON
+     * @return 是否为合法 JSON对象或JSON数组
      */
-    public boolean isJson(String jsonStr) {
+    public boolean isJsonObjectOrArray(String jsonStr) {
         if (!StringUtils.hasText(jsonStr)) return false;
         // 去除首尾空白（避免因空格导致误判）
         String trimmed = jsonStr.trim();
@@ -311,7 +271,7 @@ public class JsonHelper {
                 || !(trimmed.endsWith("}") || trimmed.endsWith("]"))) {
             return false;
         }
-        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
+        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
             // 遍历所有 token 直到结束，若过程中无异常则为合法 JSON
             while (parser.nextToken() != null) {
                 // 仅遍历，不做任何处理
@@ -332,7 +292,7 @@ public class JsonHelper {
         String trimmed = jsonStr.trim();
         // 前置校验：必须以 { 开头 和 } 结尾
         if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return false;
-        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
+        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 OBJECT_START（{）
             JsonToken firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_OBJECT) return false;
@@ -358,7 +318,7 @@ public class JsonHelper {
         if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
             return false;
         }
-        try (JsonParser parser = defaultJsonMapper.createParser(trimmed)) {
+        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 ARRAY_START（[）
             JsonToken firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_ARRAY) return false;
