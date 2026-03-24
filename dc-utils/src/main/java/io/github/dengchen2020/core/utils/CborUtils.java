@@ -1,13 +1,12 @@
 package io.github.dengchen2020.core.utils;
 
+import java.util.stream.Stream;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.util.stream.Stream;
 
 /**
  * cbor处理工具类
@@ -42,7 +41,7 @@ public abstract class CborUtils {
      * @param source     对象
      * @return byte[]
      */
-    public static byte[] serialize(@Nullable Object source) {
+    public static byte[] serialize(Object source) {
         return CborHelper.INSTANCE.serialize(source);
     }
 
@@ -53,8 +52,7 @@ public abstract class CborUtils {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public static <T> T deserialize(byte @Nullable[] data, Class<T> type) {
+    public static <T> @Nullable T deserialize(byte[] data, Class<T> type) {
         return CborHelper.INSTANCE.deserialize(data, type);
     }
 
@@ -65,8 +63,7 @@ public abstract class CborUtils {
      * @param type   类型
      * @return T 指定类型的对象
      */
-    @Nullable
-    public static  <T> T deserialize(byte @Nullable[] data, TypeReference<T> type) {
+    public static  <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         return CborHelper.INSTANCE.deserialize(data, type);
     }
 
