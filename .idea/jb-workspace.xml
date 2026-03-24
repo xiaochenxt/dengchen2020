@@ -15,6 +15,7 @@
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-websocket" />
     <project name="dc-spring-boot-native-image" path="$PROJECT_DIR$/dc-spring-boot-native-image" />
     <project name="dc-spring-boot-starter-jdbc" path="$PROJECT_DIR$/dc-spring-boot-starter-jdbc" />
+    <project name="${project.artifactId}" path="$PROJECT_DIR$/jackson-ext" />
     <option name="workspace" value="true" />
   </component>
 </project>

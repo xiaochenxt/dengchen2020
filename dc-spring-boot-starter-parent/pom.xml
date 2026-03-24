@@ -127,12 +127,17 @@
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
+                <artifactId>dc-spring-boot-native-image</artifactId>
+                <version>${dc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dengchen2020</groupId>
                 <artifactId>dc-utils</artifactId>
                 <version>${dc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-native-image</artifactId>
+                <artifactId>jackson-ext</artifactId>
                 <version>${dc.version}</version>
             </dependency>
             <dependency>

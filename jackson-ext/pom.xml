@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.dengchen2020</groupId>
+    <artifactId>dc-spring-boot-starter-parent</artifactId>
+    <version>0.4.24</version>
+  </parent>
+
+  <artifactId>jackson-ext</artifactId>
+  <name>${project.artifactId}</name>
+  <url>https://github.com/xiaochenxt/dengchen2020</url>
+  <description>Jackson扩展库</description>
+
+  <developers>
+    <developer>
+      <id>dc2024</id>
+      <name>小郴</name>
+      <email>876975281@qq.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/xiaochenxt/dengchen2020</url>
+    <connection>https://github.com/xiaochenxt/dengchen2020.git</connection>
+    <developerConnection>https://github.com/xiaochenxt/dengchen2020.git</developerConnection>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+  </dependencies>
+</project>

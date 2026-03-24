@@ -1,6 +1,7 @@
 package io.github.dengchen2020.core.jackson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.github.dengchen2020.jackson.DcModule;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.dataformat.xml.XmlMapper;
 import io.github.dengchen2020.core.utils.JsonHelper;
@@ -55,6 +56,16 @@ public final class JacksonAutoConfiguration {
         @Bean
         public XmlHelper xmlHelper(XmlMapper xmlMapper) {
             return new XmlHelper(xmlMapper);
+        }
+    }
+
+    @ConditionalOnClass(DcModule.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class DcModuleAutoConfiguration {
+        @ConditionalOnMissingBean(name = "dcModuleJsonMapperBuilderCustomizer")
+        @Bean
+        JsonMapperBuilderCustomizer dcModuleJsonMapperBuilderCustomizer() {
+            return builder -> builder.addModule(new DcModule());
         }
     }
 
