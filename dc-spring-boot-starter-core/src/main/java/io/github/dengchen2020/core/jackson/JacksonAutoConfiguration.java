@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.github.dengchen2020.core.utils.JsonHelper;
 import io.github.dengchen2020.core.utils.XmlHelper;
+import io.github.dengchen2020.jackson.DcModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -58,6 +60,16 @@ public final class JacksonAutoConfiguration {
             var mapper = new XmlMapper();
             jackson2ObjectMapperBuilder.configure(mapper);
             return new XmlHelper(mapper);
+        }
+    }
+
+    @ConditionalOnClass(DcModule.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class DcModuleAutoConfiguration {
+        @ConditionalOnMissingBean(name = "dcModuleJsonMapperBuilderCustomizer")
+        @Bean
+        Jackson2ObjectMapperBuilderCustomizer dcModuleJsonMapperBuilderCustomizer() {
+            return builder -> builder.modulesToInstall(modules -> modules.addLast(new DcModule()));
         }
     }
 
