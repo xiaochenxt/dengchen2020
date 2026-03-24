@@ -28,7 +28,7 @@ public sealed abstract class AbstractJsonbTemplate extends DslTemplate<String> p
      * @return {@link BooleanExpression}
      */
     public BooleanExpression contains(String json) {
-        if (!JsonUtils.isJson(json)) throw new IllegalArgumentException(json + "is not a json");
+        if (!JsonUtils.isJsonObjectOrArray(json)) throw new IllegalArgumentException(json + "is not a json object or json array");
         return Expressions.booleanTemplate("{0} @> {1}::jsonb", mixin, json).isTrue();
     }
 

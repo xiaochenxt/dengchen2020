@@ -52,7 +52,7 @@ public class JsonbPath<T> extends SimpleExpression<T> implements JsonbObjectOper
      * @return {@link BooleanExpression}
      */
     public BooleanExpression contains(String json) {
-        if (!JsonUtils.isJson(json)) throw new IllegalArgumentException(json + "is not a json");
+        if (!JsonUtils.isJsonObjectOrArray(json)) throw new IllegalArgumentException(json + "is not a json object or json array");
         return containsNoCheck(json);
     }
 
