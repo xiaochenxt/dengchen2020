@@ -52,7 +52,7 @@ public abstract class RestClientUtils {
     /**
      * 不携带请求体的HTTP方法
      */
-    static final Set<HttpMethod> NO_BODY_METHODS = Set.of(HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE);
+    public static final Set<HttpMethod> NO_BODY_METHODS = Set.of(HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE);
 
     static final RestClient client = create(DEFAULT_MAX_CONN_PER_ROUTE);
 
