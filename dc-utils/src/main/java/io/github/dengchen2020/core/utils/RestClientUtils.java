@@ -176,7 +176,7 @@ public abstract class RestClientUtils {
                     .setMaxConnPerRoute(DEFAULT_MAX_CONN_PER_ROUTE)
                     .setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()))
                     .build();
-            return create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), true);
+            return create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), false);
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             throw new RuntimeException("创建无需SSL证书校验的RestClient失败", e);
         }
