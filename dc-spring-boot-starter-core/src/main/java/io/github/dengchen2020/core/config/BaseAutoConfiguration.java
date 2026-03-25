@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static io.github.dengchen2020.core.utils.RestClientUtils.NO_BODY_METHODS;
+
 /**
  * 基础自动配置
  *
@@ -76,6 +78,7 @@ public final class BaseAutoConfiguration implements InitializingBean {
         @ConditionalOnMissingBean
         RestClient.Builder httpClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer, HttpComponentsClientHttpRequestFactory factory) {
             RestClient.Builder builder = restClientBuilderConfigurer.configure(RestClientUtils.builder(factory));
+            builder.bufferContent((uri, httpMethod) -> !NO_BODY_METHODS.contains(httpMethod));
             return builder;
         }
 
