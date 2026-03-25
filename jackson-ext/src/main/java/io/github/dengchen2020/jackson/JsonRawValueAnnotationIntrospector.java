@@ -6,13 +6,13 @@ import tools.jackson.databind.introspect.NopAnnotationIntrospector;
 import tools.jackson.databind.ser.jackson.RawSerializer;
 
 /**
- * JsonRawValueInput注解的处理
+ * 处理{@link JsonRawValue}注解
  * @author xiaochen
  * @since 2026/3/23
  */
-class JsonRawValueInputAnnotationIntrospector extends NopAnnotationIntrospector {
+class JsonRawValueAnnotationIntrospector extends NopAnnotationIntrospector {
 
-    protected static final JsonRawValueInputAnnotationIntrospector INSTANCE = new JsonRawValueInputAnnotationIntrospector();
+    protected static final JsonRawValueAnnotationIntrospector INSTANCE = new JsonRawValueAnnotationIntrospector();
 
     protected static final RawSerializer<String> rawSerializer = new RawSerializer<>(String.class);
 
