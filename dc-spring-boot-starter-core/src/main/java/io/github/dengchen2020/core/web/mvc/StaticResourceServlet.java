@@ -27,6 +27,8 @@ import java.io.IOException;
 @WebServlet(value = "/**", loadOnStartup = 1)
 public class StaticResourceServlet extends HttpServlet implements ApplicationListener<@NonNull WebServerInitializedEvent> {
 
+    public static final String SERVLET_NAME = "staticResourceServlet";
+
     public StaticResourceServlet(Environment environment) {
         this.staticPathPattern = environment.getProperty("spring.mvc.static-path-pattern", "/**");
         this.supportHistory = environment.getProperty("dc.static.servlet.support-history", boolean.class, false);

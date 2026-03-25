@@ -22,7 +22,7 @@ public class StaticServletBeanRegistrar implements ImportBeanDefinitionRegistrar
         String mvcServletPath = environment.getProperty("spring.mvc.servlet.path","/");
         String serverServletContextPath = environment.getProperty("server.servlet.context-path","");
         if ((!mvcServletPath.isBlank() && !"/".equals(mvcServletPath)) && (serverServletContextPath.isEmpty() || "/".equals(serverServletContextPath))) {
-            registry.registerBeanDefinition("staticServlet", new RootBeanDefinition(StaticResourceServlet.class));
+            registry.registerBeanDefinition(StaticResourceServlet.SERVLET_NAME, new RootBeanDefinition(StaticResourceServlet.class));
         }
     }
 

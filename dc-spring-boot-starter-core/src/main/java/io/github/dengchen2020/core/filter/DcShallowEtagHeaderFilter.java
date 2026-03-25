@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.filter;
 
+import io.github.dengchen2020.core.web.mvc.StaticResourceServlet;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,30 +25,21 @@ import java.util.List;
 @NullMarked
 public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
 
-    private final List<PathPattern> includePatterns;
+    private final List<PathPattern> ignorePath;
 
-    public DcShallowEtagHeaderFilter(String[] includePatterns) {
-        this.includePatterns = new ArrayList<>(includePatterns.length);
+    public DcShallowEtagHeaderFilter(String[] ignorePath) {
+        this.ignorePath = new ArrayList<>(ignorePath.length);
         PathPatternParser parser = PathPatternParser.defaultInstance;
-        for (String pattern : includePatterns) {
-            this.includePatterns.add(parser.parse(parser.initFullPathPattern(pattern)));
+        for (String pattern : ignorePath) {
+            this.ignorePath.add(parser.parse(parser.initFullPathPattern(pattern)));
         }
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (matches(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        super.doFilterInternal(request, response, filterChain);
-    }
-
-    /**
-     * 检查是否匹配
-     */
-    public boolean matches(HttpServletRequest request) {
-        if (includePatterns.isEmpty()) return false;
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        var servletName = request.getHttpServletMapping().getServletName();
+        if (StaticResourceServlet.SERVLET_NAME.equals(servletName)) return true; // 静态资源使用Last-Modified就行了，不需要浪费CPU和内存额外使用Etag
+        if (ignorePath.isEmpty()) return false;
         PathContainer path;
         if (!ServletRequestPathUtils.hasCachedPath(request)) {
             RequestPath requestPath = ServletRequestPathUtils.parseAndCache(request);
@@ -56,12 +48,15 @@ public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
             RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
             path = requestPath.pathWithinApplication();
         }
-        for (PathPattern includePattern : includePatterns) {
-            if (includePattern.matches(path)) {
-                return true;
-            }
+        for (PathPattern pathPattern : ignorePath) {
+            if (pathPattern.matches(path)) return true;
         }
         return false;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        super.doFilterInternal(request, response, filterChain);
     }
 
 }
