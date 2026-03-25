@@ -92,8 +92,4 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
         }
     }
 
-    @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
-    }
-
 }
