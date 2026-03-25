@@ -23,7 +23,7 @@ public class JsonObjectOrArrayValidator implements ConstraintValidator<JsonObjec
         if (value == null) return true;
         if (value.isBlank()) return false;
         if ((maxLength > 0 && value.length() > maxLength)) {
-            context.buildConstraintViolationWithTemplate("{io.github.dengchen2020.core.validation.JsonObjectOrArray.dataLengthError.message}")
+            context.buildConstraintViolationWithTemplate("{io.github.dengchen2020.core.validation.Json.dataLengthError.message}")
                     .addConstraintViolation().disableDefaultConstraintViolation();
             return false;
         }
