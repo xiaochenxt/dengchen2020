@@ -1,28 +1,17 @@
 package io.github.dengchen2020.jackson;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
- * 全局模块
+ * Jackson模块-dc
  * @author xiaochen
  * @since 2026/3/23
  */
-public class DcModule extends Module {
-
-    @Override
-    public String getModuleName() {
-        return "dc";
-    }
-
-    @Override
-    public Version version() {
-        return Version.unknownVersion();
-    }
+public class DcModule extends SimpleModule {
 
     @Override
     public void setupModule(SetupContext context) {
-        context.insertAnnotationIntrospector(JsonRawValueInputAnnotationIntrospector.INSTANCE);
+        context.insertAnnotationIntrospector(JsonRawValueAnnotationIntrospector.INSTANCE);
     }
 
 }
