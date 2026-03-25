@@ -76,6 +76,7 @@ public final class BaseAutoConfiguration implements InitializingBean {
         @ConditionalOnMissingBean
         RestClient.Builder httpClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer, HttpComponentsClientHttpRequestFactory factory) {
             RestClient.Builder builder = restClientBuilderConfigurer.configure(RestClientUtils.builder(factory));
+            builder.requestFactory(new RestClientUtils.OptimizedBufferingClientHttpRequestFactory(factory));
             return builder;
         }
 
