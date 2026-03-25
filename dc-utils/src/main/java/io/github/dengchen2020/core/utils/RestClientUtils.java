@@ -248,7 +248,7 @@ public abstract class RestClientUtils {
      *     对于GET、DELETE、HEAD、OPTIONS请求，不进行缓冲，其他请求进行缓冲，避免了 {@link BufferingClientHttpRequestFactory} 对于GET、DELETE、HEAD、OPTIONS等请求body和响应body进行缓冲导致的内存占用问题
      * </p>
      */
-    static final class OptimizedBufferingClientHttpRequestFactory extends BufferingClientHttpRequestFactory {
+    public static final class OptimizedBufferingClientHttpRequestFactory extends BufferingClientHttpRequestFactory {
         public OptimizedBufferingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
             super(requestFactory);
         }
