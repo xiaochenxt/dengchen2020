@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.cache.Cache;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolverChain;
 
@@ -30,6 +31,7 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
 
     @Override
     protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request,@NonNull String requestPath,@NonNull List<? extends Resource> locations,@NonNull ResourceResolverChain chain) {
+        if (request != null) ShallowEtagHeaderFilter.disableContentCaching(request);
         String key = computeKey(request, requestPath);
         Resource resource = this.getCache().get(key, Resource.class);
 

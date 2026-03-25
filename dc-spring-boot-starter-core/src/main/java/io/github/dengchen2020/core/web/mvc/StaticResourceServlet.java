@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
@@ -16,8 +17,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
-import java.io.IOException;
-
 /**
  * 为静态资源提供根路径访问
  *
@@ -26,6 +25,8 @@ import java.io.IOException;
  */
 @WebServlet(value = "/**", loadOnStartup = 1)
 public class StaticResourceServlet extends HttpServlet implements ApplicationListener<@NonNull WebServerInitializedEvent> {
+
+    public static final String SERVLET_NAME = "staticResourceServlet";
 
     public StaticResourceServlet(Environment environment) {
         this.staticPathPattern = environment.getProperty("spring.mvc.static-path-pattern", "/**");
