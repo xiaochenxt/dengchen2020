@@ -6,13 +6,13 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.impl.PlaywrightImpl;
 import com.microsoft.playwright.impl.driver.Driver;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 浏览器自动化测试工具类
@@ -114,7 +114,61 @@ public abstract class PlaywrightUtils {
      */
     @SafeVarargs
     public static void execute(Consumer<Page>... pageConsumer) {
-        execute(false, pageConsumer);
+        execute(true, pageConsumer);
+    }
+
+    /**
+     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 主要用于简化配置并作为一个启动示例作为参考。
+     * @param launchOptions 启动选项
+     * @param pageFunc 页面操作
+     */
+    public static <R> R executeWithResult(BrowserType.LaunchOptions launchOptions, Function<Page, R> pageFunc) {
+        try (var playwright = PlaywrightUtils.create();
+             var browser = playwright.chromium().launch(launchOptions)
+        ) {
+            var context = browser.newContext(new Browser.NewContextOptions()
+                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36")
+                    .setLocale("zh-CN"));
+            var page = context.newPage();
+            return pageFunc.apply(page);
+        }
+    }
+
+    /**
+     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 主要用于简化配置并作为一个启动示例作为参考。
+     * @param headless 是否无头模式
+     * @param pageFunc 页面操作
+     */
+    public static <R> R executeWithResult(boolean headless, Function<Page, R> pageFunc) {
+        return executeWithResult(new BrowserType.LaunchOptions().setHeadless(headless), pageFunc);
+    }
+
+    /**
+     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 主要用于简化配置并作为一个启动示例作为参考。
+     * @param pageFunc 页面操作
+     */
+    public static <R> R executeWithResult(Function<Page, R> pageFunc) {
+        return executeWithResult(true, pageFunc);
+    }
+
+    /**
+     * 生成PDF
+     * @param pdfOptions pdf选项
+     * @param content 内容，如果是url链接则导航到该链接，否则设置页面内容，最后打印成pdf并返回字节数组
+     * @return
+     */
+    public static byte[] pdf(Page.PdfOptions pdfOptions, String content) {
+        return executeWithResult(true, page -> {
+            if (content.startsWith("http") || content.startsWith("file:")) {
+                page.navigate(content);
+            } else {
+                page.setContent(content);
+            }
+            return page.pdf(pdfOptions);
+        });
     }
 
 }
