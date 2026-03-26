@@ -1,5 +1,6 @@
 package io.github.dengchen2020.message.wechat;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
@@ -71,7 +72,7 @@ public class WeChatClientImpl implements WeChatClient {
     }
 
     @Override
-    public String upload(Resource resource, String type, String key) {
+    public @Nullable String upload(Resource resource, String type, String key) {
         LinkedMultiValueMap<String, Object> form = new LinkedMultiValueMap<>(1);
         form.add("media", resource);
         JsonNode res = RestClientUtils.post().uri("https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=" + key + "&type=" +type)

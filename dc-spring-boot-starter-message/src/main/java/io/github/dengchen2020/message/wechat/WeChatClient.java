@@ -3,11 +3,11 @@ package io.github.dengchen2020.message.wechat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.digest.DigestUtils;
-import org.jspecify.annotations.NullMarked;
-import org.springframework.core.io.Resource;
-
 import java.util.Arrays;
 import java.util.Objects;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.core.io.Resource;
 
 /**
  * 微信消息接口
@@ -38,7 +38,7 @@ public interface WeChatClient {
      * @param key webhook中的key
      */
     @NullMarked
-    String upload(Resource resource, String type, String key);
+    @Nullable String upload(Resource resource, String type, String key);
 
     interface Message {
         String type();
