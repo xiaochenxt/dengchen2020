@@ -1,6 +1,7 @@
 package io.github.dengchen2020.security.authentication.filter;
 
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
+import io.github.dengchen2020.core.web.mvc.StaticResourceServlet;
 import io.github.dengchen2020.security.authentication.token.TokenService;
 import io.github.dengchen2020.security.authentication.web.AuthenticationHttpServletRequestWrapper;
 import io.github.dengchen2020.core.security.principal.Authentication;
@@ -31,6 +32,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     public AuthenticationFilter(TokenService tokenService) {
         this.tokenService = tokenService;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        var servletName = request.getHttpServletMapping().getServletName();
+        return StaticResourceServlet.SERVLET_NAME.equals(servletName); // 静态资源请求不需要认证
     }
 
     @Override
