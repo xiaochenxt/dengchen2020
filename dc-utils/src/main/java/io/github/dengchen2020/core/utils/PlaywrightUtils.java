@@ -1,9 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.*;
 import com.microsoft.playwright.impl.PlaywrightImpl;
 import com.microsoft.playwright.impl.driver.Driver;
 import java.io.IOException;
@@ -22,6 +19,22 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public abstract class PlaywrightUtils {
 
+    private static final Playwright PLAYWRIGHT;
+    private static final Browser BROWSER;
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36";
+
+    static {
+        PLAYWRIGHT = create();
+        BROWSER = PLAYWRIGHT.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                BROWSER.close();
+            } finally {
+                PLAYWRIGHT.close();
+            }
+        }));
+    }
+
     /**
      * 启动新的Playwright驱动进程并连接到它。 {@link com.microsoft.playwright.Playwright#close
      * Playwright.close()} 当实例不再需要时，应调用。
@@ -34,12 +47,12 @@ public abstract class PlaywrightUtils {
      * }</pre>
      *
      */
-    public static Playwright create(Playwright.@Nullable CreateOptions options) {
+    private static Playwright create(Playwright.@Nullable CreateOptions options) {
         install();
         return PlaywrightImpl.create(options);
     }
 
-    public static Playwright create() {
+    private static Playwright create() {
         return create(null);
     }
 
@@ -63,27 +76,32 @@ public abstract class PlaywrightUtils {
         }
     }
 
+    public static Browser newChromiumBrowser(BrowserType.LaunchOptions launchOptions) {
+        return PLAYWRIGHT.chromium().launch(launchOptions);
+    }
+
+    public static Browser newFirefoxBrowser(BrowserType.LaunchOptions launchOptions) {
+        return PLAYWRIGHT.firefox().launch(launchOptions);
+    }
+
+    public static Browser newWebkitBrowser(BrowserType.LaunchOptions launchOptions) {
+        return PLAYWRIGHT.webkit().launch(launchOptions);
+    }
+
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param launchOptions 启动选项
+     * @param browser 浏览器
+     * @param contextOptions 上下文选项
      * @param pageConsumers 页面操作
      */
     @SafeVarargs
-    public static void execute(BrowserType.LaunchOptions launchOptions, Consumer<Page>... pageConsumers) {
+    public static void execute(Browser browser, Browser.NewContextOptions contextOptions, Consumer<Page>... pageConsumers) {
         CountDownLatch countDownLatch = new CountDownLatch(pageConsumers.length);
         for (Consumer<Page> consumer : pageConsumers) {
             Thread.startVirtualThread(() -> {
-                try {
-                    try (var playwright = PlaywrightUtils.create();
-                         var browser = playwright.chromium().launch(launchOptions)
-                    ) {
-                        var context = browser.newContext(new Browser.NewContextOptions()
-                                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36")
-                                .setLocale("zh-CN"));
-                        var page = context.newPage();
-                        consumer.accept(page);
-                    }
+                try (var context = browser.newContext(contextOptions)) {
+                    consumer.accept(context.newPage());
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -97,61 +115,56 @@ public abstract class PlaywrightUtils {
     }
 
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param headless 是否无头模式
-     * @param pageConsumer 页面操作
+     * @param browser 浏览器
+     * @param pageConsumers 页面操作
      */
     @SafeVarargs
-    public static void execute(boolean headless, Consumer<Page>... pageConsumer) {
-        execute(new BrowserType.LaunchOptions().setHeadless(headless), pageConsumer);
+    public static void execute(Browser browser, Consumer<Page>... pageConsumers) {
+        execute(browser, new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageConsumers);
     }
 
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
      * @param pageConsumer 页面操作
      */
     @SafeVarargs
     public static void execute(Consumer<Page>... pageConsumer) {
-        execute(true, pageConsumer);
+        execute(BROWSER, pageConsumer);
     }
 
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param launchOptions 启动选项
+     * @param browser 浏览器
+     * @param contextOptions 上下文选项
      * @param pageFunc 页面操作
      */
-    public static <R> R executeWithResult(BrowserType.LaunchOptions launchOptions, Function<Page, R> pageFunc) {
-        try (var playwright = PlaywrightUtils.create();
-             var browser = playwright.chromium().launch(launchOptions)
-        ) {
-            var context = browser.newContext(new Browser.NewContextOptions()
-                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36")
-                    .setLocale("zh-CN"));
-            var page = context.newPage();
-            return pageFunc.apply(page);
+    public static <R> R executeWithResult(Browser browser, Browser.NewContextOptions contextOptions, Function<Page, R> pageFunc) {
+        try (BrowserContext context = browser.newContext(contextOptions)) {
+            return pageFunc.apply(context.newPage());
         }
     }
 
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param headless 是否无头模式
+     * @param browser 浏览器
      * @param pageFunc 页面操作
      */
-    public static <R> R executeWithResult(boolean headless, Function<Page, R> pageFunc) {
-        return executeWithResult(new BrowserType.LaunchOptions().setHeadless(headless), pageFunc);
+    public static <R> R executeWithResult(Browser browser, Function<Page, R> pageFunc) {
+        return executeWithResult(browser, new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageFunc);
     }
 
     /**
-     * 创建一个浏览器实例并执行页面操作，确保在完成时关闭浏览器实例。 </br>
+     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
      * @param pageFunc 页面操作
      */
     public static <R> R executeWithResult(Function<Page, R> pageFunc) {
-        return executeWithResult(true, pageFunc);
+        return executeWithResult(BROWSER, pageFunc);
     }
 
     /**
@@ -161,7 +174,7 @@ public abstract class PlaywrightUtils {
      * @return
      */
     public static byte[] pdf(Page.PdfOptions pdfOptions, String content) {
-        return executeWithResult(true, page -> {
+        return executeWithResult(page -> {
             if (content.startsWith("http") || content.startsWith("file:")) {
                 page.navigate(content);
             } else {
@@ -169,6 +182,41 @@ public abstract class PlaywrightUtils {
             }
             return page.pdf(pdfOptions);
         });
+    }
+
+    /**
+     * 生成PDF
+     * @param content 内容，如果是url链接则导航到该链接，否则设置页面内容，最后打印成pdf并返回字节数组
+     * @return
+     */
+    public static byte[] pdf(String content) {
+        return pdf(new Page.PdfOptions().setFormat("A4"), content);
+    }
+
+    /**
+     * 截图
+     * @param screenshotOptions 截图选项
+     * @param content 内容，如果是url链接则导航到该链接，否则设置页面内容，最后截图并返回字节数组
+     * @return
+     */
+    public static byte[] screenshot(Page.ScreenshotOptions screenshotOptions, String content) {
+        return executeWithResult(page -> {
+            if (content.startsWith("http") || content.startsWith("file:")) {
+                page.navigate(content);
+            } else {
+                page.setContent(content);
+            }
+            return page.screenshot(screenshotOptions);
+        });
+    }
+
+    /**
+     * 截图
+     * @param content 内容，如果是url链接则导航到该链接，否则设置页面内容，最后截图并返回字节数组
+     * @return
+     */
+    public static byte[] screenshot(String content) {
+        return screenshot(new Page.ScreenshotOptions().setFullPage(true), content);
     }
 
 }
