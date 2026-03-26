@@ -38,7 +38,7 @@ public interface WeChatClient {
      * @param key webhook中的key
      */
     @NullMarked
-    String upload(Resource resource, String type, String key);
+    @Nullable String upload(Resource resource, String type, String key);
 
     interface Message {
         String type();

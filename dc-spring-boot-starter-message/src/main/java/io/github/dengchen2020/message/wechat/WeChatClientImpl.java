@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -71,7 +72,7 @@ public class WeChatClientImpl implements WeChatClient {
     }
 
     @Override
-    public String upload(Resource resource, String type, String key) {
+    public @Nullable String upload(Resource resource, String type, String key) {
         LinkedMultiValueMap<String, Object> form = new LinkedMultiValueMap<>(1);
         form.add("media", resource);
         JsonNode res = RestClientUtils.post().uri("https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=" + key + "&type=" +type)
