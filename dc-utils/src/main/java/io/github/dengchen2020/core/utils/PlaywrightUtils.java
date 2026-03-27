@@ -19,20 +19,22 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public abstract class PlaywrightUtils {
 
-    private static final Playwright PLAYWRIGHT;
-    private static final Browser BROWSER;
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36";
+    /**
+     * 是否启用无头模式，默认启用。建议只在开发阶段关闭
+     */
+    public static final String HEADLESS = "playwright.headless";
+    /**
+     * 是否使用新版无头模式，默认使用新版。建议只在对性能有要求并且开发阶段已确认旧版无头模式运行没有问题时才使用旧版
+     * <p>1.旧版无头模式是 Chromium 的 //content 模块的轻量级封装容器，因此依赖项要少得多。具体而言，它不需要 X11/Wayland、D-Bus，并且在某些方面比完整的 Chrome 浏览器的性能更出色。因此，它适用于自动截取屏幕截图或 Web 抓取等用例。</p>
+     * <p>1.另一方面，新版无头 Chrome 是真正的 Chrome 浏览器，因此更真实、更可靠，并且提供更多功能。因此，它更适合高精度端到端 Web 应用测试或浏览器扩展程序测试。</p>
+     */
+    public static final String HEADLESS_NEW = "playwright.headless.new";
+    private static final boolean headless = Boolean.parseBoolean(System.getProperty(HEADLESS, "true"));
+    private static final boolean headlessNew = Boolean.parseBoolean(System.getProperty(HEADLESS_NEW, "true"));
 
     static {
-        PLAYWRIGHT = create();
-        BROWSER = PLAYWRIGHT.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                BROWSER.close();
-            } finally {
-                PLAYWRIGHT.close();
-            }
-        }));
+        install();
     }
 
     /**
@@ -47,12 +49,23 @@ public abstract class PlaywrightUtils {
      * }</pre>
      *
      */
-    private static Playwright create(Playwright.@Nullable CreateOptions options) {
-        install();
+    public static Playwright create(Playwright. @Nullable CreateOptions options) {
         return PlaywrightImpl.create(options);
     }
 
-    private static Playwright create() {
+    /**
+     * 启动新的Playwright驱动进程并连接到它。 {@link com.microsoft.playwright.Playwright#close
+     * Playwright.close()} 当实例不再需要时，应调用。
+     * <pre>{@code
+     * Playwright playwright = Playwright.create();
+     * Browser browser = playwright.webkit().launch();
+     * Page page = browser.newPage();
+     * page.navigate("https://www.w3.org/");
+     * playwright.close();
+     * }</pre>
+     *
+     */
+    public static Playwright create() {
         return create(null);
     }
 
@@ -61,13 +74,13 @@ public abstract class PlaywrightUtils {
      */
     private static void install() {
         try {
-            Driver driver = Driver.ensureDriverInstalled(Collections.emptyMap(), false);
-            ProcessBuilder pb = driver.createProcessBuilder();
+            var driver = Driver.ensureDriverInstalled(Collections.emptyMap(), false);
+            var pb = driver.createProcessBuilder();
             pb.command().add("install");
-            String version = Playwright.class.getPackage().getImplementationVersion();
+            var version = Playwright.class.getPackage().getImplementationVersion();
             if (version != null) pb.environment().put("PW_CLI_DISPLAY_VERSION", version);
             pb.inheritIO();
-            Process process = pb.start();
+            var process = pb.start();
             process.waitFor();
         } catch (IOException e) {
             throw new RuntimeException("安装浏览器失败", e);
@@ -76,32 +89,29 @@ public abstract class PlaywrightUtils {
         }
     }
 
-    public static Browser newChromiumBrowser(BrowserType.LaunchOptions launchOptions) {
-        return PLAYWRIGHT.chromium().launch(launchOptions);
-    }
-
-    public static Browser newFirefoxBrowser(BrowserType.LaunchOptions launchOptions) {
-        return PLAYWRIGHT.firefox().launch(launchOptions);
-    }
-
-    public static Browser newWebkitBrowser(BrowserType.LaunchOptions launchOptions) {
-        return PLAYWRIGHT.webkit().launch(launchOptions);
+    public static Browser newChromiumBrowser(Playwright playwright) {
+        var launchOptions = new BrowserType.LaunchOptions().setHeadless(headless);
+        if (headlessNew) launchOptions.setChannel("chromium");
+        return playwright.chromium().launch(launchOptions);
     }
 
     /**
      * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param browser 浏览器
      * @param contextOptions 上下文选项
      * @param pageConsumers 页面操作
      */
     @SafeVarargs
-    public static void execute(Browser browser, Browser.NewContextOptions contextOptions, Consumer<Page>... pageConsumers) {
-        CountDownLatch countDownLatch = new CountDownLatch(pageConsumers.length);
-        for (Consumer<Page> consumer : pageConsumers) {
+    public static void execute(Browser.NewContextOptions contextOptions, Consumer<Page>... pageConsumers) {
+        var countDownLatch = new CountDownLatch(pageConsumers.length);
+        for (var consumer : pageConsumers) {
             Thread.startVirtualThread(() -> {
-                try (var context = browser.newContext(contextOptions)) {
-                    consumer.accept(context.newPage());
+                try {
+                    try (var playwright = create();
+                         var browser = newChromiumBrowser(playwright);
+                         var context = browser.newContext(contextOptions)) {
+                        consumer.accept(context.newPage());
+                    }
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -117,45 +127,25 @@ public abstract class PlaywrightUtils {
     /**
      * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param browser 浏览器
      * @param pageConsumers 页面操作
      */
     @SafeVarargs
-    public static void execute(Browser browser, Consumer<Page>... pageConsumers) {
-        execute(browser, new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageConsumers);
+    public static void execute(Consumer<Page>... pageConsumers) {
+        execute(new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageConsumers);
     }
 
     /**
      * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
      * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param pageConsumer 页面操作
-     */
-    @SafeVarargs
-    public static void execute(Consumer<Page>... pageConsumer) {
-        execute(BROWSER, pageConsumer);
-    }
-
-    /**
-     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
-     * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param browser 浏览器
      * @param contextOptions 上下文选项
      * @param pageFunc 页面操作
      */
-    public static <R> R executeWithResult(Browser browser, Browser.NewContextOptions contextOptions, Function<Page, R> pageFunc) {
-        try (BrowserContext context = browser.newContext(contextOptions)) {
+    public static <R> R executeWithResult(Browser.NewContextOptions contextOptions, Function<Page, R> pageFunc) {
+        try (var playwright = create();
+             var browser = newChromiumBrowser(playwright);
+             var context = browser.newContext(contextOptions)) {
             return pageFunc.apply(context.newPage());
         }
-    }
-
-    /**
-     * 使用现有的浏览器实例创建隔离的上下文环境执行页面操作，确保在完成时关闭浏览器实例。 </br>
-     * 主要用于简化配置并作为一个启动示例作为参考。
-     * @param browser 浏览器
-     * @param pageFunc 页面操作
-     */
-    public static <R> R executeWithResult(Browser browser, Function<Page, R> pageFunc) {
-        return executeWithResult(browser, new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageFunc);
     }
 
     /**
@@ -164,7 +154,7 @@ public abstract class PlaywrightUtils {
      * @param pageFunc 页面操作
      */
     public static <R> R executeWithResult(Function<Page, R> pageFunc) {
-        return executeWithResult(BROWSER, pageFunc);
+        return executeWithResult(new Browser.NewContextOptions().setUserAgent(USER_AGENT), pageFunc);
     }
 
     /**
