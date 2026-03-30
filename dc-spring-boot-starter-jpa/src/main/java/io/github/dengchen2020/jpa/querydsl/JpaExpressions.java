@@ -4,9 +4,6 @@ import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.*;
-import org.hibernate.type.spi.TypeConfiguration;
-import org.jspecify.annotations.NullMarked;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -14,8 +11,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import org.hibernate.type.spi.TypeConfiguration;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 用于JPA的通用querydsl表达式
@@ -26,60 +23,6 @@ import java.util.List;
 public final class JpaExpressions {
 
     private JpaExpressions(){}
-
-    /**
-     * 检查,分割存储的字符串字段中是否包含特定值，不推荐使用，推荐使用json存储，查询更方便且性能更好
-     *
-     * @param expr
-     * @param values
-     * @return {@link BooleanExpression}
-     */
-    @Deprecated
-    public static BooleanExpression findInSet(Expression<String> expr, boolean withQuote, Object... values) {
-        if (values.length == 0) return Expressions.asBoolean(Boolean.FALSE);
-        List<BooleanExpression> list = new ArrayList<>();
-        String wrapTemplate = withQuote ? "concat(',\"',{0},'\",')" : "concat(',',{0},',')";
-        for (var val : values) {
-            var singleExpr = Expressions.booleanTemplate("position({0} in concat(',',{1},',')) > 0", Expressions.stringTemplate(wrapTemplate, val), expr);
-            list.add(singleExpr);
-        }
-        BooleanExpression finalExpr = list.getFirst();
-        for (int i = 1; i < list.size(); i++) {
-            finalExpr = finalExpr.and(list.get(i));
-        }
-        return finalExpr;
-    }
-
-    /**
-     * 检查,分割存储的字符串字段中是否包含特定值，不推荐使用，推荐使用json存储，查询更方便且性能更好
-     *
-     * @param expr
-     * @param value
-     * @return {@link BooleanExpression}
-     */
-    @Deprecated
-    public static BooleanExpression findInSet(StringExpression expr, String... value) {
-        return findInSet(expr, true, (Object[]) value);
-    }
-
-    /**
-     * 检查,分割存储的字符串字段中是否包含特定值，不推荐使用，推荐使用json存储，查询更方便且性能更好
-     *
-     * @param expr
-     * @param value
-     * @return {@link BooleanExpression}
-     */
-    @Deprecated
-    public static BooleanExpression findInSet(StringExpression expr, Number... value) {
-        return findInSet(expr, false, (Object[]) value);
-    }
-
-    /**
-     * 随机数
-     */
-    public static NumberExpression<Double> random() {
-        return NumberExpression.random();
-    }
 
     /**
      * json_value函数，用于从json字段中提取标量值（字符串|数字|布尔）

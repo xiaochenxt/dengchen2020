@@ -1,5 +1,6 @@
 package io.github.dengchen2020.jpa.hibernate;
 
+import java.util.List;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.boot.model.FunctionContributor;
 import org.hibernate.dialect.*;
@@ -19,8 +20,6 @@ import org.hibernate.sql.ast.tree.expression.QueryLiteral;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
-
-import java.util.List;
 
 /**
  * 在hibernate中注册一些hibernate自身没有的数据库的专有函数
@@ -43,12 +42,16 @@ public class DcFunctionContributor implements FunctionContributor {
             registry.registerPattern("jsonb_get_str_by_patharr", "?1 #>> ?2", stringBasicType);
             registry.registerPattern("jsonb_exists", "jsonb_exists(?1,?2)", booleanBasicType);
             registry.registerPattern("json_contains","?1 @> ?2::jsonb", booleanBasicType);
+            registry.registerPattern("st_dwithin", "st_dwithin(?1,?2,?3)", booleanBasicType);
         } else if (dialect instanceof MySQLDialect) {
             registry.registerPattern("random", "rand()", doubleBasicType);
             registry.registerPattern("json_contains","json_contains(?1,?2)", booleanBasicType);
             if (registry.findFunctionDescriptor("json_exists") != null) registry.registerPattern("json_exists", "json_contains_path(?1,'one',?2)", booleanBasicType);
             registry.registerPattern("json_value","?1 ->> ?2", stringBasicType);
             registry.registerPattern("json_query","?1 -> ?2", stringBasicType);
+            registry.registerPattern("st_setsrid","st_srid(?1,?2)");
+            registry.registerPattern("st_point","point(?1,?2)");
+            registry.registerPattern("st_distance_sphere","st_distance_sphere(?1,?2)", doubleBasicType);
         } else if (dialect instanceof AbstractTransactSQLDialect) {
             registry.registerPattern("random", "rand()", doubleBasicType);
             if (registry.findFunctionDescriptor("json_exists") != null) registry.registerPattern("json_exists", "json_value(?1,?2) is not null", booleanBasicType);

@@ -22,8 +22,8 @@ public final class PostgisExpressions {
      * @param longitude 经度
      * @return
      */
-    public static NumberExpression<Double> distancekm(SimplePath<Point<?>> point, Double longitude, Double latitude){
-        return Expressions.numberTemplate(Double.class, "sql('round((ST_Distance(?, ST_SetSRID(ST_MakePoint(?, ?), 4326))/1000)::numeric,2)',{0},{1},{2})", point, longitude, latitude);
+    public static NumberExpression<Double> distancekm(SimplePath<Point<?>> point, double longitude, double latitude){
+        return Expressions.numberTemplate(Double.class, "round(cast(st_distance({0}, st_setsrid(st_point({1}, {2}), 4326))/1000 as bigdecimal),2)", point, longitude, latitude);
     }
 
     /**
@@ -34,8 +34,32 @@ public final class PostgisExpressions {
      * @param epsg 坐标系编号，例如4326
      * @return
      */
-    public static NumberExpression<Double> distancekm(SimplePath<Point<?>> point, Double longitude, Double latitude, int epsg){
-        return Expressions.numberTemplate(Double.class, "sql('round((ST_Distance(?, ST_SetSRID(ST_MakePoint(?, ?), ?))/1000)::numeric,2)',{0},{1},{2},{3})", point, longitude, latitude, epsg);
+    public static NumberExpression<Double> distancekm(SimplePath<Point<?>> point, double longitude, double latitude, int epsg){
+        return Expressions.numberTemplate(Double.class, "round(cast(st_distance({0}, st_setsrid(st_point({1}, {2}), {3}))/1000 as bigdecimal),2)", point, longitude, latitude, epsg);
+    }
+
+    /**
+     * 计算两个经纬度之间的距离，单位为米
+     *
+     * @param point     geography类型字段
+     * @param latitude  纬度
+     * @param longitude 经度
+     * @return
+     */
+    public static NumberExpression<Double> distancem(SimplePath<Point<?>> point, double longitude, double latitude){
+        return Expressions.numberTemplate(Double.class, "round(cast(st_distance({0}, st_setsrid(st_point({1}, {2}), 4326)) as bigdecimal),2)", point, longitude, latitude);
+    }
+
+    /**
+     * 获取两个经纬度之间的距离，单位为米
+     * @param point geography类型字段
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param epsg 坐标系编号，例如4326
+     * @return
+     */
+    public static NumberExpression<Double> distancem(SimplePath<Point<?>> point, double longitude, double latitude, int epsg){
+        return Expressions.numberTemplate(Double.class, "round(cast(st_distance({0}, st_setsrid(st_point({1}, {2}), {3}))/1000 as bigdecimal),2)", point, longitude, latitude, epsg);
     }
 
     /**
@@ -46,8 +70,8 @@ public final class PostgisExpressions {
      * @param maxDistance 最大距离，单位为米
      * @return
      */
-    public static BooleanExpression within(SimplePath<Point<?>> point, Double longitude, Double latitude, int maxDistance){
-        return Expressions.booleanTemplate("sql('ST_DWithin(?,ST_SetSRID(ST_MakePoint(?, ?), 4326),?)',{0},{1},{2},{3})", point, longitude, latitude, maxDistance).isTrue();
+    public static BooleanExpression within(SimplePath<Point<?>> point, double longitude, double latitude, int maxDistance){
+        return Expressions.booleanTemplate("st_dwithin({0},st_setsrid(st_point({1}, {2}), 4326),{3})", point, longitude, latitude, maxDistance);
     }
 
     /**
@@ -59,8 +83,8 @@ public final class PostgisExpressions {
      * @param maxDistance 最大距离，单位为米
      * @return
      */
-    public static BooleanExpression within(SimplePath<Point<?>> point, Double longitude, Double latitude, int epsg, int maxDistance){
-        return Expressions.booleanTemplate("sql('ST_DWithin(?,ST_SetSRID(ST_MakePoint(?, ?), ?),?)',{0},{1},{2},{3},{4})", point, longitude, latitude, epsg, maxDistance).isTrue();
+    public static BooleanExpression within(SimplePath<Point<?>> point, double longitude, double latitude, int maxDistance, int epsg){
+        return Expressions.booleanTemplate("st_dwithin({0},st_setsrid(st_point({1}, {2}), {3}),{4})", point, longitude, latitude, epsg, maxDistance);
     }
 
 }

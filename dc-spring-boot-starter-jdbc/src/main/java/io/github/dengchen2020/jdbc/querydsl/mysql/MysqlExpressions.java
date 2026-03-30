@@ -82,4 +82,77 @@ public final class MysqlExpressions {
         return Expressions.booleanTemplate("json_contains_path({0},'all',{1})", expr, path);
     }
 
+    /**
+     * 计算两个经纬度之间的距离，单位为公里
+     *
+     * @param point     geography类型字段
+     * @param latitude  纬度
+     * @param longitude 经度
+     * @return
+     */
+    public static NumberExpression<Double> distancekm(SimplePath<?> point, double longitude, double latitude){
+        return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), 4326))/1000,2)", point, longitude, latitude);
+    }
+
+    /**
+     * 计算两个经纬度之间的距离，单位为公里
+     *
+     * @param point     geography类型字段
+     * @param latitude  纬度
+     * @param longitude 经度
+     * @return
+     */
+    public static NumberExpression<Double> distancekm(SimplePath<?> point, double longitude, double latitude, int epsg){
+        return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), {3}))/1000,2)", point, longitude, latitude, epsg);
+    }
+
+    /**
+     * 计算两个经纬度之间的距离，单位为米
+     *
+     * @param point     geography类型字段
+     * @param latitude  纬度
+     * @param longitude 经度
+     * @return
+     */
+    public static NumberExpression<Double> distancem(SimplePath<?> point, double longitude, double latitude){
+        return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), 4326)),2)", point, longitude, latitude);
+    }
+
+    /**
+     * 计算两个经纬度之间的距离，单位为米
+     *
+     * @param point     geography类型字段
+     * @param latitude  纬度
+     * @param longitude 经度
+     * @return
+     */
+    public static NumberExpression<Double> distancem(SimplePath<?> point, double longitude, double latitude, int epsg){
+        return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), {3})),2)", point, longitude, latitude, epsg);
+    }
+
+    /**
+     * 获取经纬度附近距离的数据，单位米
+     * @param point geography类型字段
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param maxDistance 最大距离，单位为米
+     * @return
+     */
+    public static BooleanExpression within(SimplePath<?> point, double longitude, double latitude, int maxDistance){
+        return Expressions.booleanTemplate("st_within({0}, st_buffer(st_srid(point({1},{2}),4326), {3}))", point, longitude, latitude, maxDistance);
+    }
+
+    /**
+     * 获取经纬度附近距离的数据，单位米
+     * @param point geography类型字段
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param epsg 坐标系编号，例如4326
+     * @param maxDistance 最大距离，单位为米
+     * @return
+     */
+    public static BooleanExpression within(SimplePath<?> point, double longitude, double latitude, int maxDistance, int epsg){
+        return Expressions.booleanTemplate("st_within({0}, st_buffer(st_srid(point({1},{2}),{3}), {4}))", point, longitude, latitude, epsg, maxDistance);
+    }
+
 }
