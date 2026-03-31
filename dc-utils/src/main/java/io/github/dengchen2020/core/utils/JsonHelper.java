@@ -46,10 +46,24 @@ public class JsonHelper {
         return nonNullJsonMapper;
     }
 
+    /**
+     * The equivalent to {@link JsonInclude.Include#NON_DEFAULT} for specifying
+     * inclusion of non-defaults for both values and content.
+     * <p>
+     * This will specify the same setting for including a value both
+     * on <b>Java object level</b> as well as when <b>contained</b>
+     * in an object reference (see {@link JsonInclude} for further
+     * details on this distinction).
+     *
+     * @since Jackson 2.21
+     */
+    public final static JsonInclude.Value ALL_NON_DEFAULT = JsonInclude.Value
+            .construct(JsonInclude.Include.NON_DEFAULT, JsonInclude.Include.NON_DEFAULT);
+
     public JsonHelper(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
         this.nonNullJsonMapper = jsonMapper.rebuild()
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .defaultPropertyInclusion(ALL_NON_DEFAULT)
                 .build();
     }
 
