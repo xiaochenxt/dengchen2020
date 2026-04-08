@@ -2,11 +2,11 @@ package io.github.dengchen2020.security.properties;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.security.permission.PermissionVerifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * token配置信息
@@ -46,6 +46,11 @@ public class SecurityProperties {
      * 权限校验配置
      */
     private Permission permission = new Permission();
+
+    /**
+     * 密码加密配置
+     */
+    private PasswordEncoder passwordEncoder = new PasswordEncoder();
 
     public static class Resource {
         /**
@@ -189,6 +194,34 @@ public class SecurityProperties {
         }
     }
 
+    public static class PasswordEncoder {
+        /**
+         * 密码加密强度，默认为10，取值范围为4-31
+         */
+        private int strength = -1;
+
+        /**
+         * 密码加密版本（Spring默认$2A），一般不用改，在Java中只有前缀区别，这里默认为$2B，OpenBSD官方统一规范，全语言、全实现行为一致
+         */
+        private BCryptPasswordEncoder.BCryptVersion version = BCryptPasswordEncoder.BCryptVersion.$2B;
+
+        public int getStrength() {
+            return strength;
+        }
+
+        public void setStrength(int strength) {
+            this.strength = strength;
+        }
+
+        public BCryptPasswordEncoder.BCryptVersion getVersion() {
+            return version;
+        }
+
+        public void setVersion(BCryptPasswordEncoder.BCryptVersion version) {
+            this.version = version;
+        }
+    }
+
     public static class SimpleToken {
 
         /**
@@ -292,4 +325,11 @@ public class SecurityProperties {
         this.simpleToken = simpleToken;
     }
 
+    public PasswordEncoder getPasswordEncoder() {
+        return passwordEncoder;
+    }
+
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 }

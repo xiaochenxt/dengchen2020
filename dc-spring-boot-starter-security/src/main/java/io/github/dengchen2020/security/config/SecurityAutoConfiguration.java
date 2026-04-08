@@ -38,7 +38,7 @@ public final class SecurityAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnMissingBean
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(4);
+        return new BCryptPasswordEncoder(securityProperties.getPasswordEncoder().getVersion(), securityProperties.getPasswordEncoder().getStrength());
     }
 
     @ConditionalOnMissingBean(value = AuthenticationFilter.class, parameterizedContainer = FilterRegistrationBean.class)

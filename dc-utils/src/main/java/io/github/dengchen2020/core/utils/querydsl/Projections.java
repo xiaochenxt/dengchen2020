@@ -54,7 +54,7 @@ public class Projections {
      * @param exprs 投影的表达式
      * @return 工厂表达式
      */
-    public static <T> QBean<T> bean(Class<? extends T> type, EntityPath<T> entityPath, Expression<?>... exprs) {
+    public static <T> QBean<T> bean(Class<? extends T> type, EntityPath<?> entityPath, Expression<?>... exprs) {
         List<Expression<?>> expressions = new ArrayList<>();
         Expression<?>[] generateSetterExpressions = generateSetterExpressions(type, entityPath);
         for (int i = 0, generateSetterExpressionsLength = generateSetterExpressions.length; i < generateSetterExpressionsLength; i++) {
@@ -123,7 +123,7 @@ public class Projections {
      * @return factory expression
      */
     public static <T extends Record> ConstructorExpression<T> constructor(
-            Class<T> type, EntityPath<?> entityPath) {
+            Class<? extends T> type, EntityPath<?> entityPath) {
         return com.querydsl.core.types.Projections.constructor(type, generateRecordConstructorExpressions(type, entityPath));
     }
 
