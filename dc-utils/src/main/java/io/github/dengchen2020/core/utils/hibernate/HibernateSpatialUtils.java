@@ -18,7 +18,7 @@ public abstract class HibernateSpatialUtils {
      * @param latitude 纬度
      * @return
      */
-    public static Point<?> point(Double longitude, Double latitude){
+    public static Point<?> point(double longitude, double latitude){
         return DSL.point(CoordinateReferenceSystems.WGS84, DSL.g(longitude, latitude));
     }
 
@@ -29,7 +29,7 @@ public abstract class HibernateSpatialUtils {
      * @param epsg 坐标系编号，例如4326
      * @return
      */
-    public static Point<?> point(Double longitude, Double latitude, int epsg){
+    public static Point<?> point(double longitude, double latitude, int epsg){
         return DSL.point(CrsRegistry.getGeographicCoordinateReferenceSystemForEPSG(epsg), DSL.g(longitude, latitude));
     }
 
