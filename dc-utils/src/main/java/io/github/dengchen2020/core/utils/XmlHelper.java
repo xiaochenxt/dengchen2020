@@ -19,6 +19,20 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public class XmlHelper {
 
+    /**
+     * Constant that indicates that only properties with non-null
+     * values are to be included.
+     * <p>
+     * This will specify the same setting for including a value both
+     * on <b>Java object level</b> as well as when <b>contained</b>
+     * in an object reference (see {@link JsonInclude} for further
+     * details on this distinction).
+     *
+     * @since 2.21
+     */
+    public final static JsonInclude.Value ALL_NON_NULL = JsonInclude.Value
+            .construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
     private static final XmlMapper defaultXmlMapper = XmlMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
     public static final XmlHelper INSTANCE = new XmlHelper(defaultXmlMapper);
 
@@ -40,7 +54,7 @@ public class XmlHelper {
     public XmlHelper(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
         this.nonNullXmlMapper = new XmlMapper.Builder(xmlMapper)
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .defaultPropertyInclusion(ALL_NON_NULL)
                 .build();
     }
 

@@ -20,6 +20,7 @@ public class JpaRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
         aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, PathBuilder.class, JPAQuery.class);
         aotUtils.registerReflection(QuerydslJpaRepositoryExecutor.class, BaseJpaRepositoryExecutor.class);
+        aotUtils.registerPattern("keywords/*");
     }
 
 }

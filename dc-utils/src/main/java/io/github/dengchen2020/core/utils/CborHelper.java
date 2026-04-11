@@ -20,6 +20,20 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public class CborHelper {
 
+    /**
+     * Constant that indicates that only properties with non-null
+     * values are to be included.
+     * <p>
+     * This will specify the same setting for including a value both
+     * on <b>Java object level</b> as well as when <b>contained</b>
+     * in an object reference (see {@link JsonInclude} for further
+     * details on this distinction).
+     *
+     * @since 2.21
+     */
+    public final static JsonInclude.Value ALL_NON_NULL = JsonInclude.Value
+            .construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
     private static final CBORMapper defaultCborMapper = CBORMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
     public static final CborHelper INSTANCE = new CborHelper(defaultCborMapper);
 
@@ -42,7 +56,7 @@ public class CborHelper {
     public CborHelper(CBORMapper cborMapper) {
         this.cborMapper = cborMapper;
         this.nonNullCborMapper = new CBORMapper.Builder(cborMapper)
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .defaultPropertyInclusion(ALL_NON_NULL)
                 .build();
     }
 

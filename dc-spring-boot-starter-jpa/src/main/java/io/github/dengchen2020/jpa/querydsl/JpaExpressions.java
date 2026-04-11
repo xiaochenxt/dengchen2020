@@ -227,4 +227,30 @@ public final class JpaExpressions {
         return Expressions.dateTimeTemplate(Timestamp.class, "cast({0} as timestamp)", expr);
     }
 
+    /**
+     * 用于在Hibernate的hql中嵌入原生sql
+     * @param sql 原生sql片段
+     * @param argCount 参数个数
+     * @return
+     */
+    public static String buildSqlFragment(String sql, int argCount) {
+        var sb = new StringBuilder().append("sql('").append(sql).append("'");
+        if (argCount > 0) {
+            sb.append(",");
+            for (int i = 0; i < argCount; i++) sb.append("{").append(i).append("}");
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    /**
+     * 用于在Hibernate的hql中嵌入原生sql
+     * @param clazz 返回类型
+     * @param sql 原生sql片段
+     * @param args 参数
+     */
+    public static <T> SimpleExpression<T> sql(Class<T> clazz, String sql, Object... args) {
+        return Expressions.simpleTemplate(clazz, buildSqlFragment(sql, args.length), args);
+    }
+
 }

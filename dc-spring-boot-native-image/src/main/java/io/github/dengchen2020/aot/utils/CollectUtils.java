@@ -76,7 +76,7 @@ public class CollectUtils {
                 Set<String> classNames = findClassNames(basePackage, name -> !name.contains("__"));
                 for (String className : classNames) {
                     try {
-                        Class<?> clazz = Class.forName(className);
+                        Class<?> clazz = classLoader.loadClass(className);
                         if (predicate == null || predicate.test(clazz)) classes.add(clazz);
                     } catch (ClassNotFoundException | LinkageError e) {
                         // 忽略无法加载的类
@@ -124,7 +124,7 @@ public class CollectUtils {
 
         for (String className : allClassNames) {
             try {
-                Class<?> clazz = Class.forName(className);
+                Class<?> clazz = classLoader.loadClass(className);
                 if (predicate.test(clazz)) {
                     result.add(clazz);
                 }
@@ -344,8 +344,10 @@ public class CollectUtils {
         Set<Class<?>> classes = new HashSet<>();
         for (String resource : findResources()) {
             if (resource.endsWith("native-image.properties")) {
-                BufferedInputStream inputStream = (BufferedInputStream) classLoader.getResource(resource).getContent();
-                String content = new String(inputStream.readAllBytes());
+                String content;
+                try (BufferedInputStream inputStream = (BufferedInputStream) classLoader.getResource(resource).getContent()) {
+                    content = new String(inputStream.readAllBytes());
+                }
                 String className = parseHClassValue(content);
                 if (className != null) {
                     Class<?> c = loadClass(className);

@@ -12,9 +12,9 @@ import org.springframework.util.StringUtils;
 @NullMarked
 public class RedisIdGenerator {
 
-    private final StringRedisTemplate redisTemplate;
-    private static final String REDIS_ID_GENERATOR_KEY = "dc:id:generator:id";
-    private final String redisKey;
+    protected final StringRedisTemplate redisTemplate;
+    protected static final String REDIS_ID_GENERATOR_KEY = "dc:id:generator:id";
+    protected final String redisKey;
 
     /**
      * 将{@code serviceName} 追加到redisKey中，隔离不同业务的唯一id，为空则不区分业务

@@ -28,6 +28,20 @@ import org.springframework.util.StringUtils;
 @NullMarked
 public class JsonHelper {
 
+    /**
+     * Constant that indicates that only properties with non-null
+     * values are to be included.
+     * <p>
+     * This will specify the same setting for including a value both
+     * on <b>Java object level</b> as well as when <b>contained</b>
+     * in an object reference (see {@link JsonInclude} for further
+     * details on this distinction).
+     *
+     * @since 2.21
+     */
+    public final static JsonInclude.Value ALL_NON_NULL = JsonInclude.Value
+            .construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
     private static final JsonMapper defaultJsonMapper = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
     public static final JsonHelper INSTANCE = new JsonHelper(defaultJsonMapper);
 
@@ -46,24 +60,10 @@ public class JsonHelper {
         return nonNullJsonMapper;
     }
 
-    /**
-     * The equivalent to {@link JsonInclude.Include#NON_DEFAULT} for specifying
-     * inclusion of non-defaults for both values and content.
-     * <p>
-     * This will specify the same setting for including a value both
-     * on <b>Java object level</b> as well as when <b>contained</b>
-     * in an object reference (see {@link JsonInclude} for further
-     * details on this distinction).
-     *
-     * @since Jackson 2.21
-     */
-    public final static JsonInclude.Value ALL_NON_DEFAULT = JsonInclude.Value
-            .construct(JsonInclude.Include.NON_DEFAULT, JsonInclude.Include.NON_DEFAULT);
-
     public JsonHelper(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
         this.nonNullJsonMapper = jsonMapper.rebuild()
-                .defaultPropertyInclusion(ALL_NON_DEFAULT)
+                .defaultPropertyInclusion(ALL_NON_NULL)
                 .build();
     }
 
