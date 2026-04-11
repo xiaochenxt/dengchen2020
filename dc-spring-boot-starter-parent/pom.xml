@@ -62,13 +62,13 @@
         <redisson.version>4.3.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <protostuff.version>1.8.0</protostuff.version>
-        <spring-ai.version>1.1.3</spring-ai.version>
+        <spring-ai.version>1.1.4</spring-ai.version>
         <graalvm.version>25.0.2</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
         <libphonenumber.version>9.0.26</libphonenumber.version>
         <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
-        <ip2region.version>3.3.6</ip2region.version>
+        <ip2region.version>3.3.7</ip2region.version>
         <software.amazon.awssdk.version>2.41.34</software.amazon.awssdk.version>
         <playwright.version>1.58.0</playwright.version>
     </properties>
