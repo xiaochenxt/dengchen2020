@@ -34,7 +34,7 @@ public final class JacksonAutoConfiguration {
                     .enableSpringCacheNullValueSupport()
                     .customize(mapper -> {
                         for (JsonMapperBuilderCustomizer customizer : customizers) customizer.customize(mapper);
-                        mapper.changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL));
+                        mapper.changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL));
                     })
                     .build();
         }

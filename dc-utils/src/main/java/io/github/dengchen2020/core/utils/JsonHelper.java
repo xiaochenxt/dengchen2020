@@ -50,7 +50,7 @@ public class JsonHelper {
     public JsonHelper(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
         this.nonNullJsonMapper = jsonMapper.rebuild()
-                .changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL))
                 .build();
     }
 

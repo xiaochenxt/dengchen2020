@@ -40,7 +40,7 @@ public class XmlHelper {
     public XmlHelper(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
         this.nonNullXmlMapper = xmlMapper.rebuild()
-                .changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL))
                 .build();
     }
 

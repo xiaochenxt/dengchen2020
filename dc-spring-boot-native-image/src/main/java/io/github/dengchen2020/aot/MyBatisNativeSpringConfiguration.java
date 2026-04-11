@@ -52,7 +52,7 @@ import java.util.function.Function;
  */
 @ConditionalOnProperty(value = AbstractAotProcessor.AOT_PROCESSING, havingValue = "true")
 @ConditionalOnClass(org.mybatis.spring.mapper.MapperFactoryBean.class)
-@ImportRuntimeHints(MyBatisNativeSpringConfiguration.MyBaitsRuntimeHintsRegistrar.class)
+@ImportRuntimeHints(MyBatisNativeSpringConfiguration.MyBatisRuntimeHintsRegistrar.class)
 @Configuration(proxyBeanMethods = false)
 public final class MyBatisNativeSpringConfiguration {
 
@@ -68,7 +68,7 @@ public final class MyBatisNativeSpringConfiguration {
         return new MyBatisMapperFactoryBeanPostProcessor();
     }
 
-    static class MyBaitsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+    static class MyBatisRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
         @Override
         public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
@@ -107,7 +107,8 @@ public final class MyBatisNativeSpringConfiguration {
             return (context, code) -> {
                 RuntimeHints hints = context.getRuntimeHints();
                 for (String beanName : beanNames) {
-                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName.substring(1));
+                    String beanDefinitionName = beanName.startsWith("&") ? beanName.substring(1) : beanName;
+                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
                     PropertyValue mapperInterface = beanDefinition.getPropertyValues().getPropertyValue("mapperInterface");
                     if (mapperInterface != null && mapperInterface.getValue() != null) {
                         Class<?> mapperInterfaceType = (Class<?>) mapperInterface.getValue();

@@ -45,7 +45,7 @@ public class CborHelper {
     public CborHelper(CBORMapper cborMapper) {
         this.cborMapper = cborMapper;
         this.nonNullCborMapper = cborMapper.rebuild()
-                .changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL))
                 .build();
     }
 
