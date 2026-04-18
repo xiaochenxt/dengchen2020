@@ -46,7 +46,7 @@ public class LockAop implements Ordered {
             Object[] args = joinPoint.getArgs();
             EvaluationContext context = new MethodBasedEvaluationContext(args.length != 1 ? null : args[0] , signature.getMethod(), args, parameterNameDiscoverer);
             String lockKey = parser.parseExpression(lock.value()).getValue(context, String.class);
-            rLock = lock.name().isBlank() ? redissonClient.getLock(LOCK_GLOBAL_PREFIX + lockKey) : redissonClient.getLock(LOCK_GLOBAL_PREFIX + lock.name() + ":" + lockKey);
+            rLock = lock.name().isBlank() ? redissonClient.getLock(LOCK_GLOBAL_PREFIX + signature + ":" + lockKey) : redissonClient.getLock(LOCK_GLOBAL_PREFIX + lock.name() + ":" + lockKey);
         }
         try {
             if (rLock.tryLock(lock.waitTime(), lock.lockTime(), lock.timeUnit())) {

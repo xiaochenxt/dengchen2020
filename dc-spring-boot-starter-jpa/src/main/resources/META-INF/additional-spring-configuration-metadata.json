@@ -1,0 +1,16 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "dc.jpa.properties.hibernate.dynamic-insert",
+      "type": "java.lang.Boolean",
+      "description": "是否启用hibernate-orm的动态生成新增sql，即新增sql语句只包含非空值的字段，详见@DynamicInsert的注解说明.",
+      "defaultValue": true
+    },{
+      "name": "dc.jpa.properties.hibernate.dynamic-update",
+      "type": "java.lang.Boolean",
+      "description": "是否启用hibernate-orm的动态生成更新sql，即更新sql语句只包含实际修改了值的字段，详见@DynamicUpdate的注解说明.",
+      "defaultValue": true
+    }
+  ]
+}

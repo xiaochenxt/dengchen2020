@@ -87,7 +87,11 @@ public final class RedisDependencyAutoConfiguration {
                         topic = PatternTopic.of(redisMessageListener.value());
                     }
                     if(messageListener instanceof MessageListenerAdapter messageListenerAdapter){
-                        messageListenerAdapter.setDefaultListenerMethod(method.getName());
+                        var methodName = method.getName();
+                        if (!MessageListenerAdapter.ORIGINAL_DEFAULT_LISTENER_METHOD.equals(methodName)) {
+                            messageListenerAdapter.setDefaultListenerMethod(methodName);
+                            messageListenerAdapter.afterPropertiesSet();
+                        }
                         Class<?> argClass = method.getParameterTypes()[0];
                         if(argClass == byte[].class){
                             messageListenerAdapter.setSerializer(RedisSerializer.byteArray());
