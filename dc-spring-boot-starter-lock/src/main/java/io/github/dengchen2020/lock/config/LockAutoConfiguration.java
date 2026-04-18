@@ -2,6 +2,7 @@ package io.github.dengchen2020.lock.config;
 
 import io.github.dengchen2020.lock.LockAop;
 import io.github.dengchen2020.lock.api.RedissonLock;
+import java.util.concurrent.Executors;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -12,8 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.env.Environment;
-
-import java.util.concurrent.Executors;
 
 /**
  * 锁自动配置
@@ -28,8 +27,8 @@ public final class LockAutoConfiguration {
     @Bean(destroyMethod = "shutdown")
     RedissonClient redissonClient(Environment environment) {
         Config config = new Config();
-        config.setNettyExecutor(Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redisson-netty-", 0).factory()));
-        config.setExecutor(Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redisson-", 0).factory()));
+        // redisson4.3.1特别说明不建议使用虚拟线程，原因在于NettyEventLoop不支持使用虚拟线程
+        if (environment.getProperty("dc.lock.redisson.netty.use-virtual-thread", boolean.class, false)) config.setNettyExecutor(Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redisson-netty-", 0).factory()));
         config.setUseScriptCache(true);
         SingleServerConfig singleServerConfig = config.useSingleServer();
         singleServerConfig.setConnectionMinimumIdleSize(1);
