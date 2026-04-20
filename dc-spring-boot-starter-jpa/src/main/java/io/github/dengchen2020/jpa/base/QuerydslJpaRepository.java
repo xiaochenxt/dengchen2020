@@ -5,8 +5,6 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
-import io.github.dengchen2020.jpa.querydsl.NativeQuery;
-import io.github.dengchen2020.jpa.querydsl.NativeQueryFactory;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -74,17 +72,5 @@ public interface QuerydslJpaRepository<T> {
     default long delete(Predicate where) {
         return delete(new Predicate[]{where});
     }
-
-    /**
-     * 原生SQL查询，所有的操作自带from当前实体对应的表，不允许再from其他表，否则形成笛卡尔积查询
-     * @return {@link NativeQuery<T>}
-     */
-    NativeQuery<T> nativeQuery();
-
-    /**
-     * 原生SQL查询工厂，与{@link #nativeQuery}不同的是，不自带from当前实体对应的表。原生SQL支持子查询等复杂SQL，更加灵活自由
-     * @return {@link NativeQuery<T>}
-     */
-    NativeQueryFactory nativeQueryFactory();
 
 }

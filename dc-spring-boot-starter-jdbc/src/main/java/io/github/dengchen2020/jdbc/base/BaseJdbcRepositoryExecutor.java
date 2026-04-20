@@ -260,12 +260,12 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForUpdate(ID id) {
+    public Optional<T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
     @Override
-    public Optional<@Nullable T> findById(ID id) {
+    public Optional<T> findById(ID id) {
         return Optional.ofNullable(selectById(id));
     }
 
@@ -282,7 +282,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForShare(ID id) {
+    public Optional<T> findByIdForShare(ID id) {
         return Optional.ofNullable(selectByIdForShare(id));
     }
 
@@ -464,7 +464,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
     }
 
     @Override
-    public Optional<@Nullable T> findByIdWithUserId(ID id) {
+    public Optional<T> findByIdWithUserId(ID id) {
         return Optional.ofNullable(selectByIdWithUserId(id));
     }
 
@@ -628,7 +628,7 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
     }
 
     @Override
-    public Optional<@Nullable T> findOne(Predicate predicate) {
+    public Optional<T> findOne(Predicate predicate) {
         return Optional.ofNullable(selectFrom().where(predicate).fetchFirst());
     }
 
@@ -662,8 +662,9 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         return delete(builder().get(idFieldName).in(ids));
     }
 
+    @SafeVarargs
     @Override
-    public long delete(ID... ids) {
+    public final long delete(ID... ids) {
         return delete(List.of(ids));
     }
 
@@ -672,8 +673,9 @@ public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, I
         return findAllById(ids);
     }
 
+    @SafeVarargs
     @Override
-    public List<T> selectInIds(ID... ids) {
+    public final List<T> selectInIds(ID... ids) {
         return selectInIds(List.of(ids));
     }
 

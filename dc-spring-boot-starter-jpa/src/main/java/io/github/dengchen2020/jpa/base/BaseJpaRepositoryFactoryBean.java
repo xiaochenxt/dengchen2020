@@ -1,9 +1,9 @@
 package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.github.dengchen2020.jpa.querydsl.NativeQueryFactory;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,6 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-
-import java.util.List;
 
 import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
 
@@ -31,8 +29,6 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
 
     private JPAQueryFactory jpaQueryFactory;
 
-    private NativeQueryFactory nativeQueryFactory;
-
     @Autowired
     public void setRepositoryFragmentsCustomizer(@jakarta.annotation.Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer) {
         this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizer;
@@ -43,11 +39,6 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    @Autowired
-    public void setNativeQueryFactory(NativeQueryFactory nativeQueryFactory) {
-        this.nativeQueryFactory = nativeQueryFactory;
-    }
-
     public BaseJpaRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
         super(repositoryInterface);
     }
@@ -55,7 +46,7 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
     @Nonnull
     @Override
     protected RepositoryFactorySupport createRepositoryFactory(@Nonnull EntityManager em) {
-        return new BaseRepositoryFactory(em, repositoryFragmentsCustomizer, jpaQueryFactory, nativeQueryFactory);
+        return new BaseRepositoryFactory(em, repositoryFragmentsCustomizer, jpaQueryFactory);
     }
 
     @NullMarked
@@ -65,14 +56,12 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
         @Nullable
         private final List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer;
         private final JPAQueryFactory jpaQueryFactory;
-        private final NativeQueryFactory nativeQueryFactory;
 
 
-        public BaseRepositoryFactory(EntityManager em,@Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizers, JPAQueryFactory jpaQueryFactory, NativeQueryFactory nativeQueryFactory) {
+        public BaseRepositoryFactory(EntityManager em,@Nullable List<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizers, JPAQueryFactory jpaQueryFactory) {
             super(em);
             this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizers;
             this.jpaQueryFactory = jpaQueryFactory;
-            this.nativeQueryFactory = nativeQueryFactory;
         }
 
         /**
@@ -97,7 +86,7 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
                     && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
             if (isQueryDslRepository) {
-                var querydslRepositoryExecutor = new QuerydslJpaRepositoryExecutor<>(entityInformation, entityManager, resolver, jpaQueryFactory, nativeQueryFactory);
+                var querydslRepositoryExecutor = new QuerydslJpaRepositoryExecutor<>(entityInformation, entityManager, resolver, jpaQueryFactory);
                 fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(querydslRepositoryExecutor));
             }
             return fragments.append(super.getRepositoryFragments(metadata, entityManager, resolver, crudMethodMetadata));

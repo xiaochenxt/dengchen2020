@@ -44,6 +44,7 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!--querydsl查询支持，官方依赖，跟JPA搭配使用 -->
@@ -60,7 +61,8 @@
         </dependency>
         <dependency>
             <groupId>io.github.openfeign.querydsl</groupId>
-            <artifactId>querydsl-sql</artifactId>
+            <artifactId>querydsl-sql-spring</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

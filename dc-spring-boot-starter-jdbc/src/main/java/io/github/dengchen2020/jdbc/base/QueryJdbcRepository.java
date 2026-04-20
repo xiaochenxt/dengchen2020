@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jdbc.base;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,7 +40,7 @@ interface QueryJdbcRepository<T, ID> {
      * @return {@link Optional<T>}
      */
     @Transactional(propagation = Propagation.SUPPORTS)
-    Optional<T> findById(@NonNull ID id);
+    Optional<T> findById(ID id);
 
     /**
      * 根据id查询
