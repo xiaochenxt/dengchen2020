@@ -13,8 +13,6 @@ import com.querydsl.jpa.impl.JPAUpdateClause;
 import com.querydsl.sql.*;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
-import io.github.dengchen2020.jpa.querydsl.NativeQuery;
-import io.github.dengchen2020.jpa.querydsl.NativeQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -46,8 +44,6 @@ public class QuerydslJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T,
     protected final EntityManager entityManager;
 
     protected  final JPAQueryFactory queryFactory;
-    protected final NativeQueryFactory nativeQueryFactory;
-    protected final NativeQuery<T> nativeQuery;
 
     protected final EntityPath<T> path;
     protected final PathBuilder<T> builder;
@@ -60,8 +56,6 @@ public class QuerydslJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T,
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
         var querydsl = new Querydsl(entityManager, builder);
         this.queryFactory = new JPAQueryFactory(querydsl.getTemplates(), entityManager);
-        this.nativeQueryFactory = new NativeQueryFactory(entityManager, getTemplates(entityManager));
-        this.nativeQuery = new NativeQuery<>(nativeQueryFactory, path);
     }
 
     private static SQLTemplates getTemplates(EntityManager entityManager) {
@@ -86,22 +80,6 @@ public class QuerydslJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T,
 
     public JPAQueryFactory queryFactory() {
         return queryFactory;
-    }
-
-    /**
-     * 原生SQL查询工厂，与{@link #nativeQuery}不同的是，不自带from当前实体对应的表。原生SQL支持子查询、CTE、窗口函数等复杂SQL，更加灵活自由
-     * @return {@link NativeQuery<T>}
-     */
-    public NativeQueryFactory nativeQueryFactory() {
-        return nativeQueryFactory;
-    }
-
-    /**
-     * 原生SQL查询，所有的操作自带from当前实体对应的表，不允许再from其他表，否则形成笛卡尔积查询
-     * @return {@link NativeQuery<T>}
-     */
-    public NativeQuery<T> nativeQuery() {
-        return nativeQuery;
     }
 
     public PathBuilder<T> builder() {

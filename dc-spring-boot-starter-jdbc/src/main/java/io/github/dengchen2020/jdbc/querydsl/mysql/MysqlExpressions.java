@@ -1,5 +1,6 @@
 package io.github.dengchen2020.jdbc.querydsl.mysql;
 
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.*;
 import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
@@ -89,7 +90,7 @@ public final class MysqlExpressions {
      * @param longitude 经度
      * @return
      */
-    public static NumberExpression<Double> distancekm(SimplePath<?> point, double longitude, double latitude){
+    public static NumberExpression<Double> distancekm(Path<?> point, double longitude, double latitude){
         return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), 4326))/1000,2)", point, longitude, latitude);
     }
 
@@ -101,7 +102,7 @@ public final class MysqlExpressions {
      * @param longitude 经度
      * @return
      */
-    public static NumberExpression<Double> distancekm(SimplePath<?> point, double longitude, double latitude, int epsg){
+    public static NumberExpression<Double> distancekm(Path<?> point, double longitude, double latitude, int epsg){
         return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), {3}))/1000,2)", point, longitude, latitude, epsg);
     }
 
@@ -113,7 +114,7 @@ public final class MysqlExpressions {
      * @param longitude 经度
      * @return
      */
-    public static NumberExpression<Double> distancem(SimplePath<?> point, double longitude, double latitude){
+    public static NumberExpression<Double> distancem(Path<?> point, double longitude, double latitude){
         return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), 4326)),2)", point, longitude, latitude);
     }
 
@@ -125,7 +126,7 @@ public final class MysqlExpressions {
      * @param longitude 经度
      * @return
      */
-    public static NumberExpression<Double> distancem(SimplePath<?> point, double longitude, double latitude, int epsg){
+    public static NumberExpression<Double> distancem(Path<?> point, double longitude, double latitude, int epsg){
         return Expressions.numberTemplate(Double.class, "round(st_distance_sphere({0}, st_srid(point({1}, {2}), {3})),2)", point, longitude, latitude, epsg);
     }
 
@@ -137,7 +138,7 @@ public final class MysqlExpressions {
      * @param maxDistance 最大距离，单位为米
      * @return
      */
-    public static BooleanExpression within(SimplePath<?> point, double longitude, double latitude, int maxDistance){
+    public static BooleanExpression within(Path<?> point, double longitude, double latitude, int maxDistance){
         return Expressions.booleanTemplate("st_within({0}, st_buffer(st_srid(point({1},{2}),4326), {3}))", point, longitude, latitude, maxDistance);
     }
 
@@ -150,7 +151,7 @@ public final class MysqlExpressions {
      * @param maxDistance 最大距离，单位为米
      * @return
      */
-    public static BooleanExpression within(SimplePath<?> point, double longitude, double latitude, int maxDistance, int epsg){
+    public static BooleanExpression within(Path<?> point, double longitude, double latitude, int maxDistance, int epsg){
         return Expressions.booleanTemplate("st_within({0}, st_buffer(st_srid(point({1},{2}),{3}), {4}))", point, longitude, latitude, epsg, maxDistance);
     }
 

@@ -188,7 +188,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForUpdate(ID id) {
+    public Optional<T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
@@ -202,7 +202,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForUpdateNowait(ID id) {
+    public Optional<T> findByIdForUpdateNowait(ID id) {
         return Optional.ofNullable(selectByIdForUpdateNowait(id));
     }
 
@@ -224,7 +224,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForShare(ID id) {
+    public Optional<T> findByIdForShare(ID id) {
         return Optional.ofNullable(selectByIdForShare(id));
     }
 
@@ -238,7 +238,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
 
     @Transactional
     @Override
-    public Optional<@Nullable T> findByIdForShareNowait(ID id) {
+    public Optional<T> findByIdForShareNowait(ID id) {
         return Optional.ofNullable(selectByIdForShareNowait(id));
     }
 
@@ -370,7 +370,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
     }
 
     @Override
-    public Optional<@Nullable T> findByIdWithTenantId(ID id) {
+    public Optional<T> findByIdWithTenantId(ID id) {
         return Optional.ofNullable(selectByIdWithTenantId(id));
     }
 
@@ -506,7 +506,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends QuerydslJpaRepositoryExecu
     }
 
     @Override
-    public Optional<@Nullable T> findByIdWithUserId(ID id) {
+    public Optional<T> findByIdWithUserId(ID id) {
         return Optional.ofNullable(selectByIdWithUserId(id));
     }
 
