@@ -141,6 +141,11 @@
                 <version>${dc.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.github.dengchen2020</groupId>
+                <artifactId>querydsl-sql-jpa-annotation-apt</artifactId>
+                <version>0.0.1</version>
+            </dependency>
+            <dependency>
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-bom</artifactId>
                 <version>${protostuff.version}</version>
