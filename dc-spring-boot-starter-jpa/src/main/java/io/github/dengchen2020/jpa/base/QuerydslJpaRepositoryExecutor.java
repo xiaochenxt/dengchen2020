@@ -10,15 +10,11 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
-import com.querydsl.sql.*;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.stream.Stream;
-import org.hibernate.Session;
-import org.hibernate.dialect.*;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
@@ -56,26 +52,6 @@ public class QuerydslJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T,
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
         var querydsl = new Querydsl(entityManager, builder);
         this.queryFactory = new JPAQueryFactory(querydsl.getTemplates(), entityManager);
-    }
-
-    private static SQLTemplates getTemplates(EntityManager entityManager) {
-        SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) entityManager.unwrap(Session.class).getSessionFactory();
-        var dialect = sessionFactory.getJdbcServices().getDialect();
-        return switch (dialect) {
-            case H2Dialect _ -> H2Templates.DEFAULT;
-            case HSQLDialect _ -> HSQLDBTemplates.DEFAULT;
-            case MySQLDialect _ -> MySQLTemplates.DEFAULT;
-            case OracleDialect _ -> OracleTemplates.DEFAULT;
-            case PostgreSQLDialect _ -> PostgreSQLTemplates.DEFAULT;
-            case SQLServerDialect _ -> {
-                var databaseMajorVersion = dialect.getVersion().getMajor();
-                if (databaseMajorVersion < 9) yield SQLServerTemplates.DEFAULT;
-                if (databaseMajorVersion == 9) yield SQLServer2005Templates.DEFAULT;
-                if (databaseMajorVersion == 10) yield SQLServer2008Templates.DEFAULT;
-                yield SQLServer2012Templates.DEFAULT;
-            }
-            case null, default -> SQLTemplates.DEFAULT;
-        };
     }
 
     public JPAQueryFactory queryFactory() {
