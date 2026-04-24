@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.utils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -18,12 +19,14 @@ import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -217,6 +220,18 @@ public abstract class RestClientUtils {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
         factory.setReadTimeout(readTimeout);
         return factory;
+    }
+
+    /**
+     * 获取请求体，如果请求体为空则返回空字节数组，详见：{@link org.springframework.web.client.RestClientUtils#getBody(HttpInputMessage)}
+     * @param message
+     * @return
+     */
+    public static byte[] getBody(HttpInputMessage message) {
+        try {
+            return FileCopyUtils.copyToByteArray(message.getBody());
+        } catch (IOException ignore) {}
+        return new byte[0];
     }
 
 }
