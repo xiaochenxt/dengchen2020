@@ -58,6 +58,11 @@
       "type": "java.lang.Boolean",
       "description": "是否移除org.springframework.web.filter.RequestContextFilter，默认true，用不到.",
       "defaultValue": true
+    },{
+      "name": "dc.active-profiles.only-one",
+      "type": "java.lang.Boolean",
+      "description": "是否同时只能配置一个激活的profile，避免环境配置混乱导致运行时错误，默认为true，符合一个环境一个配置的风格，不建议关闭.",
+      "defaultValue": true
     }
   ]
 }
