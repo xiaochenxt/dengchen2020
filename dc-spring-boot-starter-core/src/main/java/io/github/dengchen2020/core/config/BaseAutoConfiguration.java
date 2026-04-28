@@ -52,6 +52,9 @@ public final class BaseAutoConfiguration implements InitializingBean {
     public void afterPropertiesSet() {
         if (!Charset.defaultCharset().equals(StandardCharsets.UTF_8)) log.warn("JAVA默认字符集：{}，非UTF-8可能导致字符乱码", Charset.defaultCharset());
         if (!Threading.VIRTUAL.isActive(environment)) throw new IllegalStateException("请配置spring.threads.virtual.enabled=true");
+        var activeProfiles = environment.getActiveProfiles();
+        if (environment.getProperty("dc.active-profiles.only-one", Boolean.class, true) && activeProfiles.length > 1)
+            throw new IllegalStateException("存在多个激活的profile，为避免环境配置混乱导致运行时错误，请检查并优化配置，保持一个环境一个配置");
     }
 
     @ConditionalOnClass(name = "org.apache.hc.client5.http.classic.HttpClient")
