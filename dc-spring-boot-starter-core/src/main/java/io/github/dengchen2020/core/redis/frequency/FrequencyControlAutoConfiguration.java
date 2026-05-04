@@ -36,7 +36,7 @@ public final class FrequencyControlAutoConfiguration {
 
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
-            registry.addInterceptor(new FrequencyControlInterceptor(frequencyControlSupport));
+            registry.addInterceptor(new SimpleFrequencyControlInterceptor(frequencyControlSupport));
         }
 
     }
