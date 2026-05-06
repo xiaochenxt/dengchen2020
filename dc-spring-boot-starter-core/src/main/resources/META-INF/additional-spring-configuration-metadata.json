@@ -63,6 +63,11 @@
       "type": "java.lang.Boolean",
       "description": "是否同时只能配置一个激活的profile，避免环境配置混乱导致运行时错误，默认为true，符合一个环境一个配置的风格，不建议关闭.",
       "defaultValue": true
+    },{
+      "name": "spring.datasource.connection-fetch",
+      "type": "java.lang.String",
+      "description": "eager：直接获取 JDBC 连接，lazy：尽可能晚地获取 JDBC 连接，如果没有任何语句被执行的话，则完全不获取连接.强烈推荐使用lazy.",
+      "defaultValue": "eager"
     }
   ]
 }

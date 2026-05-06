@@ -7,3 +7,4 @@ io.github.dengchen2020.core.redis.frequency.FrequencyControlAutoConfiguration
 io.github.dengchen2020.core.validation.DcValidationAutoConfiguration
 io.github.dengchen2020.core.web.mvc.DcWebAutoConfiguration
 io.github.dengchen2020.core.web.mvc.StaticServletAutoConfiguration
+io.github.dengchen2020.core.jdbc.LazyConnectionDataSourceConfiguration
