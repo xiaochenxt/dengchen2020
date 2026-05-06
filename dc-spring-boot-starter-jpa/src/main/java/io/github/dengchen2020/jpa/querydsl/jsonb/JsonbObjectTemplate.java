@@ -5,9 +5,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import io.github.dengchen2020.core.utils.JsonUtils;
 import io.github.dengchen2020.jpa.querydsl.json.JsonValueTemplate;
+import java.util.Collection;
+import java.util.Map;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.Map;
+import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
 
 /**
  * jsonb对象查询实现
@@ -105,6 +107,43 @@ public final class JsonbObjectTemplate extends AbstractJsonbTemplate implements 
     @Override
     public JsonValueTemplate get(String... pathArr) {
         return new JsonValueTemplate("jsonb_get_str_by_patharr({0},{1})", mixin, pathArr);
+    }
+
+    /**
+     * 当值是对象时，设置值
+     * @param pathArr
+     * @param value
+     * @return
+     */
+    @Override
+    public JsonbObjectTemplate setObject(String[] pathArr, Object value) {
+        return new JsonbObjectTemplate("jsonb_set({0},{1},{2})", mixin, pathArr, JsonUtils.toJson(value));
+    }
+
+    /**
+     * 当值是对象时，设置值
+     * @param pathArr
+     * @param value
+     * @return
+     */
+    @Override
+    public JsonbObjectTemplate setObject(Collection<String> pathArr, Object value) {
+        return setObject(pathArr.toArray(EMPTY_STRING_ARRAY), value);
+    }
+
+    @Override
+    public JsonbObjectTemplate setObject(String path, Object value) {
+        return setObject(new String[]{path}, value);
+    }
+
+    /**
+     * 当值是对象时移除元素
+     * @param pathArr
+     * @return
+     */
+    @Override
+    public JsonbObjectTemplate removeObject(String... pathArr) {
+        return new JsonbObjectTemplate("jsonb_remove({0},{1})", mixin, pathArr);
     }
 
 }
