@@ -15,8 +15,6 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import java.util.Collection;
 import java.util.Map;
 
-import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
-
 /**
  * JsonbPath，便于访问Jsonb字段，支持postgres
  * @author xiaochen
@@ -190,46 +188,6 @@ public class JsonbPath<T> extends SimpleExpression<T> implements JsonbObjectOper
     @Override
     public JsonValueTemplate get(String... pathArr) {
         return new JsonValueTemplate("jsonb_get_str_by_patharr({0},{1})", pathImpl, pathArr);
-    }
-
-    @Override
-    public JsonbObjectTemplate setObject(String[] pathArr, Object value) {
-        return new JsonbObjectTemplate("jsonb_set({0},{1},{2})", pathImpl, pathArr, JsonUtils.toJson(value));
-    }
-
-    @Override
-    public JsonbObjectTemplate setObject(Collection<String> pathArr, Object value) {
-        return setObject(pathArr.toArray(EMPTY_STRING_ARRAY), value);
-    }
-
-    @Override
-    public JsonbObjectTemplate setObject(String path, Object value) {
-        return setObject(new String[]{path}, value);
-    }
-
-    @Override
-    public JsonbObjectTemplate removeObject(String... pathArr) {
-        return new JsonbObjectTemplate("jsonb_remove({0},{1})", pathImpl, pathArr);
-    }
-
-    @Override
-    public JsonbArrayTemplate setArray(String[] pathArr, Object value) {
-        return new JsonbArrayTemplate("jsonb_set({0},{1},{2})", pathImpl, pathArr, JsonUtils.toJson(value));
-    }
-
-    @Override
-    public JsonbArrayTemplate setArray(Collection<String> pathArr, Object value) {
-        return setArray(pathArr.toArray(EMPTY_STRING_ARRAY), value);
-    }
-
-    @Override
-    public JsonbArrayTemplate setArray(String path, Object value) {
-        return setArray(new String[]{path}, value);
-    }
-
-    @Override
-    public JsonbArrayTemplate removeArray(String... pathArr) {
-        return new JsonbArrayTemplate("jsonb_remove({0},{1})", pathImpl, pathArr);
     }
 
 }

@@ -3,8 +3,9 @@ package io.github.dengchen2020.jpa.querydsl.jsonb;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import io.github.dengchen2020.jpa.querydsl.json.JsonValueTemplate;
-import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.Collection;
 
 /**
  * jsonb数组查询
@@ -35,36 +36,5 @@ public interface JsonbArrayOperation {
     JsonbArrayTemplate getArray(int index);
 
     JsonValueTemplate get(int index);
-
-    /**
-     * 当值是数组时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    JsonbArrayTemplate setArray(String[] pathArr, Object value);
-
-    /**
-     * 当值是数组时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    JsonbArrayTemplate setArray(Collection<String> pathArr, Object value);
-
-    /**
-     * 当值是数组时，设置值
-     * @param path
-     * @param value
-     * @return
-     */
-    JsonbArrayTemplate setArray(String path, Object value);
-
-    /**
-     * 当值是数组时移除元素
-     * @param pathArr
-     * @return
-     */
-    JsonbArrayTemplate removeArray(String... pathArr);
 
 }

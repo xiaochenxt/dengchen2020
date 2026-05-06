@@ -8,8 +8,6 @@ import org.jspecify.annotations.NullMarked;
 
 import java.util.Collection;
 
-import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
-
 /**
  * jsonb数组查询实现
  * @author xiaochen
@@ -58,42 +56,5 @@ public final class JsonbArrayTemplate extends AbstractJsonbTemplate implements J
     @Override
     public JsonValueTemplate get(int index) {
         return new JsonValueTemplate("jsonb_get_str({0},{1})", mixin, index);
-    }
-
-    /**
-     * 当值是数组时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    @Override
-    public JsonbArrayTemplate setArray(String[] pathArr, Object value) {
-        return new JsonbArrayTemplate("jsonb_set({0},{1},{2})", mixin, pathArr, JsonUtils.toJson(value));
-    }
-
-    /**
-     * 当值是数组时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    @Override
-    public JsonbArrayTemplate setArray(Collection<String> pathArr, Object value) {
-        return setArray(pathArr.toArray(EMPTY_STRING_ARRAY), value);
-    }
-
-    @Override
-    public JsonbArrayTemplate setArray(String path, Object value) {
-        return setArray(new String[]{path}, value);
-    }
-
-    /**
-     * 当值是数组时移除元素
-     * @param pathArr
-     * @return
-     */
-    @Override
-    public JsonbArrayTemplate removeArray(String... pathArr) {
-        return new JsonbArrayTemplate("jsonb_remove({0},{1})", mixin, pathArr);
     }
 }
