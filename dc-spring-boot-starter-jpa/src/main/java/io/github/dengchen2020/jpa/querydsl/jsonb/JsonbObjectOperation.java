@@ -3,9 +3,9 @@ package io.github.dengchen2020.jpa.querydsl.jsonb;
 import tools.jackson.databind.node.ObjectNode;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import io.github.dengchen2020.jpa.querydsl.json.JsonValueTemplate;
-import java.util.Collection;
-import java.util.Map;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.Map;
 
 /**
  * jsonb对象查询
@@ -63,36 +63,5 @@ public interface JsonbObjectOperation {
     JsonbObjectTemplate getObject(String... pathArr);
 
     JsonValueTemplate get(String... pathArr);
-
-    /**
-     * 当值是对象时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    JsonbObjectTemplate setObject(String[] pathArr, Object value);
-
-    /**
-     * 当值是对象时，设置值
-     * @param pathArr
-     * @param value
-     * @return
-     */
-    JsonbObjectTemplate setObject(Collection<String> pathArr, Object value);
-
-    /**
-     * 当值是对象时，设置值
-     * @param path
-     * @param value
-     * @return
-     */
-    JsonbObjectTemplate setObject(String path, Object value);
-
-    /**
-     * 当值是对象时移除元素
-     * @param pathArr
-     * @return
-     */
-    JsonbObjectTemplate removeObject(String... pathArr);
 
 }
