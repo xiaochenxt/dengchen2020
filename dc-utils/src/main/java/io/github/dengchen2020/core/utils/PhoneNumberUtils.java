@@ -5,13 +5,13 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.util.Locale;
+import java.util.Set;
+
 /**
- * 国际电话号码的实用程序。功能包括格式化、解析和
- *验证。
- *
- * <p>如果您使用此库，并希望收到有关重要更改的通知，请注册
+ * 国际电话号码的实用程序。功能包括格式化、解析和验证。</br>
+ * 如果您使用此库，并希望收到有关重要更改的通知，请注册
  * 我们的 <a href="https://groups.google.com/forum/#!aboutgroup/libphonenumber-discuss">邮件列表</a>。
- *
  * 注意：此类中的许多方法都需要区域代码字符串。这些必须使用
  * CLDR 双字母区域代码格式。这些应该是大写的。代码列表
  * 可以在这里找到：
@@ -161,6 +161,74 @@ public abstract class PhoneNumberUtils {
     public static Phonenumber.PhoneNumber parse(CharSequence numberToParse)
             throws NumberParseException {
         return  phoneNumberUtil.parse(numberToParse, null);
+    }
+
+    /**
+     * Returns 返回库中所有全局网络调用代码的元数据。
+     *
+     * @return  图书馆支持的每个非地理实体的无序国家呼叫代码集合
+     */
+    public static Set<Integer> getSupportedGlobalNetworkCallingCodes() {
+        return phoneNumberUtil.getSupportedGlobalNetworkCallingCodes();
+    }
+
+    /**
+     * 返回库中所有区域的元数据
+     *
+     * @return 为图书馆支持的每个地理区域，由两个字母组成的无序区域代码集合
+     */
+    public static Set<String> getSupportedRegions() {
+        return phoneNumberUtil.getSupportedRegions();
+    }
+
+    /**
+     * 返回库中所有国家呼叫代码的元数据，涵盖非地理实体（全球网络呼叫代码）和用于地理实体的代码。
+     * 例如，这可以用来填充一个国家呼叫代码下拉框，用于电话号码小部件。
+     *
+     * @return 图书馆支持的每个地理和非地理实体的无序国家呼叫代码集合
+     */
+    public static Set<Integer> getSupportedCallingCodes() {
+        return phoneNumberUtil.getSupportedCallingCodes();
+    }
+
+    /**
+     * 返回给定区域的区域代码 </br>
+     * 这个相比直接写{@link Locale#getCountry()}只是语义上更明确罢了）。
+     * @param locale
+     * @return
+     */
+    public static String getRegionCode(Locale locale) {
+        return locale.getCountry();
+    }
+
+    /**
+     * 返回特定地区的国家呼叫代码。例如，中国是86，俄罗斯是7，美国是1，新西兰是64。
+     *
+     * @param regionCode 我们希望获得呼叫代码的国家
+     * @return 该地区的国家呼叫代码，由regionCode表示
+     */
+    public static int getCountryCodeForRegion(String regionCode) {
+        return phoneNumberUtil.getCountryCodeForRegion(regionCode);
+    }
+
+    /**
+     * 获取给定区域的移动号码示例。
+     *
+     * @param defaultRegion 代表区域的字符串 例如：
+     * @return 移动号码的示例
+     */
+    public static Phonenumber.PhoneNumber getExampleMobileNumber(String defaultRegion) {
+        return phoneNumberUtil.getExampleNumberForType(defaultRegion, PhoneNumberUtil.PhoneNumberType.MOBILE);
+    }
+
+    /**
+     * 获取给定区域的移动号码长度（不包含国家前缀或任何格式）。
+     *
+     * @param regionCode 代表区域的字符串
+     * @return 移动号码的长度
+     */
+    public static int getMobileNumberLength(String regionCode) {
+        return phoneNumberUtil.getNationalSignificantNumber(getExampleMobileNumber(regionCode)).length();
     }
 
 }
