@@ -62,11 +62,11 @@
         <redisson.version>4.3.1</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <protostuff.version>1.8.0</protostuff.version>
-        <spring-ai.version>2.0.0-M5</spring-ai.version>
+        <spring-ai.version>2.0.0-M6</spring-ai.version>
         <graalvm.version>25.0.3</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>7.1</openfeign.querydsl.version>
-        <libphonenumber.version>9.0.29</libphonenumber.version>
+        <libphonenumber.version>9.0.30</libphonenumber.version>
         <mybatis.springboot.version>4.0.1</mybatis.springboot.version>
         <ip2region.version>3.3.7</ip2region.version>
         <software.amazon.awssdk.version>2.41.34</software.amazon.awssdk.version>
@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
-                <version>4.0.7</version>
+                <version>4.0.8</version>
             </dependency>
             <dependency>
                 <groupId>org.redisson</groupId>
