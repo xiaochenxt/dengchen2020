@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,8 +28,9 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
+    @Transactional
     @Modifying
-    @Query("delete from #{#entityName} e where e.id in ?1")
+    @Query("delete from #{#entityName} e where id(e) in ?1")
     int delete(Iterable<ID> ids);
 
     /**
@@ -37,8 +39,9 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param ids id集合
      * @return 受影响的行数
      */
+    @Transactional
     @Modifying
-    @Query("delete from #{#entityName} e where e.id in ?1")
+    @Query("delete from #{#entityName} e where id(e) in ?1")
     int delete(ID... ids);
 
     /**
@@ -46,7 +49,7 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param ids id集合
      * @return List<T>
      */
-    @Query("select e from #{#entityName} e where e.id in ?1")
+    @Query("select e from #{#entityName} e where id(e) in ?1")
     List<T> selectInIds(Iterable<ID> ids);
 
     /**
@@ -54,7 +57,7 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param ids id集合
      * @return List<T>
      */
-    @Query("select e from #{#entityName} e where e.id in ?1")
+    @Query("select e from #{#entityName} e where id(e) in ?1")
     List<T> selectInIds(ID... ids);
 
     /**
@@ -62,7 +65,7 @@ public interface CrudJpaRepository<T, ID> extends JpaRepository<T, ID> {
      * @param id id
      * @return true：存在，false：不存在
      */
-    @Query("select exists(select 1 from #{#entityName} e where e.id = ?1)")
+    @Query("select exists(select 1 from #{#entityName} e where id(e) = ?1)")
     boolean exists(ID id);
 
     /**

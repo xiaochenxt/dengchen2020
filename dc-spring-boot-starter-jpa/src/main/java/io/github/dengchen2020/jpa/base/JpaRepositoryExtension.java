@@ -1,6 +1,8 @@
 package io.github.dengchen2020.jpa.base;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.data.core.TypeInformation;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.RepositoryMethodContext;
 import org.springframework.data.repository.core.support.RepositoryMetadataAccess;
@@ -8,7 +10,7 @@ import org.springframework.data.repository.core.support.RepositoryMetadataAccess
 /**
  * 实现通用存储库片段的辅助接口
  * @author xiaochen
- * @since 2025/11/22
+ * @since 2025/11/23
  */
 public interface JpaRepositoryExtension<T, ID> extends RepositoryMetadataAccess {
 
@@ -23,6 +25,11 @@ public interface JpaRepositoryExtension<T, ID> extends RepositoryMetadataAccess 
     @SuppressWarnings("unchecked")
     default Class<T> getDomainClass(){
         return (Class<T>) getRepositoryMetadata().getDomainType();
+    }
+
+    @SuppressWarnings("unchecked")
+    default JpaEntityInformation<T, ID> getJpaEntityInformation(EntityManager entityManager){
+        return (JpaEntityInformation<T, ID>) JpaSupport.getJpaEntityInformation(getDomainClass(), entityManager);
     }
 
     /**

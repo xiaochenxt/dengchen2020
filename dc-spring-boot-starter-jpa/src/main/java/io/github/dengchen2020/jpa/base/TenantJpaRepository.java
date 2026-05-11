@@ -2,7 +2,10 @@ package io.github.dengchen2020.jpa.base;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +25,25 @@ public interface TenantJpaRepository<T, ID> {
      * @return T
      */
     @Nullable
+    @Query("select e from #{#entityName} e where id(e) = :id and e.tenantId = ?#{tenantId}")
     T selectByIdWithTenantId(ID id);
+
+    /**
+     * 根据id查询（携带租户id）
+     * @param id id
+     * @return T
+     */
+    @Query("select e from #{#entityName} e where id(e) = :id and e.tenantId = ?#{tenantId}")
+    default Optional<T> findByIdWithTenantId(ID id) {
+        return Optional.ofNullable(selectByIdWithTenantId(id));
+    }
 
     /**
      * 根据id查询（携带租户id）
      * @param ids ids
      * @return T
      */
+    @Query("select e from #{#entityName} e where id(e) in :ids and e.tenantId = ?#{tenantId}")
     List<T> selectInIdsWithTenantId(Iterable<ID> ids);
 
     /**
@@ -36,20 +51,17 @@ public interface TenantJpaRepository<T, ID> {
      * @param ids ids
      * @return T
      */
+    @Query("select e from #{#entityName} e where id(e) in :ids and e.tenantId = ?#{tenantId}")
     List<T> selectInIdsWithTenantId(ID... ids);
-
-    /**
-     * 根据id查询（携带租户id）
-     * @param id id
-     * @return T
-     */
-    Optional<T> findByIdWithTenantId(ID id);
 
     /**
      * 根据id删除（携带租户id）
      * @param id id
      * @return 受影响的条数
      */
+    @Transactional
+    @Modifying
+    @Query("delete from #{#entityName} e where id(e) = :id and e.tenantId = ?#{tenantId}")
     int deleteWithTenantId(ID id);
 
     /**
@@ -57,6 +69,9 @@ public interface TenantJpaRepository<T, ID> {
      * @param ids ids
      * @return 受影响的条数
      */
+    @Transactional
+    @Modifying
+    @Query("delete from #{#entityName} e where id(e) in :ids and e.tenantId = ?#{tenantId}")
     int deleteWithTenantId(Iterable<ID> ids);
 
     /**
@@ -64,30 +79,9 @@ public interface TenantJpaRepository<T, ID> {
      * @param ids ids
      * @return 受影响的条数
      */
+    @Transactional
+    @Modifying
+    @Query("delete from #{#entityName} e where id(e) in :ids and e.tenantId = ?#{tenantId}")
     int deleteWithTenantId(ID... ids);
-
-    /**
-     * 批量逻辑删除
-     *
-     * @param ids id集合
-     * @return 受影响的行数
-     */
-    int softDeleteWithTenantId(Iterable<ID> ids);
-
-    /**
-     * 批量逻辑删除
-     *
-     * @param ids id集合
-     * @return 受影响的行数
-     */
-    int softDeleteWithTenantId(ID... ids);
-
-    /**
-     * 逻辑删除
-     *
-     * @param id id
-     * @return 受影响的行数
-     */
-    int softDeleteWithTenantId(ID id);
 
 }

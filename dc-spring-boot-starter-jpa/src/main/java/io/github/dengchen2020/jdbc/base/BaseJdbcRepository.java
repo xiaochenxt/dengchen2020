@@ -8,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 2025/12/8
  */
 @NullMarked
-public interface BaseJdbcRepository<T, ID> extends QuerydslJdbcRepository<T>, JdbcClientRepository {
+public interface BaseJdbcRepository<T, ID> extends QuerydslJdbcRepository<T> {
 
 
 

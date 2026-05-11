@@ -1,6 +1,8 @@
 package io.github.dengchen2020.jpa.config;
 
+import io.github.dengchen2020.jpa.base.DcEvaluationContextExtension;
 import org.hibernate.cfg.AvailableSettings;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +33,12 @@ public final class JpaAutoConfiguration {
                 hibernateProperties.put("dc.hibernate.dynamic_update", true);
             }
         };
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    DcEvaluationContextExtension dcEvaluationContextExtension() {
+        return new DcEvaluationContextExtension();
     }
 
 }
