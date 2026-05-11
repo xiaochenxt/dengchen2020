@@ -1,9 +1,11 @@
 package io.github.dengchen2020.jpa.base;
 
-import org.springframework.data.util.TypeInformation;
+import jakarta.persistence.EntityManager;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.RepositoryMethodContext;
 import org.springframework.data.repository.core.support.RepositoryMetadataAccess;
+import org.springframework.data.util.TypeInformation;
 
 
 /**
@@ -24,6 +26,11 @@ public interface JpaRepositoryExtension<T, ID> extends RepositoryMetadataAccess 
     @SuppressWarnings("unchecked")
     default Class<T> getDomainClass(){
         return (Class<T>) getRepositoryMetadata().getDomainType();
+    }
+
+    @SuppressWarnings("unchecked")
+    default JpaEntityInformation<T, ID> getJpaEntityInformation(EntityManager entityManager){
+        return (JpaEntityInformation<T, ID>) JpaSupport.getJpaEntityInformation(getDomainClass(), entityManager);
     }
 
     /**

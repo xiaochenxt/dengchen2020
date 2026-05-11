@@ -2,8 +2,7 @@ package io.github.dengchen2020.jdbc.base;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.jpa.sql.JPASQLQuery;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -16,26 +15,8 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 interface QuerydslJdbcRepository<T> {
 
-    SQLQueryFactory nativeQueryFactory();
+    <R> JPASQLQuery<R> nativeSelect(Expression<R> expr);
 
-    SQLQuery<?> nativeQuery();
-
-    <R> SQLQuery<R> nativeSelect(Expression<R> expr);
-
-    SQLQuery<Tuple> nativeSelect(Expression<?>... exprs);
-
-    <R> SQLQuery<R> nativeSelectDistinct(Expression<R> expr);
-
-    SQLQuery<Tuple> nativeSelectDistinct(Expression<?>... exprs);
-
-    SQLQuery<Integer> nativeSelectOne();
-
-    SQLQuery<Integer> nativeSelectZero();
-
-    /**
-     * 单表数据查询
-     * @return {@link SQLQuery<T>}
-     */
-    SQLQuery<T> nativeSelectFrom();
+    JPASQLQuery<Tuple> nativeSelect(Expression<?>... exprs);
 
 }

@@ -4,6 +4,7 @@ import com.querydsl.jpa.EclipseLinkTemplates;
 import com.querydsl.jpa.HQLTemplates;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.github.dengchen2020.jpa.base.DcEvaluationContextExtension;
 import jakarta.persistence.EntityManager;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -50,6 +51,12 @@ public final class JpaAutoConfiguration {
             default -> JPQLTemplates.DEFAULT;
         };
         return new JPAQueryFactory(templates, entityManager);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    DcEvaluationContextExtension dcEvaluationContextExtension() {
+        return new DcEvaluationContextExtension();
     }
 
 }
