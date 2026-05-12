@@ -3,7 +3,10 @@ package io.github.dengchen2020.jdbc.base;
 import com.querydsl.core.JoinExpression;
 import com.querydsl.core.QueryMetadata;
 import com.querydsl.core.types.*;
-import com.querydsl.sql.*;
+import com.querydsl.sql.ColumnMetadata;
+import com.querydsl.sql.Configuration;
+import com.querydsl.sql.SQLOps;
+import com.querydsl.sql.SQLSerializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 
@@ -21,15 +24,8 @@ final class DcNativeSQLSerializer extends SQLSerializer {
 
     private final Map<Expression<?>, List<String>> aliases = new HashMap<>();
 
-    private final boolean wrapEntityProjections;
-
     public DcNativeSQLSerializer(Configuration configuration) {
-        this(configuration, false);
-    }
-
-    public DcNativeSQLSerializer(Configuration configuration, boolean wrapEntityProjections) {
         super(configuration);
-        this.wrapEntityProjections = wrapEntityProjections;
     }
 
     @Override
@@ -197,20 +193,6 @@ final class DcNativeSQLSerializer extends SQLSerializer {
     protected void serializeConstant(int parameterIndex, String constantLabel) {
         append("?");
         append(Integer.toString(parameterIndex));
-    }
-
-    @Override
-    protected void visitOperation(
-            Class<?> type, Operator operator, List<? extends Expression<?>> args) {
-        if (operator == SQLOps.ALL
-                && !(args.get(0) instanceof RelationalPath)
-                && wrapEntityProjections) {
-            append("{");
-            super.visitOperation(type, operator, args);
-            append("}");
-        } else {
-            super.visitOperation(type, operator, args);
-        }
     }
 
     private String camelCaseToSnakeCase(String name) {
