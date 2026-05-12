@@ -13,8 +13,6 @@ import com.querydsl.jpa.impl.JPAUpdateClause;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
-import java.util.Collections;
-import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
@@ -23,6 +21,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+
+import java.util.Collections;
+import java.util.stream.Stream;
 
 /**
  * 使用Querydsl实现
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
 @NullMarked
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class QuerydslJpaRepositoryExecutor<T, ID> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
+public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
 
     protected final EntityManager entityManager;
 
