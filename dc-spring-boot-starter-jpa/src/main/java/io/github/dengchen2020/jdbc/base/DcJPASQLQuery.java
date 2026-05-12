@@ -23,7 +23,7 @@ final class DcJPASQLQuery<T> extends JPASQLQuery<T> {
 
     @Override
     protected SQLSerializer createSerializer() {
-        return new DcNativeSQLSerializer(configuration, queryHandler.wrapEntityProjections());
+        return new DcNativeSQLSerializer(configuration);
     }
 
     public Query createQuery() {
