@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFragmentsContributor;
@@ -74,7 +75,7 @@ public final class JpaAutoConfiguration {
     /**
      * 注册JPA存储库片段
      */
-    static class DcJpaBeanPostProcessor implements BeanPostProcessor {
+    static class DcJpaBeanPostProcessor implements BeanPostProcessor, Ordered {
 
         private final ObjectProvider<JpaRepositoryFragmentsContributor> jpaRepositoryFragmentsContributors;
 
@@ -95,6 +96,10 @@ public final class JpaAutoConfiguration {
             return bean;
         }
 
+        @Override
+        public int getOrder() {
+            return 0;
+        }
     }
 
 }
