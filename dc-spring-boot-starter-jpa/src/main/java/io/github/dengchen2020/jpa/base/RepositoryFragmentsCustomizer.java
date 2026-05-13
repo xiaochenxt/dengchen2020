@@ -1,7 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
 import jakarta.persistence.EntityManager;
-import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -33,6 +32,6 @@ import org.springframework.data.repository.core.RepositoryMetadata;
  */
 public interface RepositoryFragmentsCustomizer {
 
-    Object customize(RepositoryMetadata metadata, JpaEntityInformation<?, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver, CrudMethodMetadata crudMethodMetadata);
+    Object customize(RepositoryMetadata metadata, JpaEntityInformation<?, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver);
 
 }

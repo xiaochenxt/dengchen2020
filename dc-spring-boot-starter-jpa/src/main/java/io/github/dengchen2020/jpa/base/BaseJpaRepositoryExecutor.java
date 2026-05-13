@@ -13,7 +13,6 @@ import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 /**
  * BaseJpaRepository的实现
@@ -32,7 +30,6 @@ import java.util.function.Function;
  * @since 2024/1/19
  */
 @NullMarked
-@Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
         QueryJpaRepository<T, ID>, EntityManagerRepository {
@@ -70,11 +67,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public <R> R execute(Function<EntityManager, R> function) {
-        return function.apply(entityManager);
-    }
-
-    @Override
     public void detach(Object entity) {
         entityManager.detach(entity);
     }
@@ -106,19 +98,19 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Nullable
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public T selectByIdForUpdate(ID id) {
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, getHints());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Optional<T> findByIdForUpdate(ID id) {
         return Optional.ofNullable(selectByIdForUpdate(id));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public @Nullable T selectByIdForUpdateNowait(ID id) {
         var hints = getHints();
@@ -126,7 +118,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, hints);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Optional<T> findByIdForUpdateNowait(ID id) {
         return Optional.ofNullable(selectByIdForUpdateNowait(id));
@@ -142,19 +134,19 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         return entityManager.find(getDomainClass(), id, metadata.getLockModeType(), getHints());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public @Nullable T selectByIdForShare(ID id) {
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_READ, getHints());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Optional<T> findByIdForShare(ID id) {
         return Optional.ofNullable(selectByIdForShare(id));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public @Nullable T selectByIdForShareNowait(ID id) {
         var hints = getHints();
@@ -162,7 +154,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_READ, hints);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Optional<T> findByIdForShareNowait(ID id) {
         return Optional.ofNullable(selectByIdForShareNowait(id));

@@ -17,7 +17,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.EntityPathResolver;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
  * @since 2025/3/28
  */
 @NullMarked
-@Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
 
@@ -109,6 +107,7 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
         return queryFactory.update(path).where(where);
     }
 
+    @Transactional
     @Override
     public long delete(Predicate[] where) {
         Assert.notEmpty(where, "删除必须有条件");

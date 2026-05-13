@@ -81,7 +81,8 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             var entityInformation = getEntityInformation(metadata.getDomainType());
             if (repositoryFragmentsCustomizer != null) {
                 for (RepositoryFragmentsCustomizer customizer : repositoryFragmentsCustomizer) {
-                    fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(customizer.customize(metadata, entityInformation, entityManager, resolver, crudMethodMetadata)));
+                    var fragment = customizer.customize(metadata, entityInformation, entityManager, resolver);
+                    if (fragment != null) fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(fragment));
                 }
             }
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
