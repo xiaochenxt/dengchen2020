@@ -34,9 +34,9 @@ import java.util.function.BiConsumer;
 public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
         QueryJpaRepository<T, ID>, EntityManagerRepository {
 
-    protected final EntityManager entityManager;
-    protected final JpaEntityInformation<T, ?> entityInformation;
-    protected final PersistenceProvider provider;
+    private final EntityManager entityManager;
+    private final JpaEntityInformation<T, ?> entityInformation;
+    private final PersistenceProvider provider;
 
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
@@ -45,7 +45,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         this.provider = PersistenceProvider.fromEntityManager(em);
     }
 
-    protected Map<String, Object> getHints() {
+    private Map<String, Object> getHints() {
         Map<String, Object> hints = new HashMap<>();
         getQueryHints().withFetchGraphs(entityManager).forEach(hints::put);
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
@@ -59,7 +59,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
         }
     }
 
-    protected void applyQueryHintsForCount(Query query) {
+    private void applyQueryHintsForCount(Query query) {
         CrudMethodMetadata metadata = super.getRepositoryMethodMetadata();
         if (metadata == null) return;
         getQueryHintsForCount().forEach(query::setHint);

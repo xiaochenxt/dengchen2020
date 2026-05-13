@@ -34,15 +34,12 @@ import java.util.stream.Stream;
 @Transactional(propagation = Propagation.SUPPORTS)
 public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
 
-    protected final EntityManager entityManager;
+    private final JPAQueryFactory queryFactory;
 
-    protected final JPAQueryFactory queryFactory;
-
-    protected final EntityPath<T> path;
-    protected final PathBuilder<T> builder;
+    private final EntityPath<T> path;
+    private final PathBuilder<T> builder;
 
     public QuerydslJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver, JPAQueryFactory jpaQueryFactory) {
-        this.entityManager = entityManager;
         this.path = resolver.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
         this.queryFactory = jpaQueryFactory;
