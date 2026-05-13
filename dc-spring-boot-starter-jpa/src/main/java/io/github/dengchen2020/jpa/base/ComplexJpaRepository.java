@@ -8,7 +8,6 @@ import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.stream.Stream;
 
@@ -18,7 +17,6 @@ import java.util.stream.Stream;
  * @since 2024/6/18
  */
 @NullMarked
-@NoRepositoryBean
 public interface ComplexJpaRepository<T> {
 
     /**
