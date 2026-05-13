@@ -25,18 +25,18 @@ public final class BaseJpaRepositoryFragmentsContributor implements JpaRepositor
     }
 
     @Override
-    public RepositoryComposition.RepositoryFragments describe(RepositoryMetadata metadata) {
-        if (!isSupportedRepositoryInterface(metadata)) return RepositoryComposition.RepositoryFragments.empty();
-        return RepositoryComposition.RepositoryFragments
-                .of(RepositoryFragment.structural(BaseJpaRepositoryExecutor.class, BaseJpaRepositoryExecutor.class));
-    }
-
-    @Override
     public RepositoryComposition.RepositoryFragments contribute(RepositoryMetadata metadata, JpaEntityInformation<?, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
         if (!isSupportedRepositoryInterface(metadata)) return RepositoryComposition.RepositoryFragments.empty();
         var executor = new BaseJpaRepositoryExecutor<>(entityInformation, entityManager);
         return RepositoryComposition.RepositoryFragments
                 .of(RepositoryFragment.implemented(BaseJpaRepositoryExecutor.class, executor));
+    }
+
+    @Override
+    public RepositoryComposition.RepositoryFragments describe(RepositoryMetadata metadata) {
+        if (!isSupportedRepositoryInterface(metadata)) return RepositoryComposition.RepositoryFragments.empty();
+        return RepositoryComposition.RepositoryFragments
+                .of(RepositoryFragment.structural(BaseJpaRepositoryExecutor.class, BaseJpaRepositoryExecutor.class));
     }
 
 }

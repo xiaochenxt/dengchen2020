@@ -1,4 +1,4 @@
-package io.github.dengchen2020.jdbc.base;
+package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;

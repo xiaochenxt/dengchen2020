@@ -7,39 +7,43 @@ import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
 import org.springframework.data.repository.core.support.RepositoryFragment;
+import org.springframework.util.ClassUtils;
 
-import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
+import javax.sql.DataSource;
 
 /**
- * querydsl-JPA仓库片段贡献者
+ * JDBC仓库片段贡献者
  * @author xiaochen
  * @since 2026/5/12
  */
-public final class QuerydslJpaRepositoryFragmentsContributor implements JpaRepositoryFragmentsContributor {
+public class QuerydslJdbcRepositoryFragmentsContributor implements JpaRepositoryFragmentsContributor {
 
-    private QuerydslJpaRepositoryFragmentsContributor() {
+    public static final boolean SQL_TEMPLATES_PRESENT = ClassUtils
+            .isPresent("com.querydsl.sql.SQLTemplates", QuerydslJdbcRepositoryFragmentsContributor.class.getClassLoader());
+
+    private final DataSource dataSource;
+
+    public QuerydslJdbcRepositoryFragmentsContributor(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    public static final JpaRepositoryFragmentsContributor INSTANCE = new QuerydslJpaRepositoryFragmentsContributor();
-
     private boolean isSupportedRepositoryInterface(RepositoryMetadata metadata) {
-        return QUERY_DSL_PRESENT
-                && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
+        return SQL_TEMPLATES_PRESENT && QuerydslJdbcRepository.class.isAssignableFrom(metadata.getRepositoryInterface());
     }
 
     @Override
     public RepositoryComposition.RepositoryFragments contribute(RepositoryMetadata metadata, JpaEntityInformation<?, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
         if (!isSupportedRepositoryInterface(metadata)) return RepositoryComposition.RepositoryFragments.empty();
-        var executor = new QuerydslJpaRepositoryExecutor<>(entityInformation, entityManager, resolver);
+        var executor = new QuerydslJdbcRepositoryExecutor<>(entityInformation, entityManager, resolver, dataSource);
         return RepositoryComposition.RepositoryFragments
-                .of(RepositoryFragment.implemented(QuerydslJpaRepositoryExecutor.class, executor));
+                .of(RepositoryFragment.implemented(QuerydslJdbcRepositoryExecutor.class, executor));
     }
 
     @Override
     public RepositoryComposition.RepositoryFragments describe(RepositoryMetadata metadata) {
         if (!isSupportedRepositoryInterface(metadata)) return RepositoryComposition.RepositoryFragments.empty();
         return RepositoryComposition.RepositoryFragments
-                .of(RepositoryFragment.structural(QuerydslJpaRepository.class, QuerydslJpaRepositoryExecutor.class));
+                .of(RepositoryFragment.structural(QuerydslJdbcRepositoryExecutor .class, QuerydslJdbcRepositoryExecutor.class));
     }
 
 }

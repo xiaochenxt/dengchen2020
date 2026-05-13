@@ -1,4 +1,4 @@
-package io.github.dengchen2020.jdbc.base;
+package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -13,7 +13,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 2024/11/27
  */
 @NullMarked
-interface QuerydslJdbcRepository<T> {
+public interface QuerydslJdbcRepository<T> {
 
     <R> JPASQLQuery<R> nativeSelect(Expression<R> expr);
 

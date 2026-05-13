@@ -1,4 +1,4 @@
-package io.github.dengchen2020.jdbc.base;
+package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
@@ -10,8 +10,6 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -22,15 +20,18 @@ import java.sql.SQLException;
  * @since 2025/12/8
  */
 @NullMarked
-@Transactional(propagation = Propagation.SUPPORTS)
-public class BaseJdbcRepositoryExecutor<T,ID> implements BaseJdbcRepository<T, ID> {
+public class QuerydslJdbcRepositoryExecutor<T> implements QuerydslJdbcRepository<T> {
 
     private final NativeQueryFactory queryFactory;
     private final EntityPath<T> path;
 
-    public BaseJdbcRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver, DataSource dataSource) throws SQLException {
+    public QuerydslJdbcRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver, DataSource dataSource) {
         this.path = resolver.createPath(entityInformation.getJavaType());
-        this.queryFactory = new NativeQueryFactory(entityManager, new SQLTemplatesRegistry().getTemplates(DataSourceUtils.getConnection(dataSource).getMetaData()));
+        try {
+            this.queryFactory = new NativeQueryFactory(entityManager, new SQLTemplatesRegistry().getTemplates(DataSourceUtils.getConnection(dataSource).getMetaData()));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create SQLTemplates", e);
+        }
     }
 
     @Override
