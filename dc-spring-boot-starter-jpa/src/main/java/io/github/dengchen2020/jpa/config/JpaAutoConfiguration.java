@@ -52,7 +52,6 @@ public final class JpaAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     static final class QuerydslJdbcAutoConfiguration {
 
-        @ConditionalOnMissingBean
         @Bean
         RepositoryFragmentsCustomizer baseJdbcRepositoryFragmentsContributor(ObjectProvider<DataSource> dataSource) {
             return (metadata, entityInformation, entityManager, resolver) -> new QuerydslJdbcRepositoryExecutor<>(entityInformation, entityManager, resolver, dataSource.getIfAvailable());
