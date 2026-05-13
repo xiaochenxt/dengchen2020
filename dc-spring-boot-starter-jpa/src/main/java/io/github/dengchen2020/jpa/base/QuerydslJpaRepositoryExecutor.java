@@ -7,6 +7,9 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.EclipseLinkTemplates;
+import com.querydsl.jpa.HQLTemplates;
+import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
@@ -15,9 +18,9 @@ import io.github.dengchen2020.core.jdbc.SimplePage;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.EntityPathResolver;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -31,23 +34,23 @@ import java.util.stream.Stream;
  * @since 2025/3/28
  */
 @NullMarked
-@Transactional(propagation = Propagation.SUPPORTS)
 public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
-
-    protected final EntityManager entityManager;
 
     protected final JPAQueryFactory queryFactory;
 
     protected final EntityPath<T> path;
     protected final PathBuilder<T> builder;
-   // protected final Querydsl querydsl;
 
-    public QuerydslJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver, JPAQueryFactory jpaQueryFactory) {
-        this.entityManager = entityManager;
+    public QuerydslJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityPathResolver resolver) {
         this.path = resolver.createPath(entityInformation.getJavaType());
         this.builder = new PathBuilder<>(path.getType(), path.getMetadata());
-       // var querydsl = new Querydsl(entityManager, builder);
-        this.queryFactory = jpaQueryFactory;
+        var provider = PersistenceProvider.fromEntityManager(entityManager);
+        var templates = switch (provider) {
+            case ECLIPSELINK -> EclipseLinkTemplates.DEFAULT;
+            case HIBERNATE -> HQLTemplates.DEFAULT;
+            default -> JPQLTemplates.DEFAULT;
+        };
+        this.queryFactory = new JPAQueryFactory(templates, entityManager);
     }
 
     public JPAQueryFactory queryFactory() {

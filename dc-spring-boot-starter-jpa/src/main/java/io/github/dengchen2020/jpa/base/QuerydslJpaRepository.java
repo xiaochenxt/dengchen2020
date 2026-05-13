@@ -6,7 +6,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.data.repository.NoRepositoryBean;
 
 /**
  * <p>
@@ -16,7 +15,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @since 2024/11/27
  */
 @NullMarked
-@NoRepositoryBean
 public interface QuerydslJpaRepository<T> {
 
     <R> JPAQuery<R> select(Expression<R> expr);

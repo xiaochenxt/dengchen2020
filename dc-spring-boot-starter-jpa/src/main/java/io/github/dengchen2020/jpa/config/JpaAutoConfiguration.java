@@ -1,18 +1,19 @@
 package io.github.dengchen2020.jpa.config;
 
-import com.querydsl.jpa.EclipseLinkTemplates;
-import com.querydsl.jpa.HQLTemplates;
-import com.querydsl.jpa.JPQLTemplates;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.sql.SQLTemplates;
 import io.github.dengchen2020.jpa.base.DcEvaluationContextExtension;
-import jakarta.persistence.EntityManager;
+import io.github.dengchen2020.jpa.base.QuerydslJdbcRepositoryExecutor;
+import io.github.dengchen2020.jpa.base.RepositoryFragmentsCustomizer;
 import org.hibernate.cfg.AvailableSettings;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.provider.PersistenceProvider;
+
+import javax.sql.DataSource;
 
 /**
  * jpa自动配置
@@ -43,20 +44,20 @@ public final class JpaAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    JPAQueryFactory jpaQueryFactory(EntityManager entityManager) {
-        var provider = PersistenceProvider.fromEntityManager(entityManager);
-        var templates = switch (provider) {
-            case ECLIPSELINK -> EclipseLinkTemplates.DEFAULT;
-            case HIBERNATE -> HQLTemplates.DEFAULT;
-            default -> JPQLTemplates.DEFAULT;
-        };
-        return new JPAQueryFactory(templates, entityManager);
-    }
-
-    @ConditionalOnMissingBean
-    @Bean
     DcEvaluationContextExtension dcEvaluationContextExtension() {
         return new DcEvaluationContextExtension();
+    }
+
+    @ConditionalOnClass(SQLTemplates.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class QuerydslJdbcAutoConfiguration {
+
+        @ConditionalOnMissingBean
+        @Bean
+        RepositoryFragmentsCustomizer baseJdbcRepositoryFragmentsContributor(ObjectProvider<DataSource> dataSource) {
+            return (metadata, entityInformation, entityManager, resolver) -> new QuerydslJdbcRepositoryExecutor<>(entityInformation, entityManager, resolver, dataSource.getIfAvailable());
+        }
+
     }
 
 }

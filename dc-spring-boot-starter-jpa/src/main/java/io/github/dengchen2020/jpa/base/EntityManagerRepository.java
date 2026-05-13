@@ -1,6 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
 import jakarta.persistence.EntityManager;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author xiaochen
  * @since 2025/11/13
  */
+@NullMarked
 public interface EntityManagerRepository {
 
     /**
