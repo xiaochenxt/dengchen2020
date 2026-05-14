@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
 @NullMarked
 @Transactional(propagation = Propagation.SUPPORTS)
 public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID> implements
-        QueryJpaRepository<T, ID>, EntityManagerRepository {
+        QueryJpaRepository<T, ID>, EntityManagerRepository<T> {
 
     private final EntityManager entityManager;
     private final JpaEntityInformation<T, ?> entityInformation;
@@ -67,7 +67,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public void detach(Object entity) {
+    public void detach(T entity) {
         entityManager.detach(entity);
     }
 
