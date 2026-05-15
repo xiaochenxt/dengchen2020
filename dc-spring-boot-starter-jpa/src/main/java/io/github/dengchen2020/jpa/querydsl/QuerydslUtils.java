@@ -1,4 +1,4 @@
-package io.github.dengchen2020.core.utils.querydsl;
+package io.github.dengchen2020.jpa.querydsl;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -65,7 +65,7 @@ public class QuerydslUtils {
     public static <T extends Record> Expression<?>[] generateRecordConstructorExpressions(
             Class<T> dtoType, EntityPath<?> entity) {
         var entityClass = entity.getClass();
-        var cacheKey = dtoType.getName() + "record:" + entityClass.getName();
+        var cacheKey = dtoType.getName() + ":record:" + entityClass.getName();
         var cache = EXPRESSION_CACHE.get(cacheKey);
         if (cache != null) return cache;
 
