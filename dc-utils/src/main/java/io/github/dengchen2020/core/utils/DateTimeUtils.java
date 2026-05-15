@@ -33,7 +33,7 @@ public abstract class DateTimeUtils {
     /**
      * 解析yyyy-MM-dd HH:mm:ss格式的日期时间字符串
      */
-    public static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
+    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
             .parseCaseInsensitive()
             .append(ISO_LOCAL_DATE)
             .appendLiteral(' ')
