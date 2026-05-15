@@ -24,7 +24,7 @@ public final class QuerydslJpaRepositoryFragmentsContributor implements JpaRepos
 
     private boolean isSupportedRepositoryInterface(RepositoryMetadata metadata) {
         return QUERY_DSL_PRESENT
-                && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || ComplexJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
+                && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || QuerydslPagingJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
     }
 
     @Override
