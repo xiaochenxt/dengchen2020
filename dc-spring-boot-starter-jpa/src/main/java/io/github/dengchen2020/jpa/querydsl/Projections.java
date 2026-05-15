@@ -1,4 +1,4 @@
-package io.github.dengchen2020.core.utils.querydsl;
+package io.github.dengchen2020.jpa.querydsl;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.EntityPath;
@@ -9,7 +9,7 @@ import org.jspecify.annotations.NullMarked;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.dengchen2020.core.utils.querydsl.QuerydslUtils.*;
+import static io.github.dengchen2020.jpa.querydsl.QuerydslUtils.*;
 
 /**
  * 提取Querydsl中常用的投影方式并扩展为更易使用的投影方式，可在绝大多数场景下替代源{@link com.querydsl.core.types.Projections}

@@ -1,4 +1,4 @@
-package io.github.dengchen2020.core.utils.hibernate;
+package io.github.dengchen2020.jpa.hibernate;
 
 import org.geolatte.geom.Point;
 import org.geolatte.geom.builder.DSL;
@@ -6,11 +6,11 @@ import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.geolatte.geom.crs.CrsRegistry;
 
 /**
- * Hibernate工具类
+ * Spatial工具类
  * @author xiaochen
  * @since 2025/12/26
  */
-public abstract class HibernateSpatialUtils {
+public abstract class SpatialUtils {
 
     /**
      * 创建{@link Point}
