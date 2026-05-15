@@ -2,7 +2,6 @@ package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +9,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
@@ -47,7 +47,7 @@ public abstract class DateTimeUtils {
             .appendValue(DAY_OF_MONTH, 2)
             .toFormatter();
 
-    private static final ConcurrentMap<String, DateTimeFormatter> dateTimeFormatterCache = new ConcurrentReferenceHashMap<>();
+    private static final ConcurrentMap<String, DateTimeFormatter> dateTimeFormatterCache = new ConcurrentHashMap<>();
 
     public static void clearCache() {
         dateTimeFormatterCache.clear();
