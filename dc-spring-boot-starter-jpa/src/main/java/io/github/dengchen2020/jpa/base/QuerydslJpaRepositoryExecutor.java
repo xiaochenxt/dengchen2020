@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * @since 2025/3/28
  */
 @NullMarked
-public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, ComplexJpaRepository<T> {
+public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T>, QuerydslPagingJpaRepository<T> {
 
     protected final JPAQueryFactory queryFactory;
 
