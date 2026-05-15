@@ -1,11 +1,20 @@
 package io.github.dengchen2020.core.utils;
 
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.concurrent.ConcurrentMap;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static java.time.temporal.ChronoField.*;
 
 /**
  * 日期时间处理工具类
@@ -16,7 +25,38 @@ import java.util.Date;
 @NullMarked
 public abstract class DateTimeUtils {
 
+    /**
+     * 常用日期时间格式，例如：2026-05-15 09:00:00
+     */
     public static final String DEFAULT_DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    /**
+     * 解析yyyy-MM-dd HH:mm:ss格式的日期时间字符串
+     */
+    public static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .append(ISO_LOCAL_DATE)
+            .appendLiteral(' ')
+            .append(ISO_LOCAL_TIME)
+            .toFormatter();
+    private static final DateTimeFormatter SLASH_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+            .appendLiteral('/')
+            .appendValue(MONTH_OF_YEAR, 2)
+            .appendLiteral('/')
+            .appendValue(DAY_OF_MONTH, 2)
+            .toFormatter();
+
+    private static final ConcurrentMap<String, DateTimeFormatter> dateTimeFormatterCache = new ConcurrentReferenceHashMap<>();
+
+    public static void clearCache() {
+        dateTimeFormatterCache.clear();
+    }
+
+    /**
+     * 中国大陆标准时区
+     */
+    public static final ZoneId ZONE_ID_CN = ZoneId.of("Asia/Shanghai");
 
     /**
      * {@link LocalDateTime}转换为{@link Date}，使用系统默认时区
@@ -389,6 +429,17 @@ public abstract class DateTimeUtils {
     }
 
     /**
+     * 格式化{@link Date}为日期时间格式的字符串：
+     * <p>yyyy-MM-dd HH:mm:ss</p>
+     *
+     * @param date 时间
+     * @return {@link String}
+     */
+    public static String format(Date date) {
+        return format(localDateTime(date));
+    }
+
+    /**
      * 格式化{@link Date}为指定格式字符串
      *
      * @param date    时间
@@ -403,11 +454,33 @@ public abstract class DateTimeUtils {
      * 格式化{@link LocalDateTime}为指定格式字符串
      *
      * @param localDateTime 日期时间
+     * <p>yyyy-MM-dd HH:mm:ss</p>
+     * @return {@link String}
+     */
+    public static String format(LocalDateTime localDateTime) {
+        return dateTimeFormatterCache.computeIfAbsent(DEFAULT_DATETIME_PATTERN, DateTimeFormatter::ofPattern).format(localDateTime);
+    }
+
+    /**
+     * 格式化{@link LocalDateTime}为指定格式字符串
+     *
+     * @param localDateTime 日期时间
      * @param pattern       日期时间格式字符串
      * @return {@link String}
      */
     public static String format(LocalDateTime localDateTime, String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).format(localDateTime);
+        return dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern).format(localDateTime);
+    }
+
+    /**
+     * 格式化{@link ZonedDateTime}为指定格式字符串
+     *
+     * @param zonedDateTime 日期时间
+     * <p>yyyy-MM-dd HH:mm:ss</p>
+     * @return {@link String}
+     */
+    public static String format(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     /**
@@ -418,7 +491,7 @@ public abstract class DateTimeUtils {
      * @return {@link String}
      */
     public static String format(ZonedDateTime zonedDateTime, String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).format(zonedDateTime);
+        return dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern).format(zonedDateTime);
     }
 
     /**
@@ -429,7 +502,7 @@ public abstract class DateTimeUtils {
      * @return {@link String}
      */
     public static String format(LocalDate localDate, String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).format(localDate);
+        return dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern).format(localDate);
     }
 
     /**
@@ -440,7 +513,18 @@ public abstract class DateTimeUtils {
      * @return {@link String}
      */
     public static String format(LocalTime localTime, String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).format(localTime);
+        return dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern).format(localTime);
+    }
+
+    /**
+     * 转换时间字符串为时间
+     *
+     * @param dateStr 待转换的字符串
+     * @return {@link Date}
+     */
+    public static Date parse(String dateStr) {
+        var localDateTime = parseDateTime(dateStr);
+        return date(localDateTime);
     }
 
     /**
@@ -458,11 +542,18 @@ public abstract class DateTimeUtils {
      * 转换日期时间字符串为日期时间
      *
      * @param dateStr 待转换的字符串
-     * @param pattern 格式
      * @return {@link LocalDateTime}
      */
-    public static LocalDateTime parseDateTime(String dateStr, String pattern) {
-        return LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
+    public static LocalDateTime parseDateTime(String dateStr) {
+        try {
+            return LocalDateTime.parse(dateStr, DEFAULT_DATE_TIME_FORMATTER);
+        } catch (Exception e) {
+            try {
+                return LocalDateTime.parse(dateStr);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException(dateStr + "日期转换为LocalDateTime失败");
+            }
+        }
     }
 
     /**
@@ -472,8 +563,51 @@ public abstract class DateTimeUtils {
      * @param pattern 格式
      * @return {@link LocalDateTime}
      */
-    public static ZonedDateTime parseZoneDateTime(String dateStr, ZoneId zoneId, String pattern) {
-        return ZonedDateTime.parse(dateStr, DateTimeFormatter.ofPattern(pattern).withZone(zoneId));
+    public static LocalDateTime parseDateTime(String dateStr, String pattern) {
+        return LocalDateTime.parse(dateStr, dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern));
+    }
+
+    /**
+     * 转换日期时间字符串为日期时间
+     *
+     * @param dateStr 待转换的字符串
+     * @return {@link ZonedDateTime}
+     */
+    public static ZonedDateTime parseZoneDateTime(String dateStr) {
+        return parseZoneDateTime(dateStr, null);
+    }
+
+    /**
+     * 转换日期时间字符串为日期时间并切换时区
+     *
+     * @param dateStr 待转换的字符串
+     * @return {@link ZonedDateTime}
+     */
+    public static ZonedDateTime parseZoneDateTime(String dateStr,@Nullable ZoneId zoneId) {
+        try {
+            ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr);
+            if (zoneId == null) return zonedDateTime;
+            return zonedDateTime.withZoneSameInstant(zoneId);
+        } catch (Exception ignored) {}
+        throw new IllegalArgumentException(dateStr + "日期转换为ZonedDateTime失败");
+    }
+
+    /**
+     * 转换日期字符串为日期
+     *
+     * @param dateStr 待转换的字符串
+     * @return {@link LocalDate}
+     */
+    public static LocalDate parseDate(String dateStr) {
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (Exception ignored) {
+            try {
+                return LocalDate.parse(dateStr, SLASH_DATE_FORMATTER);
+            } catch (Exception e) {
+                throw new IllegalArgumentException(dateStr + "日期转换为LocalDate失败");
+            }
+        }
     }
 
     /**
@@ -484,7 +618,7 @@ public abstract class DateTimeUtils {
      * @return {@link LocalDate}
      */
     public static LocalDate parseDate(String dateStr, String pattern) {
-        return  LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
+        return LocalDate.parse(dateStr, dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern));
     }
 
     /**
@@ -495,7 +629,7 @@ public abstract class DateTimeUtils {
      * @return {@link LocalTime}
      */
     public static LocalTime parseTime(String dateStr, String pattern) {
-        return LocalTime.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
+        return LocalTime.parse(dateStr, dateTimeFormatterCache.computeIfAbsent(pattern, DateTimeFormatter::ofPattern));
     }
 
 }
