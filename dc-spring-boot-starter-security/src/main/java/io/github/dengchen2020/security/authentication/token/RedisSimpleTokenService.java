@@ -1,7 +1,6 @@
 package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
-import io.github.dengchen2020.core.utils.StrUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataAccessException;
@@ -11,8 +10,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
-
-import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
 
 /**
  * 基于Redis实现有状态Token认证，每个设备仅能同时在线一个
@@ -25,7 +22,7 @@ import static io.github.dengchen2020.security.authentication.token.TokenConstant
 public class RedisSimpleTokenService extends AbstartStateTokenService {
 
     public RedisSimpleTokenService(long expireSeconds, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
-        super(expireSeconds, device, autorenewal, autorenewalSeconds, tokenName);
+        super(expireSeconds, autorenewal, autorenewalSeconds, tokenName);
         this.tokenPrefix = StringUtils.hasText(device)
                 ? TOKEN_COMMON_PREFIX + "simp:" + device + ":"
                 : TOKEN_COMMON_PREFIX + "simp:";
@@ -37,7 +34,7 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
     }
 
     public TokenInfo createToken(Authentication authentication, long expireSeconds) {
-        String token = authentication.getName() + SEPARATOR + StrUtils.uuidSimplified();
+        String token = generateTokenStr(authentication);
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
         var userId = authentication.getName();
