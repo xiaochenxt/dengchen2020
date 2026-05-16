@@ -9,9 +9,8 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING;
  * Base64编解码工具类，详见{@link Base64}
  * <pre>
  * 主要三种编解码器
- * 标准版：适用于以下场景之外
- * Url：适用于浏览器上的Url
- * MIME：适用于图片、音频、视频、文件等
+ * 标准版：适用于以下场景之外，例如图片编码
+ * Url：适用于Url参数、header（例如JWT）等
  * </pre>
  * @author xiaochen
  * @since 2024/12/29
@@ -35,7 +34,11 @@ public abstract class Base64Utils {
     }
 
     public static byte[] decode(byte[] src) {
-        return src.length == 0 ? EMPTY_BYTE_ARRAY : Base64.getDecoder().decode(src);
+        if (src.length == 0) return EMPTY_BYTE_ARRAY;
+        for (byte b : src) {
+            if (b == '-' || b == '_') return Base64.getUrlDecoder().decode(src);
+        }
+        return Base64.getDecoder().decode(src);
     }
 
     public static byte[] decode(String src) {
@@ -59,59 +62,11 @@ public abstract class Base64Utils {
     }
 
     public static String encodeUrlToString(byte[] src) {
-        return new String(encode(src));
+        return new String(encodeUrl(src));
     }
 
     public static String encodeUrlToString(String src) {
         return src == null ? EMPTY_STRING : encodeUrlToString(src.getBytes());
-    }
-
-    public static byte[] decodeUrl(byte[] src) {
-        return src.length == 0 ? EMPTY_BYTE_ARRAY : Base64.getUrlDecoder().decode(src);
-    }
-
-    public static byte[] decodeUrl(String src) {
-        return src == null ? EMPTY_BYTE_ARRAY : decodeUrl(src.getBytes());
-    }
-
-    public static String decodeUrlToString(byte[] src) {
-        return new String(decodeUrl(src));
-    }
-
-    public static String decodeUrlToString(String src) {
-        return src == null ? EMPTY_STRING : decodeUrlToString(src.getBytes());
-    }
-
-    public static byte[] encodeMime(byte[] src) {
-        return src.length == 0 ? EMPTY_BYTE_ARRAY : Base64.getMimeEncoder().encode(src);
-    }
-
-    public static byte[] encodeMime(String src) {
-        return src == null ? EMPTY_BYTE_ARRAY : encodeUrl(src.getBytes());
-    }
-
-    public static String encodeMimeToString(byte[] src) {
-        return new String(encode(src));
-    }
-
-    public static String encodeMimeToString(String src) {
-        return src == null ? EMPTY_STRING : encodeMimeToString(src.getBytes());
-    }
-
-    public static byte[] decodeMime(byte[] src) {
-        return src.length == 0 ? EMPTY_BYTE_ARRAY : Base64.getMimeDecoder().decode(src);
-    }
-
-    public static byte[] decodeMime(String src) {
-        return src == null ? EMPTY_BYTE_ARRAY : decodeUrl(src.getBytes());
-    }
-
-    public static String decodeMimeToString(byte[] src) {
-        return new String(decodeMime(src));
-    }
-
-    public static String decodeMimeToString(String src) {
-        return src == null ? EMPTY_STRING : decodeMimeToString(src.getBytes());
     }
 
 }
