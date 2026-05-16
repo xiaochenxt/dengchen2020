@@ -1,16 +1,15 @@
 package io.github.dengchen2020.security.config;
 
 import io.github.dengchen2020.security.authentication.token.AuthenticationConvert;
-import io.github.dengchen2020.security.authentication.token.JwtTokenServiceImpl;
-import io.github.dengchen2020.security.authentication.token.SimpleTokenServiceImpl;
-import io.github.dengchen2020.security.authentication.token.TokenServiceImpl;
+import io.github.dengchen2020.security.authentication.token.JwtTokenService;
+import io.github.dengchen2020.security.authentication.token.RedisSimpleTokenService;
+import io.github.dengchen2020.security.authentication.token.RedisTokenService;
 import io.github.dengchen2020.security.properties.SecurityProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * Token认证实现类自动配置
@@ -33,9 +32,9 @@ public final class TokenAutoConfiguration {
     final static class JwtToken {
         @ConditionalOnMissingBean
         @Bean
-        JwtTokenServiceImpl jwtTokenService(SecurityProperties securityProperties, AuthenticationConvert authenticationConvert) {
+        JwtTokenService jwtTokenService(SecurityProperties securityProperties) {
             SecurityProperties.JWT jwt = securityProperties.getJwt();
-            return new JwtTokenServiceImpl(jwt.getSecret(), authenticationConvert, jwt.getExpireIn().toSeconds(), jwt.getRefreshExpireIn().toSeconds());
+            return new JwtTokenService(jwt.getSecret(), jwt.getExpireIn().toSeconds(), jwt.getRefreshExpireIn().toSeconds(), securityProperties.getTokenName());
         }
     }
 
@@ -44,9 +43,9 @@ public final class TokenAutoConfiguration {
     final static class SimpleToken{
         @ConditionalOnMissingBean
         @Bean
-        SimpleTokenServiceImpl simpleTokenService(StringRedisTemplate stringRedisTemplate, SecurityProperties securityProperties, AuthenticationConvert authenticationConvert) {
+        RedisSimpleTokenService simpleTokenService(SecurityProperties securityProperties) {
             SecurityProperties.SimpleToken simpleToken = securityProperties.getSimpleToken();
-            return new SimpleTokenServiceImpl(stringRedisTemplate, authenticationConvert, simpleToken.getExpireIn().toSeconds(), simpleToken.getDevice(), simpleToken.isAutorenewal(), simpleToken.getAutorenewalSeconds());
+            return new RedisSimpleTokenService(simpleToken.getExpireIn().toSeconds(), simpleToken.getDevice(), simpleToken.isAutorenewal(), simpleToken.getAutorenewalSeconds(), securityProperties.getTokenName());
         }
     }
 
@@ -55,9 +54,9 @@ public final class TokenAutoConfiguration {
     final static class Token {
         @ConditionalOnMissingBean
         @Bean
-        TokenServiceImpl tokenService(StringRedisTemplate stringRedisTemplate,SecurityProperties securityProperties, AuthenticationConvert authenticationConvert) {
+        RedisTokenService tokenService(SecurityProperties securityProperties) {
             SecurityProperties.Token token = securityProperties.getToken();
-            return new TokenServiceImpl(stringRedisTemplate, authenticationConvert, token.getExpireIn().toSeconds(), token.getMaxOnlineNum(), token.getDevice(), token.isAutorenewal(), token.getAutorenewalSeconds());
+            return new RedisTokenService(token.getExpireIn().toSeconds(), token.getMaxOnlineNum(), token.getDevice(), token.isAutorenewal(), token.getAutorenewalSeconds(), securityProperties.getTokenName());
         }
     }
 

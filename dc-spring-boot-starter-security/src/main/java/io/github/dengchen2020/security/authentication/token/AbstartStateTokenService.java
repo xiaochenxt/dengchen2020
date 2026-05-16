@@ -1,0 +1,134 @@
+package io.github.dengchen2020.security.authentication.token;
+
+import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.utils.Base64Utils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.util.List;
+
+import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
+
+/**
+ * 有状态Token实现基类
+ * @author xiaochen
+ * @since 2026/5/16
+ */
+abstract class AbstartStateTokenService implements TokenService, InitializingBean {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    String TOKEN_COMMON_PREFIX = "dc:security:token:";
+    String TOKEN_INFO_KEY = "dc:security:token:info:";
+
+    protected AuthenticationConvert authenticationConvert;
+    protected StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    public void setAuthenticationConvert(AuthenticationConvert authenticationConvert) {
+        this.authenticationConvert = authenticationConvert;
+    }
+
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        if (authenticationConvert == null) throw new IllegalStateException("authenticationConvert must be set");
+        if (stringRedisTemplate == null) throw new IllegalStateException("stringRedisTemplate must be set");
+    }
+
+    protected final long expireSeconds;
+    protected final boolean autorenewal;
+    protected final long autorenewalSeconds;
+    protected final String tokenName;
+    protected String tokenPrefix;
+    protected String tokenInfoPrefix = TOKEN_INFO_KEY;
+
+    public AbstartStateTokenService(long expireSeconds, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
+        this.expireSeconds = expireSeconds;
+        if (autorenewal) {
+            if (autorenewalSeconds <= 0) throw new IllegalArgumentException("autorenewalSeconds must be greater than 0");
+            if (autorenewalSeconds > expireSeconds / 2) throw new IllegalArgumentException("autorenewalSeconds must be less than expireSeconds / 2");
+        }
+        this.autorenewal = autorenewal;
+        this.autorenewalSeconds = autorenewalSeconds;
+        this.tokenName = tokenName;
+    }
+
+    @Override
+    public String tokenName() {
+        return tokenName;
+    }
+
+    public String getName(String token) {
+        var i = token.indexOf(SEPARATOR);
+        return i != -1 ? token.substring(0, i) : token;
+    }
+
+    /**
+     * 从请求中获取token
+     *
+     * @param request 请求上下文对象
+     * @return token
+     */
+    public String getToken(HttpServletRequest request) {
+        var token = TokenService.super.getToken(request);
+        return token == null ? null : decodeToken(token);
+    }
+
+    protected String encodeToken(String token) {
+        try {
+            return Base64Utils.encodeUrlToString(token);
+        } catch (Exception e) {
+            return token;
+        }
+    }
+
+    protected String decodeToken(String token) {
+        try {
+            return Base64Utils.decodeToString(token);
+        } catch (Exception e) {
+            return token;
+        }
+    }
+
+    protected TokenInfo generateTokenInfo(String token, long expiresIn) {
+        return new TokenInfo(encodeToken(token), expiresIn);
+    }
+
+    // ======== Redis Key 辅助方法 ========
+
+    protected String tokenKey(String userId) {
+        return tokenPrefix + "{" + userId + "}";
+    }
+
+    protected String infoKey(String userId) {
+        return tokenInfoPrefix + "{" + userId + "}";
+    }
+
+    protected List<String> keys(String userId) {
+        return List.of(tokenKey(userId), infoKey(userId));
+    }
+
+    // ========= 通用方法 =========
+
+    public void refreshAuthentication(Authentication authentication) {
+        try {
+            stringRedisTemplate.opsForValue().setIfPresent(infoKey(authentication.getName()), authenticationConvert.serialize(authentication));
+        } catch (IllegalArgumentException _) {
+            if (log.isDebugEnabled()) log.debug("token已失效，认证信息无法刷新");
+        }
+    }
+
+    public void offline(String userId) {
+        stringRedisTemplate.unlink(keys(userId));
+    }
+
+}

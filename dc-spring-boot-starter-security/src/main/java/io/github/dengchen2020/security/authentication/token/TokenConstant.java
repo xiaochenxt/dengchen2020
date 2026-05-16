@@ -9,11 +9,7 @@ public final class TokenConstant {
 
     private TokenConstant() {}
 
-    public static final String TOKEN_NAME = "dc-token";
-
     public static final String PAYLOAD = "payload";
-
-    public static final String ATI = "ati";
 
     /**
      * token生成时userId和随机字符串之间的分隔符

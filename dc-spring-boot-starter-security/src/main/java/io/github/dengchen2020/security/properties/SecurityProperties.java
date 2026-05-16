@@ -2,11 +2,12 @@ package io.github.dengchen2020.security.properties;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.security.permission.PermissionVerifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * token配置信息
@@ -21,6 +22,11 @@ public class SecurityProperties {
      * Token认证信息实例类型
      */
     private Class<? extends Authentication> authenticationType;
+
+    /**
+     * token名称，用于请求头中的key
+     */
+    private String tokenName = "dc-token";
 
     /**
      * 有状态Token认证
@@ -51,6 +57,15 @@ public class SecurityProperties {
      * 密码加密配置
      */
     private PasswordEncoder passwordEncoder = new PasswordEncoder();
+
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
 
     public static class Resource {
         /**
@@ -99,7 +114,7 @@ public class SecurityProperties {
         /**
          * 刷新token有效期
          */
-        private Duration refreshExpireIn = Duration.ofDays(30);
+        private Duration refreshExpireIn = Duration.ofDays(0);
 
         public String getSecret() {
             return secret;

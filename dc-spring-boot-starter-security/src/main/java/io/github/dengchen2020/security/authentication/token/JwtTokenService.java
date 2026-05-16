@@ -5,16 +5,16 @@ import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.domain.JWT;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.JsonUtils;
+import io.github.dengchen2020.core.utils.StrUtils;
 import io.github.dengchen2020.security.exception.SessionTimeOutException;
-import jakarta.servlet.http.HttpServletRequest;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 无状态Token认证实现
+ * 基于JWT实现无状态Token认证
  * <p>对比有状态：</p>
  * <p>优势：不依赖第三方组件，节省内存，稳定性好，可维护性高</p>
  * <p>劣势：对Token的控制力弱，无法做到踢人下线，实时封禁等功能，因此请求Token的有效期不能太长，刷新Token的有效期可根据业务需求设置稍长一些
@@ -22,35 +22,39 @@ import org.springframework.http.HttpHeaders;
  * @author xiaochen
  * @since 2024/4/28
  */
-@NullMarked
-public class JwtTokenServiceImpl implements TokenService {
+public class JwtTokenService implements TokenService, InitializingBean {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtTokenServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenService.class);
 
-    private final AuthenticationConvert authenticationConvert;
+    private AuthenticationConvert authenticationConvert;
+
+    @Autowired
+    public void setAuthenticationConvert(AuthenticationConvert authenticationConvert) {
+        this.authenticationConvert = authenticationConvert;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        if (authenticationConvert == null) throw new IllegalStateException("authenticationConvert must be set");
+    }
 
     private final JwtHelper jwtHelper;
 
     private final long expireSeconds;
 
     private final long refreshExpireSeconds;
+    private final String tokenName;
 
-    public JwtTokenServiceImpl(String secret, AuthenticationConvert authenticationConvert, long expireSeconds, long refreshExpireSeconds) {
+    public JwtTokenService(String secret, long expireSeconds, long refreshExpireSeconds, String tokenName) {
         this.jwtHelper = new JwtHelper(secret);
-        this.authenticationConvert = authenticationConvert;
         this.expireSeconds = expireSeconds;
         this.refreshExpireSeconds = refreshExpireSeconds;
+        this.tokenName = tokenName;
     }
 
     @Override
-    public String getToken(HttpServletRequest request) {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization != null && authorization.length() > 7) {
-            return authorization.substring(7);
-        }
-        String token = request.getHeader(TokenConstant.TOKEN_NAME);
-        if (token != null) return token;
-        return request.getParameter(TokenConstant.TOKEN_NAME);
+    public String tokenName() {
+        return tokenName;
     }
 
     @Override
@@ -67,27 +71,47 @@ public class JwtTokenServiceImpl implements TokenService {
      */
     public TokenInfo createToken(Authentication authentication, long expireSeconds, long refreshExpireSeconds) {
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        String token = jwtHelper.createToken(authentication, expiresIn);
-        long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
-        String refreshToken = jwtHelper.refreshToken(token, refreshTokenExpiresIn);
-        storeRefreshToken(authentication, refreshToken, refreshExpireSeconds);
-        return new TokenInfo(token, expiresIn, refreshToken, refreshTokenExpiresIn);
+        String token = jwtHelper.encode(jwtHelper.create(expiresIn, StrUtils.uuidSimplified(), authentication.getName())
+                .addClaim(TokenConstant.PAYLOAD, authentication));
+        if (refreshExpireSeconds > 0) {
+            long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
+            var refreshToken = createRefreshToken(authentication, refreshExpireSeconds);
+            return new TokenInfo(token, expiresIn, refreshToken, refreshTokenExpiresIn);
+        }
+        return new TokenInfo(token, expiresIn);
+    }
+
+    /**
+     * 创建刷新token
+     * @param authentication 认证信息对象
+     * @param expiresIn 有效期（秒）
+     */
+    public String createRefreshToken(Authentication authentication, long expiresIn) {
+        var jti = StrUtils.uuidSimplified();
+        var sub = authentication.getName();
+        storeRefreshToken(expiresIn, jti, sub);
+        return jwtHelper.encode(jwtHelper.create(expiresIn, jti, sub));
     }
 
     /**
      * 存储刷新token
-     * @param authentication 认证信息对象
-     * @param refreshToken 刷新token
      * @param expiresIn 有效期（秒）
+     * @param jti 刷新token的唯一ID
+     * @param sub 用户ID，唯一标识
      */
-    protected void storeRefreshToken(Authentication authentication, String refreshToken, long expiresIn) {
+    protected void storeRefreshToken(long expiresIn, String jti, String sub) {
 
     }
 
+    /**
+     * 刷新token
+     * @param refreshToken 刷新token
+     * @return Token信息
+     */
     public TokenInfo refreshToken(String refreshToken) {
         try {
-            JWT jwt = jwtHelper.parseToken(refreshToken);
-            if (jwtHelper.isRefreshToken(jwt) && checkRefreshToken(refreshToken)) return createToken(readJwt(jwt));
+            JWT jwt = jwtHelper.decode(refreshToken);
+            return createToken(checkRefreshToken(jwt.getString("jti"), jwt.getString("sub")));
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 switch (e) {
@@ -97,24 +121,24 @@ public class JwtTokenServiceImpl implements TokenService {
                     default -> log.debug(e.toString());
                 }
             }
+            if (e instanceof SessionTimeOutException) throw e;
             throw new SessionTimeOutException();
         }
-        throw new SessionTimeOutException("不是一个刷新token，" + refreshToken);
     }
 
     /**
-     * 检查刷新token是否有效
-     * @param refreshToken 刷新token
-     * @return
+     * 检查刷新token，如果有效需返回认证信息
+     * @param jti 刷新token的唯一ID
+     * @param sub 用户ID，唯一标识
+     * @return {@link TokenInfo}
      */
-    protected boolean checkRefreshToken(String refreshToken) {
-        return true;
+    protected Authentication checkRefreshToken(String jti, String sub) {
+        throw new SessionTimeOutException("未实现刷新token");
     }
 
     @Override
     public @Nullable Authentication readToken(String token) {
-        JWT jwt = jwtHelper.parseToken(token);
-        if (jwtHelper.isRefreshToken(jwt)) throw new SessionTimeOutException("不是一个请求token，" + token);
+        JWT jwt = jwtHelper.decode(token);
         return readJwt(jwt);
     }
 
@@ -124,7 +148,7 @@ public class JwtTokenServiceImpl implements TokenService {
      * @param jwt jwt
      * @return {@link Authentication}
      */
-    private @Nullable Authentication readJwt(JWT jwt) {
+    private Authentication readJwt(JWT jwt) {
         return JsonUtils.convertValue(jwt.getOtherClaims().get(TokenConstant.PAYLOAD), authenticationConvert.type());
     }
 

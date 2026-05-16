@@ -2,6 +2,7 @@ package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 
 /**
  * token认证接口
@@ -11,9 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface TokenService {
 
-    String TOKEN_COMMON_PREFIX = "dc:security:token:";
-
-    String TOKEN_INFO_KEY = "dc:security:token:info:";
+    /**
+     * 从请求中获取token的名称
+     */
+    String tokenName();
 
     /**
      * 从请求中获取token
@@ -22,9 +24,16 @@ public interface TokenService {
      * @return token
      */
     default String getToken(HttpServletRequest request) {
-        String token = request.getHeader(TokenConstant.TOKEN_NAME);
+        var tokenName = tokenName();
+        String token = request.getHeader(tokenName);
         if (token != null) return token;
-        return request.getParameter(TokenConstant.TOKEN_NAME);
+        token = request.getParameter(tokenName);
+        if (token != null) return token;
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorization != null && authorization.length() > 7) {
+            return authorization.substring(7);
+        }
+        return token;
     }
 
     /**
