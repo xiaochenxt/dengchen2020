@@ -1,5 +1,6 @@
 package io.github.dengchen2020.security.authentication.token;
 
+import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.Signer;
 import io.fusionauth.jwt.Verifier;
 import io.fusionauth.jwt.domain.JWT;
@@ -8,7 +9,6 @@ import io.fusionauth.jwt.hmac.HMACVerifier;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 /**
  * @author xiaochen
@@ -33,7 +33,7 @@ public class JwtHelper {
     /**
      * 编码JWT
      *
-     * @param jwt JWT
+     * @param jwt {@link JWT}
      * @return JWT字符串
      */
     public String encode(JWT jwt) {
@@ -41,7 +41,7 @@ public class JwtHelper {
     }
 
     /**
-     * 解码JWT
+     * 解码JWT，如果过期则抛出{@link JWTExpiredException}异常
      *
      * @param token JWT字符串
      * @return {@link JWT}
@@ -52,7 +52,7 @@ public class JwtHelper {
 
     /**
      * 创建Token
-     *
+     * @param expiresIn 过期时间（时间戳）
      * @return {@link JWT}
      */
     public JWT create(long expiresIn) {
@@ -62,6 +62,7 @@ public class JwtHelper {
     /**
      * 创建Token
      *
+     * @param expiresIn 过期时间（时间戳）
      * @return {@link JWT}
      */
     public JWT create(long expiresIn, String jti) {
@@ -71,6 +72,9 @@ public class JwtHelper {
     /**
      * 创建Token
      *
+     * @param expiresIn 过期时间（时间戳）
+     * @param jti JWT唯一ID，可用于防止重复使用
+     * @param sub 用户ID，可用于刷新令牌
      * @return {@link JWT}
      */
     public JWT create(long expiresIn, String jti, String sub) {
@@ -79,16 +83,6 @@ public class JwtHelper {
         if (jti != null) jwt.setUniqueId(jti);
         if (sub != null) jwt.setSubject(sub);
         return jwt;
-    }
-
-    /**
-     * 判断是否过期
-     *
-     * @param jwt {@link JWT}
-     * @return true表示Token已过期，false表示Token未过期
-     */
-    public boolean isExpired(JWT jwt) {
-        return jwt.isExpired(ZonedDateTime.now());
     }
 
 }

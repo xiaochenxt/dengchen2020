@@ -73,7 +73,7 @@ public class RedisTokenService extends AbstartStateTokenService {
         if (tokens == null || !tokens.contains(token)) return null;
         if (autorenewal) {
             long ttl = stringRedisTemplate.getExpire(tk, TimeUnit.SECONDS);
-            if (ttl != -1 && ttl < autorenewalSeconds) {
+            if (ttl > 0 && ttl < autorenewalSeconds) {
                 stringRedisTemplate.executePipelined(new SessionCallback<>() {
                     @Override
                     public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {

@@ -10,7 +10,6 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
@@ -46,8 +45,8 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
             @Override
             public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
                 var redis = ((StringRedisTemplate)operations);
-                redis.opsForValue().set(tokenKey(userId), token, Duration.ofSeconds(expireSeconds));
-                redis.opsForValue().set(infoKey(userId), payload, Duration.ofSeconds(expireSeconds));
+                redis.opsForValue().set(tokenKey(userId), token, expireSeconds, TimeUnit.SECONDS);
+                redis.opsForValue().set(infoKey(userId), payload, expireSeconds, TimeUnit.SECONDS);
                 return null;
             }
         });
@@ -63,7 +62,7 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
         if (!token.equals(storedToken)) return null;
         if (autorenewal) {
             long ttl = stringRedisTemplate.getExpire(tk, TimeUnit.SECONDS);
-            if (ttl != -1 && ttl < autorenewalSeconds) {
+            if (ttl > 0 && ttl < autorenewalSeconds) {
                 stringRedisTemplate.executePipelined(new SessionCallback<>() {
                     @Override
                     public @Nullable <K, V> Object execute(RedisOperations<K, V> operations) throws DataAccessException {
