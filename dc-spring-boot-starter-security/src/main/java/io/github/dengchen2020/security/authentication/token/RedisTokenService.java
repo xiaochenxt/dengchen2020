@@ -1,7 +1,6 @@
 package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
-import io.github.dengchen2020.core.utils.StrUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataAccessException;
@@ -12,8 +11,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
 
 /**
  * 基于Redis实现有状态Token认证（支持每用户最大在线数量控制）
@@ -28,7 +25,7 @@ public class RedisTokenService extends AbstartStateTokenService {
     private final int maxOnlineNum;
 
     public RedisTokenService(long expireSeconds, int maxOnlineNum, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
-        super(expireSeconds, device, autorenewal, autorenewalSeconds, tokenName);
+        super(expireSeconds, autorenewal, autorenewalSeconds, tokenName);
         this.maxOnlineNum = Math.max(maxOnlineNum, 1);
         this.tokenPrefix = StringUtils.hasText(device)
                 ? TOKEN_COMMON_PREFIX + device + ":"
@@ -45,7 +42,7 @@ public class RedisTokenService extends AbstartStateTokenService {
     }
 
     public TokenInfo createToken(Authentication authentication, int maxOnlineNum, long expireSeconds) {
-        String token = authentication.getName() + SEPARATOR + StrUtils.uuidSimplified();
+        String token = generateTokenStr(authentication);
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
         var userId = authentication.getName();

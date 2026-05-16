@@ -2,6 +2,7 @@ package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.Base64Utils;
+import io.github.dengchen2020.core.utils.StrUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ abstract class AbstartStateTokenService implements TokenService, InitializingBea
     protected String tokenPrefix;
     protected String tokenInfoPrefix = TOKEN_INFO_KEY;
 
-    public AbstartStateTokenService(long expireSeconds, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
+    public AbstartStateTokenService(long expireSeconds, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         this.expireSeconds = expireSeconds;
         if (autorenewal) {
             if (autorenewalSeconds <= 0) throw new IllegalArgumentException("autorenewalSeconds must be greater than 0");
@@ -65,6 +66,10 @@ abstract class AbstartStateTokenService implements TokenService, InitializingBea
     @Override
     public String tokenName() {
         return tokenName;
+    }
+
+    protected String generateTokenStr(Authentication authentication) {
+        return authentication.getName() + SEPARATOR + StrUtils.uuidSimplified();
     }
 
     public String getName(String token) {
