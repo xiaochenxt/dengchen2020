@@ -3,7 +3,6 @@ package io.github.dengchen2020.security.authentication.token;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.StrUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -12,14 +11,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 
-import static io.github.dengchen2020.security.authentication.token.TokenConstant.SEPARATOR;
-
 /**
  * 有状态Token实现基类
  * @author xiaochen
  * @since 2026/5/16
  */
-abstract class AbstartStateTokenService implements TokenService, InitializingBean {
+abstract class AbstractStateTokenService implements TokenService, InitializingBean {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -52,7 +49,7 @@ abstract class AbstartStateTokenService implements TokenService, InitializingBea
     protected String tokenPrefix;
     protected String tokenInfoPrefix = TOKEN_INFO_KEY;
 
-    public AbstartStateTokenService(long expireSeconds, boolean autorenewal, long autorenewalSeconds, String tokenName) {
+    public AbstractStateTokenService(long expireSeconds, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         this.expireSeconds = expireSeconds;
         if (autorenewal) {
             if (autorenewalSeconds <= 0) throw new IllegalArgumentException("autorenewalSeconds must be greater than 0");
@@ -69,43 +66,23 @@ abstract class AbstartStateTokenService implements TokenService, InitializingBea
     }
 
     protected String generateTokenStr(Authentication authentication) {
-        return authentication.getName() + SEPARATOR + StrUtils.uuidSimplified();
+        return StrUtils.uuidSimplified() + encodeUserId(authentication.userId());
     }
 
-    public String getName(String token) {
-        var i = token.indexOf(SEPARATOR);
-        return i != -1 ? token.substring(0, i) : token;
+    public String getUserId(String token) {
+        return decodeUserId(token.substring(32));
     }
 
-    /**
-     * 从请求中获取token
-     *
-     * @param request 请求上下文对象
-     * @return token
-     */
-    public String getToken(HttpServletRequest request) {
-        var token = TokenService.super.getToken(request);
-        return token == null ? null : decodeToken(token);
+    protected String encodeUserId(String token) {
+        return Base64Utils.encodeUrlToString(token);
     }
 
-    protected String encodeToken(String token) {
-        try {
-            return Base64Utils.encodeUrlToString(token);
-        } catch (Exception e) {
-            return token;
-        }
-    }
-
-    protected String decodeToken(String token) {
-        try {
-            return Base64Utils.decodeToString(token);
-        } catch (Exception e) {
-            return token;
-        }
+    protected String decodeUserId(String token) {
+        return Base64Utils.decodeToString(token);
     }
 
     protected TokenInfo generateTokenInfo(String token, long expiresIn) {
-        return new TokenInfo(encodeToken(token), expiresIn);
+        return new TokenInfo(token, expiresIn);
     }
 
     // ======== Redis Key 辅助方法 ========
@@ -126,7 +103,7 @@ abstract class AbstartStateTokenService implements TokenService, InitializingBea
 
     public void refreshAuthentication(Authentication authentication) {
         try {
-            stringRedisTemplate.opsForValue().setIfPresent(infoKey(authentication.getName()), authenticationConvert.serialize(authentication));
+            stringRedisTemplate.opsForValue().setIfPresent(infoKey(authentication.userId()), authenticationConvert.serialize(authentication));
         } catch (IllegalArgumentException _) {
             if (log.isDebugEnabled()) log.debug("token已失效，认证信息无法刷新");
         }

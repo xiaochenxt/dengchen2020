@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 基于JWT实现无状态Token认证
  * <p>对比有状态：</p>
  * <p>优势：不依赖第三方组件，节省内存，稳定性好，可维护性高</p>
- * <p>劣势：对Token的控制力弱，无法做到踢人下线，实时封禁等功能，因此请求Token的有效期不能太长，刷新Token的有效期可根据业务需求设置稍长一些
+ * <p>劣势：对Token的控制力弱，无法做到踢人下线，实时封禁等功能，因此请求Token的有效期不建议太长。刷新Token需自行实现，可以存库或redis防止重复使用
  *
  * @author xiaochen
  * @since 2024/4/28
@@ -71,7 +71,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
      */
     public TokenInfo createToken(Authentication authentication, long expireSeconds, long refreshExpireSeconds) {
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        String token = jwtHelper.encode(jwtHelper.create(expiresIn, StrUtils.uuidSimplified(), authentication.getName())
+        String token = jwtHelper.encode(jwtHelper.create(expiresIn, StrUtils.uuidSimplified(), authentication.userId())
                 .addClaim(TokenConstant.PAYLOAD, authentication));
         if (refreshExpireSeconds > 0) {
             long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
@@ -88,7 +88,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
      */
     public String createRefreshToken(Authentication authentication, long expiresIn) {
         var jti = StrUtils.uuidSimplified();
-        var sub = authentication.getName();
+        var sub = authentication.userId();
         storeRefreshToken(expiresIn, jti, sub);
         return jwtHelper.encode(jwtHelper.create(expiresIn, jti, sub));
     }
