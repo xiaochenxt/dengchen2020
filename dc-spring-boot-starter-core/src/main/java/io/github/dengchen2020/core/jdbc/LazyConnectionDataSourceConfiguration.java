@@ -16,7 +16,6 @@
 
 package io.github.dengchen2020.core.jdbc;
 
-import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -35,6 +34,8 @@ import org.springframework.jmx.export.MBeanExportException;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
 import org.springframework.jmx.support.JmxUtils;
+
+import javax.sql.DataSource;
 
 /**
  * <p>SpringBoot4.1.x推出的新功能（Spring早已支持，但是SpringBoot没有自动配置）
@@ -56,16 +57,16 @@ final class LazyConnectionDataSourceConfiguration {
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     static LazyConnectionDataSourceBeanPostProcessor lazyConnectionDataSourceBeanPostProcessor(
             ObjectProvider<MBeanExporter> mbeanExporter, ObjectProvider<MetadataNamingStrategy> namingStrategy) {
-        return new LazyConnectionDataSourceBeanPostProcessor(mbeanExporter, namingStrategy.getIfAvailable());
+        return new LazyConnectionDataSourceBeanPostProcessor(mbeanExporter, namingStrategy);
     }
 
     static class LazyConnectionDataSourceBeanPostProcessor implements BeanPostProcessor, Ordered {
 
         private final ObjectProvider<MBeanExporter> mbeanExporter;
-        private final MetadataNamingStrategy namingStrategy;
+        private final ObjectProvider<MetadataNamingStrategy> namingStrategy;
 
         LazyConnectionDataSourceBeanPostProcessor(ObjectProvider<MBeanExporter> mbeanExporter,
-                                                  MetadataNamingStrategy namingStrategy) {
+                                                  ObjectProvider<MetadataNamingStrategy> namingStrategy) {
             this.mbeanExporter = mbeanExporter;
             this.namingStrategy = namingStrategy;
         }
@@ -74,13 +75,15 @@ final class LazyConnectionDataSourceConfiguration {
         public @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
             if (beanName.equals("dataSource") && bean instanceof DataSource dataSource) {
                 this.mbeanExporter.ifAvailable((exporter) -> {
-                    if (JmxUtils.isMBean(dataSource.getClass())) {
-                        try {
-                            exporter.registerManagedResource(dataSource, namingStrategy.getObjectName(dataSource, beanName));
-                        } catch (Throwable e) {
-                            throw new MBeanExportException("Unable to generate ObjectName for MBean [" + dataSource + "]", e);
+                    this.namingStrategy.ifAvailable(strategy -> {
+                        if (JmxUtils.isMBean(dataSource.getClass())) {
+                            try {
+                                exporter.registerManagedResource(dataSource, strategy.getObjectName(dataSource, beanName));
+                            } catch (Throwable e) {
+                                throw new MBeanExportException("Unable to generate ObjectName for MBean [" + dataSource + "]", e);
+                            }
                         }
-                    }
+                    });
                 });
                 return new LazyConnectionDataSourceProxy(dataSource);
             }

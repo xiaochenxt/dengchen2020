@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author xiaochen
  * @since 2024/4/24
  */
-public class RedisTokenService extends AbstartStateTokenService {
+public class RedisTokenService extends AbstractStateTokenService {
 
     private final int maxOnlineNum;
 
@@ -45,7 +45,7 @@ public class RedisTokenService extends AbstartStateTokenService {
         String token = generateTokenStr(authentication);
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        var userId = authentication.getName();
+        var userId = authentication.userId();
         stringRedisTemplate.executePipelined(new SessionCallback<>() {
             @Override
             public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
@@ -63,7 +63,7 @@ public class RedisTokenService extends AbstartStateTokenService {
 
     @Override
     public @Nullable Authentication readToken(String token) {
-        var userId = getName(token);
+        var userId = getUserId(token);
         var tk = tokenKey(userId);
         var ik = infoKey(userId);
         List<String> tokens = stringRedisTemplate.opsForList().range(tk, 0, -1);
@@ -91,7 +91,7 @@ public class RedisTokenService extends AbstartStateTokenService {
      * @param token
      */
     public void removeToken(String token) {
-        var userId = getName(token);
+        var userId = getUserId(token);
         stringRedisTemplate.opsForList().remove(tokenKey(userId), 1, token);
     }
 
@@ -101,7 +101,7 @@ public class RedisTokenService extends AbstartStateTokenService {
      * @return
      */
     public long onlineNum(String token) {
-        Long num = stringRedisTemplate.opsForList().size(tokenKey(getName(token)));
+        Long num = stringRedisTemplate.opsForList().size(tokenKey(getUserId(token)));
         return num == null ? 0 : num;
     }
 

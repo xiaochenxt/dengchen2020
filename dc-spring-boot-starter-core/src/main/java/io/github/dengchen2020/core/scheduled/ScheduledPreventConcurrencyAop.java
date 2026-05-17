@@ -3,6 +3,7 @@ package io.github.dengchen2020.core.scheduled;
 import io.github.dengchen2020.core.event.ScheduledHandleBeforeEvent;
 import io.github.dengchen2020.core.utils.IPUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,32 +72,32 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
      * @throws Throwable
      */
     private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
-        Class<?> target = joinPoint.getTarget().getClass();
-        String key = "{dc:task}:" + target.getSimpleName() + ":" + joinPoint.getSignature().getName();
+        var signature = joinPoint.getSignature();
+        String key = "{dc:task}:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
         if (concurrency) {
-            publishEvent(joinPoint);
+            publishEvent(signature);
             return joinPoint.proceed();
         }
         keys.add(key);
         var str = stringRedisTemplate.opsForValue().get(key);
         if (str != null) {
             if (uniqueId.equals(str)) {
-                publishEvent(joinPoint);
+                publishEvent(signature);
                 return joinPoint.proceed();
             }
             return null;
         }
         //获得指定时间内的执行权
         if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, uniqueId, seconds, TimeUnit.SECONDS))) {
-            publishEvent(joinPoint);
+            publishEvent(signature);
             return joinPoint.proceed();
         }
         return null;
     }
 
-    private void publishEvent(ProceedingJoinPoint joinPoint) {
+    private void publishEvent(Signature signature) {
         String localIpInfo = StringUtils.hasText(port) ? IPUtils.getLocalAddr() + ":" + port : IPUtils.getLocalAddr();
-        eventPublisher.publishEvent(new ScheduledHandleBeforeEvent(joinPoint, localIpInfo));
+        eventPublisher.publishEvent(new ScheduledHandleBeforeEvent(signature, localIpInfo));
     }
 
     @Override

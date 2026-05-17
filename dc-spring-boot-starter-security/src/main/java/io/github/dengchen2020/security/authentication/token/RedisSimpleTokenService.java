@@ -1,6 +1,7 @@
 package io.github.dengchen2020.security.authentication.token;
 
 import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.security.exception.SessionTimeOutException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataAccessException;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author xiaochen
  * @since 2024/4/24
  */
-public class RedisSimpleTokenService extends AbstartStateTokenService {
+public class RedisSimpleTokenService extends AbstractStateTokenService {
 
     public RedisSimpleTokenService(long expireSeconds, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         super(expireSeconds, autorenewal, autorenewalSeconds, tokenName);
@@ -37,7 +38,7 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
         String token = generateTokenStr(authentication);
         String payload = authenticationConvert.serialize(authentication);
         long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
-        var userId = authentication.getName();
+        var userId = authentication.userId();
         stringRedisTemplate.executePipelined(new SessionCallback<>() {
             @Override
             public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
@@ -52,17 +53,19 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
 
     @Override
     public @Nullable Authentication readToken(String token) {
-        var userId = getName(token);
+        var userId = getUserId(token);
         var tk = tokenKey(userId);
         var ik = infoKey(userId);
-        String storedToken = stringRedisTemplate.opsForValue().get(tk);
-        if (!token.equals(storedToken)) return null;
+        var storedToken = stringRedisTemplate.opsForValue().get(tk);
+        if (storedToken == null) return null;
+        // 如果当前账号的token存在，但是与前端所给的token不一致
+        if (!token.equals(storedToken)) throw new SessionTimeOutException("当前账号已在其他设备登录");
         if (autorenewal) {
             long ttl = stringRedisTemplate.getExpire(tk, TimeUnit.SECONDS);
             if (ttl > 0 && ttl < autorenewalSeconds) {
                 stringRedisTemplate.executePipelined(new SessionCallback<>() {
                     @Override
-                    public @Nullable <K, V> Object execute(RedisOperations<K, V> operations) throws DataAccessException {
+                    public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
                         var redis = ((StringRedisTemplate)operations);
                         redis.expire(tk, expireSeconds, TimeUnit.SECONDS);
                         redis.expire(ik, expireSeconds, TimeUnit.SECONDS);
@@ -80,7 +83,7 @@ public class RedisSimpleTokenService extends AbstartStateTokenService {
      * @param token
      */
     public void removeToken(String token) {
-        stringRedisTemplate.unlink(tokenKey(getName(token)));
+        stringRedisTemplate.unlink(tokenKey(getUserId(token)));
     }
 
 }

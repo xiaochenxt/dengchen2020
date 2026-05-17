@@ -18,6 +18,8 @@ import org.springframework.web.method.HandlerMethod;
 @NullMarked
 public class AuthenticationInterceptor extends BaseHandlerMethodInterceptor {
 
+    public static final String EXCEPTION_MESSAGE = AuthenticationInterceptor.class.getName() + ".exceptionMessage";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
         if (SecurityContextHolder.getAuthentication() != null) return true;
@@ -27,6 +29,8 @@ public class AuthenticationInterceptor extends BaseHandlerMethodInterceptor {
             if (SecurityContextHolder.getAuthentication() == null) SecurityContextHolder.setAuthentication(AnonymousAuthentication.INSTANCE);
             return true;
         }
+        var exceptionMessage = request.getAttribute(EXCEPTION_MESSAGE);
+        if (exceptionMessage != null) throw new SessionTimeOutException(exceptionMessage.toString());
         throw new SessionTimeOutException();
     }
 

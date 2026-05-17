@@ -2,9 +2,11 @@ package io.github.dengchen2020.security.authentication.filter;
 
 import io.github.dengchen2020.core.security.context.SecurityContextHolder;
 import io.github.dengchen2020.core.web.mvc.StaticResourceServlet;
+import io.github.dengchen2020.security.authentication.interceptor.AuthenticationInterceptor;
 import io.github.dengchen2020.security.authentication.token.TokenService;
 import io.github.dengchen2020.security.authentication.web.AuthenticationHttpServletRequestWrapper;
 import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.security.exception.SessionTimeOutException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +52,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.setAuthentication(authentication);
                 }
             }
+        } catch (SessionTimeOutException e) {
+            request.setAttribute(AuthenticationInterceptor.EXCEPTION_MESSAGE, e.getMessage());
         } catch (Exception e) {
             if (log.isDebugEnabled()) log.debug("token读取异常：", e);
         } finally {
