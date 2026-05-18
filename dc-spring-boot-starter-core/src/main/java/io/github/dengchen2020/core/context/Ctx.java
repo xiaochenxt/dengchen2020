@@ -28,6 +28,6 @@ public interface Ctx {
 
     Object get(String key);
 
-    Object get(String key, Object defaultValue);
+    Object getOrDefault(String key, Object defaultValue);
 
 }

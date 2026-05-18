@@ -60,8 +60,19 @@ public class RedisSimpleTokenService extends AbstractStateTokenService {
         if (storedToken == null) return null;
         // 如果当前账号的token存在，但是与前端所给的token不一致
         if (!token.equals(storedToken)) throw new SessionTimeOutException("当前账号已在其他设备登录");
+        String info;
         if (autorenewal) {
-            long ttl = stringRedisTemplate.getExpire(tk, TimeUnit.SECONDS);
+            var res = stringRedisTemplate.executePipelined(new SessionCallback<>() {
+                @Override
+                public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
+                    var redis = ((StringRedisTemplate)operations);
+                    redis.getExpire(tk, TimeUnit.SECONDS);
+                    redis.opsForValue().get(ik);
+                    return null;
+                }
+            });
+            info = (String) res.get(1);
+            long ttl = (long) res.getFirst();
             if (ttl > 0 && ttl < autorenewalSeconds) {
                 stringRedisTemplate.executePipelined(new SessionCallback<>() {
                     @Override
@@ -73,8 +84,9 @@ public class RedisSimpleTokenService extends AbstractStateTokenService {
                     }
                 });
             }
+        } else {
+            info = stringRedisTemplate.opsForValue().get(ik);
         }
-        String info = stringRedisTemplate.opsForValue().get(ik);
         return StringUtils.hasText(info) ? authenticationConvert.deserialize(info) : null;
     }
 

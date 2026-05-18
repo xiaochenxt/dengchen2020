@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.aot;
 
 import io.github.dengchen2020.aot.utils.AotUtils;
-import io.github.dengchen2020.core.context.CtxImpl;
 import io.github.dengchen2020.core.event.ScheduledHandleBeforeEvent;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.PageParam;
@@ -27,7 +26,7 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 JsonObjectOrArrayValidator.class, JsonObjectValidator.class, JsonArrayValidator.class,
                 NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
                 Page.class, PageParam.class, SimplePage.class, StatsPage.class, ScheduledHandleBeforeEvent.class);
-        aotUtils.registerReflection(CtxImpl.class);
+        aotUtils.registerReflectionIfPresent("io.github.dengchen2020.core.context.CtxImpl");
         aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
     }
 

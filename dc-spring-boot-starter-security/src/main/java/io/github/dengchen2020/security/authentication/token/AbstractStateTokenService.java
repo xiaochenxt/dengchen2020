@@ -3,6 +3,7 @@ package io.github.dengchen2020.security.authentication.token;
 import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.StrUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -101,14 +102,24 @@ abstract class AbstractStateTokenService implements TokenService, InitializingBe
 
     // ========= 通用方法 =========
 
-    public void refreshAuthentication(Authentication authentication) {
+    /**
+     * 刷新redis中的认证信息，相当于更新用户session中的信息
+     * @param authentication 认证信息
+     * @return 如果用户在线则刷新返回true，否则失败返回false
+     */
+    public boolean refreshAuthentication(@NonNull Authentication authentication) {
         try {
-            stringRedisTemplate.opsForValue().setIfPresent(infoKey(authentication.userId()), authenticationConvert.serialize(authentication));
-        } catch (IllegalArgumentException _) {
-            if (log.isDebugEnabled()) log.debug("token已失效，认证信息无法刷新");
+            return stringRedisTemplate.opsForValue().setIfPresent(infoKey(authentication.userId()), authenticationConvert.serialize(authentication));
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
+    /**
+     * 使用户的所有token失效，即强制下线
+     * @Note: 虽然这里只会清除该用户当前设备的所有token，但实际效果会使该用户在所有设备下线
+     * @param userId
+     */
     public void offline(String userId) {
         stringRedisTemplate.unlink(keys(userId));
     }

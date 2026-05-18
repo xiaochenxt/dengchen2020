@@ -9,7 +9,6 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,10 +65,20 @@ public class RedisTokenService extends AbstractStateTokenService {
         var userId = getUserId(token);
         var tk = tokenKey(userId);
         var ik = infoKey(userId);
-        List<String> tokens = stringRedisTemplate.opsForList().range(tk, 0, -1);
-        if (tokens == null || !tokens.contains(token)) return null;
+        if (stringRedisTemplate.opsForList().indexOf(tk, token) == null) return null;
+        String info;
         if (autorenewal) {
-            long ttl = stringRedisTemplate.getExpire(tk, TimeUnit.SECONDS);
+            var res = stringRedisTemplate.executePipelined(new SessionCallback<>() {
+                @Override
+                public @Nullable <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
+                    var redis = ((StringRedisTemplate)operations);
+                    redis.getExpire(tk, TimeUnit.SECONDS);
+                    redis.opsForValue().get(ik);
+                    return null;
+                }
+            });
+            info = (String) res.get(1);
+            long ttl = (long) res.getFirst();
             if (ttl > 0 && ttl < autorenewalSeconds) {
                 stringRedisTemplate.executePipelined(new SessionCallback<>() {
                     @Override
@@ -81,8 +90,9 @@ public class RedisTokenService extends AbstractStateTokenService {
                     }
                 });
             }
+        } else {
+            info = stringRedisTemplate.opsForValue().get(ik);
         }
-        String info = stringRedisTemplate.opsForValue().get(ik);
         return StringUtils.hasText(info) ? authenticationConvert.deserialize(info) : null;
     }
 
@@ -91,8 +101,7 @@ public class RedisTokenService extends AbstractStateTokenService {
      * @param token
      */
     public void removeToken(String token) {
-        var userId = getUserId(token);
-        stringRedisTemplate.opsForList().remove(tokenKey(userId), 1, token);
+        stringRedisTemplate.opsForList().remove(tokenKey(getUserId(token)), 1, token);
     }
 
     /**

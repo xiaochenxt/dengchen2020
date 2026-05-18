@@ -14,11 +14,7 @@ public record AnonymousAuthentication(String name) implements Authentication, Se
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static final AnonymousAuthentication INSTANCE = new AnonymousAuthentication();
-
-    public AnonymousAuthentication() {
-        this("anonymousUser");
-    }
+    public static final AnonymousAuthentication INSTANCE = new AnonymousAuthentication(null);
 
     public AnonymousAuthentication(String name) {
         this.name = name == null ? "anonymousUser" : name;
