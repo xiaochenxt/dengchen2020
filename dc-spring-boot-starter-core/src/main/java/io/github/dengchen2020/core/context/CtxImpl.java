@@ -13,7 +13,7 @@ import java.util.UUID;
  * @author xiaochen
  * @since 2026/1/20
  */
-public final class CtxImpl implements Ctx {
+final class CtxImpl implements Ctx {
 
     private String id;
     @JsonProperty private final Map<String, Object> data;
@@ -51,13 +51,13 @@ public final class CtxImpl implements Ctx {
     }
 
     @Override
-    public CtxImpl set(String key, Object value) {
+    public Ctx set(String key, Object value) {
         data.put(key, value);
         return this;
     }
 
     @Override
-    public CtxImpl del(String key) {
+    public Ctx del(String key) {
         data.remove(key);
         return this;
     }
@@ -68,7 +68,7 @@ public final class CtxImpl implements Ctx {
     }
 
     @Override
-    public Object get(String key, Object defaultValue) {
+    public Object getOrDefault(String key, Object defaultValue) {
         return data.getOrDefault(key, defaultValue);
     }
 
