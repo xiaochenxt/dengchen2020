@@ -97,21 +97,29 @@ public abstract class DateTimeUtils {
 
     /**
      * {@link Date}转换为{@link LocalDateTime}，使用系统默认时区
-     * @param date date
+     * @param date {@link Date}
      * @return {@link LocalDateTime}
      */
     public static LocalDateTime localDateTime(Date date) {
-        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return localDateTime(date.toInstant());
     }
 
     /**
      * {@link Date}转换为{@link LocalDateTime}，使用系统默认时区
-     * @param date date
-     * @param zoneId 时区ID
+     * @param zonedDateTime {@link ZonedDateTime}
      * @return {@link LocalDateTime}
      */
-    public static LocalDateTime localDateTime(Date date, ZoneId zoneId) {
-        return LocalDateTime.ofInstant(date.toInstant(), zoneId);
+    public static LocalDateTime localDateTime(ZonedDateTime zonedDateTime) {
+        return localDateTime(zonedDateTime.toInstant());
+    }
+
+    /**
+     * {@link Date}转换为{@link LocalDateTime}，使用系统默认时区
+     * @param instant {@link Instant}
+     * @return {@link LocalDateTime}
+     */
+    public static LocalDateTime localDateTime(Instant instant) {
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     /**
@@ -377,17 +385,7 @@ public abstract class DateTimeUtils {
      * @return 时间戳
      */
     public static long timestamp(LocalDateTime localDateTime){
-        return timestamp(localDateTime, ZoneId.systemDefault());
-    }
-
-    /**
-     * {@link LocalDateTime}转时间戳
-     * @param localDateTime {@link LocalDateTime}
-     * @param zoneId 时区ID
-     * @return 时间戳
-     */
-    public static long timestamp(LocalDateTime localDateTime, ZoneId zoneId){
-        return localDateTime.atZone(zoneId).toInstant().toEpochMilli();
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     /**
