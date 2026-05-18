@@ -11,6 +11,10 @@ import java.security.Principal;
  */
 public interface Authentication extends Principal {
 
+    static Authentication create(String userId) {
+        return new SimpleUserAuthentication(userId);
+    }
+
     /**
      * @return 用户id，最好是纯数字，不能包含:，特殊字符均不能有
      */
