@@ -22,11 +22,15 @@ public class AuthenticationInterceptor extends BaseHandlerMethodInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
-        if (SecurityContextHolder.getAuthentication() != null) return true;
+        var authentication = SecurityContextHolder.getAuthentication();
+        if (authentication != null) {
+            authentication.afterAuthentication(request);
+            return true;
+        }
         NoTokenRequired noTokenRequired = handlerMethod.getMethod().getAnnotation(NoTokenRequired.class);
         if (noTokenRequired == null) noTokenRequired = handlerMethod.getBeanType().getAnnotation(NoTokenRequired.class);
         if (noTokenRequired != null) {
-            if (SecurityContextHolder.getAuthentication() == null) SecurityContextHolder.setAuthentication(AnonymousAuthentication.INSTANCE);
+            SecurityContextHolder.setAuthentication(AnonymousAuthentication.INSTANCE);
             return true;
         }
         var exceptionMessage = request.getAttribute(EXCEPTION_MESSAGE);
