@@ -1,6 +1,7 @@
 package io.github.dengchen2020.core.security.principal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
 
@@ -45,6 +46,14 @@ public interface Authentication extends Principal {
      */
     default Object getAttribute(String name) {
         return null;
+    }
+
+    /**
+     * 认证成功后的回调处理
+     * @param request {@link HttpServletRequest}
+     */
+    default void afterAuthentication(HttpServletRequest request) {
+
     }
 
 }
