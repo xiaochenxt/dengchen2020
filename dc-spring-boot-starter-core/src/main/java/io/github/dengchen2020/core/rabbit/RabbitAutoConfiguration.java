@@ -4,6 +4,7 @@ import io.github.dengchen2020.core.utils.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -129,8 +131,15 @@ public final class RabbitAutoConfiguration {
      */
     @ConditionalOnProperty(value = "spring.main.lazy-initialization", havingValue = "true")
     @Bean
-    LazyInitializationExcludeFilter dcRabbitLazyInitializationExcludeFilter() {
-        return LazyInitializationExcludeFilter.forBeanTypes(CachingConnectionFactory.class);
+    static LazyInitializationExcludeFilter dcRabbitLazyInitializationExcludeFilter() {
+        return (beanName, beanDefinition, beanType) -> {
+            if (CachingConnectionFactory.class.isAssignableFrom(beanType)) return true;
+            if (beanType.isAnnotationPresent(RabbitListener.class)) return true;
+            for (Method method : beanType.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(RabbitListener.class)) return true;
+            }
+            return false;
+        };
     }
 
 }
