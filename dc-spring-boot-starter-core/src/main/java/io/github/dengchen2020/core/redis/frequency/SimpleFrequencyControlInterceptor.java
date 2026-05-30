@@ -4,9 +4,10 @@ import io.github.dengchen2020.core.interceptor.BaseHandlerMethodInterceptor;
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.security.Principal;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.web.method.HandlerMethod;
+
+import java.security.Principal;
 
 /**
  * 频控拦截器，仅适用于简单场景，仅作用于已登录用户
@@ -43,7 +44,7 @@ public class SimpleFrequencyControlInterceptor extends BaseHandlerMethodIntercep
 
     protected String getTriggerKey(HttpServletRequest request, HandlerMethod handlerMethod) {
         Principal principal = request.getUserPrincipal();
-        return request.getRequestURI() + ":" + request.getMethod() + ":" + principal.getName();
+        return principal.getName() + ":" + handlerMethod;
     }
 
     protected void handleResult(FrequencyControl control, long res) {
