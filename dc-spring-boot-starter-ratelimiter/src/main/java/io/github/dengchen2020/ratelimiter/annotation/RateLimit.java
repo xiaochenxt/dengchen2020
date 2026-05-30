@@ -20,7 +20,12 @@ public @interface RateLimit {
     int value() default 60;
 
     /**
-     * 时间单位，仅支持秒级、分钟级
+     * 时间窗口，当项目中使用redis时更改才有效
+     */
+    long time() default 1L;
+
+    /**
+     * 时间单位，单机版仅支持秒级、分钟级，当项目中使用redis时支持任意级别
      */
     TimeUnit timeUnit() default TimeUnit.MINUTES;
 

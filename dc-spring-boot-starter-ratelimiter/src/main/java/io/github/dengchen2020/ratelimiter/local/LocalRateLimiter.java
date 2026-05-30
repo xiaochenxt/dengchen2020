@@ -1,6 +1,5 @@
 package io.github.dengchen2020.ratelimiter.local;
 
-import io.github.dengchen2020.ratelimiter.RateLimiter;
 import org.jspecify.annotations.NullMarked;
 
 import java.time.Duration;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 2024/4/18
  */
 @NullMarked
-public class LocalRateLimiter implements RateLimiter {
+public class LocalRateLimiter implements AutoCloseable {
 
     // 时间窗口长度(毫秒)
     private final long windowMillis;
@@ -59,7 +58,6 @@ public class LocalRateLimiter implements RateLimiter {
      * @param limitNum 时间窗口内的最大允许次数
      * @return true：触发限流，false：允许请求
      */
-    @Override
     public boolean limit(String limitKey, int limitNum) {
         if (limitNum <= 0) return true;
         long currentTime = System.currentTimeMillis();

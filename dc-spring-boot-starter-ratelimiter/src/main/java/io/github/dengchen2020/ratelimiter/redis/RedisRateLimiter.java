@@ -1,6 +1,5 @@
 package io.github.dengchen2020.ratelimiter.redis;
 
-import io.github.dengchen2020.ratelimiter.RateLimiter;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -13,9 +12,7 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/8/3
  */
-public class RedisRateLimiter implements RateLimiter {
-
-    private final String seconds;
+public class RedisRateLimiter {
 
     private final StringRedisTemplate redisTemplate;
 
@@ -44,12 +41,10 @@ public class RedisRateLimiter implements RateLimiter {
 
     /**
      * 分布式限流实例化
-     * @param duration 限流时间
      * @param redisTemplate {@link StringRedisTemplate}
      *
      */
-    public RedisRateLimiter(Duration duration, StringRedisTemplate redisTemplate) {
-        this.seconds = String.valueOf(duration.toSeconds());
+    public RedisRateLimiter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -58,11 +53,11 @@ public class RedisRateLimiter implements RateLimiter {
      *
      * @param limitKey 限制标识符
      * @param limitNum 限制的次数
+     * @param duration 时间窗口
      * @return true：被限制 false：未被限制
      */
-    @Override
-    public boolean limit(String limitKey, int limitNum) {
-        Long count = redisTemplate.execute(rateLimitScript, List.of(RATE_LIMIT_PREFIX + limitKey), String.valueOf(limitNum), seconds);
+    public boolean limit(String limitKey, int limitNum, Duration duration) {
+        Long count = redisTemplate.execute(rateLimitScript, List.of(RATE_LIMIT_PREFIX + limitKey), String.valueOf(limitNum), String.valueOf(duration.toSeconds()));
         return count > limitNum;
     }
 }

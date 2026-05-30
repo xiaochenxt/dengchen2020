@@ -1,10 +1,10 @@
 package io.github.dengchen2020.ratelimiter.local;
 
-import io.github.dengchen2020.ratelimiter.RateLimiterInterceptor;
 import io.github.dengchen2020.ratelimiter.properties.RateLimiterProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -16,7 +16,7 @@ import java.time.Duration;
  * @author xiaochen
  * @since 2024/7/1
  */
-@ConditionalOnProperty(value = "dc.ratelimiter.type", matchIfMissing = true, havingValue = "local")
+@ConditionalOnMissingBean(StringRedisTemplate.class)
 @EnableConfigurationProperties(RateLimiterProperties.class)
 @Configuration(proxyBeanMethods = false)
 public final class LocalRateLimiterAutoConfiguration implements WebMvcConfigurer {
@@ -29,7 +29,7 @@ public final class LocalRateLimiterAutoConfiguration implements WebMvcConfigurer
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if (properties.isEnabled()) registry.addInterceptor(new RateLimiterInterceptor(new LocalRateLimiter(Duration.ofSeconds(1)), new LocalRateLimiter(Duration.ofMinutes(1)), properties.getErrorMsg()));
+        if (properties.isEnabled()) registry.addInterceptor(new LocalRateLimiterInterceptor(new LocalRateLimiter(Duration.ofSeconds(1)), new LocalRateLimiter(Duration.ofMinutes(1)), properties.getErrorMsg()));
     }
 
 }
