@@ -34,7 +34,6 @@ public final class LockAutoConfiguration {
         config.setUseScriptCache(true);
         SingleServerConfig singleServerConfig = config.useSingleServer();
         singleServerConfig.setConnectionMinimumIdleSize(1);
-        singleServerConfig.setConnectionPoolSize(200);
         String host = environment.getProperty("dc.lock.redisson.redis.host", environment.getProperty("spring.data.redis.host","127.0.0.1"));
         int port = environment.getProperty("dc.lock.redisson.redis.port", int.class, environment.getProperty("spring.data.redis.port", int.class, 6379));
         int database = environment.getProperty("dc.lock.redisson.redis.database", int.class, environment.getProperty("spring.data.redis.database", int.class, 0));
