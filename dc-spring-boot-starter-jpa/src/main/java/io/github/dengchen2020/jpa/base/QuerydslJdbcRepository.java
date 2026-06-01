@@ -13,7 +13,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 2024/11/27
  */
 @NullMarked
-interface QuerydslJdbcRepository<T> {
+public interface QuerydslJdbcRepository<T> {
 
     <R> JPASQLQuery<R> nativeSelect(Expression<R> expr);
 
