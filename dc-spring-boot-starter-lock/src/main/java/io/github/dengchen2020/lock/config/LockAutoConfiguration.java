@@ -2,7 +2,6 @@ package io.github.dengchen2020.lock.config;
 
 import io.github.dengchen2020.lock.LockAop;
 import io.github.dengchen2020.lock.api.RedissonLock;
-import java.util.concurrent.Executors;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -13,6 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.env.Environment;
+
+import java.util.concurrent.Executors;
 
 /**
  * 锁自动配置
@@ -32,7 +33,6 @@ public final class LockAutoConfiguration {
         config.setUseScriptCache(true);
         SingleServerConfig singleServerConfig = config.useSingleServer();
         singleServerConfig.setConnectionMinimumIdleSize(1);
-        singleServerConfig.setConnectionPoolSize(200);
         String host = environment.getProperty("dc.lock.redisson.redis.host", environment.getProperty("spring.data.redis.host","127.0.0.1"));
         int port = environment.getProperty("dc.lock.redisson.redis.port", int.class, environment.getProperty("spring.data.redis.port", int.class, 6379));
         int database = environment.getProperty("dc.lock.redisson.redis.database", int.class, environment.getProperty("spring.data.redis.database", int.class, 0));
