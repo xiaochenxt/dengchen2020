@@ -67,6 +67,11 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
+    public void clear() {
+        entityManager.clear();
+    }
+
+    @Override
     public void detach(T entity) {
         entityManager.detach(entity);
     }
