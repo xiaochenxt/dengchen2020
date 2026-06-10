@@ -25,7 +25,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @return T
      */
     @Nullable
-    @Query("select e from #{#entityName} e where e.id = ?1 and e.userId = ?#{userId}")
+    @Query("select e from #{#entityName} e where id(e) = ?1 and e.userId = ?#{userId}")
     T selectByIdWithUserId(ID id);
 
     /**
@@ -33,7 +33,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @param id id
      * @return T
      */
-    @Query("select e from #{#entityName} e where e.id = ?1 and e.userId = ?#{userId}")
+    @Query("select e from #{#entityName} e where id(e) = ?1 and e.userId = ?#{userId}")
     Optional<T> findByIdWithUserId(ID id);
 
     /**
@@ -41,7 +41,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @param ids ids
      * @return T
      */
-    @Query("select e from #{#entityName} e where e.id in ?1 and e.userId = ?#{userId}")
+    @Query("select e from #{#entityName} e where id(e) in ?1 and e.userId = ?#{userId}")
     List<T> selectInIdsWithUserId(Iterable<ID> ids);
 
     /**
@@ -49,7 +49,7 @@ public interface UserIdJpaRepository<T, ID> {
      * @param ids ids
      * @return T
      */
-    @Query("select e from #{#entityName} e where e.id in ?1 and e.userId = ?#{userId}")
+    @Query("select e from #{#entityName} e where id(e) in ?1 and e.userId = ?#{userId}")
     List<T> selectInIdsWithUserId(ID... ids);
 
     /**
@@ -59,7 +59,7 @@ public interface UserIdJpaRepository<T, ID> {
      */
     @Transactional
     @Modifying
-    @Query("delete from #{#entityName} e where e.id = ?1 and e.userId = ?#{userId}")
+    @Query("delete from #{#entityName} e where id(e) = ?1 and e.userId = ?#{userId}")
     int deleteWithUserId(ID id);
 
     /**
@@ -69,7 +69,7 @@ public interface UserIdJpaRepository<T, ID> {
      */
     @Transactional
     @Modifying
-    @Query("delete from #{#entityName} e where e.id in ?1 and e.userId = ?#{userId}")
+    @Query("delete from #{#entityName} e where id(e) in ?1 and e.userId = ?#{userId}")
     int deleteWithUserId(Iterable<ID> ids);
 
     /**
@@ -79,7 +79,7 @@ public interface UserIdJpaRepository<T, ID> {
      */
     @Transactional
     @Modifying
-    @Query("delete from #{#entityName} e where e.id in ?1 and e.userId = ?#{userId}")
+    @Query("delete from #{#entityName} e where id(e) in ?1 and e.userId = ?#{userId}")
     int deleteWithUserId(ID... ids);
 
 }
