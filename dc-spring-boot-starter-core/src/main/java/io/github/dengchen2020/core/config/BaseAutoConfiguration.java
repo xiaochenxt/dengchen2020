@@ -10,11 +10,9 @@ import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.restclient.autoconfigure.RestClientBuilderConfigurer;
 import org.springframework.boot.thread.Threading;
 import org.springframework.context.annotation.*;
@@ -90,11 +88,6 @@ public final class BaseAutoConfiguration implements InitializingBean {
         RestClient restClient(RestClient.Builder builder) {
             return builder.build();
         }
-    }
-
-    @Bean
-    static BeanFactoryPostProcessor taskExecutorAliasBeanFactoryPostProcessor() {
-        return (beanFactory) -> beanFactory.registerAlias(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME, "taskExecutor");
     }
 
 }
