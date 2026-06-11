@@ -1,7 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +34,9 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
         this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizer;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected RepositoryFactorySupport createRepositoryFactory(@Nonnull EntityManager em) {
+    protected RepositoryFactorySupport createRepositoryFactory(@NonNull EntityManager em) {
         return new BaseRepositoryFactory(em, repositoryFragmentsCustomizer);
     }
 

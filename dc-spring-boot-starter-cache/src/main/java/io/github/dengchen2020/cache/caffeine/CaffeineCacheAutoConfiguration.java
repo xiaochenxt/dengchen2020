@@ -3,6 +3,7 @@ package io.github.dengchen2020.cache.caffeine;
 import io.github.dengchen2020.cache.properties.CacheSpecBuilder;
 import io.github.dengchen2020.core.redis.RedisDependencyAutoConfiguration;
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -12,7 +13,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import jakarta.annotation.Nullable;
 import org.springframework.data.redis.connection.MessageListener;
 
 /**
@@ -36,8 +36,8 @@ public final class CaffeineCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    CaffeineCacheManager caffeineCacheManager(CacheSpecBuilder cacheSpecBuilder,@Nullable CaffeineCacheHelper cacheHelper) {
-        return new CaffeineCacheManager(cacheSpecBuilder.getCaffeine(), cacheHelper);
+    CaffeineCacheManager caffeineCacheManager(CacheSpecBuilder cacheSpecBuilder, ObjectProvider<CaffeineCacheHelper> cacheHelper) {
+        return new CaffeineCacheManager(cacheSpecBuilder.getCaffeine(), cacheHelper.getIfAvailable());
     }
 
     /**
