@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.scheduled;
 
-import jakarta.annotation.Nullable;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder;
 import org.springframework.context.annotation.Configuration;
@@ -18,15 +18,16 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @Configuration(proxyBeanMethods = false)
 public final class SchedulingAutoConfiguration implements SchedulingConfigurer {
 
-    private final ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder;
+    private final ObjectProvider<ThreadPoolTaskSchedulerBuilder> threadPoolTaskSchedulerBuilder;
 
-    SchedulingAutoConfiguration(@Nullable ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder) {
+    SchedulingAutoConfiguration(ObjectProvider<ThreadPoolTaskSchedulerBuilder> threadPoolTaskSchedulerBuilder) {
         this.threadPoolTaskSchedulerBuilder = threadPoolTaskSchedulerBuilder;
     }
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        ThreadPoolTaskScheduler taskScheduler = threadPoolTaskSchedulerBuilder != null ? threadPoolTaskSchedulerBuilder.build() : new ThreadPoolTaskScheduler();
+        var builder = threadPoolTaskSchedulerBuilder.getIfAvailable();
+        ThreadPoolTaskScheduler taskScheduler = builder != null ? builder.build() : new ThreadPoolTaskScheduler();
         int size = taskRegistrar.getCronTaskList().size() + taskRegistrar.getFixedDelayTaskList().size() + taskRegistrar.getFixedRateTaskList().size() + taskRegistrar.getTriggerTaskList().size();
         taskScheduler.setPoolSize(size == 0 ? 1 : size);
        // taskScheduler.setThreadFactory(Thread.ofVirtual().name(taskScheduler.getThreadNamePrefix(),0).factory()); // 与setVirtualThreads效果一致

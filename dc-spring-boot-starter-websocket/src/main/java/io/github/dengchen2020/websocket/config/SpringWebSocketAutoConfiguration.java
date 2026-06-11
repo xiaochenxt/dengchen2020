@@ -2,13 +2,13 @@ package io.github.dengchen2020.websocket.config;
 
 import io.github.dengchen2020.websocket.annotation.WebSocketMapping;
 import io.github.dengchen2020.websocket.properties.WebSocketProperties;
-import jakarta.annotation.Nonnull;
 import jakarta.websocket.server.ServerEndpoint;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import jakarta.annotation.Nullable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -18,7 +18,6 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,15 +32,15 @@ import java.util.Set;
 @Configuration(proxyBeanMethods = false)
 public final class SpringWebSocketAutoConfiguration implements WebSocketConfigurer {
 
-    private final List<WebSocketHandler> webSocketHandlers;
+    private final ObjectProvider<WebSocketHandler> webSocketHandlers;
 
-    private final HandshakeHandler handshakeHandler;
+    private final ObjectProvider<HandshakeHandler> handshakeHandler;
 
-    private final HandshakeInterceptor[] handshakeInterceptors;
+    private final ObjectProvider<HandshakeInterceptor> handshakeInterceptors;
 
     private final WebSocketProperties webSocketProperties;
 
-    SpringWebSocketAutoConfiguration(@Nullable List<WebSocketHandler> webSocketHandlers, @Nullable HandshakeHandler handshakeHandler, @Nullable HandshakeInterceptor[] handshakeInterceptors, WebSocketProperties webSocketProperties) {
+    SpringWebSocketAutoConfiguration(ObjectProvider<WebSocketHandler> webSocketHandlers, ObjectProvider<HandshakeHandler> handshakeHandler, ObjectProvider<HandshakeInterceptor> handshakeInterceptors, WebSocketProperties webSocketProperties) {
         this.webSocketHandlers = webSocketHandlers;
         this.handshakeHandler = handshakeHandler;
         this.handshakeInterceptors = handshakeInterceptors;
@@ -49,8 +48,7 @@ public final class SpringWebSocketAutoConfiguration implements WebSocketConfigur
     }
 
     @Override
-    public void registerWebSocketHandlers(@Nonnull WebSocketHandlerRegistry registry) {
-        if (webSocketHandlers == null) return;
+    public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
         Set<String> handlerMappings = new HashSet<>();
         for (WebSocketHandler handle : webSocketHandlers) {
             if (handle.getClass().getAnnotation(ServerEndpoint.class) != null) throw new IllegalArgumentException("无需添加@ServerEndpoint注解，" + handle.getClass().getName());
@@ -65,8 +63,9 @@ public final class SpringWebSocketAutoConfiguration implements WebSocketConfigur
             if(webSocketProperties.getAllowedOriginPatterns() != null) registration.setAllowedOriginPatterns(webSocketProperties.getAllowedOriginPatterns());
             if(webSocketProperties.getAllowedOrigins() == null && webSocketProperties.getAllowedOriginPatterns() == null) registration.setAllowedOriginPatterns("*");
             if(webSocketProperties.isWithSockJS()) registration.withSockJS();
-            if(handshakeHandler != null) registration.setHandshakeHandler(handshakeHandler);
-            if(handshakeInterceptors != null) registration.addInterceptors(handshakeInterceptors);
+            var handshake = handshakeHandler.getIfAvailable();
+            if(handshake != null) registration.setHandshakeHandler(handshake);
+            handshakeInterceptors.forEach(registration::addInterceptors);
         }
     }
 
