@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.4.40</version>
+    <version>0.4.41</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -43,7 +43,7 @@
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>actable</distribution>
         </license>
     </licenses>
@@ -57,16 +57,16 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dc.version>0.4.40</dc.version>
+        <dc.version>0.4.41</dc.version>
         <querydsl.version>5.1.0</querydsl.version>
-        <redisson.version>4.4.0</redisson.version>
+        <redisson.version>4.5.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <protostuff.version>1.8.0</protostuff.version>
-        <spring-ai.version>2.0.0-M8</spring-ai.version>
+        <spring-ai.version>2.0.0-RC2</spring-ai.version>
         <graalvm.version>25.0.3</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
-        <openfeign.querydsl.version>7.2</openfeign.querydsl.version>
-        <libphonenumber.version>9.0.31</libphonenumber.version>
+        <openfeign.querydsl.version>7.3.0</openfeign.querydsl.version>
+        <libphonenumber.version>9.0.32</libphonenumber.version>
         <mybatis.springboot.version>4.0.1</mybatis.springboot.version>
         <ip2region.version>3.3.7</ip2region.version>
         <software.amazon.awssdk.version>2.41.34</software.amazon.awssdk.version>
@@ -139,11 +139,6 @@
                 <groupId>io.github.dengchen2020</groupId>
                 <artifactId>jackson-ext</artifactId>
                 <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>querydsl-sql-jpa-annotation-apt</artifactId>
-                <version>0.0.1</version>
             </dependency>
             <dependency>
                 <groupId>io.protostuff</groupId>
