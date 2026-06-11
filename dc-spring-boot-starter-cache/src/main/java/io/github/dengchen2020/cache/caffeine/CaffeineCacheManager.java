@@ -28,6 +28,7 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
     public CaffeineCacheManager(CacheSpecBuilder.Caffeine builder,@Nullable CaffeineCacheHelper cacheHelper) {
         this.builder = builder;
         this.cacheHelper = cacheHelper;
+        setTransactionAware(builder.isTransactionAware());
     }
 
    // Executor executor = new VirtualThreadTaskExecutor("caffeine-async-");
@@ -80,8 +81,4 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         return buildCache(name, new CacheSpecBuilder.Caffeine.CacheSpec());
     }
 
-    @Override
-    public boolean isTransactionAware() {
-        return builder.isTransactionAware();
-    }
 }
