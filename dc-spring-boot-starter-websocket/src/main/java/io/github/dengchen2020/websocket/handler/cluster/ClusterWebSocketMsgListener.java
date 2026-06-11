@@ -7,6 +7,8 @@ import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
 
+import static io.github.dengchen2020.websocket.handler.cluster.WebSocketSendParam.*;
+
 /**
  * 集群websocket服务器通知
  *
@@ -25,37 +27,37 @@ public class ClusterWebSocketMsgListener extends MessageListenerAdapter {
 
     public void handleMessage(WebSocketSendParam sendParam) {
         switch (sendParam.type()) {
-            case 0 -> {
+            case TYPE_CLOSE -> {
                 if (sendParam.userId() != null) {
                     clusterSpringWebSocketHandler.closeNoPublish(sendParam.userId(), new CloseStatus(sendParam.closeCode(), sendParam.closeReason()));
                 }else if (sendParam.tenantId() != null) {
                     clusterSpringWebSocketHandler.closeNoPublish(sendParam.tenantId(), new CloseStatus(sendParam.closeCode(), sendParam.closeReason()));
                 }
             }
-            case 1 -> {
+            case TYPE_USER -> {
                 if (sendParam.userId() == null) {
                     log.warn("websocket发送消息异常，用户id为null，msg：{}", new String(sendParam.msg()));
                     return;
                 }
                 switch (sendParam.msgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), new String(sendParam.msg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), ByteBuffer.wrap(sendParam.msg()));
+                    case MSG_TYPE_TEXT -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), new String(sendParam.msg()));
+                    case MSG_TYPE_BINARY -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.userId(), ByteBuffer.wrap(sendParam.msg()));
                 }
             }
-            case 2 -> {
+            case TYPE_TENANT -> {
                 if (sendParam.tenantId() == null) {
                     log.warn("websocket发送消息异常，租户id为null，msg：{}", new String(sendParam.msg()));
                     return;
                 }
                 switch (sendParam.msgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), new String(sendParam.msg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), ByteBuffer.wrap(sendParam.msg()));
+                    case MSG_TYPE_TEXT -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), new String(sendParam.msg()));
+                    case MSG_TYPE_BINARY -> clusterSpringWebSocketHandler.sendNoPublish(sendParam.tenantId(), ByteBuffer.wrap(sendParam.msg()));
                 }
             }
-            case 3 -> {
+            case TYPE_ALL -> {
                 switch (sendParam.msgType()) {
-                    case 1 -> clusterSpringWebSocketHandler.sendToAllNoPublish(new String(sendParam.msg()));
-                    case 2 -> clusterSpringWebSocketHandler.sendToAllNoPublish(ByteBuffer.wrap(sendParam.msg()));
+                    case MSG_TYPE_TEXT -> clusterSpringWebSocketHandler.sendToAllNoPublish(new String(sendParam.msg()));
+                    case MSG_TYPE_BINARY -> clusterSpringWebSocketHandler.sendToAllNoPublish(ByteBuffer.wrap(sendParam.msg()));
                 }
             }
         }
