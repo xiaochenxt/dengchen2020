@@ -68,6 +68,11 @@
       "type": "java.lang.String",
       "description": "eager：直接获取 JDBC 连接，lazy：尽可能晚地获取 JDBC 连接，如果没有任何语句被执行的话，则完全不获取连接.强烈推荐使用lazy.",
       "defaultValue": "eager"
+    },{
+      "name": "dc.web.completion-exception-resolver.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用CompletionExceptionResolver，将CompletionException或ExecutionException解包出实际的异常供@ExceptionHandler处理，默认为false.",
+      "defaultValue": false
     }
   ]
 }
