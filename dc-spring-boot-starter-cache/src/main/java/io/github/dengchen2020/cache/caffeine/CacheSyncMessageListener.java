@@ -7,6 +7,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
+import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_CLEAR;
+import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_EVICT;
+
 /**
  * 缓存同步消息订阅
  *
@@ -38,12 +41,12 @@ public class CacheSyncMessageListener extends MessageListenerAdapter {
                 Cache cache = cacheManager.getCache(cacheName);
                 if (cache == null) continue;
                 switch (cacheSync.type()) {
-                    case 1 -> {
+                    case TYPE_EVICT -> {
                         if (cache.evictIfPresent(cacheSync.key())) {
                             if (log.isDebugEnabled()) log.debug("缓存名：{}，key：{}被同步清除", cacheSync.cacheName(), cacheSync.key());
                         }
                     }
-                    case 2 -> {
+                    case TYPE_CLEAR -> {
                         if (cache.invalidate()) {
                             if (log.isDebugEnabled()) log.debug("缓存名：{}，所有缓存被清除", cacheName);
                         }

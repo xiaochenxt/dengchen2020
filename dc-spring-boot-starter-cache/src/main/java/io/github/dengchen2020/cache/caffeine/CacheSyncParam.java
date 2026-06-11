@@ -23,24 +23,37 @@ public record CacheSyncParam(int type, String[] cacheName, Object key) implement
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public CacheSyncParam() {
-        this(2, null, null);
+    /**
+     * 移除指定缓存
+     */
+    static final int TYPE_EVICT = 1;
+    /**
+     * 清除所有缓存
+     */
+    static final int TYPE_CLEAR = 2;
+
+    /**
+     * 构建清除所有缓存的参数
+     */
+    public static CacheSyncParam clearAll() {
+        return new CacheSyncParam(TYPE_CLEAR, null, null);
     }
 
-    public CacheSyncParam(String cacheName) {
-        this(2, new String[]{cacheName}, null);
+    /**
+     * 构建清除指定{@code cacheName}的缓存的参数
+     * @param cacheName 缓存名
+     */
+    public static CacheSyncParam clear(String[] cacheName) {
+        return new CacheSyncParam(TYPE_CLEAR, cacheName, null);
     }
 
-    public CacheSyncParam(String[] cacheName) {
-        this(2, cacheName, null);
-    }
-
-    public CacheSyncParam(String cacheName, Object key) {
-        this(1, new String[]{cacheName}, key);
-    }
-
-    public CacheSyncParam(String[] cacheName, Object key) {
-        this(1, cacheName, key);
+    /**
+     * 构建移除指定缓存的参数
+     * @param cacheName 缓存名
+     * @param key       要清除的缓存key
+     */
+    public static CacheSyncParam evict(String[] cacheName, Object key) {
+        return new CacheSyncParam(TYPE_EVICT, cacheName, key);
     }
 
 }
