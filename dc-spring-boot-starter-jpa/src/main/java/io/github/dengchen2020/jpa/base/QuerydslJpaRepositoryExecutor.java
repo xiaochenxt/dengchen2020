@@ -133,8 +133,10 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     }
 
     @Override
-    public SimplePage<T> findAll(Predicate predicate, Page page, OrderSpecifier<?>... o){
-        return fetchPage(selectFrom().where(predicate), page, o);
+    public SimplePage<T> findAll(@Nullable Predicate predicate, Page page, OrderSpecifier<?>... o){
+        var query = selectFrom();
+        if (predicate != null) query.where(predicate);
+        return fetchPage(query, page, o);
     }
 
     @Override
@@ -147,18 +149,10 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     }
 
     @Override
-    public Stream<T> findStream(Predicate predicate,@Nullable Page page, OrderSpecifier<?>... o){
-        return fetchStream(selectFrom().where(predicate), page, o);
-    }
-
-    @Override
-    public Stream<T> findStream(@Nullable Page page, OrderSpecifier<?>... o){
-        return fetchStream(selectFrom(), page, o);
-    }
-
-    @Override
-    public Stream<T> findStream(OrderSpecifier<?>... o){
-        return fetchStream(selectFrom(), null, o);
+    public Stream<T> findStream(@Nullable Predicate predicate,@Nullable Page page, OrderSpecifier<?>... o){
+        var query = selectFrom();
+        if (predicate != null) query.where(predicate);
+        return fetchStream(query, page, o);
     }
 
 }
