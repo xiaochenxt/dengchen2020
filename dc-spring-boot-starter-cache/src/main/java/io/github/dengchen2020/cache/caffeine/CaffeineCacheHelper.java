@@ -54,9 +54,9 @@ public class CaffeineCacheHelper implements CacheHelper {
         Class<?> keyClass = key.getClass();
         CacheSyncParam cacheSyncParam;
         if (keyClass == String.class || keyClass.isPrimitive() || keyClass.getSuperclass() == Number.class) {
-            cacheSyncParam = new CacheSyncParam(cacheNames, key);
+            cacheSyncParam = CacheSyncParam.evict(cacheNames, key);
         } else {
-            cacheSyncParam = new CacheSyncParam(cacheNames);
+            cacheSyncParam = CacheSyncParam.clear(cacheNames);
             if (keyClass != SimpleKey.class) {
                 log.warn("缓存名：{}，缓存key{}为对象类型，无法解析，清空名下所有缓存", cacheNames, key);
             }else {
@@ -83,7 +83,7 @@ public class CaffeineCacheHelper implements CacheHelper {
      */
     @Override
     public void clear(String[] cacheNames) {
-        sync(new CacheSyncParam(cacheNames));
+        sync(CacheSyncParam.clear(cacheNames));
     }
 
     /**
@@ -91,6 +91,6 @@ public class CaffeineCacheHelper implements CacheHelper {
      */
     @Override
     public void clearAll() {
-        sync(new CacheSyncParam());
+        sync(CacheSyncParam.clearAll());
     }
 }

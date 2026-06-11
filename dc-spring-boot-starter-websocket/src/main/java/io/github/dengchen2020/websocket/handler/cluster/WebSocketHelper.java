@@ -55,7 +55,7 @@ public class WebSocketHelper {
      * @param closeStatus 关闭连接原因
      */
     public void close(String userId, CloseStatus closeStatus) {
-        send(new WebSocketSendParam(userId, closeStatus));
+        send(WebSocketSendParam.closeStatus(userId, closeStatus));
     }
 
     /**
@@ -65,7 +65,7 @@ public class WebSocketHelper {
      * @param closeStatus 关闭连接原因
      */
     public void close(String[] userId, CloseStatus closeStatus) {
-        send(new WebSocketSendParam(userId, closeStatus));
+        send(WebSocketSendParam.closeStatus(userId, closeStatus));
     }
 
     /**
@@ -75,7 +75,7 @@ public class WebSocketHelper {
      * @param closeStatus 关闭连接原因
      */
     public void close(Long tenantId, CloseStatus closeStatus) {
-        send(new WebSocketSendParam(tenantId, closeStatus));
+        send(WebSocketSendParam.closeStatus(tenantId, closeStatus));
     }
 
     /**
@@ -85,7 +85,7 @@ public class WebSocketHelper {
      * @param message 文本消息
      */
     public void send(String userId, String message) {
-        send(new WebSocketSendParam(userId, message));
+        send(WebSocketSendParam.userText(userId, message));
     }
 
     /**
@@ -95,7 +95,7 @@ public class WebSocketHelper {
      * @param message 文本消息
      */
     public void send(String[] userId, String message) {
-        send(new WebSocketSendParam(userId, message));
+        send(WebSocketSendParam.userText(userId, message));
     }
 
     /**
@@ -105,7 +105,7 @@ public class WebSocketHelper {
      * @param message  文本消息
      */
     public void send(Long tenantId, String message) {
-        send(new WebSocketSendParam(tenantId, message));
+        send(WebSocketSendParam.tenantText(tenantId, message));
     }
 
     /**
@@ -114,7 +114,7 @@ public class WebSocketHelper {
      * @param message  文本消息
      */
     public void sendToAll(String message) {
-        send(new WebSocketSendParam(message));
+        send(WebSocketSendParam.allText(message));
     }
 
     /**
@@ -124,7 +124,7 @@ public class WebSocketHelper {
      * @param message 二进制消息
      */
     public void send(String userId, ByteBuffer message) {
-        send(new WebSocketSendParam(userId, message));
+        send(WebSocketSendParam.userBinary(userId, message));
     }
 
     /**
@@ -134,7 +134,7 @@ public class WebSocketHelper {
      * @param message 二进制消息
      */
     public void send(String[] userId, ByteBuffer message) {
-        send(new WebSocketSendParam(userId, message));
+        send(WebSocketSendParam.userBinary(userId, message));
     }
 
     /**
@@ -144,7 +144,7 @@ public class WebSocketHelper {
      * @param message  二进制消息
      */
     public void send(Long tenantId, ByteBuffer message) {
-        send(new WebSocketSendParam(tenantId, message));
+        send(WebSocketSendParam.tenantBinary(tenantId, message));
     }
 
     /**
@@ -153,7 +153,7 @@ public class WebSocketHelper {
      * @param message  二进制消息
      */
     public void sendToAll(ByteBuffer message) {
-        send(new WebSocketSendParam(message));
+        send(WebSocketSendParam.allBinary(message));
     }
 
 }
