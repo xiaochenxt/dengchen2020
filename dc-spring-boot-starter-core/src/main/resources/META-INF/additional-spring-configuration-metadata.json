@@ -63,6 +63,11 @@
       "type": "java.lang.Boolean",
       "description": "是否同时只能配置一个激活的profile，避免环境配置混乱导致运行时错误，默认为true，符合一个环境一个配置的风格，不建议关闭.",
       "defaultValue": true
+    },{
+      "name": "dc.web.completion-exception-resolver.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用CompletionExceptionResolver，将CompletionException或ExecutionException解包出实际的异常供@ExceptionHandler处理，默认为false.",
+      "defaultValue": false
     }
   ]
 }

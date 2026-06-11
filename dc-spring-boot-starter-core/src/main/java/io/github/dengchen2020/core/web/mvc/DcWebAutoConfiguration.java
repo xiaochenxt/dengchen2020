@@ -6,6 +6,7 @@ import io.github.dengchen2020.core.filter.DcShallowEtagHeaderFilter;
 import io.github.dengchen2020.core.properties.DcCorsProperties;
 import io.github.dengchen2020.core.properties.DcETagProperties;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
@@ -36,8 +38,11 @@ import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FrameworkServlet;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHandlerUtils;
@@ -46,6 +51,8 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
@@ -65,10 +72,12 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
     private final WebProperties.Resources resources;
     @Nullable
     private ApplicationContext applicationContext;
+    private final Environment environment;
 
-    public DcWebAutoConfiguration(WebProperties webProperties) {
+    public DcWebAutoConfiguration(WebProperties webProperties, Environment environment) {
         this.resources = webProperties.getResources();
         if (resources.isAddMappings()) throw new IllegalStateException("请配置spring.web.resources.add-mappings=false");
+        this.environment = environment;
     }
 
     @Override
@@ -208,6 +217,39 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
             if (registry.containsBeanDefinition("requestContextFilter")) {
                 registry.removeBeanDefinition("requestContextFilter");
             }
+        }
+    }
+
+    @Override
+    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        if (!environment.getProperty("dc.web.completion-exception-resolver.enabled", Boolean.class, false)) return;
+        HandlerExceptionResolver resolver = null;
+        for (var r : resolvers) {
+            if (r instanceof ExceptionHandlerExceptionResolver) {
+                resolver = r;
+                break;
+            }
+        }
+        if (resolver == null) return;
+        resolvers.addFirst(new CompletionExceptionResolver(resolver));
+    }
+
+    /**
+     * 处理 {@link CompletionException} 和 {@link ExecutionException} 解包出实际异常交由@ExceptionHandler处理
+     */
+    static final class CompletionExceptionResolver implements HandlerExceptionResolver {
+        private final HandlerExceptionResolver resolver;
+
+        public CompletionExceptionResolver(HandlerExceptionResolver resolver) {
+            this.resolver = resolver;
+        }
+
+        @Override
+        public @Nullable ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+            if (ex instanceof CompletionException || ex instanceof ExecutionException) {
+                if (ex.getCause() instanceof Exception e) return resolver.resolveException(request, response, handler, e);
+            }
+            return null;
         }
     }
 
