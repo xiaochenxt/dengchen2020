@@ -6,8 +6,10 @@ import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +38,8 @@ import java.lang.reflect.Modifier;
  * @author xiaochen
  * @since 2024/7/3
  */
-@ConditionalOnClass(ReactiveRedisConnectionFactory.class)
+@AutoConfigureAfter(RedisAutoConfiguration.class)
+@ConditionalOnBean(ReactiveRedisConnectionFactory.class)
 @Configuration(proxyBeanMethods = false)
 public final class RedisDependencyAutoConfiguration {
 
