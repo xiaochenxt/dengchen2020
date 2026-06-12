@@ -1,6 +1,5 @@
 package io.github.dengchen2020.core.rabbit;
 
-import io.github.dengchen2020.core.utils.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
@@ -105,7 +104,7 @@ public final class RabbitAutoConfiguration {
     MessageRecoverer messageRecoverer(MessageConverter messageConverter) {
         return (message, cause) -> {
             MessageProperties messageProperties = message.getMessageProperties();
-            log.error(StrUtils.format("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，异常信息：", messageProperties.getHeader(RabbitConstant.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey()), cause);
+            log.error("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，异常信息：", messageProperties.getHeader(RabbitConstant.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey(), cause);
         };
     }
 
