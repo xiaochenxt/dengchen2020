@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
  * @since 2023/7/18
  */
 @NullMarked
-public class WebSocketHelper {
+public class WebSocketTemplate {
 
     static final String defaultTopicPrefix = "dc:websocket:";
 
@@ -35,19 +35,19 @@ public class WebSocketHelper {
      * @param mapping websocket映射路径
      * @param redisMessagePublisher redis消息发布者
      */
-    public WebSocketHelper(String mapping, RedisMessagePublisher redisMessagePublisher) {
+    public WebSocketTemplate(String mapping, RedisMessagePublisher redisMessagePublisher) {
         this.topic = redisTopic(mapping);
         this.redisMessagePublisher = redisMessagePublisher;
     }
 
     /**
-     * 获取其他websocket映射路径的{@link WebSocketHelper}
+     * 获取其他websocket映射路径的{@link WebSocketTemplate}
      * @param mapping websocket映射路径
-     * @return {@link WebSocketHelper}
+     * @return {@link WebSocketTemplate}
      */
-    public WebSocketHelper getInstance(String mapping) {
+    public WebSocketTemplate getInstance(String mapping) {
         if (this.topic.equals(redisTopic(mapping))) return this;
-        return new WebSocketHelper(topic, redisMessagePublisher);
+        return new WebSocketTemplate(topic, redisMessagePublisher);
     }
 
     /**

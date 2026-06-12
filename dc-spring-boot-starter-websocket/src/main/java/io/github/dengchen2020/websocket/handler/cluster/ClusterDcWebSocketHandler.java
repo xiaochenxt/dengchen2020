@@ -35,13 +35,13 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
         this.topic = getClass().getAnnotation(WebSocketMapping.class).value();
     }
 
-    private WebSocketHelper webSocketHelper;
+    private WebSocketTemplate webSocketTemplate;
     private RedisMessageListenerContainer redisMessageListenerContainer;
     private GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer;
 
     @Autowired
     public void setRedisMessagePublisher(RedisMessagePublisher redisMessagePublisher) {
-        this.webSocketHelper = new WebSocketHelper(topic, redisMessagePublisher);
+        this.webSocketTemplate = new WebSocketTemplate(topic, redisMessagePublisher);
     }
 
     @Autowired
@@ -57,12 +57,12 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     @Override
     public void afterPropertiesSet() {
         if (redisMessageListenerContainer == null) throw new IllegalArgumentException("redisMessageListenerContainer is null");
-        if (webSocketHelper == null) throw new IllegalArgumentException("webSocketHelper is null");
+        if (webSocketTemplate == null) throw new IllegalArgumentException("webSocketHelper is null");
         if (genericJackson2JsonRedisSerializer == null) throw new IllegalArgumentException("genericJackson2JsonRedisSerializer is null");
         MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(this);
         messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer);
         messageListenerAdapter.afterPropertiesSet();
-        redisMessageListenerContainer.addMessageListener(messageListenerAdapter, ChannelTopic.of(webSocketHelper.topic()));
+        redisMessageListenerContainer.addMessageListener(messageListenerAdapter, ChannelTopic.of(webSocketTemplate.topic()));
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void close(String userId, CloseStatus closeStatus) {
-        webSocketHelper.close(userId, closeStatus);
+        webSocketTemplate.close(userId, closeStatus);
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void close(String[] userId, CloseStatus closeStatus) {
-        webSocketHelper.close(userId, closeStatus);
+        webSocketTemplate.close(userId, closeStatus);
     }
 
     /**
@@ -95,7 +95,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void close(Long tenantId, CloseStatus closeStatus) {
-        webSocketHelper.close(tenantId, closeStatus);
+        webSocketTemplate.close(tenantId, closeStatus);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(String userId, String message) {
-        webSocketHelper.send(userId, message);
+        webSocketTemplate.send(userId, message);
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(String[] userId, String message) {
-        webSocketHelper.send(userId, message);
+        webSocketTemplate.send(userId, message);
     }
 
     /**
@@ -128,7 +128,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(Long tenantId, String message) {
-        webSocketHelper.send(tenantId, message);
+        webSocketTemplate.send(tenantId, message);
     }
 
     /**
@@ -138,7 +138,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void sendToAll(String message) {
-        webSocketHelper.sendToAll(message);
+        webSocketTemplate.sendToAll(message);
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(String userId, ByteBuffer message) {
-        webSocketHelper.send(userId, message);
+        webSocketTemplate.send(userId, message);
     }
 
     /**
@@ -171,7 +171,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(Long tenantId, ByteBuffer message) {
-        webSocketHelper.send(tenantId, message);
+        webSocketTemplate.send(tenantId, message);
     }
 
     /**
@@ -181,7 +181,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void sendToAll(ByteBuffer message) {
-        webSocketHelper.sendToAll(message);
+        webSocketTemplate.sendToAll(message);
     }
 
     /**
