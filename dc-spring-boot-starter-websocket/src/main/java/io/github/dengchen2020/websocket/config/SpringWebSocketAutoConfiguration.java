@@ -53,12 +53,11 @@ public final class SpringWebSocketAutoConfiguration implements WebSocketConfigur
         for (WebSocketHandler handle : webSocketHandlers) {
             if (handle.getClass().getAnnotation(ServerEndpoint.class) != null) throw new IllegalArgumentException("无需添加@ServerEndpoint注解，" + handle.getClass().getName());
             WebSocketMapping webSocketMapping = handle.getClass().getAnnotation(WebSocketMapping.class);
-            if (webSocketMapping == null || webSocketMapping.value().length == 0) continue;
-            for (String mapping : webSocketMapping.value()) {
-                if (handlerMappings.contains(mapping)) throw new IllegalArgumentException(handle.getClass().getName()+" 配置错误，原因是重复映射："+ mapping);
-            }
-            handlerMappings.addAll(Set.of(webSocketMapping.value()));
-            WebSocketHandlerRegistration registration = registry.addHandler(handle, webSocketMapping.value());
+            if (webSocketMapping == null || webSocketMapping.value().isBlank()) continue;
+            var mapping = webSocketMapping.value();
+            if (handlerMappings.contains(mapping)) throw new IllegalArgumentException(handle.getClass().getName()+" 配置错误，原因是重复映射："+ mapping);
+            handlerMappings.add(mapping);
+            WebSocketHandlerRegistration registration = registry.addHandler(handle, mapping);
             if(webSocketProperties.getAllowedOrigins() != null) registration.setAllowedOrigins(webSocketProperties.getAllowedOrigins());
             if(webSocketProperties.getAllowedOriginPatterns() != null) registration.setAllowedOriginPatterns(webSocketProperties.getAllowedOriginPatterns());
             if(webSocketProperties.getAllowedOrigins() == null && webSocketProperties.getAllowedOriginPatterns() == null) registration.setAllowedOriginPatterns("*");

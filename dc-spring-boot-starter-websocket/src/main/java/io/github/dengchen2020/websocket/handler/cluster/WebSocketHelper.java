@@ -16,25 +16,37 @@ import java.nio.ByteBuffer;
 @NullMarked
 public class WebSocketHelper {
 
-    public WebSocketHelper(RedisMessagePublisher redisMessagePublisher) {this("default", redisMessagePublisher);}
-
-    public WebSocketHelper(String topic, RedisMessagePublisher redisMessagePublisher) {
-        this.topic = defaultTopicPrefix + topic;
-        this.redisMessagePublisher = redisMessagePublisher;
-    }
-
     static final String defaultTopicPrefix = "dc:websocket:";
 
     private final String topic;
+
+    private final RedisMessagePublisher redisMessagePublisher;
 
     public String topic() {
         return topic;
     }
 
-    private final RedisMessagePublisher redisMessagePublisher;
+    private String redisTopic(String topic) {
+        return defaultTopicPrefix + (topic.charAt(0) == '/' ? topic : "/" + topic);
+    }
 
-    public WebSocketHelper getInstance(String topic) {
-        if (this.topic.equals(defaultTopicPrefix + topic)) return this;
+    /**
+     * 构建WebSocketHelper实例
+     * @param mapping websocket映射路径
+     * @param redisMessagePublisher redis消息发布者
+     */
+    public WebSocketHelper(String mapping, RedisMessagePublisher redisMessagePublisher) {
+        this.topic = redisTopic(mapping);
+        this.redisMessagePublisher = redisMessagePublisher;
+    }
+
+    /**
+     * 获取其他websocket映射路径的{@link WebSocketHelper}
+     * @param mapping websocket映射路径
+     * @return {@link WebSocketHelper}
+     */
+    public WebSocketHelper getInstance(String mapping) {
+        if (this.topic.equals(redisTopic(mapping))) return this;
         return new WebSocketHelper(topic, redisMessagePublisher);
     }
 

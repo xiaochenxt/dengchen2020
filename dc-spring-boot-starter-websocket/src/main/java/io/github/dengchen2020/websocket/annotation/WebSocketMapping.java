@@ -18,6 +18,6 @@ public @interface WebSocketMapping {
     /**
      * websocket端口映射路径
      */
-    String[] value();
+    String value();
 
 }
