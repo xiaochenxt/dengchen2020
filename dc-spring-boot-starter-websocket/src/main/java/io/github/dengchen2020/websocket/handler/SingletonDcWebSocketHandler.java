@@ -20,7 +20,7 @@ import java.util.concurrent.*;
  * @since 2024/6/26
  */
 @NullMarked
-public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
+public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
 
     protected final ConcurrentHashMap<String, ConcurrentLinkedQueue<WebSocketSession>> userIdSessionMap = new ConcurrentHashMap<>();
 
@@ -39,7 +39,7 @@ public class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
         }
     }
 
-    public SingletonDcWebSocketHandler() {
+    protected SingletonDcWebSocketHandler() {
         if (scheduledExecutorService != null) scheduledExecutorService.scheduleAtFixedRate(this::sendPingToAll, 30, 60, TimeUnit.SECONDS);
     }
 
