@@ -1,11 +1,10 @@
 package io.github.dengchen2020.cache.caffeine;
 
-import io.github.dengchen2020.core.redis.annotation.RedisMessageListener;
+import io.github.dengchen2020.core.redis.annotation.RedisListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_CLEAR;
 import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_EVICT;
@@ -16,7 +15,7 @@ import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_EVICT;
  * @author xiaochen
  * @since 2022/12/15
  */
-public class CacheSyncMessageListener extends MessageListenerAdapter {
+public class CacheSyncMessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(CacheSyncMessageListener.class);
 
@@ -28,7 +27,7 @@ public class CacheSyncMessageListener extends MessageListenerAdapter {
         this.cacheManager = cacheManager;
     }
 
-    @RedisMessageListener(CACHE_SYNC)
+    @RedisListener(CACHE_SYNC)
     public void handleMessage(CacheSyncParam cacheSync) {
         if(cacheSync.cacheName() == null) {
             for (String cacheName : cacheManager.getCacheNames()) {

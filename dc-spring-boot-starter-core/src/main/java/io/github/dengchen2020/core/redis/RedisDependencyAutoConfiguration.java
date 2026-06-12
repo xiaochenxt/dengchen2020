@@ -1,11 +1,14 @@
 package io.github.dengchen2020.core.redis;
 
-import io.github.dengchen2020.core.redis.annotation.RedisMessageListener;
-import io.github.dengchen2020.core.redis.annotation.TopicType;
+import io.github.dengchen2020.core.redis.annotation.RedisListener;
 import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,10 +16,9 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -29,9 +31,12 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 引入redis依赖后的自动配置
@@ -60,52 +65,90 @@ public final class RedisDependencyAutoConfiguration {
         return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializer);
     }
 
-    @Lazy(false)
-    @Configuration(proxyBeanMethods = false)
-    static final class RedisMessageListenerRegistrar {
+    @Bean
+    static LazyInitializationExcludeFilter redisMessageListenerRegistrarLazyInitializationExcludeFilter() {
+        return (beanName, beanDefinition, beanType) -> {
+            for (Method m : beanType.getDeclaredMethods()) {
+                var redisListener = m.getAnnotation(RedisListener.class);
+                if (redisListener == null) continue;
+                if (m.getParameterCount() == 0 || !Modifier.isPublic(m.getModifiers())) continue;
+                return true;
+            }
+            return false;
+        };
+    }
+
+    @Bean
+    static BeanPostProcessor redisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<GenericJackson2JsonRedisSerializer> genericJackson2JsonRedisSerializer){
+        return new RedisMessageListenerRegistrar(redisMessageListenerContainer, genericJackson2JsonRedisSerializer);
+    }
+
+    static final class RedisMessageListenerRegistrar implements BeanPostProcessor, Ordered {
 
         private static final Logger log = LoggerFactory.getLogger(RedisMessageListenerRegistrar.class);
+        private final ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer;
+        private final ObjectProvider<GenericJackson2JsonRedisSerializer> genericJackson2JsonRedisSerializer;
 
-        RedisMessageListenerRegistrar(RedisMessageListenerContainer redisMessageListenerContainer, ObjectProvider<MessageListener> messageListeners, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
-            for (MessageListener messageListener : messageListeners) {
-                Method method = null;
-                for (Method m : messageListener.getClass().getDeclaredMethods()) {
-                    if (m.getParameterCount() == 0 || !Modifier.isPublic(m.getModifiers())) continue;
-                    RedisMessageListener redisMessageListener = m.getAnnotation(RedisMessageListener.class);
-                    if (redisMessageListener == null) continue;
-                    if (method != null) {
-                        throw new IllegalArgumentException(messageListener.getClass() + " 检测到多个使用@RedisMessageListener的方法");
-                    }
-                    method = m;
-                }
-                if (method == null) continue;
-                RedisMessageListener redisMessageListener = method.getAnnotation(RedisMessageListener.class);
-                Topic topic;
-                if (redisMessageListener.type() == TopicType.channel) {
-                    topic = ChannelTopic.of(redisMessageListener.value());
-                } else {
-                    topic = PatternTopic.of(redisMessageListener.value());
-                }
-                if(messageListener instanceof MessageListenerAdapter messageListenerAdapter){
-                    var methodName = method.getName();
-                    if (!MessageListenerAdapter.ORIGINAL_DEFAULT_LISTENER_METHOD.equals(methodName)) {
-                        messageListenerAdapter.setDefaultListenerMethod(methodName);
-                        messageListenerAdapter.afterPropertiesSet();
-                    }
-                    Class<?> argClass = method.getParameterTypes()[0];
-                    if(argClass == byte[].class){
-                        messageListenerAdapter.setSerializer(RedisSerializer.byteArray());
-                    }else if(argClass == String.class){
-                        messageListenerAdapter.setSerializer(RedisSerializer.string());
-                    }else {
-                        messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer);
-                    }
-                }
-                redisMessageListenerContainer.addMessageListener(messageListener, topic);
-                if (log.isDebugEnabled()) log.debug("redis消息订阅：{}，频道：{}", method, topic);
-            }
+        RedisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<GenericJackson2JsonRedisSerializer> genericJackson2JsonRedisSerializer){
+            this.redisMessageListenerContainer = redisMessageListenerContainer;
+            this.genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializer;
         }
 
+        @Override
+        public @NonNull Object postProcessAfterInitialization(@NonNull Object bean,@NonNull String beanName) throws BeansException {
+            List<Method> methods = null;
+            for (Method m : bean.getClass().getDeclaredMethods()) {
+                var redisListener = m.getAnnotation(RedisListener.class);
+                if (redisListener == null) continue;
+                if (m.getParameterCount() == 0 || !Modifier.isPublic(m.getModifiers())) continue;
+                if (methods == null) methods = new ArrayList<>(1);
+                methods.add(m);
+            }
+            if (CollectionUtils.isEmpty(methods)) return bean;
+            for (Method method : methods) {
+                var redisListener = method.getAnnotation(RedisListener.class);
+                var topicValue = redisListener.value();
+                if (topicValue.isBlank()) throw new IllegalArgumentException("@RedisListener value is required");
+                Topic topic = containsPatternGlobs(topicValue) ? PatternTopic.of(topicValue) : ChannelTopic.of(topicValue);
+                var messageListenerAdapter = new MessageListenerAdapter(bean, method.getName());
+                messageListenerAdapter.afterPropertiesSet();
+                Class<?> argClass = method.getParameterTypes()[0];
+                if(argClass == byte[].class){
+                    messageListenerAdapter.setSerializer(RedisSerializer.byteArray());
+                }else if(argClass == String.class){
+                    messageListenerAdapter.setSerializer(RedisSerializer.string());
+                }else {
+                    messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer.getIfAvailable());
+                }
+                redisMessageListenerContainer.getIfAvailable().addMessageListener(messageListenerAdapter, topic);
+                if (log.isDebugEnabled()) log.debug("redis消息订阅：{}，频道：{}", method, topic);
+            }
+            return bean;
+        }
+
+        /**
+         * @return {@literal true} if {@code destinationName} contains an unescaped glob meta character.
+         */
+        private static boolean containsPatternGlobs(String destinationName) {
+
+            for (int i = 0; i < destinationName.length(); i++) {
+
+                char c = destinationName.charAt(i);
+                if (c == '\\') {
+                    i++;
+                    continue;
+                }
+                if (c == '?' || c == '*' || c == '[') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getOrder() {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
     }
 
     @Bean

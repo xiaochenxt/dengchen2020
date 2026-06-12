@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.redis.annotation;
 
 import org.springframework.aot.hint.annotation.Reflective;
-import org.springframework.data.redis.listener.ChannelTopic;
 
 import java.lang.annotation.*;
 
@@ -14,16 +13,11 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RedisMessageListener {
+public @interface RedisListener {
 
     /**
      * 主题名称
      */
     String value();
-
-    /**
-     * redis订阅通道类型，默认{@link ChannelTopic}
-     */
-    TopicType type() default TopicType.channel;
 
 }
