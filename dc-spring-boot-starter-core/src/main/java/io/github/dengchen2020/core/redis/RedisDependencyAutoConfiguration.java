@@ -5,6 +5,7 @@ import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -97,7 +98,7 @@ public final class RedisDependencyAutoConfiguration {
         @Override
         public @NonNull Object postProcessAfterInitialization(@NonNull Object bean,@NonNull String beanName) throws BeansException {
             List<Method> methods = null;
-            for (Method m : bean.getClass().getDeclaredMethods()) {
+            for (var m : AopUtils.getTargetClass(bean).getDeclaredMethods()) {
                 var redisListener = m.getAnnotation(RedisListener.class);
                 if (redisListener == null) continue;
                 if (m.getParameterCount() == 0 || !Modifier.isPublic(m.getModifiers())) continue;
