@@ -62,7 +62,7 @@
         <redisson.version>4.5.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <protostuff.version>1.8.0</protostuff.version>
-        <spring-ai.version>2.0.0-RC2</spring-ai.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
         <graalvm.version>25.0.3</graalvm.version>
         <zxing.version>3.5.4</zxing.version>
         <openfeign.querydsl.version>7.3.0</openfeign.querydsl.version>
