@@ -1,5 +1,6 @@
 package io.github.dengchen2020.websocket.annotation;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
@@ -18,6 +19,7 @@ public @interface WebSocketMapping {
     /**
      * websocket端口映射路径
      */
+    @AliasFor(annotation = Component.class)
     String value();
 
 }
