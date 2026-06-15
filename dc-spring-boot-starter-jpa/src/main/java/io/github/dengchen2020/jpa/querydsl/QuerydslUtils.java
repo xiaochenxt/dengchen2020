@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
  * @since 2025/11/24
  */
 @NullMarked
-public class QuerydslUtils {
+public abstract class QuerydslUtils {
 
     public static final Expression<?>[] EMPTY_EXPRESSIONS = new Expression[0];
 

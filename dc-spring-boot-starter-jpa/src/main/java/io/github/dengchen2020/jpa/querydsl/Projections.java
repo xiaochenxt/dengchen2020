@@ -17,7 +17,9 @@ import static io.github.dengchen2020.jpa.querydsl.QuerydslUtils.*;
  * @since 2025/11/24
  */
 @NullMarked
-public class Projections {
+public final class Projections {
+
+    private Projections() {}
 
     /**
      * 为给定类型和表达式创建一个setter赋值的投影
