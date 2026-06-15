@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 /**
@@ -147,87 +147,95 @@ public class WebSocketClientUtils {
      *
      * @param url              websocket连接地址
      * @param webSocketHandler websocket处理器
+     * @param maxReconnectAttempts 最多尝试重连次数
      * @return {@link WebSocketSession}
      */
     public static WebSocketSession createSession(String url, WebSocketHandler webSocketHandler, int maxReconnectAttempts) {
-        return new WebSocketSessionReconnectSupport(url, webSocketHandler, Math.min(maxReconnectAttempts, 10));
+        return createSession(url, null, webSocketHandler, maxReconnectAttempts);
+    }
+
+    /**
+     * 创建一个掉线自动重连的websocket客户端会话，会话用完后需由调用方关闭
+     *
+     * @param url              websocket连接地址
+     * @param webSocketHttpHeaders websocket请求头
+     * @param webSocketHandler websocket处理器
+     * @param maxReconnectAttempts 最多尝试重连次数
+     * @return {@link WebSocketSession}
+     */
+    public static WebSocketSession createSession(String url, WebSocketHttpHeaders webSocketHttpHeaders, WebSocketHandler webSocketHandler, int maxReconnectAttempts) {
+        return new WebSocketSessionReconnectSupport(url, webSocketHttpHeaders, webSocketHandler, maxReconnectAttempts);
     }
 
     public static class WebSocketSessionReconnectSupport implements WebSocketSession {
 
         private static final Logger log = LoggerFactory.getLogger(WebSocketClientUtils.class);
 
-        private WebSocketSession session;
+        private volatile WebSocketSession session;
 
-        private final AtomicInteger counter = new AtomicInteger(0);
+        private final AtomicBoolean reconnecting = new AtomicBoolean();
 
         private final int maxReconnectAttempts;
 
-        public WebSocketSessionReconnectSupport(String url, WebSocketHandler webSocketHandler, Function<CloseStatus, Boolean> isReconnect, int maxReconnectAttempts) {
-            this.maxReconnectAttempts = maxReconnectAttempts < 1 ? 5 : maxReconnectAttempts;
+        public WebSocketSessionReconnectSupport(String url, WebSocketHttpHeaders webSocketHttpHeaders, WebSocketHandler webSocketHandler, Function<CloseStatus, Boolean> isReconnect, int maxReconnectAttempts) {
+            this.maxReconnectAttempts = Math.max(maxReconnectAttempts, 1);
             WebSocketHandler wrap = new WebSocketHandlerDecorator(webSocketHandler) {
                 @Override
                 public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
                     super.afterConnectionClosed(webSocketSession, closeStatus);
-                    if (isReconnect.apply(closeStatus)) {
-                        Thread.ofVirtual().name("websocket-client-reconnect").start(() -> reconnect(url, this, closeStatus));
+                    if (!closeStatus.equalsCode(CloseStatus.NORMAL) && isReconnect.apply(closeStatus) && reconnecting.compareAndSet(false, true)) {
+                        Thread.ofVirtual().name("websocket-client-reconnect").start(() -> {
+                            try {
+                                log.info("websocket连接断开，原因：{}，客户端开始重连，url：{}，headers：{}", closeStatus, url, webSocketHttpHeaders);
+                                reconnect(url, webSocketHttpHeaders, this, closeStatus);
+                            } finally {
+                                reconnecting.set(false);
+                            }
+                        });
                     }
                 }
             };
             setSession(createSession(url, wrap));
         }
 
-        public WebSocketSessionReconnectSupport(String url, WebSocketHandler webSocketHandler, int maxReconnectAttempts) {
-            this(url, webSocketHandler, (closeStatus -> closeStatus.equalsCode(CloseStatus.GOING_AWAY)
-                    || closeStatus.equalsCode(CloseStatus.SERVER_ERROR)
-                    || closeStatus.equalsCode(CloseStatus.SERVICE_RESTARTED)
-                    || closeStatus.equalsCode(CloseStatus.SERVICE_OVERLOAD)
-                    || closeStatus.equalsCode(CloseStatus.SESSION_NOT_RELIABLE)
-                    || closeStatus.equalsCode(CloseStatus.NO_CLOSE_FRAME)
-            ), maxReconnectAttempts);
+        public WebSocketSessionReconnectSupport(String url, WebSocketHttpHeaders webSocketHttpHeaders, WebSocketHandler webSocketHandler, int maxReconnectAttempts) {
+            this(url, webSocketHttpHeaders, webSocketHandler, (closeStatus -> true), maxReconnectAttempts);
         }
 
-        public WebSocketSessionReconnectSupport(String url, WebSocketHandler webSocketHandler, Function<CloseStatus, Boolean> isReconnect) {
-            this(url, webSocketHandler, isReconnect, 5);
-        }
-
-        public WebSocketSessionReconnectSupport(String url, WebSocketHandler webSocketHandler) {
-            this(url, webSocketHandler, 5);
-        }
-
-        protected long nextReconnectTime(CloseStatus closeStatus) {
+        protected long nextReconnectTime(CloseStatus closeStatus, int attempt) {
             long ms;
             if (closeStatus.equalsCode(CloseStatus.GOING_AWAY)) {
-                ms = 1000 * 10;
+                ms = 1000 * 3;
             } else if (closeStatus.equalsCode(CloseStatus.SERVICE_RESTARTED)) {
-                ms = 1000 * 15;
+                ms = 1000 * 5;
             } else if (closeStatus.equalsCode(CloseStatus.SERVICE_OVERLOAD)) {
-                ms = 1000 * 10;
-            } else if (closeStatus.equalsCode(CloseStatus.NO_CLOSE_FRAME)) {
-                ms = 1000 * 30;
+                ms = 1500;
             } else {
-                ms = 3000;
+                return 3000L * (attempt - 1);
             }
-            ms = ms * (counter.get());
-            return ms;
+            return Math.min(ms * attempt, 1000L * 30);
         }
 
-        private void reconnect(String url, WebSocketHandler webSocketHandler, CloseStatus closeStatus) {
-            try {
-                counter.incrementAndGet();
-                Thread.sleep(nextReconnectTime(closeStatus));
-                setSession(createSession(url, webSocketHandler));
-                counter.set(0);
-                if (isOpen()) log.info("websocket客户端重连成功，url：{}", url);
-            } catch (InterruptedException _) {
-                Thread.currentThread().interrupt();
-            } catch (CompletionException | IllegalStateException e) {
-                if (counter.get() >= maxReconnectAttempts) {
-                    log.error("websocket客户端第{}次重连失败，url：{}，不再重连", counter.get(), url);
+        private void reconnect(String url, WebSocketHttpHeaders webSocketHttpHeaders, WebSocketHandler webSocketHandler, CloseStatus closeStatus) {
+            for (int attempt = 1; attempt <= maxReconnectAttempts; attempt++) {
+                try {
+                    Thread.sleep(nextReconnectTime(closeStatus, attempt));
+                    WebSocketSession newSession = createSession(url, webSocketHttpHeaders, webSocketHandler);
+                    if (newSession.isOpen()) {
+                        setSession(newSession);
+                        log.info("websocket客户端重连成功，url：{}，headers：{}", url, webSocketHttpHeaders);
+                        return;
+                    }
+                } catch (InterruptedException _) {
+                    Thread.currentThread().interrupt();
                     return;
+                } catch (CompletionException | IllegalStateException e) {
+                    if (attempt >= maxReconnectAttempts) {
+                        log.error("websocket客户端第{}次重连失败，url：{}，headers：{}，不再重连", attempt, url, webSocketHttpHeaders);
+                        return;
+                    }
+                    if (log.isDebugEnabled()) log.debug("websocket客户端第{}次重连失败，将在{}毫秒后自动重连", attempt, nextReconnectTime(closeStatus, attempt + 1));
                 }
-                log.warn("websocket客户端第{}次重连失败，url：{}，将在{}毫秒后自动重连", counter.get() , url, nextReconnectTime(closeStatus));
-                reconnect(url, webSocketHandler, closeStatus);
             }
         }
 
@@ -277,6 +285,7 @@ public class WebSocketClientUtils {
 
         @Override
         public void setTextMessageSizeLimit(int messageSizeLimit) {
+            if (!isOpen()) return;
             session.setTextMessageSizeLimit(messageSizeLimit);
         }
 
@@ -287,6 +296,7 @@ public class WebSocketClientUtils {
 
         @Override
         public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+            if (!isOpen()) return;
             session.setBinaryMessageSizeLimit(messageSizeLimit);
         }
 
@@ -302,6 +312,7 @@ public class WebSocketClientUtils {
 
         @Override
         public void sendMessage(WebSocketMessage<?> message) throws IOException {
+            if (!isOpen()) return;
             session.sendMessage(message);
         }
 
