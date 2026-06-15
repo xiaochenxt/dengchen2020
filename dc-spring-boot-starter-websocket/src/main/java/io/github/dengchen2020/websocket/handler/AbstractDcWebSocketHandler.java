@@ -1,7 +1,6 @@
 package io.github.dengchen2020.websocket.handler;
 
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
-import jakarta.websocket.CloseReason;
 import jakarta.websocket.Session;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -96,7 +95,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final Set<Integer> CLOSE_CODE = Set.of(CloseReason.CloseCodes.NORMAL_CLOSURE.getCode(), CloseReason.CloseCodes.GOING_AWAY.getCode(), CloseReason.CloseCodes.CLOSED_ABNORMALLY.getCode(), CloseReason.CloseCodes.VIOLATED_POLICY.getCode());
+    private final Set<Integer> CLOSE_CODE = Set.of(CloseStatus.NORMAL.getCode(), CloseStatus.GOING_AWAY.getCode(), CloseStatus.NO_CLOSE_FRAME.getCode(), CloseStatus.POLICY_VIOLATION.getCode());
 
     /**
      * 在 WebSocket 协商成功且 WebSocket 连接打开并可供使用后调用

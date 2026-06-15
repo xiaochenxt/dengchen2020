@@ -160,7 +160,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
      */
     @Override
     public void send(String[] userId, ByteBuffer message) {
-        super.send(userId, message);
+        webSocketTemplate.send(userId, message);
     }
 
     /**
