@@ -2,7 +2,6 @@ package io.github.dengchen2020.core.utils.s3;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.DisposableBean;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -28,7 +27,7 @@ import java.util.function.UnaryOperator;
  * @since 2025/12/1
  */
 @NullMarked
-public class S3Service implements DisposableBean {
+public class S3Service implements AutoCloseable {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
@@ -341,7 +340,7 @@ public class S3Service implements DisposableBean {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         s3Client.close();
         s3Presigner.close();
     }
