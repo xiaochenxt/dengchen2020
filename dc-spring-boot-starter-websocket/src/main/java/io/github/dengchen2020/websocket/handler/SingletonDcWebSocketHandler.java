@@ -67,17 +67,24 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
     public void online(WebSocketSession session, Principal principal) {
         Authentication authentication = (Authentication) principal;
         if (authentication.userId() == null) return;
-        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.computeIfAbsent(authentication.userId(), (userId) -> new ConcurrentLinkedQueue<>());
+        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.compute(authentication.userId(), (userId, sessions) -> {
+            if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
+            sessions.add(session);
+            return sessions;
+        });
         int onlineCount = sessionQueue.size();
         int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
-        if (onlineCount > 0 && onlineCount >= allowSameUserMaxOnlineCount){
-            WebSocketSession head = sessionQueue.peek();
+        if (onlineCount > allowSameUserMaxOnlineCount){
+            WebSocketSession head = sessionQueue.poll();
             if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
         }
-        sessionQueue.add(session);
         if (authentication instanceof TenantInfo tenantInfo) {
             if (tenantInfo.tenantId() != null) {
-                tenantIdSessionMap.computeIfAbsent(tenantInfo.tenantId(), (tenantId) -> new ConcurrentLinkedQueue<>()).add(session);
+                tenantIdSessionMap.compute(tenantInfo.tenantId(), (tenantId, sessions) -> {
+                    if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
+                    sessions.add(session);
+                    return sessions;
+                });
             }
         }
     }
