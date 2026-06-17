@@ -64,7 +64,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
     }
 
     @Override
-    public void online(WebSocketSession session, Principal principal) {
+    protected void online(WebSocketSession session, Principal principal) {
         Authentication authentication = (Authentication) principal;
         if (authentication.userId() == null) return;
         ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.compute(authentication.userId(), (userId, sessions) -> {
