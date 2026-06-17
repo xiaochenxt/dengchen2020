@@ -71,13 +71,10 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
     }
 
     private void load(Config v4,@Nullable Config v6) throws IOException, InterruptedException {
+        var oldIp2Region = this.ip2Region;
         Ip2Region ip2Region = Ip2Region.create(v4, v6);
-        if (this.ip2Region != null) {
-            this.ip2Region.close();
-            this.ip2Region = ip2Region;
-        } else {
-            this.ip2Region = ip2Region;
-        }
+        this.ip2Region = ip2Region;
+        if (oldIp2Region != null) oldIp2Region.close();
     }
 
     @Override
