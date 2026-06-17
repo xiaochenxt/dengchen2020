@@ -3,7 +3,6 @@ package io.github.dengchen2020.websocket.handler;
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
 import jakarta.websocket.Session;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
@@ -125,7 +124,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param session 原WebSocketSession
      * @return 新WebSocketSession
      */
-    public WebSocketSession wrap(WebSocketSession session) {
+    protected WebSocketSession wrap(WebSocketSession session) {
         return new ConcurrentWebSocketSessionDecorator(session,1000 * 10,1024 * 32);
     }
 
@@ -134,7 +133,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      *
      * @param session websocket会话
      */
-    public void initSessionConfig(WebSocketSession session) {
+    protected void initSessionConfig(WebSocketSession session) {
         if(session instanceof NativeWebSocketSession nativeWebSocketSession){
             if (session instanceof JettyWebSocketSession jettyWebSocketSession) {
                 org.eclipse.jetty.websocket.api.Session jettySession = jettyWebSocketSession.getNativeSession();
@@ -156,19 +155,8 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      *
      * @param session websocket会话
      */
-    public void online(WebSocketSession session, Principal principal) {
+    protected void online(WebSocketSession session, Principal principal) {
 
-    }
-
-    /**
-     * 获取客户端信息
-     *
-     * @param session websocket会话
-     * @return 客户端信息
-     */
-    @Nullable
-    public Principal getClientInfo(WebSocketSession session) {
-        return session.getPrincipal();
     }
 
     /**
@@ -176,7 +164,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      *
      * @param session websocket会话
      */
-    public void onlineSuccessEvent(WebSocketSession session) {
+    protected void onlineSuccessEvent(WebSocketSession session) {
         if (log.isDebugEnabled()) log.debug("上线成功，客户端：{}，信息：{}", session, getClientInfo(session));
     }
 
@@ -186,7 +174,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      * @param session websocket会话
      * @param status  异常原因状态代码
      */
-    public void onlineFailEvent(WebSocketSession session, CloseStatus status) {
+    protected void onlineFailEvent(WebSocketSession session, CloseStatus status) {
         if (log.isDebugEnabled()) log.debug("上线失败，原因：{}，客户端：{}", status, session);
     }
 

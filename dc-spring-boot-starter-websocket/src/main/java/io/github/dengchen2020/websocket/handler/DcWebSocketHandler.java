@@ -19,27 +19,15 @@ public interface DcWebSocketHandler {
     PingMessage pingMessage = new PingMessage();
 
     /**
-     * 初始化会话配置
-     *
-     * @param session websocket会话
-     */
-    void initSessionConfig(WebSocketSession session);
-
-    /**
-     * 上线
-     *
-     * @param session websocket会话
-     */
-    void online(WebSocketSession session, Principal principal);
-
-    /**
      * 获取客户端信息
      *
      * @param session websocket会话
      * @return 客户端信息
      */
     @Nullable
-    Principal getClientInfo(WebSocketSession session);
+    default Principal getClientInfo(WebSocketSession session) {
+        return session.getPrincipal();
+    }
 
     /**
      * 关闭连接
