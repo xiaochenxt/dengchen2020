@@ -3,7 +3,7 @@ package io.github.dengchen2020.core.utils;
 /**
  * 版本工具类
  * @author xiaochen
- * @since 2026/6/21
+ * @since 2026/6/22
  */
 public final class VersionUtils {
 
