@@ -1,8 +1,10 @@
 package io.github.dengchen2020.core.web.mvc;
 
+import io.github.dengchen2020.core.Version;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.cache.Cache;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -23,6 +25,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 public class DcCachingResourceResolver extends CachingResourceResolver {
 
     private final long maxContentLength;
+    private static final boolean IS_THAN_3015 = Version.compareVersion(SpringBootVersion.getVersion(), "3.0.15") >= 0;
 
     public DcCachingResourceResolver(Cache cache, long maxContentLength) {
         super(cache);
@@ -32,7 +35,7 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
     @Override
     protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request,@NonNull String requestPath,@NonNull List<? extends Resource> locations,@NonNull ResourceResolverChain chain) {
         if (request != null) ShallowEtagHeaderFilter.disableContentCaching(request);
-        String key = computeKey(request, requestPath);
+        String key = IS_THAN_3015 ? computeKey(request, requestPath, locations) : computeKey(request, requestPath);
         Resource resource = this.getCache().get(key, Resource.class);
 
         if (resource != null) {

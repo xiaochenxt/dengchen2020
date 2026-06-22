@@ -1,10 +1,7 @@
 package io.github.dengchen2020.core.filter;
 
 import io.github.dengchen2020.core.web.mvc.StaticResourceServlet;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -13,7 +10,6 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,11 +48,6 @@ public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
             if (pathPattern.matches(path)) return true;
         }
         return false;
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        super.doFilterInternal(request, response, filterChain);
     }
 
 }

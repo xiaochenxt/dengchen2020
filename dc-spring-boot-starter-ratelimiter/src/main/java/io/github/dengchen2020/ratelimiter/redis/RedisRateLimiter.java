@@ -1,5 +1,6 @@
 package io.github.dengchen2020.ratelimiter.redis;
 
+import io.github.dengchen2020.core.Version;
 import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.output.IntegerListOutput;
 import org.jspecify.annotations.NonNull;
@@ -71,20 +72,13 @@ public class RedisRateLimiter {
      */
     public RedisRateLimiter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        var version = redisTemplate.execute(new RedisCallback<Double>() {
+        var version = redisTemplate.execute(new RedisCallback<String>() {
             @Override
-            public @NonNull Double doInRedis(@NonNull RedisConnection connection) throws DataAccessException {
-                var redisVersion = (String)Objects.requireNonNull(connection.serverCommands().info()).get("redis_version");
-                double version;
-                if (redisVersion.length() >= 3) {
-                    version = Double.parseDouble(redisVersion.substring(0, 3));
-                } else {
-                    version = Double.parseDouble(redisVersion.substring(0, 1));
-                }
-                return version;
+            public @NonNull String doInRedis(@NonNull RedisConnection connection) throws DataAccessException {
+                return (String)Objects.requireNonNull(connection.serverCommands().info()).get("redis_version");
             }
         });
-        this.versionAbove8_8_0 = version >= 8.8;
+        this.versionAbove8_8_0 = Version.compareVersion(version, "8.8.0") >= 0;
     }
 
     /**
