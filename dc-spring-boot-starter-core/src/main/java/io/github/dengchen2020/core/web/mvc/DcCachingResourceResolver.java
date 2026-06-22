@@ -1,6 +1,6 @@
 package io.github.dengchen2020.core.web.mvc;
 
-import io.github.dengchen2020.core.Version;
+import io.github.dengchen2020.core.utils.VersionUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -25,7 +25,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 public class DcCachingResourceResolver extends CachingResourceResolver {
 
     private final long maxContentLength;
-    private static final boolean IS_THAN_3015 = Version.compareVersion(SpringBootVersion.getVersion(), "3.0.15") >= 0;
+    private static final boolean IS_THAN_3015 = VersionUtils.compareVersion(SpringBootVersion.getVersion(), "3.0.15") >= 0;
 
     public DcCachingResourceResolver(Cache cache, long maxContentLength) {
         super(cache);
