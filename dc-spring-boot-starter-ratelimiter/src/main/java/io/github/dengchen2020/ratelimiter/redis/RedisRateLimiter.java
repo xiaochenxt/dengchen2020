@@ -1,6 +1,6 @@
 package io.github.dengchen2020.ratelimiter.redis;
 
-import io.github.dengchen2020.core.Version;
+import io.github.dengchen2020.core.utils.VersionUtils;
 import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.output.IntegerListOutput;
 import org.jspecify.annotations.NonNull;
@@ -78,7 +78,7 @@ public class RedisRateLimiter {
                 return (String)Objects.requireNonNull(connection.serverCommands().info()).get("redis_version");
             }
         });
-        this.versionAbove8_8_0 = Version.compareVersion(version, "8.8.0") >= 0;
+        this.versionAbove8_8_0 = VersionUtils.compareVersion(version, "8.8.0") >= 0;
     }
 
     /**
