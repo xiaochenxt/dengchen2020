@@ -25,13 +25,9 @@ public class IpDatServiceImpl implements IpService {
 
     private static final Logger log = LoggerFactory.getLogger(IpDatServiceImpl.class);
 
-    private IPLocation ipLocation;
+    private final IPLocation ipLocation;
 
     public IpDatServiceImpl(String ipv4DataPath) {
-        loadData(ipv4DataPath);
-    }
-
-    public synchronized void loadData(String ipv4DataPath) {
         File ipv4File = new File(ipv4DataPath);
         if (ipv4File.isFile() && ipv4File.exists()) {
             try {
@@ -59,16 +55,16 @@ public class IpDatServiceImpl implements IpService {
         if (StringUtils.hasText(ip)) {
             Location location = ipLocation.fetchIPLocation(ip);
             if (location == null) return new IpInfo(ip);
-            String[] ipInfo1 = location.country.split("\\|");
-            String[] ipInfo2 = location.area.split("\\|");
-            return new IpInfo(ip, getValue(ipInfo1, 0), getValue(ipInfo1, 1),
-                    getValue(ipInfo2, 0), getValue(ipInfo2, 1), getValue(ipInfo2, 2),
-                    getValue(ipInfo2, 3), getValue(ipInfo2, 4), getValue(ipInfo2, 5),
-                    getValue(ipInfo1, 2), getValue(ipInfo1, 3), getValue(ipInfo1, 4),
-                    getValue(ipInfo1, 5), getValue(ipInfo2, 6), getValue(ipInfo2, 7))
-                    ;
+            String[] data1 = location.country.split("\\|");
+            String[] data2 = location.area.split("\\|");
+            return convert(ip, data1, data2);
         }
         return new IpInfo(ip);
+    }
+
+    protected IpInfo convert(String ip, String[] data1, String[] data2) {
+        return new IpInfo(ip, getValue(data1, 0), getValue(data1, 1),
+                getValue(data2, 0), getValue(data2, 1), getValue(data2, 2));
     }
 
 }

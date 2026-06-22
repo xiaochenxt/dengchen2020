@@ -8,6 +8,7 @@ import org.lionsoul.ip2region.service.Config;
 import org.lionsoul.ip2region.service.InvalidConfigException;
 import org.lionsoul.ip2region.service.Ip2Region;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.lionsoul.ip2region.xdb.Util;
 import org.lionsoul.ip2region.xdb.XdbException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,17 +31,10 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(IpXdbV2ServiceImpl.class);
 
-    private Ip2Region ip2Region;
+    private final Ip2Region ip2Region;
+    private final boolean supportIpv6;
 
     public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws IOException, XdbException, InterruptedException, InvalidConfigException {
-        loadDataWithBufferCache(ipv4DataPath, ipv6DataPath, verify);
-    }
-
-    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws IOException, XdbException, InterruptedException, InvalidConfigException {
-        loadDataWithVIndexCache(ipv4DataPath, ipv6DataPath, v4Searchers, v6Searchers, verify);
-    }
-
-    public synchronized void loadDataWithBufferCache(String ipv4DataPath, @Nullable String ipv6DataPath, boolean verify) throws XdbException, IOException, InterruptedException, InvalidConfigException {
         File ipv4File = new File(ipv4DataPath);
         if (!ipv4File.isFile() || !ipv4File.exists()) throw new IllegalArgumentException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
         if (verify) Searcher.verifyFromFile(ipv4File);
@@ -52,10 +46,11 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
                 if (verify) Searcher.verifyFromFile(ipv6File);
             }
         }
-        load(Config.custom().setXdbFile(ipv4File).setCachePolicy(Config.BufferCache).asV4(), ipv6Config);
+        supportIpv6 = ipv6Config != null;
+        this.ip2Region = Ip2Region.create(Config.custom().setXdbFile(ipv4File).setCachePolicy(Config.BufferCache).asV4(), ipv6Config);
     }
 
-    public synchronized void loadDataWithVIndexCache(String ipv4DataPath,@Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws XdbException, IOException, InterruptedException, InvalidConfigException {
+    public IpXdbV2ServiceImpl(String ipv4DataPath, @Nullable String ipv6DataPath, int v4Searchers, int v6Searchers, boolean verify) throws IOException, XdbException, InterruptedException, InvalidConfigException {
         File ipv4File = new File(ipv4DataPath);
         if (!ipv4File.isFile() || !ipv4File.exists()) throw new IllegalArgumentException("未找到ipv4数据包，请将其放置在" + ipv4File.getAbsolutePath());
         if (verify) Searcher.verifyFromFile(ipv4File);
@@ -67,33 +62,42 @@ public class IpXdbV2ServiceImpl implements IpService, DisposableBean {
                 if (verify) Searcher.verifyFromFile(ipv6File);
             }
         }
-        load(Config.custom().setXdbFile(ipv4File).setSearchers(v4Searchers).asV4(), ipv6Config);
-    }
-
-    private void load(Config v4,@Nullable Config v6) throws IOException, InterruptedException {
-        var oldIp2Region = this.ip2Region;
-        Ip2Region ip2Region = Ip2Region.create(v4, v6);
-        this.ip2Region = ip2Region;
-        if (oldIp2Region != null) oldIp2Region.close();
+        supportIpv6 = ipv6Config != null;
+        this.ip2Region = Ip2Region.create(Config.custom().setXdbFile(ipv4File).setSearchers(v4Searchers).asV4(), ipv6Config);
     }
 
     @Override
     public IpInfo getInfo(String ip) {
         if (!StringUtils.hasText(ip)) return defaultInfo(ip);
         try {
-            String[] ipInfo = ip2Region.search(ip).split("\\|");
-            if (ipInfo.length > 0) {
-                return new IpInfo(ip, getValue(ipInfo, 0), getValue(ipInfo, 1),
-                        getValue(ipInfo, 2), getValue(ipInfo, 3), getValue(ipInfo, 4),
-                        getValue(ipInfo, 5), getValue(ipInfo, 6), getValue(ipInfo, 7),
-                        getValue(ipInfo, 8), getValue(ipInfo, 9), getValue(ipInfo, 10),
-                        getValue(ipInfo, 11), getValue(ipInfo, 12), getValue(ipInfo, 13))
-                        ;
+            var data = Util.parseIP(ip);
+            if (data.length == 16 && !supportIpv6) {
+                log.error("未加载ipv6数据包，无法查询ipv6信息");
+                return defaultInfo(ip);
             }
+            String[] ipData = ip2Region.search(data).split("\\|");
+            return convert(ip, ipData);
         } catch (Exception e) {
             log.error("获取ip信息失败：{}", e.toString());
         }
         return defaultInfo(ip);
+    }
+
+    protected IpInfo convert(String ip, String[] data) {
+        if (data.length == 4) { // 简化版
+            return new IpInfo(ip, getValue(data, 0), getValue(data, 1),
+                    getValue(data, 2), getValue(data, 3));
+        } else if (data.length == 5) { // 标准版
+            return new IpInfo(ip, getValue(data, 0), getValue(data, 1),
+                    getValue(data, 2), getValue(data, 3), getValue(data, 4));
+        } else { // 满载版
+            return new IpInfo(ip, getValue(data, 0), getValue(data, 1),
+                    getValue(data, 2), getValue(data, 3), getValue(data, 4),
+                    getValue(data, 5), getValue(data, 6), getValue(data, 7),
+                    getValue(data, 8), getValue(data, 9), getValue(data, 10),
+                    getValue(data, 11), getValue(data, 12), getValue(data, 13),
+                    getValue(data, 14), getValue(data, 15));
+        }
     }
 
     @Override

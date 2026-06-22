@@ -13,6 +13,7 @@ public interface IpService {
 
     /**
      * 获取ip信息
+     * @注意 各个厂商数据格式有差异，可能需要自行转换
      */
     IpInfo getInfo(String ip);
 
