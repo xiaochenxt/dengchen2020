@@ -25,7 +25,7 @@ public abstract class BaseException extends RuntimeException {
     }
 
     public BaseException(String message, int code, Throwable cause, boolean writableStackTrace) {
-        super(message, cause, false, writableStackTrace);
+        super(message, cause, true, writableStackTrace);
         this.code = code;
     }
 

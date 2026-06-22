@@ -16,6 +16,7 @@
 
 package io.github.dengchen2020.core.jdbc;
 
+import io.github.dengchen2020.core.condition.ConditionalOnSpringBootVersion;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -45,6 +46,7 @@ import javax.sql.DataSource;
  *
  * @author Stephane Nicoll
  */
+@ConditionalOnSpringBootVersion(equalOrNewer = "4.0.0", olderThan = "4.1.0")
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @ConditionalOnBean(DataSource.class)
