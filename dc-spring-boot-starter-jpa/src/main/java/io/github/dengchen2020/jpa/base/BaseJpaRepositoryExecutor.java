@@ -1,7 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import io.github.dengchen2020.core.jdbc.BeforeInsertCallback;
-import io.github.dengchen2020.core.jdbc.BeforeUpdateCallback;
 import io.github.dengchen2020.core.utils.IterableUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -15,7 +13,6 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,25 +71,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public void detach(T entity) {
         entityManager.detach(entity);
-    }
-
-    @Transactional
-    @Override
-    public <S extends T> S save(S entity) {
-        Assert.notNull(entity, "Entity must not be null");
-
-        if (entityInformation.isNew(entity)) {
-            if (entity instanceof BeforeInsertCallback beforeInsertCallback) {
-                beforeInsertCallback.beforeInsert();
-            }
-            entityManager.persist(entity);
-            return entity;
-        } else {
-            if (entity instanceof BeforeUpdateCallback beforeUpdateCallback) {
-                beforeUpdateCallback.beforeUpdate();
-            }
-            return entityManager.merge(entity);
-        }
     }
 
     @Transactional
