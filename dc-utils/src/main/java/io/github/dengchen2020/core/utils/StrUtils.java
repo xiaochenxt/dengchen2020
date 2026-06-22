@@ -142,14 +142,14 @@ public abstract class StrUtils {
     }
 
     /**
-     * 防止数组越界，安全访问指定索引的数据，访问不到时返回空字符串
+     * 防止数组越界，安全访问指定索引的数据，访问不到时返回{@code null}
      * @param arr 字符串数组
      * @param i 索引
      * @return 值
      */
-    public static String getValue(String[] arr, int i) {
+    public static @Nullable String getValue(String[] arr, int i) {
         if (i >= 0 && i < arr.length) return arr[i];
-        return "";
+        return null;
     }
 
     /**
