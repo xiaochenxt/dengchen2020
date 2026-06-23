@@ -20,6 +20,16 @@ public final class RabbitConstant {
     public static final String X_DELAYED_MESSAGE = "x-delayed-message";
 
     /**
+     * 死信交换机，用于将消费失败的消息路由到死信队列
+     */
+    public static final String X_DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
+
+    /**
+     * 死信路由键，用于将消费失败的消息路由到死信队列
+     */
+    public static final String X_DEAD_LETTER_ROUTING_KEY = "x-dead-letter-routing-key";
+
+    /**
      * 死信交换机
      */
     public static final String DEAD_LETTER_EXCHANGE = "dc.dead.letter.direct";
