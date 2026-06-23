@@ -72,12 +72,6 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
             sessions.add(session);
             return sessions;
         });
-        int onlineCount = sessionQueue.size();
-        int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
-        if (onlineCount > allowSameUserMaxOnlineCount){
-            WebSocketSession head = sessionQueue.poll();
-            if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
-        }
         if (authentication instanceof TenantInfo tenantInfo) {
             if (tenantInfo.tenantId() != null) {
                 tenantIdSessionMap.compute(tenantInfo.tenantId(), (tenantId, sessions) -> {
@@ -86,6 +80,12 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
                     return sessions;
                 });
             }
+        }
+        int onlineCount = sessionQueue.size();
+        int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
+        if (onlineCount > allowSameUserMaxOnlineCount){
+            WebSocketSession head = sessionQueue.poll();
+            if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
         }
     }
 
