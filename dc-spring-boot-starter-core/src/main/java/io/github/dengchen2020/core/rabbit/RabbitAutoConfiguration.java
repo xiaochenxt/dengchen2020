@@ -2,9 +2,11 @@ package io.github.dengchen2020.core.rabbit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.PublisherCallbackChannel;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -86,7 +89,7 @@ public final class RabbitAutoConfiguration {
                 }
             }
             Object body = messageConverter.fromMessage(returned.getMessage());
-            log.error("消息发送失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", returned.getMessage().getMessageProperties().getHeader(RabbitConstant.RETURNED_MESSAGE_CORRELATION_KEY), body, returned.getExchange(), returned.getMessage().getMessageProperties().getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
+            log.error("消息发送失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", returned.getMessage().getMessageProperties().getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), body, returned.getExchange(), returned.getMessage().getMessageProperties().getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
         };
     }
 
@@ -104,13 +107,24 @@ public final class RabbitAutoConfiguration {
     MessageRecoverer messageRecoverer(MessageConverter messageConverter) {
         return (message, cause) -> {
             MessageProperties messageProperties = message.getMessageProperties();
-            log.error("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，异常信息：", messageProperties.getHeader(RabbitConstant.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey(), cause);
+            log.error("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}", messageProperties.getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey());
+            throw new AmqpRejectAndDontRequeueException("Retry Policy Exhausted", cause);
         };
+    }
+
+    /**
+     * 死信交换机
+     */
+    @ConditionalOnMissingBean(name = "deadLetterExchange")
+    @Bean
+    DirectExchange deadLetterExchange() {
+        return new DirectExchange(RabbitConstant.DEAD_LETTER_EXCHANGE);
     }
 
     /**
      * 死信队列
      */
+    @ConditionalOnMissingBean(name = "deadLetterQueue")
     @Bean
     Queue deadLetterQueue() {
         Map<String, Object> args = new HashMap<>();
@@ -118,11 +132,14 @@ public final class RabbitAutoConfiguration {
     }
 
     /**
-     * 死信交换机
+     * 死信队列绑定死信交换机
      */
+    @ConditionalOnMissingBean(name = "deadLetterBinding")
     @Bean
-    DirectExchange deadLetterExchange() {
-        return new DirectExchange(RabbitConstant.DEAD_LETTER_EXCHANGE);
+    Binding deadLetterBinding(Queue deadLetterQueue, DirectExchange deadLetterExchange) {
+        return BindingBuilder.bind(deadLetterQueue)
+                .to(deadLetterExchange)
+                .with(RabbitConstant.DEAD_LETTER_ROUTING_KEY);
     }
 
     /**
@@ -139,6 +156,32 @@ public final class RabbitAutoConfiguration {
             }
             return false;
         };
+    }
+
+    CustomExchange customExchange(String name, String exchangeType) {
+        Map<String, Object> args = CollectionUtils.newHashMap(1);
+        args.put(RabbitConstant.X_DELAYED_TYPE, exchangeType);
+        return new CustomExchange(name, RabbitConstant.X_DELAYED_MESSAGE, true, false, args);
+    }
+
+    /**
+     * 声明一个延迟交换机，Direct模式
+     * <p>
+     * 通过 x-delayed-message 声明的交换机，它的消息在发布之后不会立即进入队列，先将消息保存至 Mnesia，<br/>
+     * 等待消息过期通过 x-delayed-type 类型标记的交换机投递至目标队列，整个消息的投递过程也就完成了。
+     * <p>
+     * 注：延迟最大极限在：0 ~ 2^32 即 4294967296毫秒，49天左右。如果不在这个范围（0 ~ 2^32），延迟将会失效，消息立即进入队列消费
+     */
+    @ConditionalOnMissingBean(name = "delayExchange")
+    @Bean
+    CustomExchange delayExchange() {
+        return customExchange(RabbitConstant.DELAY_EXCHANGE, ExchangeTypes.DIRECT);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    RabbitDelayTemplate rabbitDelayTemplate(RabbitTemplate rabbitTemplate) {
+        return new RabbitDelayTemplate(rabbitTemplate);
     }
 
 }
