@@ -14,37 +14,255 @@ import java.util.List;
 /**
  * 图片处理器
  * <p>支持图片压缩、尺寸调整、Base64转换、文本水印（多位置+字号颜色可控）、图片水印（多位置+宽高可控）</p>
- * 参数设置非线程安全，仅以下示例可单例使用
- * <pre>
- * {@code
- *     ImageProcessor imageProcessor;
- *
- *     {
- *         try {
- *             try (InputStream inputStream = new FileInputStream("qrcode.jpg")) {
- *                 imageProcessor = ImageProcessor.create()
- *                         .resize(3200,3200)
- *                         .imageWatermarkSize(400,400)
- *                         .imageWatermarkAlpha(0.7f)
- *                         .imageWatermark(inputStream.readAllBytes(), ImageProcessor.WatermarkPosition.RIGHT_BOTTOM, 10)
- *                         .compress(true);
- *             }
- *         } catch (IOException e) {
- *             throw new RuntimeException(e);
- *         }
- *     }
- *
- *     @GetMapping("/image")
- *     public void image(HttpServletResponse response) throws IOException {
- *         File sourceImage = new File("img.jpg");
- *         imageProcessor.toStream(sourceImage, response.getOutputStream());
- *     }
- * }
- * </pre>
  * @author xiaochen
  * @since 2025/10/16
  */
 public class ImageProcessor {
+
+    private String outputFormat;
+    private boolean compress;
+    private int width;
+    private int height;
+    private float compressionQuality;
+    private List<TextWatermarkConfig> textWatermarkConfigs;
+    private List<ImageWatermarkConfig> imageWatermarkConfigs;
+
+    public static ImageProcessor create() {
+        return new Builder().build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        // 功能配置参数
+        private String outputFormat = "jpg";
+        public static final Set<String> SUPPORT_FORMATS = Set.of("jpg", "png", "gif", "wbmp", "bmp", "jpeg", "tif", "tiff");
+        private int width = 0;                      // 主图目标宽度
+        private int height = 0;                     // 主图目标高度
+        private boolean compress = false;
+        private float compressionQuality = 0.9f;          // 默认压缩质量（0.0-1.0）
+        private static final Font DEFAULT_TEXT_WATERMARK_FONT = new Font("Arial, SimHei, Heiti SC, Ubuntu Sans", Font.BOLD, 20); //字体（字体大小默认20）
+        private Font textWatermarkFont = DEFAULT_TEXT_WATERMARK_FONT; // 文本水印字体
+        private Color textWatermarkColor = Color.RED; // 文本水印颜色
+        private int imageWatermarkWidth = 0;        // 图片水印宽度
+        private int imageWatermarkHeight = 0;       // 图片水印高度
+        private float imageWatermarkAlpha = 1.0f;   // 图片水印透明度
+        // 多组水印配置
+        private List<TextWatermarkConfig> textWatermarkConfigs;
+        private List<ImageWatermarkConfig> imageWatermarkConfigs;
+
+        /**
+         * 主图尺寸调整
+         * @param width 新的主图宽度
+         * @param height 新的主图高度
+         * @return
+         */
+        public Builder resize(int width, int height) {
+            if (width > 0 && height > 0) {
+                this.width = width;
+                this.height = height;
+            }
+            return this;
+        }
+
+        public Builder outputFormat(String format) {
+            if (format == null) return this;
+            String formatLower = format.toLowerCase();
+            if (SUPPORT_FORMATS.contains(formatLower)) this.outputFormat = formatLower;
+            return this;
+        }
+
+        public Builder compress(boolean compress) {
+            this.compress = compress;
+            return this;
+        }
+
+        /**
+         * 设置压缩质量
+         * @param quality
+         * @return
+         */
+        public Builder compressionQuality(float quality) {
+            this.compressionQuality = quality < 0.0f ? 0.0f : (quality > 1.0f ? 0.9f : quality);
+            return this;
+        }
+
+        /**
+         * 文本水印字体大小，影响后续设置的文本水印
+         * @param font 字体
+         * @return
+         */
+        public Builder textWatermarkFont(Font font) {
+            this.textWatermarkFont = font;
+            return this;
+        }
+
+        /**
+         * 文本水印颜色，影响后续设置的文本水印
+         * @param color 颜色
+         * @return
+         */
+        public Builder textWatermarkColor(Color color) {
+            this.textWatermarkColor = color;
+            return this;
+        }
+
+        /**
+         * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
+         * @param text 文本内容
+         * @param position 水印位置
+         * @param margin 文本水印与边缘间距
+         * @return
+         */
+        public Builder textWatermark(String text, WatermarkPosition position, int margin) {
+            return textWatermark(text, position, margin, this.textWatermarkFont, this.textWatermarkColor);
+        }
+
+        /**
+         * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
+         * @param text 文本内容
+         * @param position 水印位置
+         * @param margin 文本水印与边缘间距
+         * @param font 字体
+         * @param color 颜色
+         * @return
+         */
+        public Builder textWatermark(String text, WatermarkPosition position, int margin, Font font, Color color) {
+            if (text != null && position != null) {
+                TextWatermarkConfig config = new TextWatermarkConfig(
+                        text, font, color, position, margin
+                );
+                if (textWatermarkConfigs == null) this.textWatermarkConfigs = new ArrayList<>();
+                this.textWatermarkConfigs.add(config);
+            }
+            return this;
+        }
+
+        /**
+         * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
+         * @param text 文本内容
+         * @param x 文本水印居中时X轴偏移
+         * @param y 文本水印居中时Y轴偏移
+         * @return
+         */
+        public Builder textWatermark(String text, int x, int y) {
+            return textWatermark(text, x, y, this.textWatermarkFont, this.textWatermarkColor);
+        }
+
+        /**
+         * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
+         * @param text 文本内容
+         * @param x 文本水印居中时X轴偏移
+         * @param y 文本水印居中时Y轴偏移
+         * @param font 字体
+         * @param color 颜色
+         * @return
+         */
+        public Builder textWatermark(String text, int x, int y, Font font, Color color) {
+            if (text != null) {
+                TextWatermarkConfig config = new TextWatermarkConfig(
+                        text, font, color, x, y
+                );
+                if (textWatermarkConfigs == null) this.textWatermarkConfigs = new ArrayList<>();
+                this.textWatermarkConfigs.add(config);
+            }
+            return this;
+        }
+
+        /**
+         * 水印图片尺寸宽高，影响后续设置的图片水印
+         * @param width
+         * @param height
+         * @return
+         */
+        public Builder imageWatermarkSize(int width, int height) {
+            if (width > 0) this.imageWatermarkWidth = width;
+            if (height > 0) this.imageWatermarkHeight = height;
+            return this;
+        }
+
+        /**
+         * 水印图片透明度，影响后续设置的图片水印
+         * @param alpha 透明度 0-完全透明 1-不透明
+         * @return
+         */
+        public Builder imageWatermarkAlpha(float alpha) {
+            if (alpha >= 0 && alpha <= 1) this.imageWatermarkAlpha = alpha;
+            return this;
+        }
+
+        /**
+         * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
+         * @param image 水印图片
+         * @param x 图片水印居中时X轴偏移
+         * @param y 图片水印居中时Y轴偏移
+         * @return
+         */
+        public Builder imageWatermark(byte[] image, int x, int y) {
+            return imageWatermark(image, this.imageWatermarkWidth, this.imageWatermarkHeight, x, y, imageWatermarkAlpha);
+        }
+
+        /**
+         * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
+         * @param image 水印图片
+         * @param x 图片水印居中时X轴偏移
+         * @param y 图片水印居中时Y轴偏移
+         * @return
+         */
+        public Builder imageWatermark(byte[] image, int x, int y, int width, int height, float alpha) {
+            if (image != null) {
+                ImageWatermarkConfig config = new ImageWatermarkConfig(image, width, height, alpha, x, y);
+                if (imageWatermarkConfigs == null) this.imageWatermarkConfigs = new ArrayList<>();
+                this.imageWatermarkConfigs.add(config);
+            }
+            return this;
+        }
+
+        /**
+         * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
+         * @param image 水印图片
+         * @param position 图片水印位置
+         * @param margin 图片水印与边缘间距
+         * @return
+         */
+        public Builder imageWatermark(byte[] image, WatermarkPosition position, int margin) {
+            return imageWatermark(image, position, margin, this.imageWatermarkWidth, this.imageWatermarkHeight, imageWatermarkAlpha);
+        }
+
+        /**
+         * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
+         * @param image 水印图片
+         * @param position 图片水印位置
+         * @param margin 图片水印与边缘间距
+         * @param width 图片水印宽度
+         * @param height 图片水印高度
+         * @return
+         */
+        public Builder imageWatermark(byte[] image, WatermarkPosition position, int margin, int width, int height, float alpha) {
+            if (image != null && position != null) {
+                ImageWatermarkConfig config = new ImageWatermarkConfig(
+                        image, width, height, alpha, position, margin
+                );
+                if (imageWatermarkConfigs == null) this.imageWatermarkConfigs = new ArrayList<>();
+                this.imageWatermarkConfigs.add(config);
+            }
+            return this;
+        }
+
+        public ImageProcessor build() {
+            var processor = new ImageProcessor();
+            processor.width = this.width;
+            processor.height = this.height;
+            processor.outputFormat = this.outputFormat;
+            processor.compress = this.compress;
+            processor.compressionQuality = this.compressionQuality;
+            processor.textWatermarkConfigs = this.textWatermarkConfigs;
+            processor.imageWatermarkConfigs = this.imageWatermarkConfigs;
+            return processor;
+        }
+    }
 
     // 水印位置
     public enum WatermarkPosition {
@@ -107,222 +325,6 @@ public class ImageProcessor {
 
     }
 
-    // 功能配置参数
-    private String outputFormat = "jpg";
-    public static final Set<String> SUPPORT_FORMATS = Set.of("jpg", "png", "gif", "wbmp", "bmp", "jpeg", "tif", "tiff");
-    private boolean compress = false;
-    private float compressionQuality = 0.9f;          // 默认压缩质量（0.0-1.0）
-    private static final Font DEFAULT_TEXT_WATERMARK_FONT = new Font("Arial, SimHei, Heiti SC, Ubuntu Sans", Font.BOLD, 20); //字体（字体大小默认20）
-    private Font textWatermarkFont = DEFAULT_TEXT_WATERMARK_FONT; // 文本水印字体
-    private Color textWatermarkColor = Color.RED; // 文本水印颜色
-    private int width = 0;                      // 主图目标宽度
-    private int height = 0;                     // 主图目标高度
-    private int imageWatermarkWidth = 0;        // 图片水印宽度
-    private int imageWatermarkHeight = 0;       // 图片水印高度
-    private float imageWatermarkAlpha = 1.0f;   // 图片水印透明度
-
-    // 多组水印配置
-    private final List<TextWatermarkConfig> textWatermarkConfigs = new ArrayList<>();
-    private final List<ImageWatermarkConfig> imageWatermarkConfigs = new ArrayList<>();
-
-    public static ImageProcessor create() {
-        return new ImageProcessor();
-    }
-
-    public ImageProcessor outputFormat(String format) {
-        if (format == null) return this;
-        String formatLower = format.toLowerCase();
-        if (SUPPORT_FORMATS.contains(formatLower)) this.outputFormat = formatLower;
-        return this;
-    }
-
-    public ImageProcessor compress(boolean compress) {
-        this.compress = compress;
-        return this;
-    }
-
-    /**
-     * 设置压缩质量
-     * @param quality
-     * @return
-     */
-    public ImageProcessor compressionQuality(float quality) {
-        this.compressionQuality = quality < 0.0f ? 0.0f : (quality > 1.0f ? 0.9f : quality);
-        return this;
-    }
-
-    /**
-     * 文本水印字体大小
-     * @param font 字体
-     * @return
-     */
-    public ImageProcessor textWatermarkFont(Font font) {
-        this.textWatermarkFont = font;
-        return this;
-    }
-
-    /**
-     * 文本水印颜色
-     * @param color 颜色
-     * @return
-     */
-    public ImageProcessor textWatermarkColor(Color color) {
-        this.textWatermarkColor = color;
-        return this;
-    }
-
-    /**
-     * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
-     * @param text 文本内容
-     * @param position 水印位置
-     * @param margin 文本水印与边缘间距
-     * @return
-     */
-    public ImageProcessor textWatermark(String text, WatermarkPosition position, int margin) {
-        return textWatermark(text, position, margin, this.textWatermarkFont, this.textWatermarkColor);
-    }
-
-    /**
-     * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
-     * @param text 文本内容
-     * @param position 水印位置
-     * @param margin 文本水印与边缘间距
-     * @param font 字体
-     * @param color 颜色
-     * @return
-     */
-    public ImageProcessor textWatermark(String text, WatermarkPosition position, int margin, Font font, Color color) {
-        if (text != null && position != null) {
-            TextWatermarkConfig config = new TextWatermarkConfig(
-                    text, font, color, position, margin
-            );
-            this.textWatermarkConfigs.add(config);
-        }
-        return this;
-    }
-
-    /**
-     * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
-     * @param text 文本内容
-     * @param x 文本水印居中时X轴偏移
-     * @param y 文本水印居中时Y轴偏移
-     * @return
-     */
-    public ImageProcessor textWatermark(String text, int x, int y) {
-        return textWatermark(text, x, y, this.textWatermarkFont, this.textWatermarkColor);
-    }
-
-    /**
-     * 添加文本水印（支持多次调用，每次添加一组新的文本水印）
-     * @param text 文本内容
-     * @param x 文本水印居中时X轴偏移
-     * @param y 文本水印居中时Y轴偏移
-     * @param font 字体
-     * @param color 颜色
-     * @return
-     */
-    public ImageProcessor textWatermark(String text, int x, int y, Font font, Color color) {
-        if (text != null) {
-            TextWatermarkConfig config = new TextWatermarkConfig(
-                    text, font, color, x, y
-            );
-            this.textWatermarkConfigs.add(config);
-        }
-        return this;
-    }
-
-    /**
-     * 设置后续的水印图片尺寸宽高
-     * @param width
-     * @param height
-     * @return
-     */
-    public ImageProcessor imageWatermarkSize(int width, int height) {
-        if (width > 0) this.imageWatermarkWidth = width;
-        if (height > 0) this.imageWatermarkHeight = height;
-        return this;
-    }
-
-    /**
-     * 设置后续的水印图片透明度
-     * @param alpha 透明度 0-完全透明 1-不透明
-     * @return
-     */
-    public ImageProcessor imageWatermarkAlpha(float alpha) {
-        if (alpha >= 0 && alpha <= 1) this.imageWatermarkAlpha = alpha;
-        return this;
-    }
-
-    /**
-     * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
-     * @param image 水印图片
-     * @param x 图片水印居中时X轴偏移
-     * @param y 图片水印居中时Y轴偏移
-     * @return
-     */
-    public ImageProcessor imageWatermark(byte[] image, int x, int y) {
-        return imageWatermark(image, this.imageWatermarkWidth, this.imageWatermarkHeight, x, y, imageWatermarkAlpha);
-    }
-
-    /**
-     * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
-     * @param image 水印图片
-     * @param x 图片水印居中时X轴偏移
-     * @param y 图片水印居中时Y轴偏移
-     * @return
-     */
-    public ImageProcessor imageWatermark(byte[] image, int x, int y, int width, int height, float alpha) {
-        if (image != null) {
-            ImageWatermarkConfig config = new ImageWatermarkConfig(image, width, height, alpha, x, y);
-            this.imageWatermarkConfigs.add(config);
-        }
-        return this;
-    }
-
-    /**
-     * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
-     * @param image 水印图片
-     * @param position 图片水印位置
-     * @param margin 图片水印与边缘间距
-     * @return
-     */
-    public ImageProcessor imageWatermark(byte[] image, WatermarkPosition position, int margin) {
-        return imageWatermark(image, position, margin, this.imageWatermarkWidth, this.imageWatermarkHeight, imageWatermarkAlpha);
-    }
-
-    /**
-     * 添加图片水印（支持多次调用，每次添加一组新的图片水印）
-     * @param image 水印图片
-     * @param position 图片水印位置
-     * @param margin 图片水印与边缘间距
-     * @param width 图片水印宽度
-     * @param height 图片水印高度
-     * @return
-     */
-    public ImageProcessor imageWatermark(byte[] image, WatermarkPosition position, int margin, int width, int height, float alpha) {
-        if (image != null && position != null) {
-            ImageWatermarkConfig config = new ImageWatermarkConfig(
-                    image, width, height, alpha, position, margin
-            );
-            this.imageWatermarkConfigs.add(config);
-        }
-        return this;
-    }
-
-    /**
-     * 主图尺寸调整
-     * @param width 新的主图宽度
-     * @param height 新的主图高度
-     * @return
-     */
-    public ImageProcessor resize(int width, int height) {
-        if (width > 0 && height > 0) {
-            this.width = width;
-            this.height = height;
-        }
-        return this;
-    }
-
     /**
      * 处理 源图片{@code inputStream} 并将新图片数据输出到 {@code outputStream}
      * @param outputStream 输出流
@@ -363,9 +365,9 @@ public class ImageProcessor {
             // 主图尺寸调整
             if (width > 0 && height > 0) sourceImage = doResize(sourceImage);
             // 文本水印（循环处理所有添加的文本水印）
-            if (!textWatermarkConfigs.isEmpty()) sourceImage = doAddMultiTextWatermark(sourceImage);
+            if (textWatermarkConfigs != null && !textWatermarkConfigs.isEmpty()) sourceImage = doAddMultiTextWatermark(sourceImage);
             // 图片水印（循环处理所有添加的图片水印）
-            if (!imageWatermarkConfigs.isEmpty()) sourceImage = doAddMultiImageWatermark(sourceImage);
+            if (imageWatermarkConfigs != null && !imageWatermarkConfigs.isEmpty()) sourceImage = doAddMultiImageWatermark(sourceImage);
             // 压缩输出
             if (compress) {
                 doCompress(sourceImage, outputStream);
