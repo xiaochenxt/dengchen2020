@@ -2,6 +2,7 @@ package io.github.dengchen2020.jpa.querydsl;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.Expressions;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -75,7 +76,7 @@ public abstract class QuerydslUtils {
 
         for (RecordComponent recordComponent : recordComponents) {
             Expression<?> expression = entityFieldMap.get(recordComponent.getName());
-            if (expression != null) expressions.add(expression);
+            expressions.add(expression != null ? expression : Expressions.nullExpression(recordComponent.getType()));
         }
 
         var expressionsArray = expressions.toArray(EMPTY_EXPRESSIONS);
