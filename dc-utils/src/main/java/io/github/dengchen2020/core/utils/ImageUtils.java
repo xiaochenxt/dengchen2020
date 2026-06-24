@@ -7,7 +7,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Base64;
@@ -133,103 +132,6 @@ public abstract class ImageUtils {
             writer.dispose();
         } catch (IOException e) {
             throw new RuntimeException("压缩图片失败", e);
-        }
-    }
-
-    /**
-     * 添加文本水印
-     *
-     * @param imgInputStream 图片输入流
-     * @param text           文本水印
-     */
-    public static void addTextWatermark(InputStream imgInputStream, String text, OutputStream outputStream) {
-        addTextWatermark(imgInputStream, text, 10, 30, outputStream);
-    }
-
-    /**
-     * 添加文本水印
-     *
-     * @param inputStream 图片字节数组
-     * @param text        文本水印
-     * @param x           水印X轴位置
-     * @param y           水印Y轴位置
-     */
-    public static void addTextWatermark(InputStream inputStream, String text, int x, int y, OutputStream outputStream) {
-        try (inputStream; outputStream) {
-            BufferedImage inputImage = ImageIO.read(inputStream);
-            int width = inputImage.getWidth();
-            int height = inputImage.getHeight();
-            BufferedImage watermarkedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = (Graphics2D) watermarkedImage.getGraphics();
-            g2d.drawImage(inputImage, 0, 0, null);
-            g2d.setColor(Color.BLUE);
-            g2d.setFont(new Font("SimHei", Font.BOLD, 20));
-            // 设置支持中文字符
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g2d.drawString(text, width / 2 - x, height / 2 - y + g2d.getFont().getSize() * 2);
-            ImageIO.write(watermarkedImage, "jpg", outputStream);
-        } catch (Exception e) {
-            throw new RuntimeException("添加水印失败", e);
-        }
-    }
-
-    /**
-     * 添加图片水印
-     *
-     * @param imgInputStream       图片输入流
-     * @param watermarkInputStream 图片水印输入流
-     */
-    public static void addImageWatermark(InputStream imgInputStream, InputStream watermarkInputStream, OutputStream outputStream) {
-        addImageWatermark(imgInputStream, watermarkInputStream, 10, 15, outputStream);
-    }
-
-    /**
-     * 添加图片水印
-     *
-     * @param imgInputStream       图片字节数组
-     * @param watermarkInputStream 图片水印
-     * @param x                    水印X轴位置
-     * @param y                    水印Y轴位置
-     */
-    public static void addImageWatermark(InputStream imgInputStream, InputStream watermarkInputStream, int x, int y, OutputStream outputStream) {
-        try (imgInputStream; watermarkInputStream; outputStream) {
-            BufferedImage inputImage = ImageIO.read(imgInputStream);
-            int width = inputImage.getWidth();
-            int height = inputImage.getHeight();
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = (Graphics2D) image.getGraphics();
-            g2d.drawImage(inputImage, 0, 0, null);
-            BufferedImage watermarkImage = ImageIO.read(watermarkInputStream);
-            int watermarkWidth = watermarkImage.getWidth();
-            int watermarkHeight = watermarkImage.getHeight();
-            g2d.drawImage(watermarkImage, width / 2 - x, height / 2 - y, watermarkWidth, watermarkHeight, null);
-            ImageIO.write(image, "jpg", outputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("添加水印失败", e);
-        }
-    }
-
-    /**
-     * 调整图片尺寸
-     *
-     * @param imageInputStream 图片输入流
-     * @param targetWidth      宽度
-     * @param targetHeight     高度
-     */
-    public static void resizeImage(InputStream imageInputStream, int targetWidth, int targetHeight, OutputStream outputStream) throws IOException {
-        try (imageInputStream; outputStream) {
-            // 读取原始图片
-            BufferedImage image = ImageIO.read(imageInputStream);
-            // 创建一个新的BufferedImage对象，尺寸为新的宽高
-            BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-            // 使用Graphics2D对象将原始图片绘制到新尺寸的BufferedImage上
-            Graphics2D g = resizedImage.createGraphics();
-            g.drawImage(image, 0, 0, targetWidth, targetHeight, null);
-            g.dispose();
-            // 将调整尺寸后的图片保存为字节数组
-            ImageIO.write(resizedImage, "jpg", outputStream);
-        } catch (IOException e) {
-            throw new IOException("更改图片尺寸失败", e);
         }
     }
 
