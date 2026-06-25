@@ -5,10 +5,13 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.query.EscapeCharacter;
+import org.springframework.data.jpa.repository.query.JpaQueryMethodFactory;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.querydsl.EntityPathResolver;
+import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
@@ -29,15 +32,37 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
 
     private ObjectProvider<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer;
 
+    private EntityPathResolver entityPathResolver;
+    private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
+    private JpaQueryMethodFactory queryMethodFactory;
+
     @Autowired
     public void setRepositoryFragmentsCustomizer(ObjectProvider<RepositoryFragmentsCustomizer> repositoryFragmentsCustomizer) {
         this.repositoryFragmentsCustomizer = repositoryFragmentsCustomizer;
     }
 
+    @Autowired
+    public void setEntityPathResolver(ObjectProvider<EntityPathResolver> resolver) {
+        this.entityPathResolver = resolver.getIfAvailable(() -> SimpleEntityPathResolver.INSTANCE);
+    }
+
+    @Autowired
+    public void setQueryMethodFactory(ObjectProvider<JpaQueryMethodFactory> factory) {
+        this.queryMethodFactory = factory.getIfAvailable();
+    }
+
+    public void setEscapeCharacter(char escapeCharacter) {
+        this.escapeCharacter = EscapeCharacter.of(escapeCharacter);
+    }
+
     @NonNull
     @Override
     protected RepositoryFactorySupport createRepositoryFactory(@NonNull EntityManager em) {
-        return new BaseRepositoryFactory(em, repositoryFragmentsCustomizer);
+        var factory = new BaseRepositoryFactory(em, repositoryFragmentsCustomizer);
+        factory.setEntityPathResolver(entityPathResolver);
+        factory.setEscapeCharacter(escapeCharacter);
+        if (queryMethodFactory != null) factory.setQueryMethodFactory(queryMethodFactory);
+        return factory;
     }
 
     @NullMarked
