@@ -53,6 +53,7 @@ public abstract class BeanUtils {
      * @param target 目标对象
      */
     public static void copyProperties(Object source, Object target) {
+        if (target instanceof Record) throw new IllegalArgumentException("无法拷贝至Record实例，需使用convertValue");
         if (NativeDetector.inNativeImage()) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
             return;
@@ -97,12 +98,6 @@ public abstract class BeanUtils {
      * @param ignoreProperties 拷贝时要忽略的属性
      */
     public static void copyProperties(Object source, Object target, String... ignoreProperties) {
-        if (NativeDetector.inNativeImage()) {
-            Set<String> ignoredProperties = getNullPropertyNameSet(source);
-            Collections.addAll(ignoredProperties, ignoreProperties);
-            org.springframework.beans.BeanUtils.copyProperties(source, target, ignoredProperties.toArray(EMPTY_STRING_ARRAY));
-            return;
-        }
         copyProperties(source, target, Set.of(ignoreProperties));
     }
 
@@ -118,6 +113,7 @@ public abstract class BeanUtils {
      * @param ignoreProperties 拷贝时要忽略的属性
      */
     public static void copyProperties(Object source, Object target, Set<String> ignoreProperties) {
+        if (target instanceof Record) throw new IllegalArgumentException("无法拷贝至Record实例，需使用convertValue");
         if (NativeDetector.inNativeImage()) {
             Set<String> ignoredProperties = getNullPropertyNameSet(source);
             ignoredProperties.addAll(ignoreProperties);
@@ -232,7 +228,7 @@ public abstract class BeanUtils {
             long.class, 0L,
             float.class, 0F,
             double.class, 0D,
-            char.class, '\0');
+            char.class, Character.MIN_VALUE);
 
     /**
      * 反射实现拷贝属性到Record类
