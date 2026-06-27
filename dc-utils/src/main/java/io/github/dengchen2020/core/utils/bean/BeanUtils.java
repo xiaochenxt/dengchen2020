@@ -50,7 +50,7 @@ public abstract class BeanUtils {
      * 源对象的属性需与目标对象的同名属性类型完全相同，源对象的属性需有getter方法，目标对象的同名属性需有setter方法
      * </pre>
      * @param source 源对象
-     * @param target 目标对象
+     * @param target 目标对象，非Record实例
      */
     public static void copyProperties(Object source, Object target) {
         if (target instanceof Record) throw new IllegalArgumentException("无法拷贝至Record实例，需使用convertValue");
@@ -79,7 +79,7 @@ public abstract class BeanUtils {
      * 源对象的属性需与目标对象的同名属性类型完全相同，源对象的属性需有getter方法，目标对象的同名属性需有setter方法
      * </pre>
      * @param source 源对象
-     * @param target 目标对象
+     * @param target 目标对象，非Record实例
      * @param converter 自定义转换器
      */
     protected static void copyProperties(Object source, Object target,@Nullable Converter converter) {
@@ -94,7 +94,7 @@ public abstract class BeanUtils {
      * 源对象的属性需与目标对象的同名属性类型完全相同，源对象的属性需有getter方法，目标对象的同名属性需有setter方法
      * </pre>
      * @param source 源对象
-     * @param target 目标对象
+     * @param target 目标对象，非Record实例
      * @param ignoreProperties 拷贝时要忽略的属性
      */
     public static void copyProperties(Object source, Object target, String... ignoreProperties) {
@@ -109,7 +109,7 @@ public abstract class BeanUtils {
      * 源对象的属性需与目标对象的同名属性类型完全相同，源对象的属性需有getter方法，目标对象的同名属性需有setter方法
      * </pre>
      * @param source 源对象
-     * @param target 目标对象
+     * @param target 目标对象，非Record实例
      * @param ignoreProperties 拷贝时要忽略的属性
      */
     public static void copyProperties(Object source, Object target, Set<String> ignoreProperties) {
