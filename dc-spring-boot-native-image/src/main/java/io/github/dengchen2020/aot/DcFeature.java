@@ -237,7 +237,9 @@ class DcFeature implements Feature {
                     "org.apache.ibatis.cache.decorators.FifoCache","org.apache.ibatis.cache.decorators.LruCache",
                     "org.apache.ibatis.cache.decorators.SoftCache","org.apache.ibatis.cache.decorators.WeakCache",
                     "org.mybatis.spring.SqlSessionFactoryBean","java.util.ArrayList","java.util.HashMap","java.util.TreeSet",
-                    "java.util.HashSet");
+                    "java.util.HashSet","org.apache.ibatis.mapping.BoundSql");
+            var statementHandler = featureUtils.loadClass("org.apache.ibatis.executor.statement.StatementHandler");
+            if (statementHandler != null) featureUtils.registerReflection(featureUtils.collectClass(statementHandler::isAssignableFrom, "org.apache.ibatis.executor.statement").toArray(EMPTY_CLASS_ARRAY));
             try {
                 featureUtils.registerResource(sqlSessionFactory, featureUtils.findResources("org/apache/ibatis/builder/xml",
                         name -> name.endsWith(".dtd") || name.endsWith(".xsd")).toArray(EMPTY_STRING_ARRAY));
