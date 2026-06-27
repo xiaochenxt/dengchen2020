@@ -1,16 +1,18 @@
 package io.github.dengchen2020.core.utils.bean;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeansException;
+import org.springframework.core.NativeDetector;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.springframework.beans.BeansException;
-import org.springframework.core.NativeDetector;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_STRING_ARRAY;
 
@@ -157,6 +159,7 @@ public abstract class BeanUtils {
             for (var pd : pds) {
                 var readMethod = pd.getReadMethod();
                 if (readMethod == null) continue;
+                ReflectionUtils.makeAccessible(readMethod);
                 var srcValue = readMethod.invoke(source);
                 if (srcValue == null) emptyFieldNames.add(pd.getName());
             }
@@ -253,6 +256,7 @@ public abstract class BeanUtils {
                     if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
                     continue;
                 }
+                ReflectionUtils.makeAccessible(readMethod);
                 var val = readMethod.invoke(source);
                 if (val != null && !ignoreProperties.contains(components[i].getName())) args[i] = val;
                 else if (componentType.isPrimitive()) args[i] = DEFAULT_TYPE_VALUES.get(componentType);
