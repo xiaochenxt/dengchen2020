@@ -110,7 +110,7 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
         if (!CollectionUtils.isEmpty(builder.getAllowedMethods())) {
             config.setAllowedMethods(builder.getAllowedMethods());
         } else {
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "QUERY"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"));
         }
         if (builder.getAllowCredentials() != null) {
             config.setAllowCredentials(builder.getAllowCredentials());
