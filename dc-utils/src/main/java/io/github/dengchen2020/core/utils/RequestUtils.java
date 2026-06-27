@@ -32,55 +32,31 @@ public abstract class RequestUtils extends RequestContextHolder {
     /**
      * 获取当前请求上下文属性
      */
-    @NonNull
-    public static ServletRequestAttributes getRequiredRequestAttributes() {
+    public static @NonNull ServletRequestAttributes getRequiredRequestAttributes() {
         RequestAttributes requestAttributes = getRequestAttributes();
-        if (requestAttributes == null) {
-            throw new IllegalStateException("获取当前线程绑定的请求上下文属性失败");
-        }
+        if (requestAttributes == null) throw new IllegalStateException("获取当前线程绑定的请求上下文属性失败");
         return (ServletRequestAttributes) requestAttributes;
     }
 
     /**
      * 获取当前请求
      */
-    @NonNull
-    public static HttpServletRequest getCurrentRequest() {
+    public static @NonNull HttpServletRequest getCurrentRequest() {
         return getRequiredRequestAttributes().getRequest();
     }
 
     /**
      * 获取web的异步请求管理器，详见：{@link WebAsyncManager}
      */
-    @NonNull
-    public static WebAsyncManager getAsyncManager() {
+    public static @NonNull WebAsyncManager getAsyncManager() {
         return WebAsyncUtils.getAsyncManager(getCurrentRequest());
     }
 
     /**
      * 获取接口地址，包含域名、端口
      */
-    @NonNull
-    public static String getPath() {
-        return getPath(getCurrentRequest());
-    }
-
-    /**
-     * 获取接口地址，包含域名、端口
-     *
-     * @param request
-     */
-    @NonNull
-    public static String getPath(@NonNull HttpServletRequest request) {
-        String scheme = request.getScheme();
-        int port = request.getServerPort();
-        String path = scheme + "://" + request.getServerName();
-        if ((scheme.equals("http") && (port != 80))
-                || (scheme.equals("https") && (port != 443))) {
-            path += ":" + request.getServerPort();
-        }
-        path += request.getRequestURI();
-        return path;
+    public static @NonNull String getRequestURL() {
+        return getCurrentRequest().getRequestURL().toString();
     }
 
     /**
