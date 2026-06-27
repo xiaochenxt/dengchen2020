@@ -1,12 +1,13 @@
 package io.github.dengchen2020.core.utils.bean;
 
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.Type;
+import org.springframework.cglib.core.*;
+
 import java.beans.PropertyDescriptor;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.Type;
-import org.springframework.cglib.core.*;
 
 /**
  * 基于 CGLib 字节码生成的高性能 Record 拷贝器，详见：{@link BeanCopier}
@@ -200,20 +201,22 @@ public abstract class RecordCopier<T> {
                             e.store_local(argLocals[i]);
                             e.mark(skipStore);
                         }
-                    } else {
-                        if (isPrimitive[i]) {
+                    } else if (compatible(pd, components[i])) {
+                        if (isPrimitive[i] && pd.getPropertyType().isPrimitive()) {
                             e.load_local(sourceLocal);
                             e.invoke_virtual(sourceType, readSignatures[i]);
                             e.store_local(argLocals[i]);
                         } else {
                             var skipStore = e.make_label();
-                            var tmpVal = e.make_local(asmType);
+                            var tmpVal = e.make_local(Constants.TYPE_OBJECT);
                             e.load_local(sourceLocal);
                             e.invoke_virtual(sourceType, readSignatures[i]);
+                            e.box(readSignatures[i].getReturnType());
                             e.store_local(tmpVal);
                             e.load_local(tmpVal);
                             e.ifnull(skipStore);
                             e.load_local(tmpVal);
+                            if (isPrimitive[i]) e.unbox_or_zero(asmType);
                             e.store_local(argLocals[i]);
                             e.mark(skipStore);
                         }
@@ -231,6 +234,32 @@ public abstract class RecordCopier<T> {
             e.return_value();
             e.end_method();
             ce.end_class();
+        }
+
+        @SuppressWarnings("unchecked")
+        private static boolean compatible(PropertyDescriptor getter, java.lang.reflect.RecordComponent component) {
+            Class getterType = getter.getPropertyType();
+            Class componentType = component.getType();
+            if (componentType.isAssignableFrom(getterType)) return true;
+            return isPrimitiveWrapperPair(getterType, componentType);
+        }
+
+        private static boolean isPrimitiveWrapperPair(Class getterType, Class componentType) {
+            if (getterType.isPrimitive()) return getWrapperType(getterType) == componentType;
+            if (componentType.isPrimitive()) return getWrapperType(componentType) == getterType;
+            return false;
+        }
+
+        private static Class getWrapperType(Class primitiveType) {
+            if (primitiveType == int.class) return Integer.class;
+            if (primitiveType == long.class) return Long.class;
+            if (primitiveType == double.class) return Double.class;
+            if (primitiveType == float.class) return Float.class;
+            if (primitiveType == boolean.class) return Boolean.class;
+            if (primitiveType == byte.class) return Byte.class;
+            if (primitiveType == short.class) return Short.class;
+            if (primitiveType == char.class) return Character.class;
+            throw new IllegalArgumentException("Not a primitive type: " + primitiveType);
         }
 
         @Override
