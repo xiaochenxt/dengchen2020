@@ -37,7 +37,7 @@ public class DcCorsProperties {
     private String allowedOriginPatterns;
 
     /**
-     * 允许的请求方法，默认："GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "QUERY"
+     * 允许的请求方法，默认："GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"
      */
     private List<String> allowedMethods;
 

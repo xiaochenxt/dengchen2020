@@ -1,12 +1,6 @@
 package io.github.dengchen2020.core.config;
 
 import io.github.dengchen2020.core.utils.RestClientUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -17,13 +11,10 @@ import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 基础自动配置
@@ -56,28 +47,13 @@ public final class BaseAutoConfiguration implements InitializingBean {
     @ConditionalOnClass(name = "org.apache.hc.client5.http.classic.HttpClient")
     @Configuration(proxyBeanMethods = false)
     static final class RestClientAutoConfiguration {
-        @Bean
-        @ConditionalOnMissingBean
-        HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() {
-            HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                    .setMaxConnPerRoute(200)
-                    .setDefaultConnectionConfig(ConnectionConfig.custom()
-                            .setConnectTimeout(30, TimeUnit.SECONDS)
-                            .build())
-                    .build();
-            HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(manager).build();
-            HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-            factory.setReadTimeout(Duration.ofSeconds(10));
-            return factory;
-        }
 
         @Bean
         @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
         @ConditionalOnMissingBean
-        RestClient.Builder httpClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer, HttpComponentsClientHttpRequestFactory factory) {
-            RestClient.Builder builder = restClientBuilderConfigurer.configure(RestClientUtils.builder(factory));
-            builder.requestFactory(new RestClientUtils.OptimizedBufferingClientHttpRequestFactory(factory));
+        RestClient.Builder restClientBuilder(RestClientBuilderConfigurer restClientBuilderConfigurer) {
+            var builder = restClientBuilderConfigurer.configure(RestClient.builder());
+            builder.requestFactory(RestClientUtils.createFactory(true));
             return builder;
         }
 
