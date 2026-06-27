@@ -182,6 +182,15 @@ public abstract class BeanCopier
 
                         e.dup2();
                         e.invoke_virtual(sourceType, readSignature);
+
+                        Class getterType = getter.getPropertyType();
+                        Class setterType = setter.getPropertyType();
+                        if (getterType.isPrimitive() && !setterType.isPrimitive()) {
+                            e.box(readSignature.getReturnType());
+                        } else if (!getterType.isPrimitive() && setterType.isPrimitive()) {
+                            e.unbox_or_zero(writeSignature.getArgumentTypes()[0]);
+                        }
+
                         e.invoke_virtual(targetType, writeSignature);
 
                         if (!isPrimitive) e.mark(nonNull);
@@ -195,7 +204,28 @@ public abstract class BeanCopier
 
         private static boolean compatible(PropertyDescriptor getter, PropertyDescriptor setter) {
             // TODO: 允许自动扩大转换？
-            return setter.getPropertyType().isAssignableFrom(getter.getPropertyType());
+            Class getterType = getter.getPropertyType();
+            Class setterType = setter.getPropertyType();
+            if (setterType.isAssignableFrom(getterType)) return true;
+            return isPrimitiveWrapperPair(getterType, setterType);
+        }
+
+        private static boolean isPrimitiveWrapperPair(Class getterType, Class setterType) {
+            if (getterType.isPrimitive()) return getWrapperType(getterType) == setterType;
+            if (setterType.isPrimitive()) return getWrapperType(setterType) == getterType;
+            return false;
+        }
+
+        private static Class getWrapperType(Class primitiveType) {
+            if (primitiveType == int.class) return Integer.class;
+            if (primitiveType == long.class) return Long.class;
+            if (primitiveType == double.class) return Double.class;
+            if (primitiveType == float.class) return Float.class;
+            if (primitiveType == boolean.class) return Boolean.class;
+            if (primitiveType == byte.class) return Byte.class;
+            if (primitiveType == short.class) return Short.class;
+            if (primitiveType == char.class) return Character.class;
+            throw new IllegalArgumentException("Not a primitive type: " + primitiveType);
         }
 
         @Override
