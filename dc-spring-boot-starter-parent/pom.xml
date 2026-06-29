@@ -3,20 +3,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.7</version>
+        <groupId>io.github.dengchen2020</groupId>
+        <artifactId>dc-dependencies</artifactId>
+        <version>0.4.53</version>
         <relativePath/>
     </parent>
 
-    <groupId>io.github.dengchen2020</groupId>
     <artifactId>dc-spring-boot-starter-parent</artifactId>
-    <version>0.4.52</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
     <url>https://github.com/xiaochenxt/dengchen2020</url>
-    <description>dc项目pom，基于SpringBoot4</description>
+    <description>dc项目parent，基于SpringBoot4</description>
 
     <developers>
         <developer>
@@ -57,166 +55,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dc.version>0.4.52</dc.version>
-        <querydsl.version>5.1.0</querydsl.version>
-        <redisson.version>4.6.1</redisson.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
-        <protostuff.version>1.8.0</protostuff.version>
+        <spring-boot.version>4.0.7</spring-boot.version>
         <spring-ai.version>2.0.0</spring-ai.version>
-        <graalvm.version>25.0.3</graalvm.version>
-        <zxing.version>3.5.4</zxing.version>
-        <openfeign.querydsl.version>7.4.0</openfeign.querydsl.version>
-        <libphonenumber.version>9.0.33</libphonenumber.version>
-        <mybatis.springboot.version>4.0.1</mybatis.springboot.version>
-        <ip2region.version>3.3.7</ip2region.version>
-        <software.amazon.awssdk.version>2.46.17</software.amazon.awssdk.version>
-        <playwright.version>1.60.0</playwright.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-core</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-cache</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-id-generator</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-ip</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-jpa</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-lock</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-message</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-ratelimiter</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-security</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-starter-websocket</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-spring-boot-native-image</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>dc-utils</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>jackson-ext</artifactId>
-                <version>${dc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.protostuff</groupId>
-                <artifactId>protostuff-bom</artifactId>
-                <version>${protostuff.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>zxing-parent</artifactId>
-                <version>${zxing.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!--querydsl查询支持，跟JPA搭配使用 -->
-            <dependency>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-bom</artifactId>
-                <version>${querydsl.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>4.5.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.whvcse</groupId>
-                <artifactId>easy-captcha</artifactId>
-                <version>1.6.2</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>4.0.9</version>
-            </dependency>
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson</artifactId>
-                <version>${redisson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fusionauth</groupId>
-                <artifactId>fusionauth-jwt</artifactId>
-                <version>6.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dengchen2020</groupId>
-                <artifactId>fusionauth-jwt-jackson3</artifactId>
-                <version>6.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lionsoul</groupId>
-                <artifactId>ip2region</artifactId>
-                <version>${ip2region.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.lmax</groupId>
-                <artifactId>disruptor</artifactId>
-                <version>4.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis.springboot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct</artifactId>
-                <version>${mapstruct.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct-processor</artifactId>
-                <version>${mapstruct.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
@@ -225,54 +69,11 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>io.github.openfeign.querydsl</groupId>
-                <artifactId>querydsl-bom</artifactId>
-                <version>${openfeign.querydsl.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.googlecode.libphonenumber</groupId>
-                <artifactId>libphonenumber</artifactId>
-                <version>${libphonenumber.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>nativeimage</artifactId>
-                <version>${graalvm.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.js</groupId>
-                <artifactId>js</artifactId>
-                <version>${graalvm.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.polyglot</groupId>
-                <artifactId>js</artifactId>
-                <version>${graalvm.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.js</groupId>
-                <artifactId>js-scriptengine</artifactId>
-                <version>${graalvm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>bom</artifactId>
-                <version>${software.amazon.awssdk.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.microsoft.playwright</groupId>
-                <artifactId>playwright</artifactId>
-                <version>${playwright.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -293,13 +94,11 @@
                             <annotationProcessorPath>
                                 <groupId>org.mapstruct</groupId>
                                 <artifactId>mapstruct-processor</artifactId>
-                                <version>${mapstruct.version}</version>
                             </annotationProcessorPath>
                             <annotationProcessorPath>
                                 <groupId>io.github.openfeign.querydsl</groupId>
                                 <artifactId>querydsl-apt</artifactId>
                                 <classifier>jakarta</classifier>
-                                <version>${openfeign.querydsl.version}</version>
                             </annotationProcessorPath>
                             <annotationProcessorPath>
                                 <groupId>org.springframework.boot</groupId>
@@ -340,17 +139,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.10.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                    <waitUntil>UPLOADED</waitUntil>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.12.0</version>
@@ -363,20 +151,6 @@
                         <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.8</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
                         </goals>
                     </execution>
                 </executions>
