@@ -4,7 +4,9 @@ import com.querydsl.sql.SQLTemplates;
 import io.github.dengchen2020.jpa.base.DcEvaluationContextExtension;
 import io.github.dengchen2020.jpa.base.QuerydslJdbcRepositoryExecutor;
 import io.github.dengchen2020.jpa.base.RepositoryFragmentsCustomizer;
+import io.github.dengchen2020.jpa.hibernate.PhysicalNamingStrategySnakeCaseImpl;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.MappingSettings;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,6 +40,9 @@ public final class JpaAutoConfiguration {
             }
             if (environment.getProperty("dc.jpa.properties.hibernate.dynamic-update", Boolean.class, true)) {
                 hibernateProperties.put("dc.hibernate.dynamic_update", true);
+            }
+            if (environment.getProperty("spring.jpa.hibernate.naming.physical-strategy") == null) {
+                hibernateProperties.put(MappingSettings.PHYSICAL_NAMING_STRATEGY, PhysicalNamingStrategySnakeCaseImpl.class.getName());
             }
         };
     }
