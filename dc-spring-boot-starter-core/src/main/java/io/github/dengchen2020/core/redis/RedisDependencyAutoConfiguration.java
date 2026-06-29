@@ -53,7 +53,7 @@ public final class RedisDependencyAutoConfiguration {
     @Bean
     RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        var taskExecutor = new SimpleAsyncTaskExecutor("redisMessageListenerContainer");
+        var taskExecutor = new SimpleAsyncTaskExecutor("redisMessageListenerContainer-");
         taskExecutor.setVirtualThreads(true);
         container.setTaskExecutor(taskExecutor);
         container.setConnectionFactory(redisConnectionFactory);
