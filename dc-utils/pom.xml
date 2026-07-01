@@ -132,17 +132,6 @@
       </dependency>
 
       <dependency>
-          <groupId>io.github.openfeign.querydsl</groupId>
-          <artifactId>querydsl-core</artifactId>
-          <optional>true</optional>
-      </dependency>
-      <dependency>
-          <groupId>org.hibernate.orm</groupId>
-          <artifactId>hibernate-spatial</artifactId>
-          <optional>true</optional>
-      </dependency>
-
-      <dependency>
           <groupId>software.amazon.awssdk</groupId>
           <artifactId>s3</artifactId>
           <optional>true</optional>
