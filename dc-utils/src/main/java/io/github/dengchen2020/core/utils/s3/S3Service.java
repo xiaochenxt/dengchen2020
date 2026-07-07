@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
- * S3存储服务
+ * <a href="https://docs.amazonaws.cn/en_us/AmazonS3/latest/API/API_GetObject.html">S3存储服务</a>
  * @author xiaochen
  * @since 2025/12/1
  */
@@ -76,7 +76,86 @@ public class S3Service implements AutoCloseable {
         this.s3Presigner = s3PresignerBuilder.build();
     }
 
+    /**
+     * 创建存储桶
+     * @param bucketName 存储桶名称
+     * @return {@link CreateBucketResponse}
+     */
+    public CreateBucketResponse createBucket(String bucketName) {
+        return createBucket(bucketName, null);
+    }
 
+    /**
+     * 创建存储桶
+     * @param bucketName 存储桶名称
+     * @return {@link CreateBucketResponse}
+     */
+    public CreateBucketResponse createBucket(String bucketName,@Nullable UnaryOperator<CreateBucketRequest.Builder> requestCustomizer) {
+        var builder = CreateBucketRequest.builder().bucket(bucketName);
+        CreateBucketRequest createBucketRequest;
+        if (requestCustomizer != null) {
+            createBucketRequest = requestCustomizer.apply(builder).build();
+        } else {
+            createBucketRequest = builder.build();
+        }
+        return s3Client.createBucket(createBucketRequest);
+    }
+
+    /**
+     * 删除存储桶
+     * @param bucketName 存储桶名称
+     * @return {@link DeleteBucketResponse}
+     */
+    public DeleteBucketResponse deleteBucket(String bucketName) {
+        return s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucketName).build());
+    }
+
+    /**
+     * 获取存储桶位置
+     * @param bucketName 存储桶名称
+     * @return {@link GetBucketLocationResponse}
+     */
+    public HeadBucketResponse headBucket(String bucketName) {
+        return s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
+    }
+
+    /**
+     * 设置存储桶策略 </br>
+     * policy示例：<pre>
+     {
+        "Version":"2012-10-17",
+        "Statement":[
+            {
+                "Sid":"PublicReadAccess",
+                "Action":["s3:GetObject"],
+                "Effect":"Allow",
+                "Resource":["arn:aws:s3:::${bucketName}/*"],
+                "Principal":"*"
+            }
+        ]
+     }
+     * </pre>
+     * @param bucketName 存储桶名称
+     * @param policy 策略
+     * @return {@link PutBucketPolicyResponse}
+     */
+    public PutBucketPolicyResponse putBucketPolicy(String bucketName, String policy) {
+        return s3Client.putBucketPolicy(PutBucketPolicyRequest.builder()
+                .bucket(bucketName)
+                .policy(policy)
+                .build());
+    }
+
+    /**
+     * 获取存储桶策略
+     * @param bucketName 存储桶名称
+     * @return {@link GetBucketPolicyResponse}
+     */
+    public GetBucketPolicyResponse getBucketPolicy(String bucketName) {
+        return s3Client.getBucketPolicy(GetBucketPolicyRequest.builder()
+                .bucket(bucketName)
+                .build());
+    }
 
     /**
      * 设置跨域 </br>
@@ -97,9 +176,9 @@ public class S3Service implements AutoCloseable {
      * </pre>
      *
      * @param bucketName 存储桶名称
-     * @return
+     * @return {@link PutBucketCorsResponse}
      */
-    public PutBucketCorsResponse applyCors(String bucketName, CORSRule... corsRules) {
+    public PutBucketCorsResponse putBucketCors(String bucketName, CORSRule... corsRules) {
         return s3Client.putBucketCors(PutBucketCorsRequest.builder()
                 .bucket(bucketName)
                 .corsConfiguration(CORSConfiguration.builder()
@@ -112,18 +191,58 @@ public class S3Service implements AutoCloseable {
      * 查询跨域配置 </br>
      *
      * @param bucketName 存储桶名称
-     * @return
+     * @return {@link GetBucketCorsResponse}
      */
-    public GetBucketCorsResponse getCors(String bucketName) {
+    public GetBucketCorsResponse getBucketCors(String bucketName) {
         return s3Client.getBucketCors(GetBucketCorsRequest.builder()
                 .bucket(bucketName)
                 .build());
     }
 
     /**
+     * 列出所有存储桶
+     * @return {@link ListBucketsResponse}
+     */
+    public ListBucketsResponse listBuckets() {
+        return s3Client.listBuckets();
+    }
+
+    /**
+     * 列出所有存储桶
+     * @param requestCustomizer 请求定制配置
+     * @return {@link ListBucketsResponse}
+     */
+    public ListBucketsResponse listBuckets(@Nullable UnaryOperator<ListBucketsRequest.Builder> requestCustomizer) {
+        var builder = ListBucketsRequest.builder();
+        if (requestCustomizer != null) requestCustomizer.apply(builder);
+        return s3Client.listBuckets(builder.build());
+    }
+
+    /**
+     * 列出存储桶中的对象
+     * @param bucketName 存储桶名称
+     * @return {@link ListObjectsV2Response}
+     */
+    public ListObjectsV2Response listObjects(String bucketName) {
+        return s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build());
+    }
+
+    /**
+     * 列出存储桶中的对象
+     * @param bucketName 存储桶名称
+     * @param requestCustomizer 请求定制配置
+     * @return {@link ListObjectsV2Response}
+     */
+    public ListObjectsV2Response listObjects(String bucketName, @Nullable UnaryOperator<ListObjectsV2Request.Builder> requestCustomizer) {
+        var builder = ListObjectsV2Request.builder().bucket(bucketName);
+        if (requestCustomizer != null) requestCustomizer.apply(builder);
+        return s3Client.listObjectsV2(builder.build());
+    }
+
+    /**
      * 上传文件
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param file 文件
      * @return 上传后的文件url
      */
@@ -134,7 +253,7 @@ public class S3Service implements AutoCloseable {
     /**
      * 上传文件
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param inputStream 文件流
      * @param contentLength 文件长度
      * @param contentType 文件类型
@@ -147,7 +266,7 @@ public class S3Service implements AutoCloseable {
     /**
      * 上传文件
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param inputStream 文件流
      * @param contentLength 文件长度
      * @param contentType 文件类型
@@ -161,7 +280,7 @@ public class S3Service implements AutoCloseable {
     /**
      * 上传文件
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param contentType 文件类型
      * @param requestBody 请求体
      * @param requestCustomizer 请求定制配置
@@ -238,7 +357,7 @@ public class S3Service implements AutoCloseable {
     /**
      * 生成预签名上传url
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param duration 签名有效期
      * @return 预签名上传链接
      */
@@ -249,7 +368,7 @@ public class S3Service implements AutoCloseable {
     /**
      * 生成预签名上传url
      * @param bucketName 存储桶名称
-     * @param key 文件名
+     * @param key 文件名（严禁带有?参数，可能导致无权限，一定要的话，可在获得链接后拼接）
      * @param duration 签名有效期
      * @param requestCustomizer 请求定制配置
      * @return 预签名上传链接
@@ -312,7 +431,7 @@ public class S3Service implements AutoCloseable {
      *
      * @param bucketName 存储桶名称
      * @param key        文件名
-     * @return
+     * @return {@link DeleteObjectResponse}
      */
     public DeleteObjectResponse deleteFile(String bucketName, String key) {
         return deleteFile(bucketName, key, null);
@@ -324,7 +443,7 @@ public class S3Service implements AutoCloseable {
      * @param bucketName        存储桶名称
      * @param key               文件名
      * @param requestCustomizer 删除请求定制配置
-     * @return
+     * @return {@link DeleteObjectResponse}
      */
     public DeleteObjectResponse deleteFile(String bucketName, String key, @Nullable UnaryOperator<DeleteObjectRequest.Builder> requestCustomizer) {
         var deleteObjectRequestBuilder = DeleteObjectRequest.builder()
