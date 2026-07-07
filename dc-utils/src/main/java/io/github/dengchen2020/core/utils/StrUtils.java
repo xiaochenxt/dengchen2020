@@ -181,4 +181,15 @@ public abstract class StrUtils {
     public static boolean hasText(@Nullable String str) {
         return (str != null && !str.isBlank());
     }
+
+    /**
+     * 去除url后面的参数
+     * @param url url
+     * @return 去除参数后的url
+     */
+    public static String removeUrlParams(String url) {
+        var index = url.indexOf('?');
+        return index > -1 ? url.substring(0, index) : url;
+    }
+
 }
