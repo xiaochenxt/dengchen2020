@@ -22,11 +22,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class RedisSimpleTokenService extends AbstractStateTokenService {
 
+    private final String tokenKeyPrefix;
+
     public RedisSimpleTokenService(long expireSeconds, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         super(expireSeconds, autorenewal, autorenewalSeconds, tokenName);
-        this.tokenPrefix = StringUtils.hasText(device)
+        this.tokenKeyPrefix = StringUtils.hasText(device)
                 ? TOKEN_COMMON_PREFIX + "simp:" + device + ":"
                 : TOKEN_COMMON_PREFIX + "simp:";
+    }
+
+    @Override
+    protected String tokenKeyPrefix() {
+        return tokenKeyPrefix;
     }
 
     @Override
