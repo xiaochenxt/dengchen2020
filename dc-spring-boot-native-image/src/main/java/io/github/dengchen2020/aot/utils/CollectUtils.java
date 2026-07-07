@@ -1,8 +1,8 @@
 package io.github.dengchen2020.aot.utils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -190,6 +190,10 @@ public class CollectUtils {
         return findClassNames(packageName, name -> true);
     }
 
+    private boolean isUnderPath(String entryName, String path) {
+        return path.isEmpty() || entryName.startsWith(path + "/");
+    }
+
     /**
      * 查找指定包下的类
      * @param packageName
@@ -219,7 +223,7 @@ public class CollectUtils {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
                         String entryName = entry.getName();
-                        if (entryName.endsWith(".class") && !entry.isDirectory()) {
+                        if (entryName.endsWith(".class") && !entry.isDirectory() && isUnderPath(entryName, path)) {
                             String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);
                             if (filter.test(className)) classNames.add(className);
                         }
@@ -283,7 +287,7 @@ public class CollectUtils {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
                         String entryName = entry.getName();
-                        if (!entryName.endsWith(".class") && !entry.isDirectory()) {
+                        if (!entryName.endsWith(".class") && !entry.isDirectory() && isUnderPath(entryName, path)) {
                             if (filter.test(entryName)) resources.add(entryName);
                         }
                     }
@@ -345,8 +349,9 @@ public class CollectUtils {
         for (String resource : findResources()) {
             if (resource.endsWith("native-image.properties")) {
                 String content;
-                try (BufferedInputStream inputStream = (BufferedInputStream) classLoader.getResource(resource).getContent()) {
-                    content = new String(inputStream.readAllBytes());
+                try (InputStream inputStream = classLoader.getResourceAsStream(resource)) {
+                    if (inputStream == null) continue;
+                    content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 }
                 String className = parseHClassValue(content);
                 if (className != null) {
