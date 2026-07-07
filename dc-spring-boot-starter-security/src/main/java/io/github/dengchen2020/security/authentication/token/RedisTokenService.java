@@ -21,14 +21,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class RedisTokenService extends AbstractStateTokenService {
 
+    private final String tokenKeyPrefix;
     private final int maxOnlineNum;
 
     public RedisTokenService(long expireSeconds, int maxOnlineNum, String device, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         super(expireSeconds, autorenewal, autorenewalSeconds, tokenName);
         this.maxOnlineNum = Math.max(maxOnlineNum, 1);
-        this.tokenPrefix = StringUtils.hasText(device)
+        this.tokenKeyPrefix = StringUtils.hasText(device)
                 ? TOKEN_COMMON_PREFIX + device + ":"
                 : TOKEN_COMMON_PREFIX;
+    }
+
+    @Override
+    protected String tokenKeyPrefix() {
+        return tokenKeyPrefix;
     }
 
     @Override

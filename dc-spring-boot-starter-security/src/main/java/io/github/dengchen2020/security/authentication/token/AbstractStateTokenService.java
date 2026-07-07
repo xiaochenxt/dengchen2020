@@ -4,8 +4,6 @@ import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.StrUtils;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,10 +17,8 @@ import java.util.List;
  */
 abstract class AbstractStateTokenService implements TokenService, InitializingBean {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-
-    String TOKEN_COMMON_PREFIX = "dc:security:token:";
-    String TOKEN_INFO_KEY = "dc:security:token:info:";
+    static final String TOKEN_COMMON_PREFIX = "dc:security:token:";
+    static final String TOKEN_INFO_KEY = "dc:security:token:info:";
 
     protected AuthenticationConvert authenticationConvert;
     protected StringRedisTemplate stringRedisTemplate;
@@ -47,8 +43,6 @@ abstract class AbstractStateTokenService implements TokenService, InitializingBe
     protected final boolean autorenewal;
     protected final long autorenewalSeconds;
     protected final String tokenName;
-    protected String tokenPrefix;
-    protected String tokenInfoPrefix = TOKEN_INFO_KEY;
 
     public AbstractStateTokenService(long expireSeconds, boolean autorenewal, long autorenewalSeconds, String tokenName) {
         this.expireSeconds = expireSeconds;
@@ -74,12 +68,12 @@ abstract class AbstractStateTokenService implements TokenService, InitializingBe
         return decodeUserId(token.substring(32));
     }
 
-    protected String encodeUserId(String token) {
-        return Base64Utils.encodeUrlToString(token);
+    protected String encodeUserId(String userId) {
+        return Base64Utils.encodeUrlToString(userId);
     }
 
-    protected String decodeUserId(String token) {
-        return Base64Utils.decodeToString(token);
+    protected String decodeUserId(String userId) {
+        return Base64Utils.decodeToString(userId);
     }
 
     protected TokenInfo generateTokenInfo(String token, long expiresIn) {
@@ -88,12 +82,14 @@ abstract class AbstractStateTokenService implements TokenService, InitializingBe
 
     // ======== Redis Key 辅助方法 ========
 
+    protected abstract String tokenKeyPrefix();
+
     protected String tokenKey(String userId) {
-        return tokenPrefix + "{" + userId + "}";
+        return tokenKeyPrefix() + "{" + userId + "}";
     }
 
     protected String infoKey(String userId) {
-        return tokenInfoPrefix + "{" + userId + "}";
+        return TOKEN_INFO_KEY + "{" + userId + "}";
     }
 
     protected List<String> keys(String userId) {

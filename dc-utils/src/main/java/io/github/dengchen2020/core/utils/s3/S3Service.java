@@ -387,7 +387,8 @@ public class S3Service implements AutoCloseable {
                 .signatureDuration(duration)
                 .putObjectRequest(putObjectRequest)
                 .build();
-        return new S3PresignedUploadUrlInfo(apiEndpointCname + "/"+bucketName+"/" + key, s3Presigner.presignPutObject(presignRequest).url().toString());
+        var request = s3Presigner.presignPutObject(presignRequest);
+        return new S3PresignedUploadUrlInfo(apiEndpointCname + "/"+bucketName+"/" + key, request.url().toString());
     }
 
     /**
@@ -423,7 +424,8 @@ public class S3Service implements AutoCloseable {
                 .signatureDuration(duration)
                 .getObjectRequest(getObjectRequest)
                 .build();
-        return s3Presigner.presignGetObject(presignRequest).url().toString();
+        var request = s3Presigner.presignGetObject(presignRequest);
+        return request.url().toString();
     }
 
     /**
