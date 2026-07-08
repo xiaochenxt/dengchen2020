@@ -41,11 +41,11 @@ public abstract class JsUtils {
         // 配置GraalJS引擎
         return GraalJSScriptEngine.create(null, Context.newBuilder("js")
                 .allowHostAccess(HostAccess.newBuilder() //配置java主机访问策略
-                        .allowAccessAnnotatedBy(HostAccess.Export.class) // 使用@HostAccess.Export导出可访问的构造函数、字段、方法
-                        .methodScoping(true) //方法作用域隔离
-                        .allowArrayAccess(true) // 允许对Java Array的访问，推荐开启
-                        .allowListAccess(true) // 允许对Java List、Iterable、Iterator的访问，推荐开启
-                        .allowMapAccess(true) // 允许对Java Map的访问，推荐开启
+                .allowAccessAnnotatedBy(HostAccess.Export.class) // 使用@HostAccess.Export导出可访问的构造函数、字段、方法
+                .methodScoping(true) //方法作用域隔离
+                .allowArrayAccess(true) // 允许对Java Array的访问，推荐开启
+                .allowListAccess(true) // 允许对Java List、Iterable、Iterator的访问，推荐开启
+                .allowMapAccess(true) // 允许对Java Map的访问，推荐开启
                         .build()));
     });
 
@@ -97,8 +97,9 @@ public abstract class JsUtils {
      * 清除当前线程的引擎实例
      */
     public static void clear() {
-        engineLocal.get().close();
+        GraalJSScriptEngine engine = engineLocal.get();
         engineLocal.remove();
+        if (engine != null) engine.close();
     }
 
 }
