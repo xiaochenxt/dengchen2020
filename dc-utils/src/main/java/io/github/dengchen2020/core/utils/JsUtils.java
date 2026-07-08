@@ -97,8 +97,9 @@ public abstract class JsUtils {
      * 清除当前线程的引擎实例
      */
     public static void clear() {
-        engineLocal.get().close();
+        GraalJSScriptEngine engine = engineLocal.get();
         engineLocal.remove();
+        if (engine != null) engine.close();
     }
 
 }
