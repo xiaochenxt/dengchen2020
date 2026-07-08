@@ -82,7 +82,9 @@ abstract class AbstractStateTokenService implements TokenService, InitializingBe
 
     // ======== Redis Key 辅助方法 ========
 
-    protected abstract String tokenKeyPrefix();
+    protected String tokenKeyPrefix() {
+        return TOKEN_COMMON_PREFIX;
+    }
 
     protected String tokenKey(String userId) {
         return tokenKeyPrefix() + "{" + userId + "}";
