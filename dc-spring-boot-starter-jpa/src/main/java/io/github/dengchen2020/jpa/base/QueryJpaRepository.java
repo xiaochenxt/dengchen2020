@@ -2,11 +2,13 @@ package io.github.dengchen2020.jpa.base;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -38,7 +40,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
     Optional<T> findByIdForUpdate(ID id);
 
     /**
-     * 与{@link #selectByIdForUpdate(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常
+     * 与{@link #selectByIdForUpdate(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常{@link PessimisticLockingFailureException}
      *
      * @param id id
      * @return T
@@ -47,7 +49,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
     T selectByIdForUpdateNowait(ID id);
 
     /**
-     * 与{@link #findByIdForUpdate(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常
+     * 与{@link #findByIdForUpdate(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常{@link PessimisticLockingFailureException}
      *
      * @param id id
      * @return {@link Optional<T>}
@@ -89,7 +91,7 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
     Optional<T> findByIdForShare(ID id);
 
     /**
-     * 与{@link #selectByIdForShare(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常
+     * 与{@link #selectByIdForShare(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常{@link PessimisticLockingFailureException}
      * @param id id
      * @return T
      */
@@ -97,10 +99,26 @@ public interface QueryJpaRepository<T, ID> extends JpaRepository<T, ID> {
     T selectByIdForShareNowait(ID id);
 
     /**
-     * 与{@link #findByIdForShare(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常
+     * 与{@link #findByIdForShare(Object)}不同的是，该方法不阻塞等待获取锁，而是获取锁失败时抛出异常{@link PessimisticLockingFailureException}
      * @param id id
      * @return {@link Optional<T>}
      */
     Optional<T> findByIdForShareNowait(ID id);
+
+    /**
+     * 根据id集合查询并给这批数据加悲观锁，等同{@link #selectByIdForUpdate}的批量模式，但会跳过已被加锁的数据。</br>
+     * 可用于跳过其他事务正在独占处理的数据
+     * @param ids id集合
+     * @return List<T>
+     */
+    List<T> selectInIdsForUpdateSkipLocked(Iterable<ID> ids);
+
+    /**
+     * 根据id集合查询并给这批数据加悲观锁，等同{@link #selectByIdForUpdate}的批量模式，但会跳过已被加锁的数据。</br>
+     * 可用于跳过其他事务正在独占处理的数据
+     * @param ids id集合
+     * @return List<T>
+     */
+    List<T> selectInIdsForUpdateSkipLocked(ID... ids);
 
 }

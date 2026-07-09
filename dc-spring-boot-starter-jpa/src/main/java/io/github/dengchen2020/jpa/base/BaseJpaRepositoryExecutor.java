@@ -4,6 +4,8 @@ import io.github.dengchen2020.core.utils.IterableUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
+import org.hibernate.LockMode;
+import org.hibernate.Timeouts;
 import org.hibernate.jpa.AvailableHints;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -35,11 +37,14 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     private final JpaEntityInformation<T, ?> entityInformation;
     private final PersistenceProvider provider;
 
+    private final String selectInIdsForUpdateSkipLockedQueryString;
+
     public BaseJpaRepositoryExecutor(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
         this.entityManager = em;
         this.entityInformation = entityInformation;
         this.provider = PersistenceProvider.fromEntityManager(em);
+        selectInIdsForUpdateSkipLockedQueryString = "select e from " + entityInformation.getEntityName() + " e where id(e) in ?1";
     }
 
     private Map<String, Object> getHints() {
@@ -97,7 +102,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public @Nullable T selectByIdForUpdateNowait(ID id) {
         var hints = getHints();
-        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, 0);
+        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, Timeouts.NO_WAIT_MILLI);
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE, hints);
     }
 
@@ -133,7 +138,7 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public @Nullable T selectByIdForShareNowait(ID id) {
         var hints = getHints();
-        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, 0);
+        hints.put(AvailableHints.HINT_SPEC_LOCK_TIMEOUT, Timeouts.NO_WAIT_MILLI);
         return entityManager.find(getDomainClass(), id, LockModeType.PESSIMISTIC_READ, hints);
     }
 
@@ -141,6 +146,20 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public Optional<T> findByIdForShareNowait(ID id) {
         return Optional.ofNullable(selectByIdForShareNowait(id));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<T> selectInIdsForUpdateSkipLocked(Iterable<ID> ids) {
+        return entityManager.createQuery(selectInIdsForUpdateSkipLockedQueryString, getDomainClass())
+                .setHint(AvailableHints.HINT_NATIVE_LOCK_MODE, LockMode.UPGRADE_SKIPLOCKED)
+                .setParameter(1, ids).getResultList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<T> selectInIdsForUpdateSkipLocked(ID... ids) {
+        return selectInIdsForUpdateSkipLocked(List.of(ids));
     }
 
     @Override
