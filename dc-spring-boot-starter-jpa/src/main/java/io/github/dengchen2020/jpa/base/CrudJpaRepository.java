@@ -1,7 +1,6 @@
 package io.github.dengchen2020.jpa.base;
 
 import jakarta.persistence.Version;
-import jakarta.transaction.Transactional;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
