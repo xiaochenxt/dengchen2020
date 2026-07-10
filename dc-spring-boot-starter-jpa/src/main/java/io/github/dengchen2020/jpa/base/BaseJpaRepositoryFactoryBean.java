@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.query.EscapeCharacter;
 import org.springframework.data.jpa.repository.query.JpaQueryMethodFactory;
 import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
+import org.springframework.data.jpa.repository.support.JpaRepositoryConfigurationAware;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.querydsl.EntityPathResolver;
@@ -82,10 +83,7 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             var entityInformation = getEntityInformation(metadata.getDomainType());
             var fragments = RepositoryComposition.RepositoryFragments.empty();
             if (QueryJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || EntityManagerRepository.class.isAssignableFrom(metadata.getRepositoryInterface())) {
-                var baseJpaRepositoryExecutor = new BaseJpaRepositoryExecutor<>(entityInformation, entityManager);
-                baseJpaRepositoryExecutor.setRepositoryMethodMetadata(crudMethodMetadata);
-                baseJpaRepositoryExecutor.setProjectionFactory(getProjectionFactory());
-                fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(baseJpaRepositoryExecutor));
+                fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(new BaseJpaRepositoryExecutor<>(entityInformation, entityManager)));
             }
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
                     && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
@@ -98,6 +96,12 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
                 if (fragment != null)
                     fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(fragment));
             }
+            fragments.forEach(repositoryFragment -> repositoryFragment.getImplementation().filter(JpaRepositoryConfigurationAware.class::isInstance)
+                    .ifPresent(it -> {
+                        JpaRepositoryConfigurationAware jpaRepositoryConfigurationAware = (JpaRepositoryConfigurationAware) it;
+                        jpaRepositoryConfigurationAware.setRepositoryMethodMetadata(crudMethodMetadata);
+                        jpaRepositoryConfigurationAware.setProjectionFactory(getProjectionFactory());
+                    }));
             return fragments.append(super.getRepositoryFragments(metadata, entityManager, resolver, crudMethodMetadata));
         }
     }
