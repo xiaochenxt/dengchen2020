@@ -82,7 +82,10 @@ public class BaseJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> ex
             var entityInformation = getEntityInformation(metadata.getDomainType());
             var fragments = RepositoryComposition.RepositoryFragments.empty();
             if (QueryJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()) || EntityManagerRepository.class.isAssignableFrom(metadata.getRepositoryInterface())) {
-                fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(new BaseJpaRepositoryExecutor<>(entityInformation, entityManager)));
+                var baseJpaRepositoryExecutor = new BaseJpaRepositoryExecutor<>(entityInformation, entityManager);
+                baseJpaRepositoryExecutor.setRepositoryMethodMetadata(crudMethodMetadata);
+                baseJpaRepositoryExecutor.setProjectionFactory(getProjectionFactory());
+                fragments = fragments.append(RepositoryComposition.RepositoryFragments.just(baseJpaRepositoryExecutor));
             }
             boolean isQueryDslRepository = QUERY_DSL_PRESENT
                     && (QuerydslJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface()));
