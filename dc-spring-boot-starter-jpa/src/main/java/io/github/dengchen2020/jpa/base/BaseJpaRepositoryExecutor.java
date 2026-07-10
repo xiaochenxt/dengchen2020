@@ -151,9 +151,11 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Transactional(readOnly = true)
     @Override
     public List<T> selectInIdsForUpdateSkipLocked(Iterable<ID> ids) {
-        return entityManager.createQuery(selectInIdsForUpdateSkipLockedQueryString, getDomainClass())
-                .setHint(AvailableHints.HINT_NATIVE_LOCK_MODE, LockMode.UPGRADE_SKIPLOCKED)
-                .setParameter(1, ids).getResultList();
+        var query = entityManager.createQuery(selectInIdsForUpdateSkipLockedQueryString, getDomainClass());
+        var hints = getHints();
+        hints.forEach(query::setHint);
+        return query.setParameter(1, ids)
+                .setHint(AvailableHints.HINT_NATIVE_LOCK_MODE, LockMode.UPGRADE_SKIPLOCKED).getResultList();
     }
 
     @Transactional(readOnly = true)
