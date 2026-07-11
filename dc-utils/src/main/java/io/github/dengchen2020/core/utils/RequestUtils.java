@@ -19,7 +19,7 @@ import static io.github.dengchen2020.core.utils.IPUtils.UNKNOWN;
  * @author xiaochen
  * @since 2023/8/22
  */
-public abstract class RequestUtils extends RequestContextHolder {
+public abstract class RequestUtils {
 
     private static final Logger log = LoggerFactory.getLogger(RequestUtils.class);
 
@@ -33,7 +33,7 @@ public abstract class RequestUtils extends RequestContextHolder {
      * 获取当前请求上下文属性
      */
     public static @NonNull ServletRequestAttributes getRequiredRequestAttributes() {
-        RequestAttributes requestAttributes = getRequestAttributes();
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes == null) throw new IllegalStateException("获取当前线程绑定的请求上下文属性失败");
         return (ServletRequestAttributes) requestAttributes;
     }
