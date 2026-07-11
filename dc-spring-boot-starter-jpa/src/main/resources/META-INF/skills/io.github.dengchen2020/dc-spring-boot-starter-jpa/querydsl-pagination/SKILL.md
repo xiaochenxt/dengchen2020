@@ -89,8 +89,7 @@ default SimplePage<OrderDTO> list(OrderQueryParam param, OrderSpecifier<?>... o)
             q_order.createTime,
             q_user.name.as("userName"),
             q_user.phone.as("userPhone")
-    )).from(q_order)
-      .leftJoin(q_user).on(q_order.userId.eq(q_user.id))
+    )).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
       .where(builder);
 
     return fetchPage(query, param, o);
