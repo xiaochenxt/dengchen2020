@@ -66,6 +66,35 @@ public class NotifyWebSocketHandler extends ClusterDcWebSocketHandler {
 }
 ```
 
+**跨服务消息推送**（`WebSocketTemplate`）— 在任意服务中向其他服务的 WebSocket 客户端推送消息：
+
+```java
+@Resource
+private RedisMessagePublisher redisMessagePublisher;
+
+// 实例化 WebSocketTemplate，指向目标服务的映射路径
+WebSocketTemplate appWebSocket = new WebSocketTemplate(
+        "/ws/app/notify",          // App 服务的 WebSocket 路径
+        redisMessagePublisher
+);
+WebSocketTemplate merchantWebSocket = new WebSocketTemplate(
+        "/ws/merchant/notify",      // 商家端服务的 WebSocket 路径
+        redisMessagePublisher
+);
+
+// 管理后台向 App 端用户推送消息
+appWebSocket.send(userId, "您的订单已发货");
+appWebSocket.send(new String[]{"user1", "user2"}, "通知");
+appWebSocket.send(tenantId, "租户公告");
+appWebSocket.sendToAll("全体通知");
+appWebSocket.close(userId, CloseStatus.POLICY_VIOLATION);
+
+// 向商家端推送新订单提醒
+merchantWebSocket.send(merchantId, "您有新订单");
+```
+
+> `WebSocketTemplate` 可独立于 WebSocket 处理器使用，通过 Redis 广播 → 目标服务的 `ClusterDcWebSocketHandler` 接收 → 推送 WebSocket 消息给客户端。
+
 WebSocket 客户端工具：
 
 ```java
