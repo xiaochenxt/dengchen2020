@@ -78,8 +78,7 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long> {
         var query = select(Projections.bean(OrderDTO.class, q_order,
                 q_user.name.as("userName"),
                 q_user.phone.as("userPhone")
-        )).from(q_order)
-          .leftJoin(q_user).on(q_order.userId.eq(q_user.id))
+        )).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
           .where(builder);
 
         return fetchPage(query, Page.of(1,10), q_order.id.desc());
