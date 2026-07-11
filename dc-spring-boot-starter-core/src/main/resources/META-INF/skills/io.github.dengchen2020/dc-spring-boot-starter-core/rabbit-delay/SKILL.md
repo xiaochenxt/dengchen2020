@@ -31,8 +31,8 @@ description: RabbitMQ延迟消息，基于x-delayed-message插件实现，提供
 @Resource
 private RabbitDelayTemplate rabbitDelayTemplate;
 
-// 延迟 30 分钟
-rabbitDelayTemplate.send("routingKey", orderId, Duration.ofMinutes(30));
+// 延迟 10 分钟
+rabbitDelayTemplate.send(RK_ORDER_TIMEOUT, orderId, Duration.ofMinutes(10));
 ```
 
 ### 消费延迟消息
@@ -48,8 +48,7 @@ public static final String RK_ORDER_TIMEOUT = "order.timeout";
                 value = RabbitConstant.DELAY_EXCHANGE,
                 delayed = Exchange.TRUE)))
 public void consumer(String orderId, Message message, Channel channel) {
-    if (!StringUtils.hasText(orderId)) return;
-    orderService.timeoutClose(Long.parseLong(orderId));
+    orderService.timeoutClose(orderId);
 }
 ```
 
