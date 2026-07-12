@@ -49,7 +49,7 @@ public class WebSocketClientUtils {
 
     static {
         ClassLoader classLoader = WebSocketClientUtils.class.getClassLoader();
-        jakartaWebSocketClientContainerProviderPresent = ClassUtils.isPresent("org.eclipse.jetty.ee10.websocket.jakarta.client.JakartaWebSocketClientContainerProvider", classLoader);
+        jakartaWebSocketClientContainerProviderPresent = ClassUtils.isPresent("org.eclipse.jetty.ee11.websocket.jakarta.client.JakartaWebSocketClientContainerProvider", classLoader);
         wsWebSocketContainerPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.WsWebSocketContainer", classLoader);
         // jetty默认配置会导致websocket连接变多后线程数暴涨，tomcat和undertow不会
         if (jakartaWebSocketClientContainerProviderPresent) {
