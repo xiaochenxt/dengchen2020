@@ -34,7 +34,7 @@ public void nightlyTask() {
     // 业务逻辑
 }
 
-@Scheduled(cron = "0 0/5 * * * ?", concurrency = true) // 允许多台同时执行
+@DcScheduled(cron = "0 0/5 * * * ?", concurrency = true) // 允许多台同时执行
 @DcScheduled(cron = "0 0 2 * * ?", seconds = 60)         // 60秒内只有其中一台服务器拥有独占执行权
 ```
 

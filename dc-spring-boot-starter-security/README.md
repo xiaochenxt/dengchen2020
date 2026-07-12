@@ -19,7 +19,7 @@ dc.security.jwt.refresh-expire-in=7d    # 刷新Token有效期
 private JwtTokenService tokenService;
 
 // 创建Token
-Authentication authentication = new Authentication("userId");
+Authentication authentication = Authentication.create("userId");
 TokenInfo tokenInfo = tokenService.createToken(authentication);
 // 返回给前端
 String token = tokenInfo.token();            // Token值

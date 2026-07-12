@@ -49,13 +49,12 @@ feiShuClient.send(new FeiShuClient.TextMessage("你好，世界").addAtAll());
 ### 富文本消息
 
 ```java
-feiShuClient.send(FeiShuClient.PostMessage.builder()
-        .zhTitle("中文标题")
-        .addText("普通文本", true)                          // unescape=true 不转义
-        .addA("链接文字", "https://example.com")            // 超链接
-        .addAt("user_id_1")                                // @指定人
-        .addAtAll()                                        // @所有人
-        .build());
+var zhCn = new FeiShuClient.PostMessage.Post.Zh_cn("中文标题");
+zhCn.addText("普通文本", true);                       // unescape=true 不转义
+zhCn.addA("链接文字", "https://example.com");          // 超链接
+zhCn.addAt("user_id_1");                              // @指定人
+zhCn.addAtAll();                                      // @所有人
+feiShuClient.send(new FeiShuClient.PostMessage(new FeiShuClient.PostMessage.Post(zhCn)));
 ```
 
 ### 指定 Webhook 发送
@@ -80,7 +79,7 @@ HTTP POST → 飞书 Webhook 地址
 ```
 
 - 签名算法与钉钉一致：`HmacSHA256(timestamp + "\n" + secret)`，Base64 编码后追加到 URL
-- 富文本消息通过 `PostMessage.builder()` 链式构建，支持中英文双内容（`zh_cn` / `en_us`）
+- 富文本消息通过 `Zh_cn` 链式构建（`addText`/`addA`/`addAt`），支持中英文双内容（`zh_cn` / `en_us`）
 
 ## 模块结构
 

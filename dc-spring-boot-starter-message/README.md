@@ -40,12 +40,11 @@ feiShuClient.send(new FeiShuClient.TextMessage("你好，世界")
         .addAt("user_id_1")    // @指定人
         .addAtAll());          // @所有人
 // 富文本消息
-feiShuClient.send(FeiShuClient.PostMessage.builder()
-        .zhTitle("标题")
-        .addText("文本内容", true)
-        .addA("链接", "https://example.com")
-        .addAt("user_id_1")
-        .build());
+var zhCn = new FeiShuClient.PostMessage.Post.Zh_cn("标题");
+zhCn.addText("文本内容", true);
+zhCn.addA("链接", "https://example.com");
+zhCn.addAt("user_id_1");
+feiShuClient.send(new FeiShuClient.PostMessage(new FeiShuClient.PostMessage.Post(zhCn)));
 // 发送到指定 webhook
 feiShuClient.send(message, "https://open.feishu.cn/open-apis/bot/v2/hook/xxx");
 // 发送到指定 webhook + 签名
