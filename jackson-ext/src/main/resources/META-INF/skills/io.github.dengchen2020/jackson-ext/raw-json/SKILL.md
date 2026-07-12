@@ -81,7 +81,7 @@ public class User {
 `DcModule` 通过 **JDK SPI** 机制自动注册到 Jackson 的 `ObjectMapper`:
 
 ```
-META-INF/services/com.fasterxml.jackson.databind.Module
+META-INF/services/tools.jackson.databind.JacksonModule
 → io.github.dengchen2020.jackson.DcModule
 ```
 
@@ -116,7 +116,7 @@ jackson-ext/src/main/java/io/github/dengchen2020/jackson/
 
 jackson-ext/src/main/resources/META-INF/
 └── services/
-    └── com.fasterxml.jackson.databind.Module  // SPI 注册
+    └── tools.jackson.databind.JacksonModule  // SPI 注册
 ```
 
 ## 注意事项
