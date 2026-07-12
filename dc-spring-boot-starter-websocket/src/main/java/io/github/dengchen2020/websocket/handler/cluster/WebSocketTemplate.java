@@ -47,7 +47,7 @@ public class WebSocketTemplate {
      */
     public WebSocketTemplate getInstance(String mapping) {
         if (this.topic.equals(redisTopic(mapping))) return this;
-        return new WebSocketTemplate(topic, redisMessagePublisher);
+        return new WebSocketTemplate(mapping, redisMessagePublisher);
     }
 
     /**
