@@ -116,5 +116,5 @@ dc-spring-boot-starter-message/src/main/java/io/github/dengchen2020/message/
 
 1. 邮件发送依赖 `spring-boot-starter-mail`，需自行引入该依赖
 2. 默认收件人 `dc.message.email.to` 为可选配置，`sendText()`/`sendMime()` 不传收件人时使用默认收件人
-3. 附件通过 `DataSource` 接口传递，可使用 `FileSystemResource`、`ByteArrayResource` 等实现
+3. 附件通过 `DataSource` 接口传递，可使用 `FileDataSource`、`ByteArrayResource` 等实现
 4. 内联元素（`inlines`）一般不推荐使用，HTML 中通过 `src` 引用外部资源即可

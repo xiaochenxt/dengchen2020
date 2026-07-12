@@ -87,7 +87,7 @@ emailClient.sendMime("邮件主题", "<h1>标题</h1><p>内容</p>");
 // HTML邮件带附件
 emailClient.sendMime("邮件主题", "<h1>标题</h1>", new FileDataSource("/path/file.pdf"));
 // 指定收件人（覆盖配置的默认收件人）
-emailClient.sendMime("邮件主题", "<h1>标题</h1>", null, "user1@example.com", "user2@example.com");
+emailClient.sendMime("邮件主题", "<h1>标题</h1>", "user1@example.com", "user2@example.com");
 ```
 
 properties 配置：
