@@ -51,20 +51,6 @@ UserRecord record = BeanUtils.convertValue(user, UserRecord.class);
 UserRecord record = BeanUtils.convertValue(user, UserRecord.class, "password");
 ```
 
-### 自定义类型转换器
-
-```java
-BeanUtils.copyProperties(source, target, (value, targetType, context, fieldName) -> {
-    if (value instanceof String str && targetType == Integer.class) {
-        return Integer.parseInt(str);
-    }
-    if ("createTime".equals(fieldName) && value instanceof Long ts) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault());
-    }
-    return value;
-});
-```
-
 ## 实现原理
 
 ```
