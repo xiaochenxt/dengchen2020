@@ -81,7 +81,7 @@ appWebSocket.close(userId, CloseStatus.POLICY_VIOLATION);
 ### 通过 getInstance 切换映射路径
 
 ```java
-WebSocketHelper helper = new WebSocketTemplate("/ws/notify", redisMessagePublisher);
+WebSocketTemplate helper = new WebSocketTemplate("/ws/notify", redisMessagePublisher);
 
 // 切换到其他 WebSocket 映射路径
 WebSocketTemplate orderWs = helper.getInstance("/ws/order");
