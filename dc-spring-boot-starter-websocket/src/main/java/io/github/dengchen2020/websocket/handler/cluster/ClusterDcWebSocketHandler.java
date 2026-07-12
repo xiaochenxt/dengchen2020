@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
@@ -37,7 +37,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
 
     private WebSocketTemplate webSocketTemplate;
     private RedisMessageListenerContainer redisMessageListenerContainer;
-    private GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer;
+    private GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer;
 
     @Autowired
     public void setRedisMessagePublisher(RedisMessagePublisher redisMessagePublisher) {
@@ -50,17 +50,17 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     }
 
     @Autowired
-    public void setGenericJackson2JsonRedisSerializer(GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
-        this.genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializer;
+    public void setGenericJacksonJsonRedisSerializer(GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer) {
+        this.genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializer;
     }
 
     @Override
     public void afterPropertiesSet() {
         if (redisMessageListenerContainer == null) throw new IllegalArgumentException("redisMessageListenerContainer is null");
         if (webSocketTemplate == null) throw new IllegalArgumentException("webSocketHelper is null");
-        if (genericJackson2JsonRedisSerializer == null) throw new IllegalArgumentException("genericJackson2JsonRedisSerializer is null");
+        if (genericJacksonJsonRedisSerializer == null) throw new IllegalArgumentException("genericJacksonJsonRedisSerializer is null");
         MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(this);
-        messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer);
+        messageListenerAdapter.setSerializer(genericJacksonJsonRedisSerializer);
         messageListenerAdapter.afterPropertiesSet();
         redisMessageListenerContainer.addMessageListener(messageListenerAdapter, ChannelTopic.of(webSocketTemplate.topic()));
     }
