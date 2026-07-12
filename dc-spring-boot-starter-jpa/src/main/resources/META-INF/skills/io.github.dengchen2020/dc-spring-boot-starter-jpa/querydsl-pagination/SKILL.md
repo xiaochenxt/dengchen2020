@@ -119,7 +119,6 @@ BaseJpaRepositoryExecutor 实现类
 ```
 dc-spring-boot-starter-jpa/src/main/java/io/github/dengchen2020/jpa/
 ├── config/
-│   ├── EnableDcJpaRepositories.java     // 启用注解
 │   └── JpaAutoConfiguration.java         // 自动配置
 ├── base/
 │   ├── BaseJpaRepository.java            // 统一接口

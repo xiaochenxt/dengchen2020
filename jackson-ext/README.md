@@ -20,7 +20,7 @@ public ObjectMapper objectMapper() {
 }
 ```
 
-使用方式二：通过 JDK SPI 自动注册（引入依赖后 Jackson ObjectMapper 自动发现 `META-INF/services/com.fasterxml.jackson.databind.Module`）
+使用方式二：通过 JDK SPI 自动注册（引入依赖后 Jackson ObjectMapper 自动发现 `META-INF/services/tools.jackson.databind.JacksonModule`）
 
 实体类中使用：
 
