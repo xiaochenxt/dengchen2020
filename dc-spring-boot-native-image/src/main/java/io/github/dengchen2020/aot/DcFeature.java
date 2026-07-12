@@ -288,7 +288,7 @@ class DcFeature implements Feature {
     }
 
     private void jetty(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
-        Class<?> jettyWebSocket = featureUtils.loadClass("org.eclipse.jetty.ee10.websocket.jakarta.server.JakartaWebSocketServerContainer");
+        Class<?> jettyWebSocket = featureUtils.loadClass("org.eclipse.jetty.ee11.websocket.jakarta.server.JakartaWebSocketServerContainer");
         if (jettyWebSocket != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
                 try {
