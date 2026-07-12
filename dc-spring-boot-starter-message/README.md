@@ -66,9 +66,10 @@ weChatClient.send(new WeChatClient.MarkdownMessage("# 标题\n**加粗**"));
 // 图片消息
 weChatClient.send(new WeChatClient.ImageMessage(imageBytes));
 // 图文消息
-weChatClient.send(WeChatClient.NewsMessage.builder()
-        .addArticle("标题", "描述", "https://pic-url", "https://link-url")
-        .build());
+var news = new WeChatClient.NewsMessage("articles", "标题", "https://link-url");
+news.setDescription("描述");
+news.setPicurl("https://pic-url");
+weChatClient.send(news);
 ```
 
 邮件发送（EmailClient）：
@@ -84,7 +85,7 @@ emailClient.sendText("邮件主题", "邮件内容", "user@example.com");
 // HTML邮件
 emailClient.sendMime("邮件主题", "<h1>标题</h1><p>内容</p>");
 // HTML邮件带附件
-emailClient.sendMime("邮件主题", "<h1>标题</h1>", new FileSystemResource("/path/file.pdf"));
+emailClient.sendMime("邮件主题", "<h1>标题</h1>", new FileDataSource("/path/file.pdf"));
 // 指定收件人（覆盖配置的默认收件人）
 emailClient.sendMime("邮件主题", "<h1>标题</h1>", null, "user1@example.com", "user2@example.com");
 ```

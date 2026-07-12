@@ -74,12 +74,10 @@ ChineseCaptcha chinese = CaptchaUtils.chinese();
 
 ```java
 QRCodeGenerator qr = QRCodeGenerator.builder().size(300).build();
-BufferedImage image = qr.encode("https://example.com");
+qr.generate("https://example.com", outputStream);
 
 QRCodeGenerator qr2 = QRCodeGenerator.builder().size(300).logo(logoBytes).build();
-BufferedImage image2 = qr2.encode("https://example.com");
-
-String text = QRCodeGenerator.decode(image, null);
+qr2.generate("https://example.com", outputStream);
 ```
 
 CSV 读写（CsvReader / CsvWriter）：
