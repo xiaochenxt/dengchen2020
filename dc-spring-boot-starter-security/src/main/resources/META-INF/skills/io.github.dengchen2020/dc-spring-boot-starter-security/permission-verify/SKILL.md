@@ -45,7 +45,7 @@ public record Authentication(String userId, Set<String> permissions)
 ### 注解使用
 
 ```java
-// 方法级别：需要同时拥有 admin 和 order:read 权限
+// 方法级别：拥有 admin 或 order:read 其中任一权限即可（默认 OR 关系）
 @HasPermission({"admin", "order:read"})
 @GetMapping("/admin/orders")
 public Result listOrders() { ... }
@@ -109,4 +109,4 @@ dc-spring-boot-starter-security/src/main/java/io/github/dengchen2020/security/
 1. 权限校验依赖认证信息，需先配置 Token 认证（JWT 或 Redis 有状态）
 2. 认证信息 Record 必须实现 `PermissionsInfo` 接口并返回权限集合
 3. 通过 `dc.security.resource.permit-path` 配置的白名单路径会跳过权限校验拦截器
-4. `@HasPermission` 的 `value` 为数组时，表示 **同时拥有** 这些权限（AND 关系）
+4. `@HasPermission` 的 `value` 为数组时，默认实现表示 **拥有其中任意一个** 权限即可（OR 关系）

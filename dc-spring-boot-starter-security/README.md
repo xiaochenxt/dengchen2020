@@ -112,7 +112,7 @@ public record Authentication(String userId, Set<String> permissions)
 ```
 
 ```java
-@HasPermission({"admin", "order:read"})  // 方法级别，需要同时拥有这些权限
+@HasPermission({"admin", "order:read"})  // 方法级别，拥有其中任意一个权限即可
 @GetMapping("/admin/orders")
 public Result listOrders() { ... }
 ```
