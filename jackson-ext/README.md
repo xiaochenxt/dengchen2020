@@ -20,7 +20,7 @@ public ObjectMapper objectMapper() {
 }
 ```
 
-使用方式二：Spring Boot 自动注册（通过 `META-INF/spring` 或 `META-INF/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 自动配置）
+使用方式二：通过 JDK SPI 自动注册（引入依赖后 Jackson ObjectMapper 自动发现 `META-INF/services/com.fasterxml.jackson.databind.Module`）
 
 实体类中使用：
 

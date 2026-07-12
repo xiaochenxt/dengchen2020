@@ -63,9 +63,9 @@ emailClient.sendMime("邮件主题", "<h1>标题</h1><p>段落内容</p>");
 ### 发送带附件的邮件
 
 ```java
-import org.springframework.core.io.FileSystemResource;
+import jakarta.activation.FileDataSource;
 
-DataSource attachment = new FileSystemResource("/path/file.pdf");
+DataSource attachment = new FileDataSource("/path/file.pdf");
 emailClient.sendMime("邮件主题", "<h1>标题</h1>", attachment);
 ```
 
@@ -73,7 +73,7 @@ emailClient.sendMime("邮件主题", "<h1>标题</h1>", attachment);
 
 ```java
 emailClient.sendMime("邮件主题", "<h1>标题</h1>",
-    new DataSource[]{new FileSystemResource("/path/file.pdf")},
+    new DataSource[]{new FileDataSource("/path/file.pdf")},
     "user1@example.com", "user2@example.com");
 ```
 

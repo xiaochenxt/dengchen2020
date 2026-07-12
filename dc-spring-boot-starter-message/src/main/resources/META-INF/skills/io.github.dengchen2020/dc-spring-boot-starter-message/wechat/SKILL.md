@@ -67,9 +67,10 @@ weChatClient.send(new WeChatClient.ImageMessage(base64, md5));
 ### 图文消息
 
 ```java
-weChatClient.send(WeChatClient.NewsMessage.builder()
-        .addArticle("标题", "描述", "https://pic-url", "https://link-url")
-        .build());
+var news = new WeChatClient.NewsMessage("articles", "标题", "https://link-url");
+news.setDescription("描述");
+news.setPicurl("https://pic-url");
+weChatClient.send(news);
 ```
 
 ### 上传文件
