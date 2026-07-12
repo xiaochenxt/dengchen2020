@@ -24,13 +24,14 @@ UserRecord record = BeanUtils.convertValue(user, UserRecord.class);
 加密解密（AESUtils / RSAUtils）：
 
 ```java
-String key = AESUtils.generateKeyHex();
-String encrypted = AESUtils.encryptHex("你好世界", key);
-String decrypted = AESUtils.decryptHex(encrypted, key);
+String key = AESUtils.generateKey(256);
+String iv = AESUtils.generateIV();
+String encrypted = AESUtils.encrypt("你好世界", key, iv);
+String decrypted = AESUtils.decrypt(encrypted, key, iv);
 
 KeyPair keyPair = RSAUtils.generateKeyPair();
-String encrypted = RSAUtils.encryptHex("你好世界", keyPair.getPublic());
-String decrypted = RSAUtils.decryptHex(encrypted, keyPair.getPrivate());
+String encrypted = RSAUtils.encrypt("你好世界", keyPair.getPublic());
+String decrypted = RSAUtils.decrypt(encrypted, keyPair.getPrivate());
 ```
 
 摘要算法（DigestUtils）：
