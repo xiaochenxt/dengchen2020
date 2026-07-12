@@ -24,7 +24,7 @@ dc.cache.redis.specs.name1.expire-time=90s # 缓存过期时间
 编程方式移除缓存：
 ```
 @Resource CacheHelper cacheHelper;
-cacheHelper.evict("cacheName", "key"); # 移除指定缓存名下指定key的缓存
-cacheHelper.clear("cacheName"); # 清空指定缓存名下的所有缓存
-cacheHelper.clearAll(); # 清空所有缓存
+cacheHelper.evict("cacheName", "key"); // 移除指定缓存名下指定key的缓存
+cacheHelper.clear("cacheName"); // 清空指定缓存名下的所有缓存
+cacheHelper.clearAll(); // 清空所有缓存
 ```
