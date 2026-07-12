@@ -39,7 +39,7 @@ String decrypted = RSAUtils.decrypt(encrypted, keyPair.getPrivate());
 ```java
 String md5 = DigestUtils.md5Hex("hello");
 String sha256 = DigestUtils.sha256Hex("hello");
-String fileMd5 = DigestUtils.md5Hex(java.io.FileInputStream("/path/file.txt"));
+String fileMd5 = DigestUtils.md5Hex(new java.io.FileInputStream("/path/file.txt"));
 ```
 
 日期时间（DateTimeUtils）：

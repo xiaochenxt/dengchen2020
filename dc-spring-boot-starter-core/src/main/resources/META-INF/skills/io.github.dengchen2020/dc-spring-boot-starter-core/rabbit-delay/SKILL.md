@@ -76,7 +76,7 @@ rabbitTemplate.convertAndSend(DELAY_EXCHANGE, routingKey, message, msg -> {
 
 ```
 RabbitAutoConfiguration 自动注册：
-├── Jackson2JsonMessageConverter     // 消息转换器
+├── JacksonJsonMessageConverter     // 消息转换器
 ├── ConfirmCallback                  // 发送确认回调
 ├── ReturnsCallback                  // 退回回调
 ├── MessageRecoverer                 // 消费失败处理
