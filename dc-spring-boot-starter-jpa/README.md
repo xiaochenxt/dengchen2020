@@ -45,16 +45,16 @@ long delete(Predicate where);                                                // 
 ```java
 import io.github.dengchen2020.core.jdbc.Page;
 
-public interface GoodsRepository extends BaseJpaRepository<Goods, Long> {
+public interface GoodsRepository extends BaseJpaRepository<GoodsDTO, Long> {
 
     QGoods q_goods = QGoods.goods;
 
-    default SimplePage<GoodsDTO> list(GoodsQueryParam param) {
+    default SimplePage<GoodsDTO> list(GoodsQueryParam param, OrderSpecifier<?>... o) {
         var builder = new BooleanBuilder();
         // 多条件动态拼接
         builder.and(q_goods.shopId.in(getQueryShopIds()));
         if (StringUtils.hasText(param.getName())) builder.and(q_goods.name.contains(param.getName()));
-        return findAll(builder, Page.of(1,10), o);
+        return findAll(builder, param, o);
     }
 }
 ```
@@ -62,7 +62,7 @@ public interface GoodsRepository extends BaseJpaRepository<Goods, Long> {
 连表查询（JPAQuery + Projections）：
 
 ```java
-public interface OrderRepository extends BaseJpaRepository<Order, Long> {
+public interface OrderRepository extends BaseJpaRepository<OrderDTO, Long> {
 
     QOrder q_order = QOrder.order;
     QUser q_user = QUser.user;
@@ -81,7 +81,7 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long> {
         )).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
           .where(builder);
 
-        return fetchPage(query, Page.of(1,10), q_order.id.desc());
+        return fetchPage(query, param, q_order.id.desc());
     }
 }
 ```
