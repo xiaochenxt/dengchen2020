@@ -63,8 +63,9 @@ public class AdminController { ... }
 @Component
 public class MyPermissionVerifier implements PermissionVerifier {
     @Override
-    public boolean hasPermission(PermissionsInfo permissionsInfo, String[] requirePermissions) {
+    public boolean hasPermission(Authentication authentication, String[] requirePermissions) {
         // 自定义校验逻辑
+        if (!(authentication instanceof PermissionsInfo permissionsInfo)) return true;
         return Arrays.stream(requirePermissions)
                 .allMatch(p -> permissionsInfo.permissions().contains(p));
     }

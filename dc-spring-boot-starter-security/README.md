@@ -135,6 +135,6 @@ properties 配置：
 # 密码加密器配置
 dc.security.password-encoder.version=$2a   # BCrypt版本
 dc.security.password-encoder.strength=10   # 加密强度
-# Token名称（请求头/参数名），默认 Authorization
+# Token名称（请求头/参数名），默认 dc-token
 dc.security.token-name=Authorization
 ```
