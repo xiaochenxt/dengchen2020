@@ -89,8 +89,7 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long> {
 原生 SQL 查询（QuerydslJdbcRepository）：
 
 ```java
-JPASQLQuery<Tuple> nativeSelect(Expression<?>... exprs); // 原生 SQL 查询
-JPASQLQuery<?> with(EntityPath<?> path, SubQueryExpression<?> query); // 公用表表达式（CTE）
+JPASQLQuery<Tuple> nativeSelect(Expression<?>... exprs); // 原生 SQL 查询（返回JPASQLQuery支持链式调用with等操作）
 ```
 
 租户/用户数据隔离（TenantJpaRepository / UserIdJpaRepository）：

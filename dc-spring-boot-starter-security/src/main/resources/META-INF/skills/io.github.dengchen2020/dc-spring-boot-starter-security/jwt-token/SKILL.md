@@ -30,7 +30,7 @@ description: 基于JWT的无状态Token认证服务，提供创建Token、读取
 ```properties
 dc.security.authentication-type=com.example.Authentication  # 认证信息Record类型
 dc.security.jwt.secret=your-secret-key                       # JWT密钥（配置后启用JWT模式）
-dc.security.jwt.expire-in=7200s                              # Token有效期,默认7200秒
+dc.security.jwt.expire-in=7200s                              # Token有效期,默认1800秒
 dc.security.jwt.refresh-expire-in=7d                         # 刷新Token有效期
 ```
 

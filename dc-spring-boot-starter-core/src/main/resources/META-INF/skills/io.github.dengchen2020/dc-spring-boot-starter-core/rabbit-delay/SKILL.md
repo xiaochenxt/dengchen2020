@@ -92,7 +92,7 @@ dc-spring-boot-starter-core/src/main/java/io/github/dengchen2020/core/rabbit/
 ├── RabbitAutoConfiguration.java      // RabbitMQ 自动配置
 ├── RabbitConstant.java               // 常量（交换机/队列/路由键名称）
 ├── RabbitDelayTemplate.java          // 延迟消息发送模板
-└── Jackson2JsonMessageConverter.java // JSON 消息转换器
+└── JacksonJsonMessageConverter.java // JSON 消息转换器
 ```
 
 ## 注意事项
