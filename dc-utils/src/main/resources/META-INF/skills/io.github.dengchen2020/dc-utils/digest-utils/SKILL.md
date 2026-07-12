@@ -38,8 +38,8 @@ String sha512 = DigestUtils.sha512Hex("hello");
 ### 文件摘要
 
 ```java
-String fileMd5 = DigestUtils.md5Hex(new File("/path/file.txt"));
-String fileSha256 = DigestUtils.sha256Hex(new File("/path/file.zip"));
+String fileMd5 = DigestUtils.md5Hex(new FileInputStream("/path/file.txt"));
+String fileSha256 = DigestUtils.sha256Hex(new FileInputStream("/path/file.zip"));
 ```
 
 ### 字节数组 / 输入流
