@@ -56,8 +56,8 @@ Date parsed = DateTimeUtils.parse(str, "yyyy-MM-dd HH:mm:ss");
 随机数（RandomUtils / RandomStringUtils）— 实例式 API：
 
 ```java
-String code = RandomStringUtils.insecure().random(6, 0, 0, false, true, null, ThreadLocalRandom.current());
-String str = RandomStringUtils.insecure().random(16, 0, 0, true, true, null, ThreadLocalRandom.current());
+String code = RandomStringUtils.insecure().nextNumeric(6);
+String str = RandomStringUtils.insecure().nextAlphanumeric(16);
 int num = RandomUtils.insecure().randomInt(0, 100);
 ```
 
