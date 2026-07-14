@@ -71,6 +71,7 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
         } else {
             log.warn("连接关闭，原因是：{}，客户端：{}", status, session);
         }
+        offline(session, status);
     }
 
     /**
@@ -176,6 +177,15 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
      */
     protected void onlineFailEvent(WebSocketSession session, CloseStatus status) {
         if (log.isDebugEnabled()) log.debug("上线失败，原因：{}，客户端：{}", status, session);
+    }
+
+    /**
+     * 下线
+     *
+     * @param session websocket会话
+     */
+    protected void offline(WebSocketSession session, CloseStatus status) {
+
     }
 
 }
