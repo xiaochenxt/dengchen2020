@@ -64,16 +64,6 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
         }
     }
 
-    /**
-     * 同一用户当前在线连接数量
-     * @param userId 用户id
-     * @param sessions 用户会话队列
-     * @return 在线数量
-     */
-    protected int sameUserOnlineCount(String userId, ConcurrentLinkedQueue<WebSocketSession> sessions) {
-        return sessions.size();
-    }
-
     @Override
     protected void online(WebSocketSession session, Principal principal) {
         Authentication authentication = (Authentication) principal;
@@ -93,7 +83,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
                 });
             }
         }
-        int onlineCount = sameUserOnlineCount(userId, sessionQueue);
+        int onlineCount = sessionQueue.size();
         int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
         if (onlineCount > allowSameUserMaxOnlineCount){
             WebSocketSession head = sessionQueue.poll();
