@@ -47,15 +47,16 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
     protected void clear(WebSocketSession session) {
         Authentication authentication = getClientInfo(session);
         if (authentication == null) return;
-        if (authentication.userId() != null) {
-            userIdSessionMap.computeIfPresent(authentication.userId(), (userId, sessions) -> {
+        String userId = authentication.userId();
+        if (userId != null) {
+            userIdSessionMap.computeIfPresent(userId, (_, sessions) -> {
                 sessions.removeIf(s -> s.getId().equals(session.getId()));
                 return sessions.isEmpty() ? null : sessions;
             });
         }
         if (authentication instanceof TenantInfo tenantInfo) {
             if (tenantInfo.tenantId() != null) {
-                tenantIdSessionMap.computeIfPresent(tenantInfo.tenantId(), (tenantId, sessions) -> {
+                tenantIdSessionMap.computeIfPresent(tenantInfo.tenantId(), (_, sessions) -> {
                     sessions.removeIf(s -> s.getId().equals(session.getId()));
                     return sessions.isEmpty() ? null : sessions;
                 });
@@ -63,25 +64,36 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
         }
     }
 
+    /**
+     * 同一用户当前在线连接数量
+     * @param userId 用户id
+     * @param sessions 用户会话队列
+     * @return 在线数量
+     */
+    protected int sameUserOnlineCount(String userId, ConcurrentLinkedQueue<WebSocketSession> sessions) {
+        return sessions.size();
+    }
+
     @Override
     protected void online(WebSocketSession session, Principal principal) {
         Authentication authentication = (Authentication) principal;
-        if (authentication.userId() == null) return;
-        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.compute(authentication.userId(), (userId, sessions) -> {
+        String userId = authentication.userId();
+        if (userId == null) return;
+        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.compute(userId, (_, sessions) -> {
             if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
             sessions.add(session);
             return sessions;
         });
         if (authentication instanceof TenantInfo tenantInfo) {
             if (tenantInfo.tenantId() != null) {
-                tenantIdSessionMap.compute(tenantInfo.tenantId(), (tenantId, sessions) -> {
+                tenantIdSessionMap.compute(tenantInfo.tenantId(), (_, sessions) -> {
                     if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
                     sessions.add(session);
                     return sessions;
                 });
             }
         }
-        int onlineCount = sessionQueue.size();
+        int onlineCount = sameUserOnlineCount(userId, sessionQueue);
         int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
         if (onlineCount > allowSameUserMaxOnlineCount){
             WebSocketSession head = sessionQueue.poll();
