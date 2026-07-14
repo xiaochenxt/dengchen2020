@@ -71,7 +71,8 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
         } else {
             log.warn("连接关闭，原因是：{}，客户端：{}", status, session);
         }
-        offline(session, status);
+        var principal = session.getPrincipal();
+        if (principal != null && !(principal instanceof AnonymousAuthentication)) offlineEvent(principal);
     }
 
     /**
@@ -180,11 +181,11 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
     }
 
     /**
-     * 下线
+     * 下线事件
      *
-     * @param session websocket会话
+     * @param principal 用户信息
      */
-    protected void offline(WebSocketSession session, CloseStatus status) {
+    protected void offlineEvent(Principal principal) {
 
     }
 
