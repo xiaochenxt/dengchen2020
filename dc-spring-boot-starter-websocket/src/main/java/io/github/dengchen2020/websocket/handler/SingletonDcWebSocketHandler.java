@@ -55,8 +55,9 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
             });
         }
         if (authentication instanceof TenantInfo tenantInfo) {
-            if (tenantInfo.tenantId() != null) {
-                tenantIdSessionMap.computeIfPresent(tenantInfo.tenantId(), (_, sessions) -> {
+            Long tenantId = tenantInfo.tenantId();
+            if (tenantId != null) {
+                tenantIdSessionMap.computeIfPresent(tenantId, (_, sessions) -> {
                     sessions.removeIf(s -> s.getId().equals(session.getId()));
                     return sessions.isEmpty() ? null : sessions;
                 });
@@ -75,8 +76,9 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
             return sessions;
         });
         if (authentication instanceof TenantInfo tenantInfo) {
-            if (tenantInfo.tenantId() != null) {
-                tenantIdSessionMap.compute(tenantInfo.tenantId(), (_, sessions) -> {
+            Long tenantId = tenantInfo.tenantId();
+            if (tenantId != null) {
+                tenantIdSessionMap.compute(tenantId, (_, sessions) -> {
                     if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
                     sessions.add(session);
                     return sessions;
