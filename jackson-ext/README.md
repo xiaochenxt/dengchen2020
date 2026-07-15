@@ -1,6 +1,8 @@
-Jackson 扩展，提供 `@JsonRawValue` 注解，支持 String 字段的 JSON 原样序列化与反序列化。
+Jackson 扩展，直接支持 Jackson 自带的 `@JsonRawValue` 注解。
 
-与 Jackson 自带的 `@com.fasterxml.jackson.annotation.JsonRawValue` 不同，该注解同时作用于序列化（输出）和反序列化（输入）。
+Jackson 自带的 `@JsonRawValue` 已支持序列化（输出时原样输出，不转义），但**默认不支持反序列化（输入）**。
+
+本模块通过 `DcModule` 为其额外注册了反序列化支持，使得带 `@JsonRawValue` 的 String 字段在反序列化时也能直接接收 JSON 对象/数组，实现完整的双向 JSON 原样处理。
 
 ```xml
 <dependency>
@@ -25,6 +27,8 @@ public ObjectMapper objectMapper() {
 实体类中使用：
 
 ```java
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
 public class Product {
     private Long id;
     private String name;
