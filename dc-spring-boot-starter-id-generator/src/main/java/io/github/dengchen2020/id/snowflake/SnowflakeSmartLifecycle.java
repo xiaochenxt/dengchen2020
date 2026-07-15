@@ -91,9 +91,9 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
      */
     @Override
     public void stop() {
+        running = false;
         stringRedisTemplate.opsForSet().remove(SNOWFLAKE_WORKERID_LIST_KEY, String.valueOf(options.getWorkerId()));
         if (log.isInfoEnabled()) log.info("雪花算法移除workerId：{}", options.getWorkerId());
-        running = false;
     }
 
     @Override
@@ -104,6 +104,11 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
     @Override
     public int getPhase() {
         return PHASE;
+    }
+
+    @Override
+    public boolean isPauseable() {
+        return false;
     }
 }
 
