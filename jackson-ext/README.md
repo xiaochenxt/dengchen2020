@@ -1,8 +1,8 @@
 Jackson 扩展，直接支持 Jackson 自带的 `@JsonRawValue` 注解。
 
-Jackson 自带的 `@JsonRawValue` 本来只支持序列化（输出时原样输出，不转义），**不支持反序列化（输入）**。
+Jackson 自带的 `@JsonRawValue` 已支持序列化（输出时原样输出，不转义），但**默认不支持反序列化（输入）**。
 
-本模块通过 `DcModule` 为其额外注册了反序列化支持，使得带 `@JsonRawValue` 的 String 字段在反序列化时也能直接接收 JSON 对象/数组，实现完整的双向 JSON 原样处理。
+本模块通过 `DcModule` 为其额外注册了反序列化支持，使得带 `@JsonRawValue` 的 String 字段在反序列化时也能直接接收 JSON 对象/数组。
 
 ```xml
 <dependency>
