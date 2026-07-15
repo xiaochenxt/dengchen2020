@@ -5,10 +5,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
+import org.springframework.beans.BeansException;
+import org.springframework.boot.web.server.context.WebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
@@ -25,9 +26,11 @@ import java.io.IOException;
  * @since 2025/8/1
  */
 @WebServlet(value = "/**", loadOnStartup = 1)
-public class StaticResourceServlet extends HttpServlet implements ApplicationListener<@NonNull ContextRefreshedEvent> {
+public class StaticResourceServlet extends HttpServlet implements ApplicationContextAware, SmartLifecycle {
 
     public static final String SERVLET_NAME = "staticResourceServlet";
+
+    private volatile boolean running = false;
 
     public StaticResourceServlet(Environment environment) {
         this.staticPathPattern = environment.getProperty("spring.mvc.static-path-pattern", "/**");
@@ -47,23 +50,11 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
     public static final String indexPath = "index.html";
     public static final String notFoundPath = "404.html";
 
-    /**
-     * 在web服务准备就绪时查找需要的静态资源处理器 </br>
-     * 静态资源处理器获取代码参考：{@link ResourceUrlProvider#detectResourceHandlers(ApplicationContext)}
-     *
-     * @param event
-     */
+    private ApplicationContext applicationContext;
+
     @Override
-    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        event.getApplicationContext().getBeanProvider(HandlerMapping.class).orderedStream()
-                .filter(AbstractUrlHandlerMapping.class::isInstance)
-                .map(AbstractUrlHandlerMapping.class::cast)
-                .forEach(mapping -> mapping.getHandlerMap().forEach((pattern, handler) -> {
-                    if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
-                        if (pattern.equals(this.staticPathPattern)) this.handler = resourceHandler;
-                    }
-                }));
-        if (this.handler == null) throw new IllegalStateException("未找到处理"+this.staticPathPattern+"的静态资源处理器");
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -92,6 +83,44 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         }
+    }
+
+    /**
+     * 在web服务准备就绪时查找需要的静态资源处理器 </br>
+     * 静态资源处理器获取代码参考：{@link ResourceUrlProvider#detectResourceHandlers(ApplicationContext)}
+     */
+    @Override
+    public void start() {
+        running = true;
+        applicationContext.getBeanProvider(HandlerMapping.class).orderedStream()
+                .filter(AbstractUrlHandlerMapping.class::isInstance)
+                .map(AbstractUrlHandlerMapping.class::cast)
+                .forEach(mapping -> mapping.getHandlerMap().forEach((pattern, handler) -> {
+                    if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
+                        if (pattern.equals(this.staticPathPattern)) this.handler = resourceHandler;
+                    }
+                }));
+        if (this.handler == null) throw new IllegalStateException("未找到处理"+this.staticPathPattern+"的静态资源处理器");
+    }
+
+    @Override
+    public void stop() {
+        running = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public int getPhase() {
+        return WebServerApplicationContext.GRACEFUL_SHUTDOWN_PHASE - 5000;
+    }
+
+    @Override
+    public boolean isPauseable() {
+        return false;
     }
 
 }
