@@ -6,9 +6,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
-import org.springframework.boot.web.server.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
@@ -25,7 +25,7 @@ import java.io.IOException;
  * @since 2025/8/1
  */
 @WebServlet(value = "/**", loadOnStartup = 1)
-public class StaticResourceServlet extends HttpServlet implements ApplicationListener<@NonNull WebServerInitializedEvent> {
+public class StaticResourceServlet extends HttpServlet implements ApplicationListener<@NonNull ContextRefreshedEvent> {
 
     public static final String SERVLET_NAME = "staticResourceServlet";
 
@@ -54,7 +54,7 @@ public class StaticResourceServlet extends HttpServlet implements ApplicationLis
      * @param event
      */
     @Override
-    public void onApplicationEvent(@NonNull WebServerInitializedEvent event) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         event.getApplicationContext().getBeanProvider(HandlerMapping.class).orderedStream()
                 .filter(AbstractUrlHandlerMapping.class::isInstance)
                 .map(AbstractUrlHandlerMapping.class::cast)
