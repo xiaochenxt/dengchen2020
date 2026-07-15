@@ -33,7 +33,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
 
     static {
         if (Objects.equals(System.getProperty(WEBSOCKET_KEEPALIVE_ENABLED), Boolean.TRUE.toString())) {
-            scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("websocket-keepalive-").factory());
+            scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("websocket-keepalive").factory());
         }else {
             scheduledExecutorService = null;
         }

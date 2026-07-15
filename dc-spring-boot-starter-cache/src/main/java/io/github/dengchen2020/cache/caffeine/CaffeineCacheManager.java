@@ -7,11 +7,13 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
@@ -25,15 +27,16 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineCacheManager.class);
 
+    private final Scheduler scheduler;
+    private final Executor executor;
+
     public CaffeineCacheManager(CacheSpecBuilder.Caffeine builder,@Nullable CaffeineCacheHelper cacheHelper) {
         this.builder = builder;
         this.cacheHelper = cacheHelper;
         setTransactionAware(builder.isTransactionAware());
+        this.scheduler = Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("caffeine-scheduler").factory()));
+        this.executor = new SimpleAsyncTaskExecutorBuilder().virtualThreads(true).threadNamePrefix("caffeine-executor-").build();
     }
-
-   // Executor executor = new VirtualThreadTaskExecutor("caffeine-async-");
-
-    Scheduler scheduler = Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("caffeine-cleaner",0).factory()));
 
     private final CacheSpecBuilder.Caffeine builder;
 
@@ -57,7 +60,7 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
         }
         Caffeine<Object, Object> caffeine = caffeineBuilder
                 .scheduler(scheduler)
-               // .executor(executor) // 使用同步模式，因此不需要异步执行器
+                .executor(executor)
                 .maximumSize(cacheSpec.getMax());
         if (cacheSpec.getSoftValues()) caffeine.softValues();
         com.github.benmanes.caffeine.cache.Cache<Object, Object> cache = caffeine.build();
