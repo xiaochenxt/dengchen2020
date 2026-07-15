@@ -121,8 +121,8 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
 
     @Override
     public void stop() {
-        if(!keys.isEmpty()) stringRedisTemplate.execute(stopScript, new ArrayList<>(keys), uniqueId);
         running = false;
+        if(!keys.isEmpty()) stringRedisTemplate.execute(stopScript, new ArrayList<>(keys), uniqueId);
     }
 
     @Override
