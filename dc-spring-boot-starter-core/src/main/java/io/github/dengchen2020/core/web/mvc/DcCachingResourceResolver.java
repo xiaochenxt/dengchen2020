@@ -27,6 +27,8 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
     private final long maxContentLength;
     private static final boolean IS_THAN_3015 = VersionUtils.compareVersion(SpringBootVersion.getVersion(), "3.0.15") >= 0;
 
+    private static final ByteArrayResource NOT_FOUND_RESOURCE = new ByteArrayResource(EMPTY_BYTE_ARRAY, "404.html", -1);
+
     public DcCachingResourceResolver(Cache cache, long maxContentLength) {
         super(cache);
         this.maxContentLength = maxContentLength;
@@ -42,11 +44,7 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
             if (logger.isTraceEnabled()) {
                 logger.trace("Resource resolved from cache");
             }
-            try {
-                var data = resource.getContentAsByteArray();
-                if (data == EMPTY_BYTE_ARRAY) return null;
-            } catch (IOException _) {}
-            return resource;
+            return resource == NOT_FOUND_RESOURCE ? null : resource;
         }
 
         resource = chain.resolveResource(request, requestPath, locations);
@@ -63,8 +61,7 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
                 this.getCache().put(key, resource);
             }
         } else { // 缓存404
-            ByteArrayResource data = new ByteArrayResource(EMPTY_BYTE_ARRAY, "404.html", -1);
-            this.getCache().put(key, data);
+            this.getCache().put(key, NOT_FOUND_RESOURCE);
         }
 
         return resource;
