@@ -1,8 +1,8 @@
 package io.github.dengchen2020.jackson;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
-import com.fasterxml.jackson.databind.ser.std.RawSerializer;
 
 /**
  * 处理{@link JsonRawValue}注解
@@ -13,8 +13,6 @@ class JsonRawValueAnnotationIntrospector extends NopAnnotationIntrospector {
 
     protected static final JsonRawValueAnnotationIntrospector INSTANCE = new JsonRawValueAnnotationIntrospector();
 
-    protected static final RawSerializer<String> rawSerializer = new RawSerializer<>(String.class);
-
     @Override
     public Object findDeserializer(Annotated annotated) {
         JsonRawValue annotation = _findAnnotation(annotated, JsonRawValue.class);
@@ -22,10 +20,4 @@ class JsonRawValueAnnotationIntrospector extends NopAnnotationIntrospector {
         return super.findDeserializer(annotated);
     }
 
-    @Override
-    public Object findSerializer(Annotated am) {
-        JsonRawValue annotation = _findAnnotation(am, JsonRawValue.class);
-        if (annotation != null && annotation.value()) return rawSerializer;
-        return super.findSerializer(am);
-    }
 }
