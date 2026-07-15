@@ -7,9 +7,9 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
-import org.springframework.core.task.VirtualThreadTaskExecutor;
 
 import java.time.Duration;
 import java.util.*;
@@ -27,15 +27,16 @@ public class CaffeineCacheManager extends AbstractTransactionSupportingCacheMana
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineCacheManager.class);
 
+    private final Scheduler scheduler;
+    private final Executor executor;
+
     public CaffeineCacheManager(CacheSpecBuilder.Caffeine builder,@Nullable CaffeineCacheHelper cacheHelper) {
         this.builder = builder;
         this.cacheHelper = cacheHelper;
         setTransactionAware(builder.isTransactionAware());
+        this.scheduler = Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("caffeine-scheduler").factory()));
+        this.executor = new SimpleAsyncTaskExecutorBuilder().virtualThreads(true).threadNamePrefix("caffeine-executor-").build();
     }
-
-    Executor executor = new VirtualThreadTaskExecutor("caffeine-async-");
-
-    Scheduler scheduler = Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("caffeine-cleaner",0).factory()));
 
     private final CacheSpecBuilder.Caffeine builder;
 

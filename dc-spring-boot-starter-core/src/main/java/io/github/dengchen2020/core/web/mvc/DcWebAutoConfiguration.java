@@ -185,7 +185,7 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
         var cache = new CaffeineCache("spring-resource-chain-cache", Caffeine.newBuilder()
                 .maximumSize(Math.max(100, maximumSize))
                 .expireAfterWrite(ttl)
-                .scheduler(Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("resource-cache-clear",0).factory())))
+                .scheduler(Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("resource-cache-clear").factory())))
                 .softValues()
                 .build());
         var cachePeriod = resources.getCache().getPeriod();
