@@ -5,7 +5,6 @@ import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.output.IntegerListOutput;
 import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.DefaultStringRedisConnection;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -59,9 +58,8 @@ public class RedisRateLimiter {
     @SuppressWarnings("unchecked")
     private List<Long> increx(String key, long ubound, long exSecond) {
         return redisTemplate.execute((RedisCallback<List<Long>>) connection -> {
-            var command = (DefaultStringRedisConnection)connection.commands();
-            var delegate = (LettuceConnection)command.getDelegate();
-            return (List<Long>) delegate.execute(INCREX, new IntegerListOutput<>(ByteArrayCodec.INSTANCE), key.getBytes(), UBOUND, String.valueOf(ubound).getBytes(), EX, String.valueOf(exSecond).getBytes(), ENX);
+            var command = (LettuceConnection)connection.commands();
+            return (List<Long>) command.execute(INCREX, new IntegerListOutput<>(ByteArrayCodec.INSTANCE), key.getBytes(), UBOUND, String.valueOf(ubound).getBytes(), EX, String.valueOf(exSecond).getBytes(), ENX);
         });
     }
 
