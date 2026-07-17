@@ -53,34 +53,34 @@ public class JwtHelper {
 
     /**
      * 创建Token
-     * @param expiresIn 过期时间（时间戳）
+     * @param timestamp 过期时间（时间戳）
      * @return {@link JWT}
      */
-    public JWT create(long expiresIn) {
-        return create(expiresIn, null);
+    public JWT create(long timestamp) {
+        return create(timestamp, null);
     }
 
     /**
      * 创建Token
      *
-     * @param expiresIn 过期时间（时间戳）
+     * @param timestamp 过期时间（时间戳）
      * @return {@link JWT}
      */
-    public JWT create(long expiresIn, String jti) {
-        return create(expiresIn, jti, null);
+    public JWT create(long timestamp, String jti) {
+        return create(timestamp, jti, null);
     }
 
     /**
      * 创建Token
      *
-     * @param expiresIn 过期时间（时间戳）
+     * @param timestamp 过期时间（时间戳）
      * @param jti JWT唯一ID，可用于防止重复使用
      * @param sub 用户ID，可用于刷新令牌
      * @return {@link JWT}
      */
-    public JWT create(long expiresIn, String jti, String sub) {
+    public JWT create(long timestamp, String jti, String sub) {
         JWT jwt = new JWT();
-        jwt.setExpiration(Instant.ofEpochMilli(expiresIn).atZone(ZoneId.systemDefault()));
+        jwt.setExpiration(Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()));
         if (jti != null) jwt.setUniqueId(jti);
         if (sub != null) jwt.setSubject(sub);
         return jwt;
