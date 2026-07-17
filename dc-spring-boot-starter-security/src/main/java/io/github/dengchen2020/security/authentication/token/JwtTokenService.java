@@ -75,7 +75,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
                 .addClaim(TokenConstant.PAYLOAD, authentication));
         if (refreshExpireSeconds > 0) {
             long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
-            var refreshToken = createRefreshToken(authentication, refreshExpireSeconds);
+            var refreshToken = createRefreshToken(authentication, refreshExpireSeconds, refreshTokenExpiresIn);
             return new TokenInfo(token, expiresIn, refreshToken, refreshTokenExpiresIn);
         }
         return new TokenInfo(token, expiresIn);
@@ -84,22 +84,23 @@ public class JwtTokenService implements TokenService, InitializingBean {
     /**
      * 创建刷新token
      * @param authentication 认证信息对象
-     * @param expiresIn 有效期（秒）
+     * @param expiresSeconds 有效期（秒）
+     * @param timestamp 过期时间戳
      */
-    public String createRefreshToken(Authentication authentication, long expiresIn) {
+    public String createRefreshToken(Authentication authentication, long expiresSeconds, long timestamp) {
         var jti = StrUtils.uuidSimplified();
         var sub = authentication.userId();
-        storeRefreshToken(expiresIn, jti, sub);
-        return jwtHelper.encode(jwtHelper.create(expiresIn, jti, sub));
+        storeRefreshToken(expiresSeconds, jti, sub);
+        return jwtHelper.encode(jwtHelper.create(timestamp, jti, sub));
     }
 
     /**
      * 存储刷新token
-     * @param expiresIn 有效期（秒）
+     * @param expiresSeconds 有效期（秒）
      * @param jti 刷新token的唯一ID
      * @param sub 用户ID，唯一标识
      */
-    protected void storeRefreshToken(long expiresIn, String jti, String sub) {
+    protected void storeRefreshToken(long expiresSeconds, String jti, String sub) {
 
     }
 
