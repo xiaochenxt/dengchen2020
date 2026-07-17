@@ -65,7 +65,7 @@ public abstract class AbstractRateLimiterInterceptor extends BaseHandlerMethodIn
         if (rateLimit == null) rateLimit = handlerMethod.getBeanType().getAnnotation(RateLimit.class);
         if (rateLimit == null) return true;
         String limitKey = getLimitKey(request, rateLimit, handlerMethod.toString());
-        if (limit(rateLimit, limitKey)) throw new RateLimitException(StringUtils.hasText(rateLimit.errorMsg()) ? rateLimit.errorMsg() : errorMsg);
+        if (limit(rateLimit, limitKey)) throw new RateLimitException(StringUtils.hasText(rateLimit.errorMsg()) ? rateLimit.errorMsg() : errorMsg, rateLimit.timeUnit());
         return true;
     }
 }
