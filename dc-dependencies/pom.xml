@@ -4,7 +4,7 @@
 
   <groupId>io.github.dengchen2020</groupId>
   <artifactId>dc-dependencies</artifactId>
-  <version>0.3.21</version>
+  <version>0.3.22</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -47,7 +47,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dc.version>0.3.21</dc.version>
+    <dc.version>0.3.22</dc.version>
     <jspecify.version>1.0.0</jspecify.version>
     <redisson.version>4.6.1</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
@@ -61,7 +61,7 @@
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
     <playwright.version>1.61.0</playwright.version>
     <easy-captcha.version>1.6.2</easy-captcha.version>
-    <fusionauth-jwt.version>6.0.0</fusionauth-jwt.version>
+    <fusionauth-jwt.version>7.0.0</fusionauth-jwt.version>
   </properties>
 
   <dependencyManagement>
