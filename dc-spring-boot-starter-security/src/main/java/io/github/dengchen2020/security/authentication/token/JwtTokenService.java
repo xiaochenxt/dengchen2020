@@ -70,11 +70,12 @@ public class JwtTokenService implements TokenService, InitializingBean {
      * @return Token信息
      */
     public TokenInfo createToken(Authentication authentication, long expireSeconds, long refreshExpireSeconds) {
-        long expiresIn = System.currentTimeMillis() + expireSeconds * 1000;
+        long timestamp = System.currentTimeMillis();
+        long expiresIn = timestamp + expireSeconds * 1000;
         String token = jwtHelper.encode(jwtHelper.create(expiresIn, StrUtils.uuidSimplified(), authentication.userId())
                 .addClaim(TokenConstant.PAYLOAD, authentication));
         if (refreshExpireSeconds > 0) {
-            long refreshTokenExpiresIn = System.currentTimeMillis() + refreshExpireSeconds * 1000;
+            long refreshTokenExpiresIn = timestamp + refreshExpireSeconds * 1000;
             var refreshToken = createRefreshToken(authentication, refreshExpireSeconds, refreshTokenExpiresIn);
             return new TokenInfo(token, expiresIn, refreshToken, refreshTokenExpiresIn);
         }
