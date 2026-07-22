@@ -4,7 +4,7 @@
 
   <groupId>io.github.dengchen2020</groupId>
   <artifactId>dc-dependencies</artifactId>
-  <version>0.3.22</version>
+  <version>0.3.23</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -47,7 +47,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dc.version>0.3.22</dc.version>
+    <dc.version>0.3.23</dc.version>
     <jspecify.version>1.0.0</jspecify.version>
     <redisson.version>4.6.1</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
@@ -55,7 +55,7 @@
     <graalvm.version>25.0.3</graalvm.version>
     <zxing.version>3.5.4</zxing.version>
     <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
-    <libphonenumber.version>9.0.34</libphonenumber.version>
+    <libphonenumber.version>9.0.35</libphonenumber.version>
     <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
     <ip2region.version>3.3.7</ip2region.version>
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
