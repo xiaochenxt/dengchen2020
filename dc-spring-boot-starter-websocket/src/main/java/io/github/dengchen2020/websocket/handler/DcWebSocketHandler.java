@@ -18,6 +18,8 @@ public interface DcWebSocketHandler {
 
     PingMessage pingMessage = new PingMessage();
 
+    String CONCURRENT_DECORATOR = "concurrentDecorator";
+
     /**
      * 获取客户端信息
      *
@@ -63,12 +65,22 @@ public interface DcWebSocketHandler {
      */
     default void sendPing(WebSocketSession session) {
         try {
-            session.sendMessage(pingMessage);
+            getConcurrentDecorator(session).sendMessage(pingMessage);
         } catch (SessionLimitExceededException e) {
             close(session, e.getStatus());
         } catch (Exception e) {
             if (session.isOpen()) log.error("发送ping消息失败，异常信息：{}", e.toString());
         }
+    }
+
+    /**
+     * 获取可并发发送消息的{@link WebSocketSession}
+     *
+     * @param session websocket会话
+     * @return {@link WebSocketSession}
+     */
+    private WebSocketSession getConcurrentDecorator(WebSocketSession session) {
+        return (WebSocketSession) session.getAttributes().getOrDefault(CONCURRENT_DECORATOR, session);
     }
 
     /**
@@ -90,7 +102,7 @@ public interface DcWebSocketHandler {
      */
     default void send(WebSocketSession session, String message, boolean isLast) {
         try {
-            session.sendMessage(new TextMessage(message, isLast));
+            getConcurrentDecorator(session).sendMessage(new TextMessage(message, isLast));
         } catch (SessionLimitExceededException e) {
             close(session, e.getStatus());
         } catch (Exception e) {
@@ -117,7 +129,7 @@ public interface DcWebSocketHandler {
      */
     default void send(WebSocketSession session, ByteBuffer byteBuffer, boolean isLast) {
         try {
-            session.sendMessage(new BinaryMessage(byteBuffer, isLast));
+            getConcurrentDecorator(session).sendMessage(new BinaryMessage(byteBuffer, isLast));
         } catch (SessionLimitExceededException e) {
             close(session, e.getStatus());
         } catch (Exception e) {

@@ -1,6 +1,9 @@
 package io.github.dengchen2020.websocket.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.unit.DataSize;
+
+import java.time.Duration;
 
 /**
  * websocket属性配置
@@ -34,6 +37,26 @@ public class WebSocketProperties {
      */
     private boolean withSockJS = false;
 
+    /**
+     * 文本消息的默认最大缓冲区大小
+     */
+    private DataSize maxTextMessageBufferSize = DataSize.ofKilobytes(16);
+
+    /**
+     * 二进制消息的默认最大缓冲区大小
+     */
+    private DataSize maxBinaryMessageBufferSize = DataSize.ofKilobytes(32);
+
+    /**
+     * 默认会话闲置超时（毫秒级）。零值或负值表示无限超时
+     */
+    private Duration maxSessionIdleTimeout = Duration.ofSeconds(90);
+
+    /**
+     * 异步发送消息的默认超时（毫秒级）。非正值表示无限超时
+     */
+    private Duration asyncSendTimeout = Duration.ofSeconds(10);
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -64,5 +87,37 @@ public class WebSocketProperties {
 
     public void setWithSockJS(boolean withSockJS) {
         this.withSockJS = withSockJS;
+    }
+
+    public DataSize getMaxTextMessageBufferSize() {
+        return maxTextMessageBufferSize;
+    }
+
+    public void setMaxTextMessageBufferSize(DataSize maxTextMessageBufferSize) {
+        this.maxTextMessageBufferSize = maxTextMessageBufferSize;
+    }
+
+    public DataSize getMaxBinaryMessageBufferSize() {
+        return maxBinaryMessageBufferSize;
+    }
+
+    public void setMaxBinaryMessageBufferSize(DataSize maxBinaryMessageBufferSize) {
+        this.maxBinaryMessageBufferSize = maxBinaryMessageBufferSize;
+    }
+
+    public Duration getMaxSessionIdleTimeout() {
+        return maxSessionIdleTimeout;
+    }
+
+    public void setMaxSessionIdleTimeout(Duration maxSessionIdleTimeout) {
+        this.maxSessionIdleTimeout = maxSessionIdleTimeout;
+    }
+
+    public Duration getAsyncSendTimeout() {
+        return asyncSendTimeout;
+    }
+
+    public void setAsyncSendTimeout(Duration asyncSendTimeout) {
+        this.asyncSendTimeout = asyncSendTimeout;
     }
 }
