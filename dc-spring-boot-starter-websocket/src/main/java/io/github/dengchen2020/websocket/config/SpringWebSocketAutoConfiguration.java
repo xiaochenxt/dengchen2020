@@ -6,9 +6,12 @@ import jakarta.websocket.server.ServerEndpoint;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -16,6 +19,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistra
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -66,6 +70,23 @@ public final class SpringWebSocketAutoConfiguration implements WebSocketConfigur
             if(handshake != null) registration.setHandshakeHandler(handshake);
             handshakeInterceptors.forEach(registration::addInterceptors);
         }
+    }
+
+    /**
+     * 配置websocket容器
+     */
+    @ConditionalOnMissingBean
+    @Bean
+    ServletServerContainerFactoryBean serverContainerFactoryBean() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxTextMessageBufferSize((int) webSocketProperties.getMaxTextMessageBufferSize().toBytes());
+        container.setMaxBinaryMessageBufferSize((int) webSocketProperties.getMaxBinaryMessageBufferSize().toBytes());
+        container.setMaxSessionIdleTimeout(webSocketProperties.getMaxSessionIdleTimeout().toMillis());
+        container.setAsyncSendTimeout(webSocketProperties.getAsyncSendTimeout().toMillis());
+        boolean jettyWsPresent = ClassUtils.isPresent("org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", SpringWebSocketAutoConfiguration.class.getClassLoader());
+        // jetty未适配这种配置方式
+        if (jettyWsPresent) throw new IllegalStateException("Jetty WebSocket is not supported");
+        return container;
     }
 
 }

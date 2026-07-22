@@ -50,7 +50,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
         String userId = authentication.userId();
         if (userId != null) {
             userIdSessionMap.computeIfPresent(userId, (_, sessions) -> {
-                sessions.removeIf(s -> s.getId().equals(session.getId()));
+                sessions.remove(session);
                 return sessions.isEmpty() ? null : sessions;
             });
         }
@@ -58,7 +58,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
             Long tenantId = tenantInfo.tenantId();
             if (tenantId != null) {
                 tenantIdSessionMap.computeIfPresent(tenantId, (_, sessions) -> {
-                    sessions.removeIf(s -> s.getId().equals(session.getId()));
+                    sessions.remove(session);
                     return sessions.isEmpty() ? null : sessions;
                 });
             }

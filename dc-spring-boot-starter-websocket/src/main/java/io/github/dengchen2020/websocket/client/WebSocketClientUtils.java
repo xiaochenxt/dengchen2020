@@ -80,8 +80,8 @@ public class WebSocketClientUtils {
             webSocketContainer = ContainerProvider.getWebSocketContainer();
         }
         if (webSocketContainer == null) throw new IllegalStateException("未找到可用的websocket客户端容器实现");
-        webSocketContainer.setDefaultMaxTextMessageBufferSize(8192);
-        webSocketContainer.setDefaultMaxBinaryMessageBufferSize(8192);
+        webSocketContainer.setDefaultMaxTextMessageBufferSize(65536);
+        webSocketContainer.setDefaultMaxBinaryMessageBufferSize(65536);
         webSocketContainer.setDefaultMaxSessionIdleTimeout(0);
         webSocketContainer.setAsyncSendTimeout(10000);
     }
@@ -139,7 +139,8 @@ public class WebSocketClientUtils {
      * @return {@link ConcurrentWebSocketSessionDecorator}
      */
     public static WebSocketSession wrap(WebSocketSession session) {
-        return new ConcurrentWebSocketSessionDecorator(session, 1000 * 10, 1024 * 32);
+        var bufferLimit = Math.min(128 * 1024, Math.max(session.getTextMessageSizeLimit(), session.getBinaryMessageSizeLimit()) * 2);
+        return new ConcurrentWebSocketSessionDecorator(session,1000 * 10,bufferLimit);
     }
 
     /**

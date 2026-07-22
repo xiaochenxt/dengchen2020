@@ -1,18 +1,14 @@
 package io.github.dengchen2020.websocket.handler;
 
 import io.github.dengchen2020.core.security.principal.AnonymousAuthentication;
-import jakarta.websocket.Session;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
-import org.springframework.web.socket.adapter.NativeWebSocketSession;
-import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.security.Principal;
-import java.time.Duration;
 import java.util.Set;
 
 /**
@@ -112,44 +108,23 @@ public abstract class AbstractDcWebSocketHandler extends AbstractWebSocketHandle
             close(session, status);
             return;
         }
-        initSessionConfig(session);
-        online(wrap(session), principal);
+        session.getAttributes().put(CONCURRENT_DECORATOR, concurrentDecorator(session));
+        online(session, principal);
         onlineSuccessEvent(session);
     }
 
     /**
-     * 包装WebSocketSession，例如：
+     * 包装成可并发发送消息的WebSocketSession，例如：
      * <pre>
-     * new ConcurrentWebSocketSessionDecorator(session, 10 * 1000, 32 * 1024)
+     * new ConcurrentWebSocketSessionDecorator(session, 10 * 1000, 128 * 1024)
      * </pre>
      *
      * @param session 原WebSocketSession
      * @return 新WebSocketSession
      */
-    protected WebSocketSession wrap(WebSocketSession session) {
-        return new ConcurrentWebSocketSessionDecorator(session,1000 * 10,1024 * 32);
-    }
-
-    /**
-     * 初始化会话配置
-     *
-     * @param session websocket会话
-     */
-    protected void initSessionConfig(WebSocketSession session) {
-        if(session instanceof NativeWebSocketSession nativeWebSocketSession){
-            if (session instanceof JettyWebSocketSession jettyWebSocketSession) {
-                org.eclipse.jetty.websocket.api.Session jettySession = jettyWebSocketSession.getNativeSession();
-                jettySession.setIdleTimeout(Duration.ofSeconds(90));
-            } else {
-                Session nativeSession = nativeWebSocketSession.getNativeSession(Session.class);
-                if(nativeSession != null){
-                    nativeSession.setMaxIdleTimeout(90 * 1000);
-                    nativeSession.getAsyncRemote().setSendTimeout(10 * 1000);
-                }
-            }
-        }
-        session.setTextMessageSizeLimit(16 * 1024);
-        session.setBinaryMessageSizeLimit(32 * 1024);
+    protected ConcurrentWebSocketSessionDecorator concurrentDecorator(WebSocketSession session) {
+        var bufferLimit = Math.min(128 * 1024, Math.max(session.getTextMessageSizeLimit(), session.getBinaryMessageSizeLimit()) * 2);
+        return new ConcurrentWebSocketSessionDecorator(session,1000 * 10,bufferLimit);
     }
 
     /**
