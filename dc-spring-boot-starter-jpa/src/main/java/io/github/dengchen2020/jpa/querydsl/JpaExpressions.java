@@ -4,6 +4,9 @@ import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.*;
+import org.hibernate.type.spi.TypeConfiguration;
+import org.jspecify.annotations.NullMarked;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -11,8 +14,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import org.hibernate.type.spi.TypeConfiguration;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * 用于JPA的通用querydsl表达式
@@ -249,8 +250,26 @@ public final class JpaExpressions {
      * @param sql 原生sql片段
      * @param args 参数
      */
-    public static <T> SimpleExpression<T> sql(Class<T> clazz, String sql, Object... args) {
-        return Expressions.simpleTemplate(clazz, buildSqlFragment(sql, args.length), args);
+    public static <T extends Number & Comparable<?>> NumberExpression<T> numberSql(Class<T> clazz, String sql, Object... args) {
+        return Expressions.numberTemplate(clazz, buildSqlFragment(sql, args.length), args);
+    }
+
+    /**
+     * 用于在Hibernate的hql中嵌入原生sql
+     * @param sql 原生sql片段
+     * @param args 参数
+     */
+    public static BooleanExpression boolSql(String sql, Object... args) {
+        return bool(Expressions.booleanTemplate(buildSqlFragment(sql, args.length), args));
+    }
+
+    /**
+     * 用于在Hibernate的hql中嵌入原生sql
+     * @param sql 原生sql片段
+     * @param args 参数
+     */
+    public static StringTemplate stringSql(String sql, Object... args) {
+        return Expressions.stringTemplate(buildSqlFragment(sql, args.length), args);
     }
 
 }
