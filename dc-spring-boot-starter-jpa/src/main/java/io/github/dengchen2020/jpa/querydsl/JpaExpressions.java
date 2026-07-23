@@ -235,12 +235,12 @@ public final class JpaExpressions {
      * @return
      */
     public static String buildSqlFragment(String sql, int argCount) {
-        var sb = new StringBuilder().append("sql('").append(sql).append("'");
+        var sb = new StringBuilder().append("sql('").append(sql).append('\'');
         if (argCount > 0) {
-            sb.append(",");
-            for (int i = 0; i < argCount; i++) sb.append("{").append(i).append("}");
+            sb.append(",{0}");
+            for (int i = 1; i < argCount; i++) sb.append(",{").append(i).append('}');
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
 
