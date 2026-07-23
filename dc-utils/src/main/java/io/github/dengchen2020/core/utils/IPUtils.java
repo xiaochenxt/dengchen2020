@@ -1,10 +1,11 @@
 package io.github.dengchen2020.core.utils;
 
+import org.jspecify.annotations.NonNull;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import org.jspecify.annotations.NonNull;
 
 /**
  * 获取客户端IP
@@ -82,7 +83,7 @@ public abstract class IPUtils {
         for (int i = 3; i >= 0; i--) {
             int part = (int) ((ipNumber >> (i * 8)) & 255);
             ip.append(part);
-            if (i > 0) ip.append(".");
+            if (i > 0) ip.append('.');
         }
         return ip.toString();
     }
