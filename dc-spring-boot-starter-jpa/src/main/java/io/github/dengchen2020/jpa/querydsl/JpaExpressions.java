@@ -268,7 +268,7 @@ public final class JpaExpressions {
      * @param sql 原生sql片段
      * @param args 参数
      */
-    public static StringTemplate stringSql(String sql, Object... args) {
+    public static StringExpression stringSql(String sql, Object... args) {
         return Expressions.stringTemplate(buildSqlFragment(sql, args.length), args);
     }
 

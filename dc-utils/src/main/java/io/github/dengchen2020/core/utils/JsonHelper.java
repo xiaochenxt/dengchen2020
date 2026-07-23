@@ -9,6 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.util.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,9 +20,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * 简化{@link JsonMapper}常用操作的异常处理
@@ -241,25 +242,6 @@ public class JsonHelper {
         } catch (Exception e) {
             throw new IllegalArgumentException("data：" + new String(data, StandardCharsets.UTF_8) + "，type：" + type, e);
         }
-    }
-
-    /**
-     * 反序列化，需要动态类型序列化的场景中使用，一般场景不推荐使用
-     * <p>仅支持反序列化源json数据携带有{@code @class}属性或添加了注解{@code @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)}的类</p>
-     *
-     * @param data 字节数组
-     * @return 对象
-     */
-    public <T> @Nullable T deserialize(byte[] data) {
-        var dataStr = new String(data, StandardCharsets.UTF_8);
-        try {
-            JsonNode tree = readTree(dataStr);
-            JsonNode classNode = tree.get("@class");
-            if (classNode != null) return nonNullJsonMapper.readValue(data, nonNullJsonMapper.getTypeFactory().constructFromCanonical(classNode.asText()));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("data：" + dataStr, e);
-        }
-        return null;
     }
 
     /**

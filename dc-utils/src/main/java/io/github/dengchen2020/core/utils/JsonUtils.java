@@ -155,17 +155,6 @@ public abstract class JsonUtils {
     }
 
     /**
-     * 反序列化，需要动态类型序列化的场景中使用，一般场景不推荐使用
-     * <p>仅支持反序列化源json数据携带有{@code @class}属性或添加了注解{@code @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)}的类</p>
-     *
-     * @param data 字节数组
-     * @return 对象
-     */
-    public static <T> @Nullable T deserialize(byte[] data) {
-        return JsonHelper.INSTANCE.deserialize(data);
-    }
-
-    /**
      * 将ArrayNode转化为Stream
      * @param arrayNode ArrayNode
      * @return {@link Stream}
