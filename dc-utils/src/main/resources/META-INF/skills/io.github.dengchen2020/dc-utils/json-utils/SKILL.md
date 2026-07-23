@@ -86,9 +86,6 @@ byte[] data = JsonUtils.serialize(user);
 
 // 字节数组 → 对象
 User user = JsonUtils.deserialize(data, User.class);
-
-// 带类型信息的字节反序列化（支持多态）
-Object obj = JsonUtils.deserialize(data);
 ```
 
 ## 实现原理
@@ -119,6 +116,5 @@ dc-utils/src/main/java/io/github/dengchen2020/core/utils/
 ## 注意事项
 
 1. `JsonUtils` 是静态工具类，底层委托给 `JsonHelper` Bean 执行，需确保 Spring 上下文已初始化
-2. 带类型信息的 `deserialize(byte[] data)` 仅支持 JSON 中带 `@class` 属性或声明了 `@JsonTypeInfo` 的类
-3. `toJsonIgnoreNull()` 在序列化时会忽略所有值为 null 的属性
-4. `isJsonObjectOrArray()` 使用流式解析，不会反序列化为完整对象树，性能极高，适合批量校验
+2`toJsonIgnoreNull()` 在序列化时会忽略所有值为 null 的属性
+3`isJsonObjectOrArray()` 使用流式解析，不会反序列化为完整对象树，性能极高，适合批量校验

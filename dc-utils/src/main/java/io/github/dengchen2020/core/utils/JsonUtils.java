@@ -1,9 +1,5 @@
 package io.github.dengchen2020.core.utils;
 
-import java.io.InputStream;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JsonParser;
@@ -12,6 +8,11 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.io.InputStream;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * json处理工具类
@@ -151,17 +152,6 @@ public abstract class JsonUtils {
      */
     public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
         return JsonHelper.INSTANCE.deserialize(data, type);
-    }
-
-    /**
-     * 反序列化，需要动态类型序列化的场景中使用，一般场景不推荐使用
-     * <p>仅支持反序列化源json数据携带有{@code @class}属性或添加了注解{@code @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)}的类</p>
-     *
-     * @param data 字节数组
-     * @return 对象
-     */
-    public static <T> @Nullable T deserialize(byte[] data) {
-        return JsonHelper.INSTANCE.deserialize(data);
     }
 
     /**
