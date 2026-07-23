@@ -27,6 +27,8 @@ public class DcFunctionContributor implements FunctionContributor {
             registry.registerPattern("jsonb_exists", "jsonb_exists(?1,?2)", booleanBasicType);
             registry.registerPattern("json_contains","?1 @> ?2::jsonb", booleanBasicType);
             registry.registerPattern("st_dwithin", "st_dwithin(?1,?2,?3)", booleanBasicType);
+            registry.registerPattern("similarity", "similarity(?1,?2)", doubleBasicType);
+            registry.registerPattern("bsimilarity", "?1 % ?2", booleanBasicType);
         } else if (dialect instanceof MySQLDialect) {
             registry.registerPattern("random", "rand()", doubleBasicType);
             registry.registerPattern("json_contains","json_contains(?1,?2)", booleanBasicType);
