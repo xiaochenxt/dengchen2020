@@ -194,7 +194,7 @@ public class CsvReader implements AutoCloseable {
                     break;
                 }
                 // 添加换行符分隔多行内容
-                currentValue.append("\n");
+                currentValue.append('\n');
             }
         } while (inQuotes);
 

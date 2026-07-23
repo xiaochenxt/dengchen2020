@@ -66,7 +66,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, methodsLength = methods.length; i < methodsLength; i++) {
             Method method = methods[i];
             s.append(method.toString());
-            if (i != methodsLength - 1) s.append(",");
+            if (i != methodsLength - 1) s.append(',');
         }
         System.out.println("registering reflect method " + s);
     }
@@ -78,7 +78,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, constructorsLength = constructors.length; i < constructorsLength; i++) {
             Constructor<?> constructor = constructors[i];
             s.append(constructor.toString());
-            if (i != constructorsLength - 1) s.append(",");
+            if (i != constructorsLength - 1) s.append(',');
         }
         System.out.println("registering reflect constructor " + s);
     }
@@ -90,7 +90,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, fieldsLength = fields.length; i < fieldsLength; i++) {
             Field field = fields[i];
             s.append(field.toString());
-            if (i != fieldsLength - 1) s.append(",");
+            if (i != fieldsLength - 1) s.append(',');
         }
         System.out.println("registering reflect field " + s);
     }
@@ -168,7 +168,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, methodsLength = methods.length; i < methodsLength; i++) {
             Method method = methods[i];
             s.append(method.toString());
-            if (i != methodsLength - 1) s.append(",");
+            if (i != methodsLength - 1) s.append(',');
         }
         System.out.println("registering jni method " + s);
     }
@@ -180,7 +180,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, constructorsLength = constructors.length; i < constructorsLength; i++) {
             Constructor<?> constructor = constructors[i];
             s.append(constructor.toString());
-            if (i != constructorsLength - 1) s.append(",");
+            if (i != constructorsLength - 1) s.append(',');
         }
         System.out.println("registering jni constructor " + s);
     }
@@ -192,7 +192,7 @@ public class FeatureUtils extends CollectUtils {
         for (int i = 0, fieldsLength = fields.length; i < fieldsLength; i++) {
             Field field = fields[i];
             s.append(field.toString());
-            if (i != fieldsLength - 1) s.append(",");
+            if (i != fieldsLength - 1) s.append(',');
         }
         System.out.println("registering jni field " + s);
     }
