@@ -32,10 +32,11 @@ public final class RedisCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
+    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder) {
         String prefixCacheName = "dc:cache:";
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         CacheSpecBuilder.Redis builder = cacheSpecBuilder.getRedis();
+        var genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializerBuilder.defaultTyping(true).build();
         builder.getSpecs().forEach((s, cacheSpec) -> {
             if (cacheSpec.getExpireTime() == null || cacheSpec.getExpireTime().compareTo(Duration.ofSeconds(1)) < 0) cacheSpec.setExpireTime(builder.getExpireTime());
             RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().prefixCacheNameWith(prefixCacheName).entryTtl(cacheSpec.getExpireTime())
