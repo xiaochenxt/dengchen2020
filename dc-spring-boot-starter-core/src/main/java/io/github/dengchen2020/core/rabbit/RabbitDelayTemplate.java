@@ -23,14 +23,19 @@ public class RabbitDelayTemplate {
     private final String defaultExchange;
     private final long defaultDelay;
 
+    /**
+     * 消息无延迟
+     */
+    private static final long X_DELAY_MIN = 0;
+
     public RabbitDelayTemplate(RabbitTemplate rabbitTemplate) {
-        this(rabbitTemplate, RabbitConstant.DELAY_EXCHANGE, 0);
+        this(rabbitTemplate, RabbitConstant.DELAY_EXCHANGE, X_DELAY_MIN);
     }
 
     public RabbitDelayTemplate(RabbitTemplate rabbitTemplate, String defaultExchange, long defaultDelay) {
         this.rabbitTemplate = rabbitTemplate;
         this.defaultExchange = defaultExchange;
-        this.defaultDelay = Math.max(defaultDelay, 0);
+        this.defaultDelay = Math.max(defaultDelay, X_DELAY_MIN);
     }
 
     /**
@@ -68,14 +73,15 @@ public class RabbitDelayTemplate {
         Assert.notNull(routingKey, "路由键不能为null");
         Assert.notNull(obj, "消息对象不能为null");
         long millis = time == null ? defaultDelay :
-                Math.clamp(time.toMillis(), defaultDelay, MessageProperties.X_DELAY_MAX);
+                Math.clamp(time.toMillis(), X_DELAY_MIN, MessageProperties.X_DELAY_MAX);
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
         //发送延迟消息
         rabbitTemplate.convertAndSend(exchange, routingKey, obj, message -> {
+            var messageProperties = message.getMessageProperties();
             //消息持久化
-            message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             //设置延迟时间，毫秒。
-            message.getMessageProperties().setHeader(MessageProperties.X_DELAY, millis);
+            if (millis > 0) messageProperties.setHeader(MessageProperties.X_DELAY, millis);
             return message;
         }, correlationData);
     }

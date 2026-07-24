@@ -77,7 +77,8 @@ public final class SpringWebSocketAutoConfiguration implements WebSocketConfigur
      * 配置websocket容器
      */
     @Lazy(false)
-    @ConditionalOnMissingBean
+    // @SpringBootTest的Mock环境下servletContext中没有ServerContainer
+    @ConditionalOnMissingBean(value = ServletServerContainerFactoryBean.class, type = "org.springframework.boot.test.mock.web.SpringBootMockServletContext")
     @Bean
     ServletServerContainerFactoryBean serverContainerFactoryBean() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();

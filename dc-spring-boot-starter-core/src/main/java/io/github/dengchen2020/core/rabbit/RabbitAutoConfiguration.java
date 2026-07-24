@@ -66,13 +66,16 @@ public final class RabbitAutoConfiguration {
                 }
             } else {
                 Message message = returned.getMessage();
+                var messageProperties = message.getMessageProperties();
                 Object body = messageConverter.fromMessage(message);
                 if (ack) {
-                    Long receivedDelay = message.getMessageProperties().getReceivedDelayLong();
-                    String handleTime = receivedDelay == null || receivedDelay <= 30000 ? "，" : "，预计处理时间：" + LocalDateTime.now().plusSeconds(receivedDelay / 1000);
-                    if (log.isDebugEnabled()) log.debug("消息发送成功 --> 消息id：{}{}，消息：{}，交换机：{}，队列：{}，路由键：{}", correlationData.getId(), handleTime, body, returned.getExchange(), message.getMessageProperties().getConsumerQueue(), returned.getRoutingKey());
+                    if (log.isDebugEnabled()) {
+                        Long receivedDelay = messageProperties.getReceivedDelayLong();
+                        String handleTime = receivedDelay == null || receivedDelay <= 5000 ? "" : "，预计处理时间：" + LocalDateTime.now().plusSeconds(receivedDelay / 1000);
+                        log.debug("消息发送成功 --> 消息id：{}{}，消息：{}，交换机：{}，队列：{}，路由键：{}", correlationData.getId(), handleTime, body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey());
+                    }
                 } else {
-                    log.error("消息发送失败 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}，异常：{}", correlationData.getId(), body, returned.getExchange(), message.getMessageProperties().getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), cause);
+                    log.error("消息发送失败 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}，异常：{}", correlationData.getId(), body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), cause);
                 }
             }
         };
@@ -82,14 +85,15 @@ public final class RabbitAutoConfiguration {
     @Bean
     RabbitTemplate.ReturnsCallback returnsCallback(MessageConverter messageConverter) {
         return returned -> {
+            var messageProperties = returned.getMessage().getMessageProperties();
             //排除延时任务：因为发送方确实没有投递到队列上，只是在交换器上暂存，等过期时间到了 才会发往队列
-            if (returned.getMessage().getMessageProperties().getReceivedDelayLong() != null) {
+            if (messageProperties.getReceivedDelayLong() != null) {
                 if (returned.getReplyCode() == 312 && "NO_ROUTE".equals(returned.getReplyText())) {
                     return;
                 }
             }
             Object body = messageConverter.fromMessage(returned.getMessage());
-            log.error("消息发送失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", returned.getMessage().getMessageProperties().getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), body, returned.getExchange(), returned.getMessage().getMessageProperties().getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
+            log.error("消息路由失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", messageProperties.getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
         };
     }
 
