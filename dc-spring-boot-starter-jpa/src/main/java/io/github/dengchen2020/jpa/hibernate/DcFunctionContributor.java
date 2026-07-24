@@ -29,6 +29,12 @@ public class DcFunctionContributor implements FunctionContributor {
             registry.registerPattern("st_dwithin", "st_dwithin(?1,?2,?3)", booleanBasicType);
             registry.registerPattern("similarity", "similarity(?1,?2)", doubleBasicType);
             registry.registerPattern("bsimilarity", "?1 % ?2", booleanBasicType);
+            registry.registerPattern("left_word_similarity", "?1 <% ?2", booleanBasicType);
+            registry.registerPattern("right_word_similarity", "?1 %> ?2", booleanBasicType);
+            registry.registerPattern("word_similarity", "word_similarity(?1,?2)", doubleBasicType);
+            registry.registerPattern("left_strict_word_similarity", "?1 <<% ?2", booleanBasicType);
+            registry.registerPattern("right_strict_word_similarity", "?1 %>> ?2", booleanBasicType);
+            registry.registerPattern("strict_word_similarity", "strict_word_similarity(?1,?2)", doubleBasicType);
         } else if (dialect instanceof MySQLDialect) {
             registry.registerPattern("random", "rand()", doubleBasicType);
             registry.registerPattern("json_contains","json_contains(?1,?2)", booleanBasicType);
