@@ -54,7 +54,7 @@ public class RabbitDelayTemplate {
      *
      * @param routingKey 路由键
      * @param obj        消息对象
-     * @param time 延迟时间
+     * @param time 延迟时间，最多49天（4294967295毫秒）
      */
     public void send(String routingKey,Object obj, Duration time) {
         send(defaultExchange, routingKey, obj, time);
@@ -66,7 +66,7 @@ public class RabbitDelayTemplate {
      * @param exchange   延迟交换机
      * @param routingKey 路由键
      * @param obj        消息对象
-     * @param time     延迟时间
+     * @param time     延迟时间，最多49天（4294967295毫秒）
      */
     public void send(String exchange, String routingKey, Object obj,@Nullable Duration time) {
         Assert.notNull(exchange, "交换机不能为null");
