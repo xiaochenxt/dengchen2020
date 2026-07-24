@@ -2,6 +2,8 @@ package io.github.dengchen2020.core.jackson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.dengchen2020.jackson.DcModule;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.dataformat.xml.XmlMapper;
 import io.github.dengchen2020.core.utils.JsonHelper;
@@ -26,17 +28,16 @@ public final class JacksonAutoConfiguration {
     @ConditionalOnClass(GenericJacksonJsonRedisSerializer.class)
     @Configuration(proxyBeanMethods = false)
     static final class GenericJacksonJsonRedisSerializerConfiguration {
+        @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
         @ConditionalOnMissingBean
         @Bean
-        GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer(List<JsonMapperBuilderCustomizer> customizers){
+        GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJackson2JsonRedisSerializerBuilder(List<JsonMapperBuilderCustomizer> customizers){
             return GenericJacksonJsonRedisSerializer.builder()
-                    .enableUnsafeDefaultTyping()
                     .enableSpringCacheNullValueSupport()
                     .customize(mapper -> {
                         for (JsonMapperBuilderCustomizer customizer : customizers) customizer.customize(mapper);
                         mapper.changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL));
-                    })
-                    .build();
+                    });
         }
     }
 

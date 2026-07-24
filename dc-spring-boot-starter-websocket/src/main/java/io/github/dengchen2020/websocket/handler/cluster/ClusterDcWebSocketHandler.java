@@ -11,6 +11,8 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.web.socket.CloseStatus;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 import java.nio.ByteBuffer;
 
@@ -50,8 +52,9 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     }
 
     @Autowired
-    public void setGenericJacksonJsonRedisSerializer(GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer) {
-        this.genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializer;
+    public void setGenericJacksonJsonRedisSerializer(GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJacksonJsonRedisSerializerBuilder) {
+        this.genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializerBuilder.enableDefaultTyping(BasicPolymorphicTypeValidator.builder()
+                .allowIfBaseType(WebSocketSendParam.class).build()).build();
     }
 
     @Override

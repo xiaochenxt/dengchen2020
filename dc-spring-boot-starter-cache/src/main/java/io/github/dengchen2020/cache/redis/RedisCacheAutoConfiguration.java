@@ -13,6 +13,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -32,10 +33,11 @@ public final class RedisCacheAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer) {
+    RedisCacheManager redisCacheManager(CacheSpecBuilder cacheSpecBuilder, RedisConnectionFactory redisConnectionFactory, GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJacksonJsonRedisSerializerBuilder) {
         String prefixCacheName = "dc:cache:";
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         CacheSpecBuilder.Redis builder = cacheSpecBuilder.getRedis();
+        var genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializerBuilder.enableUnsafeDefaultTyping().build();
         builder.getSpecs().forEach((s, cacheSpec) -> {
             if (cacheSpec.getExpireTime() == null || cacheSpec.getExpireTime().compareTo(Duration.ofSeconds(1)) < 0) cacheSpec.setExpireTime(builder.getExpireTime());
             RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().prefixCacheNameWith(prefixCacheName).entryTtl(cacheSpec.getExpireTime())
