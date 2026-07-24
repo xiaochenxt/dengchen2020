@@ -26,7 +26,8 @@ public class JacksonJsonMessageConverter extends org.springframework.amqp.suppor
                 if (targetJavaType.isTypeOrSubTypeOf(byte[].class)) {
                     return message.getBody();
                 } else if (targetJavaType.isTypeOrSubTypeOf(String.class)) {
-                    return new String(message.getBody(), properties.getContentEncoding() != null ? properties.getContentEncoding() : getDefaultCharset());
+                    var contentEncoding = properties.getContentEncoding();
+                    return new String(message.getBody(), contentEncoding != null ? contentEncoding : getDefaultCharset());
                 }
             } catch (Exception ignored) {
 
@@ -46,8 +47,9 @@ public class JacksonJsonMessageConverter extends org.springframework.amqp.suppor
                 body = bytes;
             } else if (object instanceof String str) {
                 messageProperties.setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN);
-                messageProperties.setContentEncoding(getDefaultCharset());
-                body = str.getBytes(getDefaultCharset());
+                var defaultCharset = getDefaultCharset();
+                messageProperties.setContentEncoding(defaultCharset);
+                body = str.getBytes(defaultCharset);
             }
             if (body != null) {
                 messageProperties.setContentLength(body.length);
