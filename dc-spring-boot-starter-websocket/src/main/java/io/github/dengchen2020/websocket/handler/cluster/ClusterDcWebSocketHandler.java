@@ -50,7 +50,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     }
 
     @Autowired
-    public void setGenericJackson2JsonRedisSerializer(GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder) {
+    public void setGenericJacksonJsonRedisSerializerBuilder(GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder) {
         this.genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializerBuilder.defaultTyping(true).build();
     }
 
