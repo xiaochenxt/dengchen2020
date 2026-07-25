@@ -24,7 +24,7 @@ public class LogbackProperties {
     private int queueSize = 4096;
 
     /**
-     * 应用关闭时允许等待该时长处理队列中的残留日志，如果超过这个时间将丢弃剩余的日志
+     * 应用关闭时允许等待该时长处理队列中的残留日志，如果超过这个时间将丢弃剩余的日志，默认1秒
      */
     private Duration maxFlushTime = Duration.ofMillis(AsyncAppenderBase.DEFAULT_MAX_FLUSH_TIME);
 
