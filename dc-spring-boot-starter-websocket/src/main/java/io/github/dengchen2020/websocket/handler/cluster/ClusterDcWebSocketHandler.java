@@ -52,7 +52,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     }
 
     @Autowired
-    public void setGenericJacksonJsonRedisSerializer(GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJacksonJsonRedisSerializerBuilder) {
+    public void setGenericJacksonJsonRedisSerializerBuilder(GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJacksonJsonRedisSerializerBuilder) {
         this.genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializerBuilder.enableDefaultTyping(BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(WebSocketSendParam.class).build()).build();
     }
