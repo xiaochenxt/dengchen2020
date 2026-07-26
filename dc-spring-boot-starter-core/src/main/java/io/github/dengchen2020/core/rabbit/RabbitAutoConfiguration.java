@@ -72,7 +72,9 @@ public final class RabbitAutoConfiguration {
                     if (log.isDebugEnabled()) {
                         Long receivedDelay = messageProperties.getReceivedDelayLong();
                         String handleTime = receivedDelay == null || receivedDelay <= 5000 ? "" : "，预计处理时间：" + LocalDateTime.now().plusSeconds(receivedDelay / 1000);
-                        log.debug("消息发送成功 --> 消息id：{}{}，消息：{}，交换机：{}，队列：{}，路由键：{}", correlationData.getId(), handleTime, body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey());
+                        var retryCount = messageProperties.getRetryCount();
+                        String retryCountText = retryCount == 0 ? "" : "，重试计数：" + retryCount;
+                        log.debug("消息发送成功 --> 消息id：{}{}{}，消息：{}，交换机：{}，队列：{}，路由键：{}", correlationData.getId(), retryCountText, handleTime, body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey());
                     }
                 } else {
                     log.error("消息发送失败 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}，异常：{}", correlationData.getId(), body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), cause);
