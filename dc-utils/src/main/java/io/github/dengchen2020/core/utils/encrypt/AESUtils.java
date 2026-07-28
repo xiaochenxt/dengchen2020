@@ -7,6 +7,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -46,7 +47,7 @@ public abstract class AESUtils {
      * 生成 AES 密钥
      * @param keySize 密钥长度，可选 128、192、256
      * @return 密钥的 Base64 编码字符串
-     * @throws Exception 异常
+     * @throws AESGenerateKeyException 异常
      */
     public static String generateKey(int keySize) {
         try {
@@ -98,7 +99,7 @@ public abstract class AESUtils {
             byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
             SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, iv);
-            byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
+            byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
             throw new AESEncryptException(e);
@@ -157,7 +158,7 @@ public abstract class AESUtils {
             SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, iv);
             byte[] decryptedBytes = cipher.doFinal(cipherBytes);
-            return new String(decryptedBytes);
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new AESDecryptException(e);
         }
@@ -183,6 +184,65 @@ public abstract class AESUtils {
      */
     public static String decrypt(String cipherText, String keyBase64, String ivBase64) {
         return decrypt(cipherText, keyBase64, ivBase64, CBC_PKCS5_PADDING);
+    }
+
+    /**
+     * AES 解密，返回原始字节数组
+     * @param cipherText 密文的 Base64 编码字符串
+     * @param keyBase64 密钥的 Base64 编码字符串
+     * @param iv 初始化向量
+     * @param cipher 密码对象
+     * @return 解密后的原始字节数组
+     */
+    public static byte[] decryptToBytes(String cipherText, String keyBase64, IvParameterSpec iv, Cipher cipher) {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
+            byte[] cipherBytes = Base64.getDecoder().decode(cipherText);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, iv);
+            return cipher.doFinal(cipherBytes);
+        } catch (Exception e) {
+            throw new AESDecryptException(e);
+        }
+    }
+
+    /**
+     * AES 解密，返回原始字节数组
+     * @param cipherText 密文的 Base64 编码字符串
+     * @param keyBase64 密钥的 Base64 编码字符串
+     * @param iv 初始化向量
+     * @param transformation 转换名称
+     * @return 解密后的原始字节数组
+     */
+    public static byte[] decryptToBytes(String cipherText, String keyBase64, IvParameterSpec iv, String transformation) {
+        try {
+            return decryptToBytes(cipherText, keyBase64, iv, Cipher.getInstance(transformation));
+        } catch (Exception e) {
+            throw new AESDecryptException(e);
+        }
+    }
+
+    /**
+     * AES 解密，返回原始字节数组
+     * @param cipherText 密文的 Base64 编码字符串
+     * @param keyBase64 密钥的 Base64 编码字符串
+     * @param ivBase64 初始化向量的 Base64 编码字符串
+     * @param transformation 转换名称
+     * @return 解密后的原始字节数组
+     */
+    public static byte[] decryptToBytes(String cipherText, String keyBase64, String ivBase64, String transformation) {
+        return decryptToBytes(cipherText, keyBase64, new IvParameterSpec(Base64.getDecoder().decode(ivBase64)), transformation);
+    }
+
+    /**
+     * AES CBC PKCS5Padding 解密，返回原始字节数组
+     * @param cipherText 密文的 Base64 编码字符串
+     * @param keyBase64 密钥的 Base64 编码字符串
+     * @param ivBase64 初始化向量的 Base64 编码字符串
+     * @return 解密后的原始字节数组
+     */
+    public static byte[] decryptToBytes(String cipherText, String keyBase64, String ivBase64) {
+        return decryptToBytes(cipherText, keyBase64, ivBase64, CBC_PKCS5_PADDING);
     }
 
 }
