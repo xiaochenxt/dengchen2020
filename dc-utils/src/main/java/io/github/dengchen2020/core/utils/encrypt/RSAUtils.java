@@ -114,7 +114,12 @@ public abstract class RSAUtils {
      * @return 加密后的Base64编码字符串
      */
     public static String encrypt(byte[] data, PublicKey publicKey, Cipher cipher) {
-        return Base64.getEncoder().encodeToString(encryptToBytes(data, publicKey, cipher));
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(data));
+        } catch (Exception e) {
+            throw new RSAEncryptException(e);
+        }
     }
 
     /**
@@ -125,47 +130,6 @@ public abstract class RSAUtils {
      */
     public static String encrypt(byte[] data, PublicKey publicKey) {
         return encrypt(data, publicKey, ECB_OAEPWithSHA256_MGF1Padding);
-    }
-
-    /**
-     * RSA公钥加密
-     * @param data 待加密的数据
-     * @param publicKey 公钥
-     * @param cipher 密码对象
-     * @return 加密后的原始字节数组
-     */
-    public static byte[] encryptToBytes(byte[] data, PublicKey publicKey, Cipher cipher) {
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            return cipher.doFinal(data);
-        } catch (Exception e) {
-            throw new RSAEncryptException(e);
-        }
-    }
-
-    /**
-     * RSA公钥加密
-     * @param data 待加密的数据
-     * @param publicKey 公钥
-     * @param transformation 转换名称
-     * @return 加密后的原始字节数组
-     */
-    public static byte[] encryptToBytes(byte[] data, PublicKey publicKey, String transformation) {
-        try {
-            return encryptToBytes(data, publicKey, Cipher.getInstance(transformation));
-        } catch (Exception e) {
-            throw new RSAEncryptException(e);
-        }
-    }
-
-    /**
-     * RSA公钥加密
-     * @param data 待加密的数据
-     * @param publicKey 公钥
-     * @return 加密后的原始字节数组
-     */
-    public static byte[] encryptToBytes(byte[] data, PublicKey publicKey) {
-        return encryptToBytes(data, publicKey, ECB_OAEPWithSHA256_MGF1Padding);
     }
 
     /**
