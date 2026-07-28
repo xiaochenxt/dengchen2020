@@ -1,5 +1,7 @@
 package io.github.dengchen2020.core.utils.encrypt;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -28,6 +30,7 @@ import java.util.Base64;
  * @author xiaochen
  * @since 2025/3/12
  */
+@NullMarked
 public abstract class RSAUtils {
 
     public static final String ALGORITHM = "RSA";
