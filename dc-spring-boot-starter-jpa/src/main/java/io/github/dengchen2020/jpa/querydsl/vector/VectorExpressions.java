@@ -26,7 +26,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code a <-> b}，Euclidean distance
+     * sql：{@code a <-> b}，欧式距离
      * @param expr 要匹配的向量
      * @param vector 要匹配的向量
      * @return {@link NumberExpression<Double>}
@@ -36,7 +36,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code (a <-> b)^2}，squared Euclidean distance
+     * sql：{@code (a <-> b)^2}，平方欧氏距离
      * @param expr 要匹配的向量
      * @param vector 要匹配的向量
      * @return {@link NumberExpression<Double>}
@@ -46,7 +46,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code l1_distance(vector, vector)}，taxicab distance
+     * sql：{@code l1_distance(vector, vector)}，曼哈顿距离
      * @param expr 要匹配的向量
      * @param vector 要匹配的向量
      * @return {@link NumberExpression<Double>}
@@ -56,7 +56,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code (a <#> b) *-1}，inner product
+     * sql：{@code (a <#> b) *-1}，内积
      * @param expr 要匹配的向量
      * @param vector 要匹配的向量
      * @return {@link NumberExpression<Double>}
@@ -66,7 +66,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code a <#> b}，negative inner product
+     * sql：{@code a <#> b}，负内积
      * @param expr 要匹配的向量
      * @param vector 要匹配的向量
      * @return {@link NumberExpression<Double>}
@@ -76,7 +76,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code vector_dims(vector)}, number of dimensions
+     * sql：{@code vector_dims(vector)}, 获取向量的维度数量
      * @param expr 要匹配的向量
      * @return {@link NumberExpression<Integer>}
      */
@@ -85,7 +85,7 @@ public final class VectorExpressions {
     }
 
     /**
-     * sql：{@code vector_norm(vector)}，Euclidean norm
+     * sql：{@code vector_norm(vector)}，计算向量的欧几里得 L2 模长（L2 范数）
      * @param expr 要匹配的向量
      * @return {@link NumberExpression<Double>}
      */
