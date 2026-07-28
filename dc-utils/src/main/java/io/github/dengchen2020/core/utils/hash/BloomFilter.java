@@ -87,7 +87,11 @@ public abstract class BloomFilter {
         }
 
         byte[] bytes = element.getBytes(StandardCharsets.UTF_8);
-        int[] hashes = getHashes(bytes);
+        add(bytes);
+    }
+
+    public void add(byte[] data) {
+        int[] hashes = getHashes(data);
 
         for (int i = 0; i < hashFunctions; i++) {
             int bitIndex = (hashes[0] + i * hashes[1]) % bitSize;
@@ -109,7 +113,11 @@ public abstract class BloomFilter {
         }
 
         byte[] bytes = element.getBytes(StandardCharsets.UTF_8);
-        int[] hashes = getHashes(bytes);
+        return mightContain(bytes);
+    }
+
+    public boolean mightContain(byte[] data) {
+        int[] hashes = getHashes(data);
 
         for (int i = 0; i < hashFunctions; i++) {
             int bitIndex = (hashes[0] + i * hashes[1]) % bitSize;
