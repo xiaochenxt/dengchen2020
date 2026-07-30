@@ -1,6 +1,6 @@
 package io.github.dengchen2020.jpa.querydsl.vector;
 
-import com.querydsl.core.types.dsl.ArrayExpression;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import org.jspecify.annotations.NullMarked;
@@ -32,7 +32,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> cosineDistance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> cosineDistance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"cosine_distance({0},{1})", expr, vector);
     }
 
@@ -43,7 +43,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l2Distance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l2Distance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l2_distance({0},{1})", expr, vector);
     }
 
@@ -54,7 +54,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l2SquaredDistance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l2SquaredDistance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l2_squared_distance({0},{1})", expr, vector);
     }
 
@@ -65,7 +65,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l1Distance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l1Distance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l1_distance({0},{1})", expr, vector);
     }
 
@@ -76,7 +76,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> innerProduct(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> innerProduct(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"inner_product({0},{1})", expr, vector);
     }
 
@@ -87,7 +87,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> negativeInnerProduct(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> negativeInnerProduct(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"negative_inner_product({0},{1})", expr, vector);
     }
 
@@ -97,7 +97,7 @@ public final class VectorExpressions {
      * @param expr 向量列表达式
      * @return {@link NumberExpression<Integer>}
      */
-    public static NumberExpression<Integer> vectorDims(ArrayExpression<float[], Float> expr){
+    public static NumberExpression<Integer> vectorDims(Expression<float[]> expr){
         return Expressions.numberTemplate(Integer.class,"vector_dims({0})", expr);
     }
 
@@ -108,7 +108,7 @@ public final class VectorExpressions {
      * @param expr 向量列表达式
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> vectorNorm(ArrayExpression<float[], Float> expr){
+    public static NumberExpression<Double> vectorNorm(Expression<float[]> expr){
         return Expressions.numberTemplate(Double.class,"vector_norm({0})", expr);
     }
 
