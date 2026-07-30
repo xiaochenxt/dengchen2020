@@ -1,6 +1,9 @@
 package io.github.dengchen2020.jpa.querydsl.vector;
 
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -24,13 +27,20 @@ public final class VectorExpressions {
     private VectorExpressions(){}
 
     /**
+     * 将 {@code float[]} 转换为 {@code vector} 类型
+     */
+    public static SimpleExpression<float[]> vector(float[] vector) {
+        return Expressions.simpleTemplate(float[].class, "cast({0} as vector)", (Object) vector);
+    }
+
+    /**
      * sql：{@code a <=> b}，余弦距离
      * <p>相似度规则：范围：[0.0 , 2.0]，数值越小，向量越相似</p>
      * @param expr 向量列表达式
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> cosineDistance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> cosineDistance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"cosine_distance({0},{1})", expr, vector);
     }
 
@@ -41,7 +51,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l2Distance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l2Distance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l2_distance({0},{1})", expr, vector);
     }
 
@@ -52,7 +62,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l2SquaredDistance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l2SquaredDistance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l2_squared_distance({0},{1})", expr, vector);
     }
 
@@ -63,7 +73,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> l1Distance(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> l1Distance(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"l1_distance({0},{1})", expr, vector);
     }
 
@@ -74,7 +84,7 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> innerProduct(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> innerProduct(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"inner_product({0},{1})", expr, vector);
     }
 
@@ -85,8 +95,30 @@ public final class VectorExpressions {
      * @param vector 查询向量
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> negativeInnerProduct(ArrayExpression<float[], Float> expr, float[] vector){
+    public static NumberExpression<Double> negativeInnerProduct(Expression<float[]> expr, float[] vector){
         return Expressions.numberTemplate(Double.class,"negative_inner_product({0},{1})", expr, vector);
+    }
+
+    /**
+     * sql：{@code binary_vector <~> binary_vector)}，汉明距离（仅用于二进制向量）
+     * <p>相似度规则：范围：[0.0 , +∞)，数值越小，向量越相似</p>
+     * @param expr 向量列表达式
+     * @param b 查询向量
+     * @return {@link NumberExpression<Double>}
+     */
+    public static NumberExpression<Double> hammingDistance(NumberExpression<Byte> expr, NumberExpression<Byte> b){
+        return Expressions.numberTemplate(Double.class,"hamming_distance({0},{1})", expr, b);
+    }
+
+    /**
+     * sql：{@code binary_vector <%> binary_vector}，杰卡德距离（仅用于二进制向量）
+     * <p>相似度规则：范围：[0.0 , 1.0]，数值越小，向量越相似</p>
+     * @param expr 向量列表达式
+     * @param b 查询向量
+     * @return {@link NumberExpression<Double>}
+     */
+    public static NumberExpression<Double> jaccardDistance(NumberExpression<Byte> expr, NumberExpression<Byte> b){
+        return Expressions.numberTemplate(Double.class,"jaccard_distance({0},{1})", expr, b);
     }
 
     /**
@@ -95,7 +127,7 @@ public final class VectorExpressions {
      * @param expr 向量列表达式
      * @return {@link NumberExpression<Integer>}
      */
-    public static NumberExpression<Integer> vectorDims(ArrayExpression<float[], Float> expr){
+    public static NumberExpression<Integer> vectorDims(Expression<float[]> expr){
         return Expressions.numberTemplate(Integer.class,"vector_dims({0})", expr);
     }
 
@@ -106,17 +138,26 @@ public final class VectorExpressions {
      * @param expr 向量列表达式
      * @return {@link NumberExpression<Double>}
      */
-    public static NumberExpression<Double> vectorNorm(ArrayExpression<float[], Float> expr){
+    public static NumberExpression<Double> vectorNorm(Expression<float[]> expr){
         return Expressions.numberTemplate(Double.class,"vector_norm({0})", expr);
     }
 
     /**
      * sql：{@code binary_quantize(vector)}，二进制量化，将浮点 vector 按维度正负转为 bit 向量；维度 > 0 置 1，≤0 置 0。用于构建二进制粗召回索引，搭配汉明距离<~>检索，一般需要原始向量二次精排弥补精度损失
      * @param expr 向量列表达式
-     * @return {@link SimpleExpression}
+     * @return {@link NumberExpression<Byte>}
      */
-    public static SimpleExpression<byte[]> binaryQuantize(ArrayExpression<float[], Float> expr){
-        return Expressions.template(byte[].class,"binary_quantize({0})", expr);
+    public static NumberExpression<Byte> binaryQuantize(Expression<float[]> expr){
+        return Expressions.numberTemplate(Byte.class,"binary_quantize({0})", expr);
+    }
+
+    /**
+     * sql：{@code binary_quantize(vector)}，二进制量化，将浮点 vector 按维度正负转为 bit 向量；维度 > 0 置 1，≤0 置 0。用于构建二进制粗召回索引，搭配汉明距离<~>检索，一般需要原始向量二次精排弥补精度损失
+     * @param vector 向量列表达式
+     * @return {@link NumberExpression<Byte>}
+     */
+    public static NumberExpression<Byte> binaryQuantize(float[] vector){
+        return Expressions.numberTemplate(Byte.class,"binary_quantize({0})", vector(vector));
     }
 
     /**
@@ -127,7 +168,7 @@ public final class VectorExpressions {
      * @param length 长度
      * @return {@link SimpleExpression}
      */
-    public static SimpleExpression<float[]> subvector(ArrayExpression<float[], Float> expr, int offset, int length){
+    public static SimpleExpression<float[]> subvector(Expression<float[]> expr, int offset, int length){
         return Expressions.template(float[].class,"subvector({0},{1},{2})", expr, offset, length);
     }
 
@@ -136,7 +177,7 @@ public final class VectorExpressions {
      * @param expr 向量列表达式
      * @return {@link SimpleExpression}
      */
-    public static SimpleExpression<float[]> l2Normalize(ArrayExpression<float[], Float> expr){
+    public static SimpleExpression<float[]> l2Normalize(Expression<float[]> expr){
         return Expressions.template(float[].class,"l2_normalize({0})", expr);
     }
 
