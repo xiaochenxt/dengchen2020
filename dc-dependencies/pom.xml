@@ -4,7 +4,7 @@
 
   <groupId>io.github.dengchen2020</groupId>
   <artifactId>dc-dependencies</artifactId>
-  <version>0.3.25</version>
+  <version>0.3.26</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -47,7 +47,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dc.version>0.3.25</dc.version>
+    <dc.version>0.3.26</dc.version>
     <jspecify.version>1.0.0</jspecify.version>
     <redisson.version>4.6.1</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
@@ -246,7 +246,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.10.0</version>
+        <version>0.11.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
