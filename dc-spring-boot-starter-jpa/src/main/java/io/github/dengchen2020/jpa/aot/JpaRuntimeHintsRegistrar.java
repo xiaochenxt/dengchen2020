@@ -25,6 +25,7 @@ public class JpaRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         aotUtils.registerReflection(BaseJpaRepositoryExecutor.class, QuerydslJpaRepositoryExecutor.class, QuerydslJdbcRepositoryExecutor.class);
         aotUtils.registerPattern("keywords/*");
         aotUtils.registerReflectionIfPresent("com.querydsl.sql.SQLTemplates");
+        aotUtils.registerReflectionIfPresent("org.hibernate.internal.log.DeprecationLogger_$logger");
     }
 
 }

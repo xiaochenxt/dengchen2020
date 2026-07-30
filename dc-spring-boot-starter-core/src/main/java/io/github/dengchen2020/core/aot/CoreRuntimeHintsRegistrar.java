@@ -28,6 +28,8 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 Page.class, PageParam.class, SimplePage.class, StatsPage.class, ScheduledHandleBeforeEvent.class);
         aotUtils.registerReflectionIfPresent("io.github.dengchen2020.core.context.CtxImpl");
         aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
+        aotUtils.registerReflectionIfPresent("org.apache.coyote.http11.Http11NioProtocol",
+                "org.apache.coyote.AbstractProtocol","org.apache.coyote.http11.AbstractHttp11Protocol");
     }
 
 }

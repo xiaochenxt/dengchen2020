@@ -52,7 +52,7 @@
     <redisson.version>4.6.1</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <protostuff.version>1.8.0</protostuff.version>
-    <graalvm.version>25.0.3</graalvm.version>
+    <graalvm.version>25.2.4</graalvm.version>
     <zxing.version>3.5.4</zxing.version>
     <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
     <libphonenumber.version>9.0.35</libphonenumber.version>
