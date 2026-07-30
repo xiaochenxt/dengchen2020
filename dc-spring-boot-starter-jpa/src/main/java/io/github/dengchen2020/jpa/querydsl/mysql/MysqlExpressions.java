@@ -1,11 +1,13 @@
 package io.github.dengchen2020.jpa.querydsl.mysql;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import io.github.dengchen2020.jpa.querydsl.JpaExpressions;
-import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.Collection;
 
 /**
  * 扩充querydsl的专用于mysql的sql表达式
@@ -53,7 +55,7 @@ public final class MysqlExpressions {
      * @param expr json字段
      * @param path 路径
      */
-    public static StringExpression jsonExtract(StringExpression expr, String path) {
+    public static StringExpression jsonExtract(Expression<?> expr, String path) {
         return JpaExpressions.jsonValue(expr, path);
     }
 

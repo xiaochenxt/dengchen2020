@@ -30,7 +30,7 @@ public final class JpaExpressions {
      * @param expr json字段值
      * @param path 路径
      */
-    public static StringExpression jsonValue(StringExpression expr, String path) {
+    public static StringExpression jsonValue(Expression<?> expr, String path) {
         return Expressions.stringTemplate("json_value({0},{1})", expr, path);
     }
 
@@ -39,7 +39,7 @@ public final class JpaExpressions {
      * @param expr json字段值
      * @param path 路径
      */
-    public static StringExpression jsonQuery(StringExpression expr, String path) {
+    public static StringExpression jsonQuery(Expression<?> expr, String path) {
         return Expressions.stringTemplate("json_query({0},{1})", expr, path);
     }
 
@@ -48,7 +48,7 @@ public final class JpaExpressions {
      * @param expr json字段值
      * @param path 路径
      */
-    public static BooleanExpression jsonExists(StringExpression expr, String path) {
+    public static BooleanExpression jsonExists(Expression<?> expr, String path) {
         return Expressions.booleanTemplate("json_exists({0},{1})", expr, path);
     }
 
