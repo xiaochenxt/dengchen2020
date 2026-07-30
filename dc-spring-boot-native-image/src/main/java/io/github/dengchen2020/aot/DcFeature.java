@@ -149,6 +149,7 @@ class DcFeature implements Feature {
                 featureUtils.registerReflectionConstructorsIfPresent(
                         "com.github.benmanes.caffeine.cache.SIMSA","com.github.benmanes.caffeine.cache.SIMSW",
                         "com.github.benmanes.caffeine.cache.SSMSA","com.github.benmanes.caffeine.cache.SSMSW");
+                featureUtils.registerReflectionFields("com.github.benmanes.caffeine.cache.SIMSW","FACTORY");
             }, localCacheFactory);
         }
     }
