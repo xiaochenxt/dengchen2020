@@ -3,6 +3,7 @@ package io.github.dengchen2020.jpa.querydsl.vector;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -24,6 +25,13 @@ import org.jspecify.annotations.NullMarked;
 public final class VectorExpressions {
 
     private VectorExpressions(){}
+
+    /**
+     * 将 {@code float[]} 转换为 {@code vector} 类型
+     */
+    public static SimpleExpression<float[]> vector(float[] vector) {
+        return Expressions.simpleTemplate(float[].class, "cast({0} as vector)", (Object) vector);
+    }
 
     /**
      * sql：{@code a <=> b}，余弦距离
