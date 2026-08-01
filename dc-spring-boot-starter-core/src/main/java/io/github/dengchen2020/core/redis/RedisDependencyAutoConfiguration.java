@@ -34,7 +34,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.CollectionUtils;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -91,6 +90,7 @@ public final class RedisDependencyAutoConfiguration {
         private static final Logger log = LoggerFactory.getLogger(RedisMessageListenerRegistrar.class);
         private final ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer;
         private final ObjectProvider<GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder>> genericJacksonJsonRedisSerializerBuilder;
+        private GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer;
 
         RedisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder>> genericJacksonJsonRedisSerializerBuilder){
             this.redisMessageListenerContainer = redisMessageListenerContainer;
@@ -122,9 +122,10 @@ public final class RedisDependencyAutoConfiguration {
                 }else if(argClass == String.class){
                     messageListenerAdapter.setSerializer(RedisSerializer.string());
                 }else {
-                    messageListenerAdapter.setSerializer(genericJacksonJsonRedisSerializerBuilder.getIfAvailable()
-                            .enableDefaultTyping(BasicPolymorphicTypeValidator.builder().allowIfBaseType(argClass).build())
-                            .build());
+                    if (genericJacksonJsonRedisSerializer == null) genericJacksonJsonRedisSerializer = genericJacksonJsonRedisSerializerBuilder.getIfAvailable()
+                            .enableUnsafeDefaultTyping()
+                            .build();
+                        messageListenerAdapter.setSerializer(genericJacksonJsonRedisSerializer);
                 }
                 redisMessageListenerContainer.getIfAvailable().addMessageListener(messageListenerAdapter, topic);
                 if (log.isDebugEnabled()) log.debug("redis消息订阅：{}，频道：{}", method, topic);
