@@ -2,7 +2,6 @@ package io.github.dengchen2020.cache.caffeine;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -18,7 +17,6 @@ import java.io.Serializable;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public record CacheSyncParam(int type, String[] cacheName, Object key) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

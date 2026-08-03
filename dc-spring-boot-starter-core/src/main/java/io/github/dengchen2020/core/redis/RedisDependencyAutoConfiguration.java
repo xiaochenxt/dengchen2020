@@ -2,6 +2,7 @@ package io.github.dengchen2020.core.redis;
 
 import io.github.dengchen2020.core.redis.annotation.RedisListener;
 import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
+import io.github.dengchen2020.core.utils.JsonHelper;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.CollectionUtils;
@@ -63,7 +65,7 @@ public final class RedisDependencyAutoConfiguration {
     @ConditionalOnMissingBean
     @Bean
     RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder){
-        return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializerBuilder.defaultTyping(true).build());
+        return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializerBuilder.build());
     }
 
     @Bean
@@ -80,20 +82,19 @@ public final class RedisDependencyAutoConfiguration {
     }
 
     @Bean
-    static BeanPostProcessor redisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder> genericJackson2JsonRedisSerializerBuilder){
-        return new RedisMessageListenerRegistrar(redisMessageListenerContainer, genericJackson2JsonRedisSerializerBuilder);
+    static BeanPostProcessor redisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<JsonHelper> jsonHelper){
+        return new RedisMessageListenerRegistrar(redisMessageListenerContainer, jsonHelper);
     }
 
     static final class RedisMessageListenerRegistrar implements BeanPostProcessor, Ordered {
 
         private static final Logger log = LoggerFactory.getLogger(RedisMessageListenerRegistrar.class);
         private final ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer;
-        private final ObjectProvider<GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder> genericJackson2JsonRedisSerializerBuilder;
-        private GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer;
+        private final ObjectProvider<JsonHelper> jsonHelper;
 
-        RedisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder> genericJackson2JsonRedisSerializerBuilder){
+        RedisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<JsonHelper> jsonHelper){
             this.redisMessageListenerContainer = redisMessageListenerContainer;
-            this.genericJackson2JsonRedisSerializerBuilder = genericJackson2JsonRedisSerializerBuilder;
+            this.jsonHelper = jsonHelper;
         }
 
         @Override
@@ -120,8 +121,7 @@ public final class RedisDependencyAutoConfiguration {
                 }else if(argClass == String.class){
                     messageListenerAdapter.setSerializer(RedisSerializer.string());
                 }else {
-                    if (genericJackson2JsonRedisSerializer == null) genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializerBuilder.getIfAvailable().defaultTyping(true).build();
-                    messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer);
+                    messageListenerAdapter.setSerializer(new Jackson2JsonRedisSerializer<>(jsonHelper.getIfAvailable().getNonNullMapper(), argClass));
                 }
                 redisMessageListenerContainer.getIfAvailable().addMessageListener(messageListenerAdapter, topic);
                 if (log.isDebugEnabled()) log.debug("redis消息订阅：{}，频道：{}", method, topic);

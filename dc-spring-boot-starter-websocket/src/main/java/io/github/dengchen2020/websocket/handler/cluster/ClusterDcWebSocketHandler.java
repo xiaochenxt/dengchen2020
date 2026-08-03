@@ -1,6 +1,7 @@
 package io.github.dengchen2020.websocket.handler.cluster;
 
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
+import io.github.dengchen2020.core.utils.JsonHelper;
 import io.github.dengchen2020.websocket.annotation.WebSocketMapping;
 import io.github.dengchen2020.websocket.handler.SingletonDcWebSocketHandler;
 import org.jspecify.annotations.NullMarked;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
@@ -37,7 +38,7 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
 
     private WebSocketTemplate webSocketTemplate;
     private RedisMessageListenerContainer redisMessageListenerContainer;
-    private GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer;
+    private Jackson2JsonRedisSerializer<WebSocketSendParam> jacksonJsonRedisSerializer;
 
     @Autowired
     public void setRedisMessagePublisher(RedisMessagePublisher redisMessagePublisher) {
@@ -50,17 +51,17 @@ public abstract class ClusterDcWebSocketHandler extends SingletonDcWebSocketHand
     }
 
     @Autowired
-    public void setGenericJacksonJsonRedisSerializerBuilder(GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder) {
-        this.genericJackson2JsonRedisSerializer = genericJackson2JsonRedisSerializerBuilder.defaultTyping(true).build();
+    public void setJacksonJsonRedisSerializer(JsonHelper jsonHelper) {
+        this.jacksonJsonRedisSerializer = new Jackson2JsonRedisSerializer<>(jsonHelper.getNonNullMapper(), WebSocketSendParam.class);
     }
 
     @Override
     public void afterPropertiesSet() {
         if (redisMessageListenerContainer == null) throw new IllegalArgumentException("redisMessageListenerContainer is null");
         if (webSocketTemplate == null) throw new IllegalArgumentException("webSocketHelper is null");
-        if (genericJackson2JsonRedisSerializer == null) throw new IllegalArgumentException("genericJackson2JsonRedisSerializer is null");
+        if (jacksonJsonRedisSerializer == null) throw new IllegalArgumentException("jacksonJsonRedisSerializer is null");
         MessageListenerAdapter messageListenerAdapter = new ClusterWebSocketMsgListener(this);
-        messageListenerAdapter.setSerializer(genericJackson2JsonRedisSerializer);
+        messageListenerAdapter.setSerializer(jacksonJsonRedisSerializer);
         messageListenerAdapter.afterPropertiesSet();
         redisMessageListenerContainer.addMessageListener(messageListenerAdapter, ChannelTopic.of(webSocketTemplate.topic()));
     }

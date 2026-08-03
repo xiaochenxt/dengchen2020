@@ -2,7 +2,6 @@ package io.github.dengchen2020.websocket.handler.cluster;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.springframework.web.socket.CloseStatus;
 
 import java.io.Serial;
@@ -25,7 +24,6 @@ import java.nio.charset.StandardCharsets;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public record WebSocketSendParam(String[] userId, Long tenantId, byte[] msg, int type, int msgType, Integer closeCode,
                                  String closeReason) implements Serializable {
     @Serial
