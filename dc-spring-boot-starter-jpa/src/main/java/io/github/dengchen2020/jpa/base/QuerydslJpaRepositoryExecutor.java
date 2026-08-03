@@ -107,6 +107,7 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     @Override
     public JPAUpdateClause update(Predicate[] where) {
         Assert.notEmpty(where, "更新必须有条件");
+        for (var predicate : where) Assert.notNull(predicate, "更新条件不能为空");
         return queryFactory.update(path).where(where);
     }
 
@@ -114,6 +115,7 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     @Override
     public long delete(Predicate[] where) {
         Assert.notEmpty(where, "删除必须有条件");
+        for (var predicate : where) Assert.notNull(predicate, "删除条件不能为空");
         return queryFactory.delete(path).where(where).execute();
     }
 
