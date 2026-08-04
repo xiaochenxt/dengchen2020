@@ -261,18 +261,16 @@ public class JsonHelper {
     public boolean isJsonObjectOrArray(String jsonStr) {
         if (!StringUtils.hasText(jsonStr)) return false;
         // 去除首尾空白（避免因空格导致误判）
-        String trimmed = jsonStr.trim();
+        var trimmed = jsonStr.trim();
         // 快速前置校验：JSON 必须以 { 或 [ 开头，以 } 或 ] 结尾
-        if (!(trimmed.startsWith("{") || trimmed.startsWith("["))
-                || !(trimmed.endsWith("}") || trimmed.endsWith("]"))) {
-            return false;
-        }
-        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
-            // 遍历所有 token 直到结束，若过程中无异常则为合法 JSON
-            while (parser.nextToken() != null) {
-                // 仅遍历，不做任何处理
-            }
-            return true;
+        var first = trimmed.charAt(0);
+        var last = trimmed.charAt(trimmed.length() - 1);
+        if (!(first == '{' || first == '[') || !(last == '}' || last == ']')) return false;
+        try (var parser = jsonMapper.createParser(trimmed)) {
+            var firstToken = parser.nextToken();
+            if (firstToken != JsonToken.START_OBJECT && firstToken != JsonToken.START_ARRAY) return false;
+            parser.skipChildren();
+            return parser.nextToken() == null;
         } catch (IOException e) {
             return false;
         }
@@ -285,18 +283,17 @@ public class JsonHelper {
      */
     public boolean isJsonObject(String jsonStr) {
         if (!StringUtils.hasText(jsonStr)) return false;
-        String trimmed = jsonStr.trim();
+        var trimmed = jsonStr.trim();
         // 前置校验：必须以 { 开头 和 } 结尾
-        if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return false;
-        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
+        var first = trimmed.charAt(0);
+        var last = trimmed.charAt(trimmed.length() - 1);
+        if (first != '{' || last != '}') return false;
+        try (var parser = jsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 OBJECT_START（{）
-            JsonToken firstToken = parser.nextToken();
+            var firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_OBJECT) return false;
-            // 遍历剩余 token 确保无语法错误
-            while (parser.nextToken() != null) {
-                // 仅遍历，不做任何处理
-            }
-            return true;
+            parser.skipChildren();
+            return parser.nextToken() == null;
         } catch (IOException e) {
             return false;
         }
@@ -309,20 +306,17 @@ public class JsonHelper {
      */
     public boolean isJsonArray(String jsonStr) {
         if (!StringUtils.hasText(jsonStr)) return false;
-        String trimmed = jsonStr.trim();
+        var trimmed = jsonStr.trim();
         // 前置校验：必须以 [ 开头 和 ] 结尾
-        if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
-            return false;
-        }
-        try (JsonParser parser = jsonMapper.createParser(trimmed)) {
+        var first = trimmed.charAt(0);
+        var last = trimmed.charAt(trimmed.length() - 1);
+        if (first != '[' || last != ']') return false;
+        try (var parser = jsonMapper.createParser(trimmed)) {
             // 校验第一个 token 是 ARRAY_START（[）
-            JsonToken firstToken = parser.nextToken();
+            var firstToken = parser.nextToken();
             if (firstToken != JsonToken.START_ARRAY) return false;
-            // 遍历剩余 token 确保无语法错误
-            while (parser.nextToken() != null) {
-                // 仅遍历，不做任何处理
-            }
-            return true;
+            parser.skipChildren();
+            return parser.nextToken() == null;
         } catch (IOException e) {
             return false;
         }
@@ -375,7 +369,7 @@ public class JsonHelper {
      * 流式读取并处理json数据，处理完后会关闭输入流
      * @param inputStream 输入流
      * @param consumer 处理json数据
-     * @throws IOException 输入流异常
+     * @throws IllegalArgumentException 输入流异常
      */
     public void readStream(InputStream inputStream, BiConsumer<JsonParser, JsonToken> consumer) {
         try (var parser = nonNullJsonMapper.createParser(inputStream)) {
