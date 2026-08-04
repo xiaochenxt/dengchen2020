@@ -36,15 +36,14 @@ public interface Authentication extends Principal {
      * @param name 属性名
      * @param value 属性值
      */
-    default void setAttribute(String name, Object value) {}
+    default void setAttribute(String name, String value) {}
 
     /**
      * 获取属性
-     * @Note: 注意类型转换，反序列化后可能导致Long变Integer类型
      * @param name 属性名
      * @return 属性值
      */
-    default Object getAttribute(String name) {
+    default String getAttribute(String name) {
         return null;
     }
 
