@@ -17,9 +17,27 @@ import java.io.Serializable;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record CacheSyncParam(int type, String[] cacheName, Object key) implements Serializable {
+public record CacheSyncParam(int type, String[] cacheName, Object key, String _keyType) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    public CacheSyncParam {
+        if (_keyType != null && key instanceof Number number) {
+            switch (_keyType) {
+                case "java.lang.Long" -> _keyType = "Long";
+                case "Long" -> {
+                    key = number.longValue();
+                    _keyType = null;
+                }
+                case "java.lang.Integer" -> _keyType = "Integer";
+                case "Integer" -> {
+                    key = number.intValue();
+                    _keyType = null;
+                }
+                default -> _keyType = null;
+            }
+        }
+    }
 
     /**
      * 移除指定缓存
@@ -34,7 +52,7 @@ public record CacheSyncParam(int type, String[] cacheName, Object key) implement
      * 构建清除所有缓存的参数
      */
     public static CacheSyncParam clearAll() {
-        return new CacheSyncParam(TYPE_CLEAR, null, null);
+        return new CacheSyncParam(TYPE_CLEAR, null, null, null);
     }
 
     /**
@@ -42,7 +60,7 @@ public record CacheSyncParam(int type, String[] cacheName, Object key) implement
      * @param cacheName 缓存名
      */
     public static CacheSyncParam clear(String[] cacheName) {
-        return new CacheSyncParam(TYPE_CLEAR, cacheName, null);
+        return new CacheSyncParam(TYPE_CLEAR, cacheName, null, null);
     }
 
     /**
@@ -51,7 +69,7 @@ public record CacheSyncParam(int type, String[] cacheName, Object key) implement
      * @param key       要清除的缓存key
      */
     public static CacheSyncParam evict(String[] cacheName, Object key) {
-        return new CacheSyncParam(TYPE_EVICT, cacheName, key);
+        return new CacheSyncParam(TYPE_EVICT, cacheName, key, key instanceof Number ? key.getClass().getName() : null);
     }
 
 }

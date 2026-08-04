@@ -21,7 +21,7 @@ public class SimpleUserAuthentication implements Authentication, Serializable {
     private static final long serialVersionUID = 1L;
     private final String userId;
     @JsonProperty
-    private final Map<String, Object> attributes;
+    private final Map<String, String> attributes;
 
     public SimpleUserAuthentication(String userId) {
         this.userId = userId;
@@ -35,12 +35,12 @@ public class SimpleUserAuthentication implements Authentication, Serializable {
     }
 
     @Override
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(String name, String value) {
         attributes.put(name, value);
     }
 
     @Override
-    public Object getAttribute(String name) {
+    public String getAttribute(String name) {
         return attributes.get(name);
     }
 }

@@ -53,12 +53,12 @@ public class CaffeineCacheHelper implements CacheHelper {
     public void evict(String[] cacheNames, Object key) {
         Class<?> keyClass = key.getClass();
         CacheSyncParam cacheSyncParam;
-        if (keyClass == String.class || keyClass.isPrimitive() || keyClass.getSuperclass() == Number.class) {
+        if (keyClass == String.class || keyClass == Long.class || keyClass == Integer.class) {
             cacheSyncParam = CacheSyncParam.evict(cacheNames, key);
         } else {
             cacheSyncParam = CacheSyncParam.clear(cacheNames);
             if (keyClass != SimpleKey.class) {
-                log.warn("缓存名：{}，缓存key{}为对象类型，无法解析，清空名下所有缓存", cacheNames, key);
+                log.warn("缓存名：{}，缓存key：{}，是{}类型，无法解析String、Long、Integer之外的类型，清空名下所有缓存", cacheNames, key, keyClass.getName());
             }else {
                 log.warn("缓存名：{}，未指定缓存key，清空名下所有缓存，如确定清空名下所有缓存，请配置@CacheEvict(value = \"{}\", allEntries = true)", cacheNames, String.join(",", cacheNames));
             }
