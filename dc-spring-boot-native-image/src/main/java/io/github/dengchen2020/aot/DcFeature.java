@@ -57,6 +57,7 @@ class DcFeature implements Feature {
         jackson(featureUtils, access);
         geom(featureUtils, access);
         telegram(featureUtils, access);
+        springai(featureUtils, access);
     }
 
     /**
@@ -136,7 +137,7 @@ class DcFeature implements Feature {
         Class<?> nodeFactory = featureUtils.loadClass("com.github.benmanes.caffeine.cache.NodeFactory");
         if (nodeFactory != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
-                featureUtils.registerReflectionConstructorsIfPresent(
+                featureUtils.registerReflectionIfPresent(
                         "com.github.benmanes.caffeine.cache.PD","com.github.benmanes.caffeine.cache.PDA","com.github.benmanes.caffeine.cache.PDAMS",
                         "com.github.benmanes.caffeine.cache.PDW", "com.github.benmanes.caffeine.cache.PDWMS","com.github.benmanes.caffeine.cache.PS",
                         "com.github.benmanes.caffeine.cache.PSA","com.github.benmanes.caffeine.cache.PSAMS","com.github.benmanes.caffeine.cache.PSW",
@@ -146,10 +147,9 @@ class DcFeature implements Feature {
         Class<?> localCacheFactory = featureUtils.loadClass("com.github.benmanes.caffeine.cache.LocalCacheFactory");
         if (localCacheFactory != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
-                featureUtils.registerReflectionConstructorsIfPresent(
+                featureUtils.registerReflectionIfPresent(
                         "com.github.benmanes.caffeine.cache.SIMSA","com.github.benmanes.caffeine.cache.SIMSW",
                         "com.github.benmanes.caffeine.cache.SSMSA","com.github.benmanes.caffeine.cache.SSMSW");
-                featureUtils.registerReflectionFields("com.github.benmanes.caffeine.cache.SIMSW","FACTORY");
             }, localCacheFactory);
         }
     }
@@ -465,6 +465,15 @@ class DcFeature implements Feature {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
                 featureUtils.registerReflection(featureUtils.collectClass("org.telegram.telegrambots.meta.api").toArray(EMPTY_CLASS_ARRAY));
             }, apiResponse);
+        }
+    }
+
+    private void springai(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        var embeddingOptions = featureUtils.loadClass("org.springframework.ai.embedding.EmbeddingOptions");
+        if (embeddingOptions != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerReflection(embeddingOptions);
+            }, embeddingOptions);
         }
     }
 
