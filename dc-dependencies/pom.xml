@@ -4,7 +4,7 @@
 
   <groupId>io.github.dengchen2020</groupId>
   <artifactId>dc-dependencies</artifactId>
-  <version>0.4.66</version>
+  <version>0.4.67</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -47,8 +47,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dc.version>0.4.66</dc.version>
-    <redisson.version>4.6.1</redisson.version>
+    <dc.version>0.4.67</dc.version>
+    <redisson.version>4.7.0</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <protostuff.version>1.8.0</protostuff.version>
     <graalvm.version>25.2.4</graalvm.version>
