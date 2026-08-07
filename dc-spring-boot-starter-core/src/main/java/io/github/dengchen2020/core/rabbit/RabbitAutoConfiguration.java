@@ -6,7 +6,6 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.connection.PublisherCallbackChannel;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -42,12 +41,14 @@ public final class RabbitAutoConfiguration {
     @ConditionalOnMissingBean
     @Bean
     MessageConverter jacksonJsonMessageConverter() {
-        return new JacksonJsonMessageConverter();
+        var messageConverter = new JacksonJsonMessageConverter();
+        messageConverter.setCreateMessageIds(true);
+        return messageConverter;
     }
 
     @ConditionalOnMissingBean
     @Bean
-    RabbitTemplate.ConfirmCallback confirmCallback(MessageConverter messageConverter) {
+    RabbitTemplate.ConfirmCallback confirmCallback() {
         return (correlationData, ack, cause) -> {
             if (correlationData == null) {
                 if (ack) {
@@ -67,17 +68,16 @@ public final class RabbitAutoConfiguration {
             } else {
                 Message message = returned.getMessage();
                 var messageProperties = message.getMessageProperties();
-                Object body = messageConverter.fromMessage(message);
                 if (ack) {
                     if (log.isDebugEnabled()) {
                         Long receivedDelay = messageProperties.getReceivedDelayLong();
                         String handleTime = receivedDelay == null || receivedDelay <= 5000 ? "" : "，预计处理时间：" + LocalDateTime.now().plusSeconds(receivedDelay / 1000);
                         var retryCount = messageProperties.getRetryCount();
                         String retryCountText = retryCount == 0 ? "" : "，重试计数：" + retryCount;
-                        log.debug("消息发送成功 --> 消息id：{}{}{}，消息：{}，交换机：{}，队列：{}，路由键：{}", correlationData.getId(), retryCountText, handleTime, body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey());
+                        log.debug("消息发送成功 --> 消息id：{}{}{}，交换机：{}，队列：{}，路由键：{}", messageProperties.getMessageId(), retryCountText, handleTime, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey());
                     }
                 } else {
-                    log.error("消息发送失败 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}，异常：{}", correlationData.getId(), body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), cause);
+                    log.error("消息发送失败 --> 消息id：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}，异常：{}", messageProperties.getMessageId(), returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), cause);
                 }
             }
         };
@@ -85,7 +85,7 @@ public final class RabbitAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    RabbitTemplate.ReturnsCallback returnsCallback(MessageConverter messageConverter) {
+    RabbitTemplate.ReturnsCallback returnsCallback() {
         return returned -> {
             var messageProperties = returned.getMessage().getMessageProperties();
             //排除延时任务：因为发送方确实没有投递到队列上，只是在交换器上暂存，等过期时间到了 才会发往队列
@@ -94,8 +94,7 @@ public final class RabbitAutoConfiguration {
                     return;
                 }
             }
-            Object body = messageConverter.fromMessage(returned.getMessage());
-            log.error("消息路由失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", messageProperties.getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), body, returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
+            log.error("消息路由失败回调 --> 消息id：{}，交换机：{}，队列：{}，路由键：{}，回应码：{}，回应信息：{}", messageProperties.getMessageId(), returned.getExchange(), messageProperties.getConsumerQueue(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText());
         };
     }
 
@@ -113,7 +112,11 @@ public final class RabbitAutoConfiguration {
     MessageRecoverer messageRecoverer(MessageConverter messageConverter) {
         return (message, cause) -> {
             MessageProperties messageProperties = message.getMessageProperties();
-            log.error("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}", messageProperties.getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY), messageConverter.fromMessage(message), messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey());
+            Object body = null;
+            try {
+                body = messageConverter.fromMessage(message);
+            } catch (RuntimeException _) {}
+            log.error("消息处理失败回调 --> 消息id：{}，消息：{}，交换机：{}，队列：{}，路由键：{}", messageProperties.getMessageId(), body, messageProperties.getReceivedExchange(), messageProperties.getConsumerQueue(), messageProperties.getReceivedRoutingKey());
             throw new AmqpRejectAndDontRequeueException("Retry Policy Exhausted", cause);
         };
     }
