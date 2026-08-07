@@ -25,7 +25,7 @@ public record R<T>(int code, String msg, T data) {
      * 成功响应
      */
     public static <T> R<T> ok(String msg) {
-        return new R<>(0, "", null);
+        return new R<>(0, msg, null);
     }
 
     /**
