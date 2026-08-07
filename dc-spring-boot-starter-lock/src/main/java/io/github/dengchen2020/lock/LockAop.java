@@ -16,6 +16,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import static io.github.dengchen2020.lock.api.DLock.LOCK_GLOBAL_PREFIX;
+
 /**
  * 锁注解实现
  *
@@ -24,8 +26,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  */
 @Aspect
 public class LockAop implements Ordered {
-
-    public static final String LOCK_GLOBAL_PREFIX = "dc:lock:";
 
     private final RedissonClient redissonClient;
 
