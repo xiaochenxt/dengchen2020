@@ -30,7 +30,7 @@ public interface TokenService {
         token = request.getParameter(tokenName);
         if (token != null) return token;
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization != null && authorization.length() > 7) {
+        if (authorization != null && authorization.startsWith("Bearer ")) {
             return authorization.substring(7);
         }
         return token;
