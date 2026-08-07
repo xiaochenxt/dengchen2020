@@ -7,7 +7,6 @@ import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.connection.PublisherCallbackChannel;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.time.Duration;
@@ -81,6 +80,8 @@ public class RabbitDelayTemplate {
         //发送延迟消息
         rabbitTemplate.convertAndSend(exchange, routingKey, obj, message -> {
             var messageProperties = message.getMessageProperties();
+            var messageId = messageProperties.getMessageId();
+            if (messageId != null) correlationData.setId(messageId);
             //消息持久化
             messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             //设置延迟时间，毫秒。
@@ -107,8 +108,8 @@ public class RabbitDelayTemplate {
         long millis = Math.clamp(time.toMillis(), RETRY_DELAY_MIN, MessageProperties.X_DELAY_MAX);
         messageProperties.setDelayLong(millis);
         messageProperties.setHeader(MessageProperties.RETRY_COUNT, messageProperties.getRetryCount());
-        var correlationId = messageProperties.getHeader(PublisherCallbackChannel.RETURNED_MESSAGE_CORRELATION_KEY);
-        CorrelationData correlationData = new CorrelationData(correlationId != null ? correlationId.toString() : UUID.randomUUID().toString());
+        var messageId = messageProperties.getMessageId();
+        CorrelationData correlationData = new CorrelationData(messageId != null ? messageId : UUID.randomUUID().toString());
         //发送延迟消息
         rabbitTemplate.send(messageProperties.getReceivedExchange(), messageProperties.getReceivedRoutingKey(), message, correlationData);
         return true;
