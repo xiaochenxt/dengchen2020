@@ -100,8 +100,8 @@ public class RabbitDelayTemplate {
      */
     public boolean resend(Message message, Duration time, int maxRetryCount) {
         var messageProperties = message.getMessageProperties();
+        if (messageProperties.getRetryCount() + 1 > maxRetryCount) return false;
         messageProperties.incrementRetryCount();
-        if (messageProperties.getRetryCount() > maxRetryCount) return false;
         //消息持久化
         messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
         //设置延迟时间，毫秒。

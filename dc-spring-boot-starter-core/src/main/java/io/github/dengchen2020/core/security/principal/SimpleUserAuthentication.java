@@ -43,4 +43,12 @@ public class SimpleUserAuthentication implements Authentication, Serializable {
     public String getAttribute(String name) {
         return attributes.get(name);
     }
+
+    @Override
+    public String toString() {
+        return "SimpleUserAuthentication{" +
+                "userId='" + userId + '\'' +
+                ", attributes=" + attributes +
+                '}';
+    }
 }

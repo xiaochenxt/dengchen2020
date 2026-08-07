@@ -22,8 +22,9 @@ public class AuthenticationHttpServletRequestWrapper extends HttpServletRequestW
     @Override
     public String getRemoteUser() {
         Authentication authentication = SecurityContextHolder.getAuthentication();
-        if (authentication != null) return authentication.toString();
-        return null;
+        if (authentication == null) return null;
+        var userId = authentication.userId();
+        return userId != null ? userId : authentication.toString();
     }
 
     @Override

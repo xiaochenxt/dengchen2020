@@ -1,24 +1,19 @@
 package io.github.dengchen2020.core.web.mvc;
 
 import io.github.dengchen2020.core.utils.RequestUtils;
-import io.github.dengchen2020.core.utils.ResponseUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.*;
-import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import org.springframework.web.util.ContentCachingResponseWrapper;
-
-import java.io.IOException;
 
 /**
  * 避免etag导致的一些副作用
@@ -30,51 +25,20 @@ import java.io.IOException;
 @ControllerAdvice
 public class EtagOptimizeResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
-    private final long maxContentCachingLength;
-
-    public EtagOptimizeResponseBodyAdvice(long maxContentCachingLength) {
-        super();
-        if (maxContentCachingLength < 2048) throw new IllegalArgumentException("maxContentCachingLength 必须大于等于2048");
-        this.maxContentCachingLength = maxContentCachingLength;
-    }
-
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        if (!AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType) && !StringHttpMessageConverter.class.isAssignableFrom(converterType) && !AbstractJsonHttpMessageConverter.class.isAssignableFrom(converterType)
-                && !ResourceHttpMessageConverter.class.isAssignableFrom(converterType) && !ByteArrayHttpMessageConverter.class.isAssignableFrom(converterType)) {
-            ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
+        if (AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType)
+                || StringHttpMessageConverter.class.isAssignableFrom(converterType)
+                || ByteArrayHttpMessageConverter.class.isAssignableFrom(converterType)
+        ) {
             return false;
         }
-        return true;
+        ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
+        return false;
     }
 
-    @Nullable
     @Override
-    public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType,
-                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                  ServerHttpRequest request, ServerHttpResponse response) {
-        long contentLength = response.getHeaders().getContentLength();
-        if (contentLength < 0) {
-            if (body instanceof String str) {
-                contentLength = str.length();
-            } else if (body instanceof Resource resource) {
-                if (resource instanceof FileSystemResource || resource instanceof ByteArrayResource) {
-                    try {
-                        contentLength = resource.contentLength();
-                        if (contentLength <= Integer.MAX_VALUE && ResponseUtils.getCurrentResponse() instanceof ContentCachingResponseWrapper wrapper) {
-                            wrapper.getResponse().setContentLengthLong(contentLength);
-                        }
-                    } catch (IOException _) {
-                        ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
-                    }
-                } else {
-                    ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
-                }
-            } else if (body instanceof byte[] bytes) {
-                contentLength = bytes.length;
-            }
-        }
-        if (contentLength > maxContentCachingLength) ShallowEtagHeaderFilter.disableContentCaching(RequestUtils.getCurrentRequest());
+    public @Nullable Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         return body;
     }
 

@@ -17,7 +17,7 @@ public class CaffeineCacheHelper implements CacheHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineCacheHelper.class);
 
-    private final RedisMessagePublisher redisMessagePublisher;
+    protected final RedisMessagePublisher redisMessagePublisher;
 
     public CaffeineCacheHelper(RedisMessagePublisher redisMessagePublisher) {
         this.redisMessagePublisher = redisMessagePublisher;
@@ -28,8 +28,12 @@ public class CaffeineCacheHelper implements CacheHelper {
      *
      * @param param 同步参数
      */
-    private void sync(CacheSyncParam param) {
-        redisMessagePublisher.publish(CacheSyncMessageListener.CACHE_SYNC, param);
+    protected void sync(CacheSyncParam param) {
+        try {
+            redisMessagePublisher.publish(CacheSyncMessageListener.CACHE_SYNC, param);
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) log.error("缓存同步失败", e);
+        }
     }
 
     /**

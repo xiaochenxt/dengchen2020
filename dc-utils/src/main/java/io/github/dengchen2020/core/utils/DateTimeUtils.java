@@ -398,7 +398,7 @@ public abstract class DateTimeUtils {
     }
 
     /**
-     * 判断当前时间是否在指定的开始时间和结束时间范围内，支持跨天，开始时间和结束时间自身不包含在范围内
+     * 判断当前时间是否在指定的开始时间和结束时间范围内，支持跨天，结束时间自身不包含在范围内
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param currentTime 当前时间

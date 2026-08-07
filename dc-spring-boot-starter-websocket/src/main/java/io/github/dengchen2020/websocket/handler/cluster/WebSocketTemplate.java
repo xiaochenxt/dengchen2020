@@ -3,6 +3,8 @@ package io.github.dengchen2020.websocket.handler.cluster;
 
 import io.github.dengchen2020.core.redis.RedisMessagePublisher;
 import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
 
 import java.nio.ByteBuffer;
@@ -15,6 +17,8 @@ import java.nio.ByteBuffer;
  */
 @NullMarked
 public class WebSocketTemplate {
+
+    private static final Logger log = LoggerFactory.getLogger(WebSocketTemplate.class);
 
     static final String defaultTopicPrefix = "dc:websocket:";
 
@@ -56,8 +60,12 @@ public class WebSocketTemplate {
      *
      * @param param 集群websocket服务器通知参数
      */
-    private void send(WebSocketSendParam param) {
-        redisMessagePublisher.publish(topic, param);
+    protected void send(WebSocketSendParam param) {
+        try {
+            redisMessagePublisher.publish(topic, param);
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) log.error("websocket消息发送失败", e);
+        }
     }
 
     /**

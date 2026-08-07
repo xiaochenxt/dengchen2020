@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.unit.DataSize;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,14 +28,9 @@ public class DcETagProperties {
     private boolean writeWeakETag = false;
 
     /**
-     * 文件下载等大数据量场景下不适合生成etag
+     * 数据变化频繁且响应数据量巨大的请求可以不生成ETag
      */
     private Set<String> ignorePath = new HashSet<>();
-
-    /**
-     * 数据长度超过{@code maxLength}时不生成etag
-     */
-    private DataSize maxLength = DataSize.ofMegabytes(1);
 
     public boolean isEnabled() {
         return enabled;
@@ -60,13 +54,5 @@ public class DcETagProperties {
 
     public void setIgnorePath(Set<String> ignorePath) {
         this.ignorePath = ignorePath;
-    }
-
-    public DataSize getMaxLength() {
-        return maxLength;
-    }
-
-    public void setMaxLength(DataSize maxLength) {
-        this.maxLength = maxLength;
     }
 }

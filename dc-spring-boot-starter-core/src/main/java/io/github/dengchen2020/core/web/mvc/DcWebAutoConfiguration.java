@@ -160,7 +160,7 @@ public final class DcWebAutoConfiguration implements WebMvcConfigurer, Applicati
         @ConditionalOnMissingBean
         @Bean
         EtagOptimizeResponseBodyAdvice etagOptimizeResponseBodyAdvice() {
-            return new EtagOptimizeResponseBodyAdvice(properties.getMaxLength().toBytes());
+            return new EtagOptimizeResponseBodyAdvice();
         }
     }
 

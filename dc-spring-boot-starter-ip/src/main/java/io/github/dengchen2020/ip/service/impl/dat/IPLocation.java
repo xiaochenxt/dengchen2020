@@ -150,8 +150,8 @@ class IPLocation {
     public Location fetchIPLocation(String ip) {
         long numericIp = inet_pton(ip);
         lock.lock();
-        long offset = search(numericIp);
         try {
+            long offset = search(numericIp);
             if (offset != -1) {
                 return readIPLocation((int) offset);
             }

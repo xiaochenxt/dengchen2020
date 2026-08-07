@@ -88,8 +88,9 @@ public class RedisRateLimiter {
      * @return true：被限制 false：未被限制
      */
     public boolean limit(String limitKey, int limitNum, Duration duration) {
-        if (versionAbove8_8_0) return increx(limitKey, limitNum, duration.toSeconds()).get(1) == 0;
-        Long count = redisTemplate.execute(rateLimitScript, List.of(RATE_LIMIT_PREFIX + limitKey), String.valueOf(limitNum), String.valueOf(duration.toSeconds()));
+        var key = RATE_LIMIT_PREFIX + limitKey;
+        if (versionAbove8_8_0) return increx(key, limitNum, duration.toSeconds()).get(1) == 0;
+        Long count = redisTemplate.execute(rateLimitScript, List.of(key), String.valueOf(limitNum), String.valueOf(duration.toSeconds()));
         return count > limitNum;
     }
 }
