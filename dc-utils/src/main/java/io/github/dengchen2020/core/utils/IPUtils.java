@@ -97,7 +97,7 @@ public abstract class IPUtils {
         try {
             return InetAddress.getByName(ip) instanceof Inet4Address;
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("无效的IP地址：" + ip, e);
+            return false;
         }
     }
 
@@ -110,7 +110,7 @@ public abstract class IPUtils {
         try {
             return InetAddress.getByName(ip) instanceof Inet6Address;
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("无效的IP地址：" + ip, e);
+            return false;
         }
     }
 

@@ -388,7 +388,7 @@ public class ImageProcessor {
     public String toBase64(InputStream inputStream) {
         var baos = new ByteArrayOutputStream(256);
         toStream(inputStream, baos);
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
+        return "data:image/"+outputFormat+";base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -398,7 +398,7 @@ public class ImageProcessor {
     public String toBase64(File file) {
         var baos = new ByteArrayOutputStream(256);
         toStream(file, baos);
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
+        return "data:image/"+outputFormat+";base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -408,7 +408,7 @@ public class ImageProcessor {
     public String toBase64(BufferedImage image) {
         var baos = new ByteArrayOutputStream(256);
         toStream(image, baos);
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
+        return "data:image/"+outputFormat+";base64," + Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**

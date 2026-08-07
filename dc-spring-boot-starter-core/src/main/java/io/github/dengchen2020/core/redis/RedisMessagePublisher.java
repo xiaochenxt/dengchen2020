@@ -21,7 +21,7 @@ public class RedisMessagePublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RedisMessagePublisher.class);
 
-    private final ReactiveRedisTemplate<byte[], byte[]> reactiveRedisTemplate;
+    protected final ReactiveRedisTemplate<byte[], byte[]> reactiveRedisTemplate;
 
     private final RedisSerializer<Object> serializer;
 
@@ -62,14 +62,10 @@ public class RedisMessagePublisher {
         convertAndSend(channelName, message);
     }
 
-    private void convertAndSend(String channelName, byte[] message){
-        try {
-            reactiveRedisTemplate.convertAndSend(channelName, message).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
-                if (log.isDebugEnabled()) logMessage(channelName, message, count);
-            });
-        } catch (Exception e) {
-            log.error("convertAndSend error", e);
-        }
+    protected void convertAndSend(String channelName, byte[] message){
+        reactiveRedisTemplate.convertAndSend(channelName, message).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
+            if (log.isDebugEnabled()) logMessage(channelName, message, count);
+        });
     }
 
     private void logMessage(String channelName, byte[] message, Long count) {

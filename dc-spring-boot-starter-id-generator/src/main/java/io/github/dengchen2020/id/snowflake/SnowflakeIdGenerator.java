@@ -9,7 +9,7 @@ import java.time.Instant;
  */
 public class SnowflakeIdGenerator {
 
-    private static SnowWorker _SnowWorker = null;
+    private final SnowWorker _SnowWorker;
 
     public SnowflakeIdGenerator(SnowflakeIdGeneratorOptions options) {
         if (options == null) throw new IllegalArgumentException("雪花算法配置错误");
