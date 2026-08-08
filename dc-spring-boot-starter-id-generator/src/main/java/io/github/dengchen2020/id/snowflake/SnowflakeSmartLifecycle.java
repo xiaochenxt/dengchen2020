@@ -74,10 +74,10 @@ public class SnowflakeSmartLifecycle implements SmartLifecycle {
 
     @Override
     public void start() {
+        running = true;
         try {
             //智能设置雪花算法机器id
             setWorkerIdFromRedis(options.getWorkerId(), (1 << options.getWorkerIdBitLength()) - 1);
-            running = true;
         } catch (Exception e) {
             running = false;
             throw new IdGeneratorException("雪花算法初始化失败", e);
