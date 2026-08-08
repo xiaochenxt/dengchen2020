@@ -16,7 +16,7 @@ public class DcTypeContributor implements TypeContributor {
     @Override
     public void contribute(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
         if (contributed) return; // 因为hibernate的bug，详见：https://hibernate.atlassian.net/browse/HHH-20070，这里会被执行两次，简单去重
-        typeContributions.contributeJavaType(DcStringJavaType.INSTANCE);
         contributed = true;
+        typeContributions.contributeJavaType(DcStringJavaType.INSTANCE);
     }
 }
