@@ -1,0 +1,179 @@
+package io.github.dengchen2020.websocket.handler.cluster;
+
+
+import io.github.dengchen2020.core.redis.RedisMessagePublisher;
+import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.socket.CloseStatus;
+
+import java.nio.ByteBuffer;
+
+/**
+ * websocket服务器集群时使用该工具发送消息
+ *
+ * @author xiaochen
+ * @since 2023/7/18
+ */
+@NullMarked
+public class WebSocketTemplate {
+
+    private static final Logger log = LoggerFactory.getLogger(WebSocketTemplate.class);
+
+    static final String defaultTopicPrefix = "dc:websocket:";
+
+    private final String topic;
+
+    protected final RedisMessagePublisher redisMessagePublisher;
+
+    public String topic() {
+        return topic;
+    }
+
+    private String redisTopic(String topic) {
+        return defaultTopicPrefix + (topic.charAt(0) == '/' ? topic : "/" + topic);
+    }
+
+    /**
+     * 构建WebSocketHelper实例
+     * @param mapping websocket映射路径
+     * @param redisMessagePublisher redis消息发布者
+     */
+    public WebSocketTemplate(String mapping, RedisMessagePublisher redisMessagePublisher) {
+        this.topic = redisTopic(mapping);
+        this.redisMessagePublisher = redisMessagePublisher;
+    }
+
+    /**
+     * 获取其他websocket映射路径的{@link WebSocketTemplate}
+     * @param mapping websocket映射路径
+     * @return {@link WebSocketTemplate}
+     */
+    public WebSocketTemplate getInstance(String mapping) {
+        if (this.topic.equals(redisTopic(mapping))) return this;
+        return new WebSocketTemplate(mapping, redisMessagePublisher);
+    }
+
+    /**
+     *
+     * 发送websocket消息
+     *
+     * @param param 集群websocket服务器通知参数
+     */
+    protected void send(WebSocketSendParam param) {
+        try {
+            redisMessagePublisher.publish(topic, param);
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) log.error("websocket消息发送失败", e);
+        }
+    }
+
+    /**
+     * 集群环境-关闭用户连接
+     *
+     * @param userId 用户id
+     * @param closeStatus 关闭连接原因
+     */
+    public void close(String userId, CloseStatus closeStatus) {
+        send(WebSocketSendParam.closeStatus(userId, closeStatus));
+    }
+
+    /**
+     * 集群环境-关闭用户连接
+     *
+     * @param userId 用户id
+     * @param closeStatus 关闭连接原因
+     */
+    public void close(String[] userId, CloseStatus closeStatus) {
+        send(WebSocketSendParam.closeStatus(userId, closeStatus));
+    }
+
+    /**
+     * 集群环境-关闭租户下所有用户的连接
+     *
+     * @param tenantId 租户id
+     * @param closeStatus 关闭连接原因
+     */
+    public void close(Long tenantId, CloseStatus closeStatus) {
+        send(WebSocketSendParam.closeStatus(tenantId, closeStatus));
+    }
+
+    /**
+     * 集群环境-向用户发送文本消息
+     *
+     * @param userId 用户id
+     * @param message 文本消息
+     */
+    public void send(String userId, String message) {
+        send(WebSocketSendParam.userText(userId, message));
+    }
+
+    /**
+     * 集群环境-向用户发送文本消息
+     *
+     * @param userId 用户id
+     * @param message 文本消息
+     */
+    public void send(String[] userId, String message) {
+        send(WebSocketSendParam.userText(userId, message));
+    }
+
+    /**
+     * 集群环境-向用户发送文本消息
+     *
+     * @param tenantId 租户id
+     * @param message  文本消息
+     */
+    public void send(Long tenantId, String message) {
+        send(WebSocketSendParam.tenantText(tenantId, message));
+    }
+
+    /**
+     * 集群环境-向所有用户发送文本消息
+     *
+     * @param message  文本消息
+     */
+    public void sendToAll(String message) {
+        send(WebSocketSendParam.allText(message));
+    }
+
+    /**
+     * 集群环境-向用户发送二进制消息
+     *
+     * @param userId 用户id
+     * @param message 二进制消息
+     */
+    public void send(String userId, ByteBuffer message) {
+        send(WebSocketSendParam.userBinary(userId, message));
+    }
+
+    /**
+     * 集群环境-向用户发送二进制消息
+     *
+     * @param userId 用户id
+     * @param message 二进制消息
+     */
+    public void send(String[] userId, ByteBuffer message) {
+        send(WebSocketSendParam.userBinary(userId, message));
+    }
+
+    /**
+     * 集群环境-向用户发送二进制消息
+     *
+     * @param tenantId 租户id
+     * @param message  二进制消息
+     */
+    public void send(Long tenantId, ByteBuffer message) {
+        send(WebSocketSendParam.tenantBinary(tenantId, message));
+    }
+
+    /**
+     * 集群环境-向所有用户发送二进制消息
+     *
+     * @param message  二进制消息
+     */
+    public void sendToAll(ByteBuffer message) {
+        send(WebSocketSendParam.allBinary(message));
+    }
+
+}

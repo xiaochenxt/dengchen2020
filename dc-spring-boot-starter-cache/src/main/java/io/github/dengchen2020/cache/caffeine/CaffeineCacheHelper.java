@@ -1,0 +1,100 @@
+package io.github.dengchen2020.cache.caffeine;
+
+import io.github.dengchen2020.cache.CacheHelper;
+import io.github.dengchen2020.core.redis.RedisMessagePublisher;
+import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.interceptor.SimpleKey;
+
+/**
+ * Caffeine缓存操作实现
+ * @author xiaochen
+ * @since 2024/7/31
+ */
+@NullMarked
+public class CaffeineCacheHelper implements CacheHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(CaffeineCacheHelper.class);
+
+    protected final RedisMessagePublisher redisMessagePublisher;
+
+    public CaffeineCacheHelper(RedisMessagePublisher redisMessagePublisher) {
+        this.redisMessagePublisher = redisMessagePublisher;
+    }
+
+    /**
+     * 缓存同步
+     *
+     * @param param 同步参数
+     */
+    protected void sync(CacheSyncParam param) {
+        try {
+            redisMessagePublisher.publish(CacheSyncMessageListener.CACHE_SYNC, param);
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) log.error("缓存同步失败", e);
+        }
+    }
+
+    /**
+     * 移除cacheName指定key的缓存
+     *
+     * @param cacheName 缓存名
+     * @param key       key
+     */
+    @Override
+    public void evict(String cacheName, Object key) {
+        evict(new String[]{cacheName}, key);
+    }
+
+    /**
+     * 移除cacheName指定key的缓存
+     *
+     * @param cacheNames 缓存名
+     * @param key        key
+     */
+    @Override
+    public void evict(String[] cacheNames, Object key) {
+        Class<?> keyClass = key.getClass();
+        CacheSyncParam cacheSyncParam;
+        if (keyClass == String.class || keyClass == Long.class || keyClass == Integer.class) {
+            cacheSyncParam = CacheSyncParam.evict(cacheNames, key);
+        } else {
+            cacheSyncParam = CacheSyncParam.clear(cacheNames);
+            if (keyClass != SimpleKey.class) {
+                log.warn("缓存名：{}，缓存key：{}，是{}类型，无法解析String、Long、Integer之外的类型，清空名下所有缓存", cacheNames, key, keyClass.getName());
+            }else {
+                log.warn("缓存名：{}，未指定缓存key，清空名下所有缓存，如确定清空名下所有缓存，请配置@CacheEvict(value = \"{}\", allEntries = true)", cacheNames, String.join(",", cacheNames));
+            }
+        }
+        sync(cacheSyncParam);
+    }
+
+    /**
+     * 移除cacheName的所有缓存
+     *
+     * @param cacheName 缓存名
+     */
+    @Override
+    public void clear(String cacheName) {
+        clear(new String[]{cacheName});
+    }
+
+    /**
+     * 移除cacheName的所有缓存
+     *
+     * @param cacheNames 缓存名
+     */
+    @Override
+    public void clear(String[] cacheNames) {
+        sync(CacheSyncParam.clear(cacheNames));
+    }
+
+    /**
+     * 清除所有缓存
+     */
+    @Override
+    public void clearAll() {
+        sync(CacheSyncParam.clearAll());
+    }
+}

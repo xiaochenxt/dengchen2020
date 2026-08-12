@@ -1,0 +1,239 @@
+package io.github.dengchen2020.websocket.handler;
+
+import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.security.principal.TenantInfo;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.nio.ByteBuffer;
+import java.security.Principal;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.*;
+
+/**
+ * 单实例服务器的websocket消息处理器
+ *
+ * @author xiaochen
+ * @since 2024/6/26
+ */
+@NullMarked
+public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHandler {
+
+    protected final ConcurrentHashMap<String, ConcurrentLinkedQueue<WebSocketSession>> userIdSessionMap = new ConcurrentHashMap<>();
+
+    protected final ConcurrentHashMap<Long, ConcurrentLinkedQueue<WebSocketSession>> tenantIdSessionMap = new ConcurrentHashMap<>();
+
+    @Nullable
+    private static final ScheduledExecutorService scheduledExecutorService;
+
+    private static final String WEBSOCKET_KEEPALIVE_ENABLED = "dc.websocket.keepalive.enabled";
+
+    static {
+        if (Objects.equals(System.getProperty(WEBSOCKET_KEEPALIVE_ENABLED), Boolean.TRUE.toString())) {
+            scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("websocket-keepalive").factory());
+        }else {
+            scheduledExecutorService = null;
+        }
+    }
+
+    protected SingletonDcWebSocketHandler() {
+        if (scheduledExecutorService != null) scheduledExecutorService.scheduleAtFixedRate(this::sendPingToAll, 30, 60, TimeUnit.SECONDS);
+    }
+
+    @Override
+    protected void clear(WebSocketSession session) {
+        Authentication authentication = getClientInfo(session);
+        if (authentication == null) return;
+        String userId = authentication.userId();
+        if (userId != null) {
+            userIdSessionMap.computeIfPresent(userId, (_, sessions) -> {
+                sessions.remove(session);
+                return sessions.isEmpty() ? null : sessions;
+            });
+        }
+        if (authentication instanceof TenantInfo tenantInfo) {
+            Long tenantId = tenantInfo.tenantId();
+            if (tenantId != null) {
+                tenantIdSessionMap.computeIfPresent(tenantId, (_, sessions) -> {
+                    sessions.remove(session);
+                    return sessions.isEmpty() ? null : sessions;
+                });
+            }
+        }
+    }
+
+    @Override
+    protected void online(WebSocketSession session, Principal principal) {
+        Authentication authentication = (Authentication) principal;
+        String userId = authentication.userId();
+        if (userId == null) return;
+        ConcurrentLinkedQueue<WebSocketSession> sessionQueue = userIdSessionMap.compute(userId, (_, sessions) -> {
+            if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
+            sessions.add(session);
+            return sessions;
+        });
+        if (authentication instanceof TenantInfo tenantInfo) {
+            Long tenantId = tenantInfo.tenantId();
+            if (tenantId != null) {
+                tenantIdSessionMap.compute(tenantId, (_, sessions) -> {
+                    if (sessions == null) sessions = new ConcurrentLinkedQueue<>();
+                    sessions.add(session);
+                    return sessions;
+                });
+            }
+        }
+        int onlineCount = sessionQueue.size();
+        int allowSameUserMaxOnlineCount = allowSameUserMaxOnlineCount();
+        if (onlineCount > allowSameUserMaxOnlineCount){
+            WebSocketSession head = sessionQueue.poll();
+            if (head != null) close(head, CloseStatus.POLICY_VIOLATION.withReason("该用户同时在线数量超过"+ allowSameUserMaxOnlineCount));
+        }
+    }
+
+    @Nullable
+    @Override
+    public Authentication getClientInfo(WebSocketSession session) {
+        return (Authentication) super.getClientInfo(session);
+    }
+
+    /**
+     * 允许同一用户的最大连接数
+     */
+    public int allowSameUserMaxOnlineCount(){
+        return 1;
+    }
+
+    /**
+     * 关闭连接
+     * @param userId 用户id
+     * @param closeStatus 关闭原因
+     */
+    public void close(String userId, CloseStatus closeStatus){
+        ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(userId);
+        if (sessions != null) sessions.forEach((session) -> close(session, closeStatus));
+    }
+
+    /**
+     * 关闭连接
+     * @param userId 用户id
+     */
+    public void close(String[] userId, CloseStatus closeStatus){
+        for (String s : userId) {
+            ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(s);
+            if (sessions != null) sessions.forEach((session) -> close(session, closeStatus));
+        }
+    }
+
+    /**
+     * 关闭租户下所有用户的连接
+     * @param tenantId 租户id
+     * @param closeStatus 关闭原因
+     */
+    public void close(Long tenantId, CloseStatus closeStatus){
+        Queue<WebSocketSession> sessions = tenantIdSessionMap.get(tenantId);
+        if (sessions != null) sessions.forEach(session -> close(session, closeStatus));
+    }
+
+    /**
+     * 向用户发送文本消息
+     *
+     * @param userId 用户id
+     * @param message 文本消息
+     */
+    public void send(String userId, String message) {
+        ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(userId);
+        if (sessions != null) sessions.forEach((session) -> send(session, message));
+    }
+
+    /**
+     * 向用户发送文本消息
+     *
+     * @param userId 用户id
+     * @param message 文本消息
+     */
+    public void send(String[] userId, String message) {
+        for (String s : userId) {
+            ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(s);
+            if (sessions != null) sessions.forEach((session) -> send(session, message));
+        }
+    }
+
+    /**
+     * 向用户发送文本消息
+     *
+     * @param tenantId 租户id
+     * @param message  文本消息
+     */
+    public void send(Long tenantId, String message) {
+        Queue<WebSocketSession> sessions = tenantIdSessionMap.get(tenantId);
+        if (sessions != null) sessions.forEach(session -> send(session, message));
+    }
+
+    /**
+     * 向所有用户发送文本消息
+     *
+     * @param message 文本消息
+     */
+    public void sendToAll(String message) {
+        // 向所有连接的客户端发送消息
+        userIdSessionMap.forEach((a, sessions)
+                -> sessions.forEach((session) -> send(session, message)));
+    }
+
+    /**
+     * 向用户发送二进制消息
+     *
+     * @param userId 用户id
+     * @param message 二进制消息
+     */
+    public void send(String userId, ByteBuffer message) {
+        ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(userId);
+        if (sessions != null) sessions.forEach((session) -> send(session, message));
+    }
+
+    /**
+     * 向用户发送二进制消息
+     *
+     * @param userId 用户id
+     * @param message 二进制消息
+     */
+    public void send(String[] userId, ByteBuffer message) {
+        for (String s : userId) {
+            ConcurrentLinkedQueue<WebSocketSession> sessions = userIdSessionMap.get(s);
+            if (sessions != null) sessions.forEach((session) -> send(session, message));
+        }
+    }
+
+    /**
+     * 向用户发送二进制消息
+     *
+     * @param tenantId 租户id
+     * @param message  二进制消息
+     */
+    public void send(Long tenantId, ByteBuffer message) {
+        Queue<WebSocketSession> sessions = tenantIdSessionMap.get(tenantId);
+        if (sessions != null) sessions.forEach(session -> send(session, message));
+    }
+
+    /**
+     * 向所有用户发送二进制消息
+     *
+     * @param message 二进制消息
+     */
+    public void sendToAll(ByteBuffer message) {
+        userIdSessionMap.forEach((a, sessions)
+                -> sessions.forEach((session) -> send(session, message)));
+    }
+
+    /**
+     * 向所有用户发送Ping消息
+     */
+    protected void sendPingToAll() {
+        userIdSessionMap.forEach((a, sessions)
+                -> sessions.forEach(this::sendPing));
+    }
+
+}

@@ -1,0 +1,231 @@
+package io.github.dengchen2020.core.utils;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.io.InputStream;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+/**
+ * json处理工具类
+ * <p>未注入到SpringBean，与Spring的全局Jackson配置可能不一致，因此可能导致转换的部分字段数据与前者不一致</p>
+ * @author xiaochen
+ * @since 2022/9/15
+ */
+@NullMarked
+public abstract class JsonUtils {
+
+    /**
+     * 初始化一个{@link ObjectNode}
+     *
+     * @return {@link ObjectNode}
+     */
+    public static ObjectNode createObjectNode() {
+        return JsonHelper.INSTANCE.createObjectNode();
+    }
+
+    /**
+     * 初始化一个{@link ArrayNode}
+     *
+     * @return {@link ArrayNode}
+     */
+    public static ArrayNode createArrayNode() {
+        return JsonHelper.INSTANCE.createArrayNode();
+    }
+
+    /**
+     * 将对象转换为json
+     *
+     * @param source 源对象
+     * @return json
+     */
+    public static String toJson(Object source) {
+        return JsonHelper.INSTANCE.toJson(source);
+    }
+
+    /**
+     * 将对象转换为json，忽略null属性
+     *
+     * @param source 源对象
+     * @return json
+     */
+    public static String toJsonIgnoreNull(Object source) {
+        return JsonHelper.INSTANCE.toJsonIgnoreNull(source);
+    }
+
+    /**
+     * 将对象转换成指定类型的新对象
+     *
+     * @param source 源对象
+     * @param target 类型
+     * @return 指定类型的新对象
+     */
+    public static <T> T convertValue(Object source, Class<T> target) {
+        return JsonHelper.INSTANCE.convertValue(source, target);
+    }
+
+    /**
+     * 将对象转换成指定类型的新对象
+     *
+     * @param source 源对象
+     * @param target 类型
+     * @return 指定类型的新对象
+     */
+    public static <T> T convertValue(Object source, TypeReference<T> target) {
+        return JsonHelper.INSTANCE.convertValue(source, target);
+    }
+
+    /**
+     * 将json解析为{@link JsonNode}
+     *
+     * @param json json
+     * @return {@link JsonNode}
+     */
+    public static JsonNode readTree(String json) {
+        return JsonHelper.INSTANCE.readTree(json);
+    }
+
+    /**
+     * 将json转换为指定类型的对象
+     *
+     * @param json json
+     * @return 指定类型的对象
+     */
+    public static <T> @Nullable T fromJson(String json, Class<T> type) {
+        return JsonHelper.INSTANCE.fromJson(json, type);
+    }
+
+    /**
+     * 将json转换为指定类型的对象
+     *
+     * @param json json
+     * @return 指定类型的对象
+     */
+    public static <T> @Nullable T fromJson(String json, TypeReference<T> typeReference) {
+        return JsonHelper.INSTANCE.fromJson(json, typeReference);
+    }
+
+    /**
+     * 对象转ObjectNode
+     * @param source 对象
+     * @return {@link ObjectNode}
+     */
+    public static @Nullable ObjectNode valueToTree(Object source) {
+        return JsonHelper.INSTANCE.valueToTree(source);
+    }
+
+    /**
+     * 序列化
+     *
+     * @param source 对象
+     * @return 字节数组
+     */
+    public static byte[] serialize(@Nullable Object source) {
+        return JsonHelper.INSTANCE.serialize(source);
+    }
+
+    /**
+     * 反序列化
+     *
+     * @param data 字节数组
+     * @param type 反序列化数据类型
+     * @return 对象
+     */
+    public static <T> @Nullable T deserialize(byte[] data, Class<T> type) {
+        return JsonHelper.INSTANCE.deserialize(data, type);
+    }
+
+    /**
+     * 反序列化
+     *
+     * @param data 字节数组
+     * @param type 反序列化数据类型
+     * @return 对象
+     */
+    public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
+        return JsonHelper.INSTANCE.deserialize(data, type);
+    }
+
+    /**
+     * 将ArrayNode转化为Stream
+     * @param arrayNode ArrayNode
+     * @return {@link Stream}
+     */
+    public static Stream<JsonNode> toStream(ArrayNode arrayNode){
+        return JsonHelper.INSTANCE.toStream(arrayNode);
+    }
+
+    /**
+     * 流式校验 JSON 合法性（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON
+     */
+    public static boolean isJsonObjectOrArray(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonObjectOrArray(jsonStr);
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 对象（{...} 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 字符串
+     * @return 是否为合法 JSON 对象
+     */
+    public static boolean isJsonObject(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonObject(jsonStr);
+    }
+
+    /**
+     * 流式校验是否为合法的 JSON 数组（[...] 格式）（仅遍历，不构建对象），性能好
+     * @param jsonStr 待校验的 JSON 数组字符串
+     * @return 是否为合法 JSON 数组
+     */
+    public static boolean isJsonArray(String jsonStr) {
+        return JsonHelper.INSTANCE.isJsonArray(jsonStr);
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public static <T> void readStreamHandleObject(InputStream inputStream, Class<T> objectType, Consumer<T> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param objectType 对象的数据类型
+     * @param consumer 处理json数据
+     */
+    public static <T> void readStreamHandleObject(InputStream inputStream, TypeReference<T> objectType, Consumer<T> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+    }
+
+    /**
+     * 流式读取并处理json对象数据，处理完后会关闭输入流，适用于总数据量大但单个json对象数据量小的场景
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public static void readStreamHandleObject(InputStream inputStream, Consumer<ObjectNode> consumer) {
+        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, consumer);
+    }
+
+    /**
+     * 流式读取并处理json数据，处理完后会关闭输入流
+     * @param inputStream 输入流
+     * @param consumer 处理json数据
+     */
+    public static void readStream(InputStream inputStream, BiConsumer<JsonParser, JsonToken> consumer) {
+        JsonHelper.INSTANCE.readStream(inputStream, consumer);
+    }
+
+}

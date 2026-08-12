@@ -1,0 +1,154 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.dengchen2020</groupId>
+        <artifactId>dc-spring-boot-starter-parent</artifactId>
+        <version>0.3.33</version>
+    </parent>
+
+    <artifactId>dc-utils</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <url>https://github.com/xiaochenxt/dengchen2020</url>
+    <description>dc工具类集合，包含验证码生成、二维码、CSV写入读取、时间处理、请求发送、序列化、签名、加解密等等</description>
+
+    <developers>
+        <developer>
+            <id>dc2024</id>
+            <name>小郴</name>
+            <email>876975281@qq.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/xiaochenxt/dengchen2020</url>
+        <connection>https://github.com/xiaochenxt/dengchen2020.git</connection>
+        <developerConnection>https://github.com/xiaochenxt/dengchen2020.git</developerConnection>
+    </scm>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+  <dependencies>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-web</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-beans</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webmvc</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>com.fasterxml.jackson.datatype</groupId>
+          <artifactId>jackson-datatype-jsr310</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-xml</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-cbor</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>io.protostuff</groupId>
+          <artifactId>protostuff-core</artifactId>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>io.protostuff</groupId>
+          <artifactId>protostuff-runtime</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.httpcomponents.client5</groupId>
+          <artifactId>httpclient5</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jspecify</groupId>
+          <artifactId>jspecify</artifactId>
+      </dependency>
+
+      <!--二维码-->
+      <dependency>
+          <groupId>com.google.zxing</groupId>
+          <artifactId>core</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <!--图片验证码-->
+      <dependency>
+          <groupId>com.github.whvcse</groupId>
+          <artifactId>easy-captcha</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>com.googlecode.libphonenumber</groupId>
+          <artifactId>libphonenumber</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+<!--      <dependency>-->
+<!--          <groupId>org.graalvm.polyglot</groupId>-->
+<!--          <artifactId>js</artifactId>-->
+<!--          <type>pom</type>-->
+<!--          <optional>true</optional>-->
+<!--      </dependency>-->
+      <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>s3</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+      <dependency>
+          <groupId>com.microsoft.playwright</groupId>
+          <artifactId>playwright</artifactId>
+          <optional>true</optional>
+      </dependency>
+
+  </dependencies>
+
+</project>

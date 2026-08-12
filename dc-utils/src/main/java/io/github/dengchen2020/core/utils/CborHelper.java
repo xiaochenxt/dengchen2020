@@ -1,0 +1,135 @@
+package io.github.dengchen2020.core.utils;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * 简化{@link CBORMapper}常用操作的异常处理
+ * @author xiaochen
+ * @since 2025/11/17
+ */
+@NullMarked
+public class CborHelper {
+
+    /**
+     * Constant that indicates that only properties with non-null
+     * values are to be included.
+     * <p>
+     * This will specify the same setting for including a value both
+     * on <b>Java object level</b> as well as when <b>contained</b>
+     * in an object reference (see {@link JsonInclude} for further
+     * details on this distinction).
+     *
+     * @since 2.21
+     */
+    public final static JsonInclude.Value ALL_NON_NULL = JsonInclude.Value
+            .construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
+    private static final CBORMapper defaultCborMapper = CBORMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).findAndAddModules().build();
+    public static final CborHelper INSTANCE = new CborHelper(defaultCborMapper);
+
+    protected final CBORMapper cborMapper;
+
+    protected final CBORMapper nonNullCborMapper;
+
+    public static CborHelper get() {
+        return INSTANCE;
+    }
+
+    public CBORMapper getMapper() {
+        return cborMapper;
+    }
+
+    public CBORMapper getNonNullMapper() {
+        return nonNullCborMapper;
+    }
+
+    public CborHelper(CBORMapper cborMapper) {
+        this.cborMapper = cborMapper;
+        this.nonNullCborMapper = new CBORMapper.Builder(cborMapper)
+                .defaultPropertyInclusion(ALL_NON_NULL)
+                .build();
+    }
+
+    /**
+     * 初始化一个{@link ObjectNode}
+     *
+     * @return {@link ObjectNode}
+     */
+    public ObjectNode createObjectNode() {
+        return cborMapper.createObjectNode();
+    }
+
+    /**
+     * 初始化一个{@link ArrayNode}
+     *
+     * @return {@link ArrayNode}
+     */
+    public ArrayNode createArrayNode() {
+        return cborMapper.createArrayNode();
+    }
+
+    /**
+     * 序列化
+     *
+     * @param source 源对象
+     * @return byte[]
+     */
+    public byte[] serialize(Object source) {
+        try {
+            return nonNullCborMapper.writeValueAsBytes(source);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("source：" + source + "，type：" + source.getClass(), e);
+        }
+    }
+
+    /**
+     * 反序列化
+     *
+     * @param data byte[]
+     * @param type   类型
+     * @return T 指定类型的对象
+     */
+    public <T> @Nullable T deserialize(byte[] data, Class<T> type) {
+        if (type == byte[].class) return (T) data;
+        try {
+            return nonNullCborMapper.readValue(data, type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("data：" + new String(data) + "，type：" + type, e);
+        }
+    }
+
+    /**
+     * 反序列化
+     *
+     * @param data byte[]
+     * @param type   类型
+     * @return T 指定类型的对象
+     */
+    public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
+        try {
+            return nonNullCborMapper.readValue(data, type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("data：" + new String(data) + "，type：" + type, e);
+        }
+    }
+
+    /**
+     * 将ArrayNode转化为Stream
+     * @param arrayNode ArrayNode
+     * @return Stream<JsonNode>
+     */
+    public Stream<JsonNode> toStream(ArrayNode arrayNode){
+        return StreamSupport.stream(arrayNode.spliterator(),false);
+    }
+
+}
