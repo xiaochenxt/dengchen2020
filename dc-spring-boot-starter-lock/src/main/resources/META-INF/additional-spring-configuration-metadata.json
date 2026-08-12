@@ -1,0 +1,41 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "dc.lock.redisson.redis.host",
+      "type": "java.lang.String",
+      "description": "用于redisson lock的redis主机地址 .",
+      "defaultValue": "${spring.data.redis.host}"
+    },{
+      "name": "dc.lock.redisson.redis.port",
+      "type": "java.lang.Integer",
+      "description": "用于redisson lock的redis端口号 .",
+      "defaultValue": "${spring.data.redis.port}"
+    },{
+      "name": "dc.lock.redisson.redis.database",
+      "type": "java.lang.Integer",
+      "description": "用于redisson lock的redis数据库编号 .",
+      "defaultValue": "${spring.data.redis.database}"
+    },{
+      "name": "dc.lock.redisson.redis.username",
+      "type": "java.lang.String",
+      "description": "用于redisson lock的redis用户名 .",
+      "defaultValue": "${spring.data.redis.username}"
+    },{
+      "name": "dc.lock.redisson.redis.password",
+      "type": "java.lang.String",
+      "description": "用于redisson lock的redis密码 .",
+      "defaultValue": "${spring.data.redis.password}"
+    },{
+      "name": "dc.lock.redisson.redis.lazy-initialization",
+      "type": "java.lang.Boolean",
+      "description": "用于redisson lock的redis是否仅在进行第一次 Redis 调用时连接到 Redis，而不是在创建 Redisson 实例期间 .",
+      "defaultValue": true
+    },{
+      "name": "dc.lock.redisson.netty.use-virtual-thread",
+      "type": "java.lang.Boolean",
+      "description": "用于redisson lock的NettyEventLoop是否使用虚拟线程，redisson4.3.1特别说明不建议使用虚拟线程，原因在于NettyEventLoop不支持使用虚拟线程 .",
+      "defaultValue": "false"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+package io.github.dengchen2020.security.authentication.filter;
+
+import io.github.dengchen2020.core.security.context.SecurityContextHolder;
+import io.github.dengchen2020.core.security.principal.Authentication;
+import io.github.dengchen2020.core.web.mvc.StaticResourceServlet;
+import io.github.dengchen2020.security.authentication.interceptor.AuthenticationInterceptor;
+import io.github.dengchen2020.security.authentication.token.TokenService;
+import io.github.dengchen2020.security.authentication.web.AuthenticationHttpServletRequestWrapper;
+import io.github.dengchen2020.security.exception.SessionTimeOutException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+/**
+ * 身份认证过滤器
+ *
+ * @author xiaochen
+ * @since 2023/10/13
+ */
+@NullMarked
+public class AuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
+
+    private final TokenService tokenService;
+
+    public AuthenticationFilter(TokenService tokenService) {
+        this.tokenService = tokenService;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        var servletName = request.getHttpServletMapping().getServletName();
+        return StaticResourceServlet.SERVLET_NAME.equals(servletName); // 静态资源请求不需要认证
+    }
+
+    @Override
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws IOException, ServletException {
+        try {
+            String token = tokenService.getToken(request);
+            if (StringUtils.hasText(token)) {
+                Authentication authentication = tokenService.readToken(token);
+                if (authentication != null) {
+                    SecurityContextHolder.setAuthentication(authentication);
+                }
+            }
+        } catch (SessionTimeOutException e) {
+            request.setAttribute(AuthenticationInterceptor.EXCEPTION_MESSAGE, e.getMessage());
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) log.debug("token读取异常：", e);
+        } finally {
+            try {
+                filterChain.doFilter(new AuthenticationHttpServletRequestWrapper(request), response);
+            } finally {
+                SecurityContextHolder.clear();
+            }
+        }
+    }
+
+}

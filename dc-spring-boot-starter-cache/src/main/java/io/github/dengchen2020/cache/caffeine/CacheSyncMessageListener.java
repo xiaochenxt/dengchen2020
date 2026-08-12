@@ -1,0 +1,58 @@
+package io.github.dengchen2020.cache.caffeine;
+
+import io.github.dengchen2020.core.redis.annotation.RedisListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+
+import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_CLEAR;
+import static io.github.dengchen2020.cache.caffeine.CacheSyncParam.TYPE_EVICT;
+
+/**
+ * 缓存同步消息订阅
+ *
+ * @author xiaochen
+ * @since 2022/12/15
+ */
+public class CacheSyncMessageListener {
+
+    private static final Logger log = LoggerFactory.getLogger(CacheSyncMessageListener.class);
+
+    public static final String CACHE_SYNC = "dc:cache:sync";
+
+    private final CacheManager cacheManager;
+
+    public CacheSyncMessageListener(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+
+    @RedisListener(CACHE_SYNC)
+    public void handleMessage(CacheSyncParam cacheSync) {
+        if(cacheSync.cacheName() == null) {
+            for (String cacheName : cacheManager.getCacheNames()) {
+                Cache cache = cacheManager.getCache(cacheName);
+                if (cache != null) cache.invalidate();
+            }
+            if (log.isDebugEnabled()) log.debug("所有缓存被清除");
+        }else {
+            for (String cacheName : cacheSync.cacheName()) {
+                Cache cache = cacheManager.getCache(cacheName);
+                if (cache == null) continue;
+                switch (cacheSync.type()) {
+                    case TYPE_EVICT -> {
+                        if (cache.evictIfPresent(cacheSync.key())) {
+                            if (log.isDebugEnabled()) log.debug("缓存名：{}，key：{}被同步清除", cacheSync.cacheName(), cacheSync.key());
+                        }
+                    }
+                    case TYPE_CLEAR -> {
+                        if (cache.invalidate()) {
+                            if (log.isDebugEnabled()) log.debug("缓存名：{}，所有缓存被清除", cacheName);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}

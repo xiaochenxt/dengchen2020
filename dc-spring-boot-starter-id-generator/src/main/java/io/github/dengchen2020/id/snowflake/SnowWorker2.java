@@ -1,0 +1,46 @@
+package io.github.dengchen2020.id.snowflake;
+
+import io.github.dengchen2020.id.exception.IdGeneratorException;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * 雪花算法-传统算法
+ */
+class SnowWorker2 extends SnowWorker {
+
+    public SnowWorker2(SnowflakeIdGeneratorOptions options) {
+        super(options);
+    }
+
+    private final ReentrantLock lock = new ReentrantLock();
+
+    @Override
+    public long nextId() throws IdGeneratorException {
+        lock.lock();
+
+        try {
+            long currentTimeTick = getCurrentTimeTick();
+
+            if (_LastTimeTick == currentTimeTick) {
+                if (_CurrentSeqNumber++ > maxSeqNumber) {
+                    _CurrentSeqNumber = minSeqNumber;
+                    currentTimeTick = getNextTimeTick();
+                }
+            } else {
+                _CurrentSeqNumber = minSeqNumber;
+            }
+
+            if (currentTimeTick < _LastTimeTick) {
+                throw new IdGeneratorException("Time错误 " + (_LastTimeTick - currentTimeTick) + " 毫秒");
+            }
+
+            _LastTimeTick = currentTimeTick;
+
+            return ((currentTimeTick << _TimestampShift) + ((long) workerId << seqBitLength) + (int) _CurrentSeqNumber);
+        } finally {
+            lock.unlock();
+        }
+
+    }
+}

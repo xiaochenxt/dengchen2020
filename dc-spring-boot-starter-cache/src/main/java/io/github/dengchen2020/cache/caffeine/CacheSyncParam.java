@@ -1,0 +1,75 @@
+package io.github.dengchen2020.cache.caffeine;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * 缓存同步参数
+ *
+ * @param type      1-移除指定缓存 2-清除所有缓存
+ * @param cacheName 缓存名
+ * @param key       要操作的缓存key
+ * @author xiaochen
+ * @since 2022/12/14
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record CacheSyncParam(int type, String[] cacheName, Object key, String _keyType) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    public CacheSyncParam {
+        if (_keyType != null && key instanceof Number number) {
+            switch (_keyType) {
+                case "java.lang.Long" -> _keyType = "Long";
+                case "Long" -> {
+                    key = number.longValue();
+                    _keyType = null;
+                }
+                case "java.lang.Integer" -> _keyType = "Integer";
+                case "Integer" -> {
+                    key = number.intValue();
+                    _keyType = null;
+                }
+                default -> _keyType = null;
+            }
+        }
+    }
+
+    /**
+     * 移除指定缓存
+     */
+    static final int TYPE_EVICT = 1;
+    /**
+     * 清除所有缓存
+     */
+    static final int TYPE_CLEAR = 2;
+
+    /**
+     * 构建清除所有缓存的参数
+     */
+    public static CacheSyncParam clearAll() {
+        return new CacheSyncParam(TYPE_CLEAR, null, null, null);
+    }
+
+    /**
+     * 构建清除指定{@code cacheName}的缓存的参数
+     * @param cacheName 缓存名
+     */
+    public static CacheSyncParam clear(String[] cacheName) {
+        return new CacheSyncParam(TYPE_CLEAR, cacheName, null, null);
+    }
+
+    /**
+     * 构建移除指定缓存的参数
+     * @param cacheName 缓存名
+     * @param key       要清除的缓存key
+     */
+    public static CacheSyncParam evict(String[] cacheName, Object key) {
+        return new CacheSyncParam(TYPE_EVICT, cacheName, key, key instanceof Number ? key.getClass().getName() : null);
+    }
+
+}

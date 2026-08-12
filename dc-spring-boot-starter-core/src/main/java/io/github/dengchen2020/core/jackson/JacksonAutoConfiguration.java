@@ -1,0 +1,73 @@
+package io.github.dengchen2020.core.jackson;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.github.dengchen2020.jackson.DcModule;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
+import io.github.dengchen2020.core.utils.JsonHelper;
+import io.github.dengchen2020.core.utils.XmlHelper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+import java.util.List;
+
+/**
+ * Jackson配置选项优化自动配置
+ *
+ * @author xiaochen
+ * @since 2024/7/17
+ */
+@Configuration(proxyBeanMethods = false)
+public final class JacksonAutoConfiguration {
+
+    @ConditionalOnClass(GenericJacksonJsonRedisSerializer.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class GenericJacksonJsonRedisSerializerConfiguration {
+        @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+        @ConditionalOnMissingBean
+        @Bean
+        GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder<JsonMapper.Builder> genericJackson2JsonRedisSerializerBuilder(List<JsonMapperBuilderCustomizer> customizers){
+            return GenericJacksonJsonRedisSerializer.builder()
+                    .enableSpringCacheNullValueSupport()
+                    .customize(mapper -> {
+                        for (JsonMapperBuilderCustomizer customizer : customizers) customizer.customize(mapper);
+                        mapper.changeDefaultPropertyInclusion(h -> h.withOverrides(JsonInclude.Value.ALL_NON_NULL));
+                    });
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static final class JsonHelperAutoConfiguration {
+        @ConditionalOnMissingBean
+        @Bean
+        public JsonHelper jsonHelper(JsonMapper jsonMapper) {
+            return new JsonHelper(jsonMapper);
+        }
+    }
+
+    @ConditionalOnClass(XmlMapper.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class XmlHelperAutoConfiguration {
+        @ConditionalOnMissingBean
+        @Bean
+        public XmlHelper xmlHelper(XmlMapper xmlMapper) {
+            return new XmlHelper(xmlMapper);
+        }
+    }
+
+    @ConditionalOnClass(DcModule.class)
+    @Configuration(proxyBeanMethods = false)
+    static final class DcModuleAutoConfiguration {
+        @ConditionalOnMissingBean(name = "dcModuleJsonMapperBuilderCustomizer")
+        @Bean
+        JsonMapperBuilderCustomizer dcModuleJsonMapperBuilderCustomizer() {
+            return builder -> builder.addModule(new DcModule());
+        }
+    }
+
+}
