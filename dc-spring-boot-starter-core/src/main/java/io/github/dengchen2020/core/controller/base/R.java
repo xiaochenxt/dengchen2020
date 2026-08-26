@@ -11,6 +11,17 @@ package io.github.dengchen2020.core.controller.base;
  */
 public record R<T>(int code, String msg, T data) {
 
+    private static final R<String> OK = new R<>(0, "", null);
+
+    /**
+     * 成功响应
+     *
+     * @return 成功响应体
+     */
+    public static R<String> ok() {
+        return OK;
+    }
+
     /**
      * 成功响应
      *

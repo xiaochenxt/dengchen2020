@@ -84,12 +84,12 @@ default SimplePage<OrderDTO> list(OrderQueryParam param, OrderSpecifier<?>... o)
     }
 
     // select 投影 + left join 连表
-    var query = select(Projections.bean(OrderDTO.class,
+    var query = selectBean(OrderDTO.class,
             q_order.id, q_order.status, q_order.amount,
             q_order.createTime,
             q_user.name.as("userName"),
             q_user.phone.as("userPhone")
-    )).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
+    ).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
       .where(builder);
 
     return fetchPage(query, param, o);
@@ -101,7 +101,7 @@ default SimplePage<OrderDTO> list(OrderQueryParam param, OrderSpecifier<?>... o)
 ```
 BaseJpaRepository<T, ID> (统一接口)
 ├── QuerydslPagingJpaRepository<T>  — fetchPage(), findAll(), findStream()
-├── QuerydslJpaRepository<T>        — select(), update(), delete()
+├── QuerydslJpaRepository<T>        — selectBean(), selectRecord(), selectConstructor(), update(), delete()
 ├── QueryJpaRepository<T, ID>       — 悲观锁查询
 ├── CrudJpaRepository<T, ID>        — 批量删除/查询
 └── EntityManagerRepository<T>      — clear/detach
@@ -129,7 +129,7 @@ dc-spring-boot-starter-jpa/src/main/java/io/github/dengchen2020/jpa/
 │   ├── QuerydslPagingJpaRepository.java  // 分页
 │   └── BaseJpaRepositoryExecutor.java    // 实现
 ├── querydsl/
-│   ├── Projections.java                  // 投影工具
+│   ├── QuerydslUtils.java                  // 投影字段自动匹配
 │   ├── JpaExpressions.java               // 表达式工具
 │   └── jsonb/                            // JSONB查询
 └── hibernate/
@@ -140,4 +140,4 @@ dc-spring-boot-starter-jpa/src/main/java/io/github/dengchen2020/jpa/
 
 1. `BooleanBuilder` 中的每个条件默认是 **AND** 关系，多个条件用 `or()` 方法切换为 OR
 2. `findAll()` 会先执行 count 查询，如果不需要总条数，设置 `Page.isSelectCount() = false` 可提升性能（推荐基于索引 ID 分页时使用）
-3. `Projections.bean()` 要求目标类符合 JavaBeans 规范；Record 类型使用 `Projections.constructor()`
+3. DTO 投影优先使用 `selectBean()`/`selectRecord()`/`selectConstructor()` 自动匹配字段：`selectBean()` 要求目标类符合 JavaBeans 规范（有 setter），`selectRecord()` 要求 public Record
