@@ -33,12 +33,51 @@ Querydsl 类型安全查询（QuerydslJpaRepository / QuerydslPagingJpaRepositor
 
 ```java
 JPAQuery<T> selectFrom();                                                    // 单表查询
+JPAQuery<R> selectBean(Class<? extends R> type, Expression<?>... exprs);     // DTO投影：同名setter字段自动查询
+JPAQuery<R> selectRecord(Class<? extends R> type, Expression<?>... exprs);   // Record投影：同名字段自动查询
+JPAQuery<R> selectConstructor(Class<? extends R> type, Expression<?>... exprs); // 构造函数投影：手动指定字段
 SimplePage<T> findAll(@Nullable Predicate predicate, Page page, OrderSpecifier<?>... o); // 分页查询
 SimplePage<T> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>...); // 分页查询
 Stream<T> findStream(Predicate, Page, OrderSpecifier<?>...);                 // 流式读取
 JPAUpdateClause update(Predicate where);                                     // 更新
 long delete(Predicate where);                                                // 删除
 ```
+
+DTO 投影查询（selectBean / selectRecord / selectConstructor，高频推荐）：
+
+自动查询实体同名字段投影到 DTO/Record，无需手动罗列字段，实体加字段后查询零改动；连表等额外字段通过 `exprs` 补充，返回 `JPAQuery<R>` 可继续链式 join/where，配合 `fetchPage()` 分页：
+
+```java
+// selectBean：目标类符合 JavaBeans 规范（有 setter），同名字段自动查询
+// 额外字段（如关联表字段）用 .as("属性名") 别名匹配 setter
+var query = selectBean(OrderDTO.class,
+        q_user.name.as("userName"),
+        q_user.phone.as("userPhone"))
+    .leftJoin(q_user).on(q_order.userId.eq(q_user.id))
+    .where(builder);
+
+// selectRecord：目标类为 public Record，同名字段自动查询，实体中不存在的字段自动补 null
+public record UserInfo(Long id, String name, String phone) {}
+List<UserInfo> list = selectRecord(UserInfo.class)
+        .where(q_user.status.eq(1))
+        .fetch();
+
+// selectRecord 连表：实体同名字段在前（无顺序要求），额外字段必须在 Record 末尾且与 exprs 顺序一致
+public record OrderInfo(Long id, Integer status, String userName) {}
+var query = selectRecord(OrderInfo.class, q_user.name)
+        .leftJoin(q_user).on(q_order.userId.eq(q_user.id));
+
+// selectConstructor：全手动指定，exprs 与某个 public 构造函数的参数顺序一致，适合聚合、字段重命名、表达式场景
+public record StatusCount(Integer status, long total) {}
+var query = selectConstructor(StatusCount.class, q_order.status, q_order.count())
+        .groupBy(q_order.status);
+```
+
+| 方法 | 结果类型要求 | 字段匹配规则 | 适用场景 |
+|------|-------------|-------------|---------|
+| `selectBean` | 符合 JavaBeans 规范（有 setter） | 同名字段自动查询，额外字段需 `.as("属性名")` | 可变 DTO 投影、连表 |
+| `selectRecord` | public Record | 同名字段自动查询，缺失字段补 null；额外字段在末尾 | 不可变 Record 投影 |
+| `selectConstructor` | 有对应 public 构造函数 | 全手动，顺序与构造函数参数一致 | 聚合、重命名、表达式 |
 
 复杂多条件分页查询（BooleanBuilder + findAll）：
 
@@ -75,10 +114,10 @@ public interface OrderRepository extends BaseJpaRepository<OrderDTO, Long> {
         if (param.getStartTime() != null) builder.and(q_order.createTime.goe(param.getStartTime()));
 
         // select 投影 + left join 连表
-        var query = select(Projections.bean(OrderDTO.class, q_order,
+        var query = selectBean(OrderDTO.class,
                 q_user.name.as("userName"),
                 q_user.phone.as("userPhone")
-        )).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
+        ).leftJoin(q_user).on(q_order.userId.eq(q_user.id))
           .where(builder);
 
         return fetchPage(query, param, q_order.id.desc());
@@ -130,6 +169,7 @@ NumberExpression<Integer> age = JpaExpressions.intValue(field);     // 类型转
 自定义投影（Projections）：
 
 ```java
+// 以下为 Querydsl 原生手动投影方式，日常开发优先使用上面的 selectBean/selectRecord/selectConstructor
 // Bean 属性赋值投影
 QBean<UserDTO> dto = Projections.bean(UserDTO.class, user.id, user.name);
 // 连表查询投影
