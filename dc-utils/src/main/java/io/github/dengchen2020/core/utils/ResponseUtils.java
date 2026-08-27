@@ -36,7 +36,7 @@ public abstract class ResponseUtils {
         if (servletRequestAttributes != null) {
             HttpServletResponse response = servletRequestAttributes.getResponse();
             if (response != null) {
-                response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=" + time.toSeconds() + ", must-revalidate, private, proxy-revalidate");
+                response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=" + time.toSeconds() + ", must-revalidate, private");
             }
         }
     }
