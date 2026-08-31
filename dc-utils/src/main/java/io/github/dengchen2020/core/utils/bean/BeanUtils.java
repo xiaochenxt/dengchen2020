@@ -260,7 +260,9 @@ public abstract class BeanUtils {
             }
         }
         try {
-            return targetClass.getDeclaredConstructor(paramTypes).newInstance(args);
+            var constructor = targetClass.getDeclaredConstructor(paramTypes);
+            ReflectionUtils.makeAccessible(constructor);
+            return constructor.newInstance(args);
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new RuntimeException("创建Record实例失败，class：" + targetClass.getName(), ex);
         }
