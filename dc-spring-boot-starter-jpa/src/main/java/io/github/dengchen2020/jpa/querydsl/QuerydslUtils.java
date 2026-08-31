@@ -38,6 +38,14 @@ public abstract class QuerydslUtils {
     public static final NullExpression<Short> NULL_SHORT = Expressions.nullExpression(Short.class);
     public static final NullExpression<Byte> NULL_BYTE = Expressions.nullExpression(Byte.class);
     public static final NullExpression<Character> NULL_CHARACTER = Expressions.nullExpression(Character.class);
+    public static final NullExpression<Long> NULL_LONG_PRIMITIVE = Expressions.nullExpression(Long.TYPE);
+    public static final NullExpression<Integer> NULL_INTEGER_PRIMITIVE = Expressions.nullExpression(Integer.TYPE);
+    public static final NullExpression<Boolean> NULL_BOOLEAN_PRIMITIVE = Expressions.nullExpression(Boolean.TYPE);
+    public static final NullExpression<Double> NULL_DOUBLE_PRIMITIVE = Expressions.nullExpression(Double.TYPE);
+    public static final NullExpression<Float> NULL_FLOAT_PRIMITIVE = Expressions.nullExpression(Float.TYPE);
+    public static final NullExpression<Short> NULL_SHORT_PRIMITIVE = Expressions.nullExpression(Short.TYPE);
+    public static final NullExpression<Byte> NULL_BYTE_PRIMITIVE = Expressions.nullExpression(Byte.TYPE);
+    public static final NullExpression<Character> NULL_CHARACTER_PRIMITIVE = Expressions.nullExpression(Character.TYPE);
     public static final NullExpression<BigDecimal> NULL_BIG_DECIMAL = Expressions.nullExpression(BigDecimal.class);
     public static final NullExpression<BigInteger> NULL_BIG_INTEGER = Expressions.nullExpression(BigInteger.class);
 
@@ -45,21 +53,21 @@ public abstract class QuerydslUtils {
 
     static {
         primitivesNullExpressions.put(Long.class, NULL_LONG);
-        primitivesNullExpressions.put(Long.TYPE, NULL_LONG);
         primitivesNullExpressions.put(Integer.class, NULL_INTEGER);
-        primitivesNullExpressions.put(Integer.TYPE, NULL_INTEGER);
         primitivesNullExpressions.put(Boolean.class, NULL_BOOLEAN);
-        primitivesNullExpressions.put(Boolean.TYPE, NULL_BOOLEAN);
         primitivesNullExpressions.put(Double.class, NULL_DOUBLE);
-        primitivesNullExpressions.put(Double.TYPE, NULL_DOUBLE);
         primitivesNullExpressions.put(Float.class, NULL_FLOAT);
-        primitivesNullExpressions.put(Float.TYPE, NULL_FLOAT);
         primitivesNullExpressions.put(Byte.class, NULL_BYTE);
-        primitivesNullExpressions.put(Byte.TYPE, NULL_BYTE);
         primitivesNullExpressions.put(Short.class, NULL_SHORT);
-        primitivesNullExpressions.put(Short.TYPE, NULL_SHORT);
         primitivesNullExpressions.put(Character.class, NULL_CHARACTER);
-        primitivesNullExpressions.put(Character.TYPE, NULL_CHARACTER);
+        primitivesNullExpressions.put(Long.TYPE, NULL_LONG_PRIMITIVE);
+        primitivesNullExpressions.put(Integer.TYPE, NULL_INTEGER_PRIMITIVE);
+        primitivesNullExpressions.put(Boolean.TYPE, NULL_BOOLEAN_PRIMITIVE);
+        primitivesNullExpressions.put(Double.TYPE, NULL_DOUBLE_PRIMITIVE);
+        primitivesNullExpressions.put(Float.TYPE, NULL_FLOAT_PRIMITIVE);
+        primitivesNullExpressions.put(Byte.TYPE, NULL_BYTE_PRIMITIVE);
+        primitivesNullExpressions.put(Short.TYPE, NULL_SHORT_PRIMITIVE);
+        primitivesNullExpressions.put(Character.TYPE, NULL_CHARACTER_PRIMITIVE);
     }
 
     private record BeanCacheKey(EntityPath<?> entity, Class<?> type) {}
