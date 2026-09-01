@@ -72,6 +72,7 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
      * @throws Throwable
      */
     private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
+        if (!running) return null;
         var signature = joinPoint.getSignature();
         String key = "{dc:task}:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
         if (concurrency) {
