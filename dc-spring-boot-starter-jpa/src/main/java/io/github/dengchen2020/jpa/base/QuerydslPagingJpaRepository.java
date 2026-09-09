@@ -1,9 +1,7 @@
 package io.github.dengchen2020.jpa.base;
 
-import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
@@ -19,18 +17,6 @@ import java.util.stream.Stream;
  */
 @NullMarked
 public interface QuerydslPagingJpaRepository<T> {
-
-    /**
-     * Querydsl的Q类实例
-     * @return {@link EntityPath}
-     */
-    EntityPath<T> path();
-
-    /**
-     * Querydsl的Q类实例对应的路径构造器
-     * @return {@link EntityPath}
-     */
-    PathBuilder<T> builder();
 
     /**
      * Querydsl分页查询
