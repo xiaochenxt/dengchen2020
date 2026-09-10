@@ -34,7 +34,7 @@ public class DcShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         var servletName = request.getHttpServletMapping().getServletName();
-        if (StaticResourceServlet.SERVLET_NAME.equals(servletName)) return true; // 静态资源使用Last-Modified就行了，不需要浪费CPU和内存额外使用Etag
+        if (StaticResourceServlet.SERVLET_NAME.equals(servletName)) return true; // 静态资源使用Last-Modified就行了，不需要浪费CPU额外使用Etag
         if (ignorePath.isEmpty()) return false;
         PathContainer path;
         if (!ServletRequestPathUtils.hasCachedPath(request)) {
