@@ -40,10 +40,6 @@ public interface QuerydslJpaRepository<T> {
 
     JPAQuery<Tuple> selectDistinct(Expression<?>... exprs);
 
-    JPAQuery<Integer> selectOne();
-
-    JPAQuery<Integer> selectZero();
-
     /**
      * 单表数据查询
      * @return {@link JPAQuery<T>}
