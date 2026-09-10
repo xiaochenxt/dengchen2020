@@ -91,16 +91,6 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     }
 
     @Override
-    public JPAQuery<Integer> selectOne() {
-        return queryFactory.selectOne().from(path);
-    }
-
-    @Override
-    public JPAQuery<Integer> selectZero() {
-        return queryFactory.selectZero().from(path);
-    }
-
-    @Override
     public JPAQuery<T> selectFrom() {
         return queryFactory.selectFrom(path);
     }
