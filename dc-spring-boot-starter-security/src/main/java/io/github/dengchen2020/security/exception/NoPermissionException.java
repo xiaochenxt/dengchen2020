@@ -13,12 +13,21 @@ public class NoPermissionException extends ViewToastException {
 
     public static final String DEFAULT_MESSAGE = "您没有权限操作该功能";
 
-    public NoPermissionException(String message) {
+    private final String[] permissions;
+
+    public NoPermissionException(String[] permissions) {
+        this(DEFAULT_MESSAGE, permissions);
+    }
+
+    public NoPermissionException(String message, String[] permissions) {
         super(message, CODE);
+        this.permissions = permissions;
     }
 
-    public NoPermissionException() {
-        super(DEFAULT_MESSAGE, CODE);
+    /**
+     * 需要的权限
+     */
+    public String[] getPermissions() {
+        return permissions;
     }
-
 }
