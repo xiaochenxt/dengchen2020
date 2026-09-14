@@ -33,8 +33,9 @@ public class PermissionVerifyInterceptor extends BaseHandlerMethodInterceptor {
         HasPermission hasPermission = handlerMethod.getMethod().getAnnotation(HasPermission.class);
         if (hasPermission == null) hasPermission = handlerMethod.getBeanType().getAnnotation(HasPermission.class);
         if (hasPermission == null) return true;
-        if (permissionVerifier.hasPermission(authentication, hasPermission.value().length == 0 ? new String[]{request.getRequestURI()} : hasPermission.value())) return true;
-        throw new NoPermissionException();
+        var permissions = hasPermission.value().length == 0 ? new String[]{request.getRequestURI()} : hasPermission.value();
+        if (permissionVerifier.hasPermission(authentication, permissions)) return true;
+        throw new NoPermissionException(permissions);
     }
 
 }
