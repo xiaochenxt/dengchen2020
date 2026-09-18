@@ -28,6 +28,7 @@ public abstract class QuerydslUtils {
 
     private QuerydslUtils() {}
 
+    public static final Predicate[] EMPTY_PREDICATE = new Predicate[0];
     public static final Expression<?>[] EMPTY_EXPRESSIONS = new Expression[0];
     public static final NullExpression<String> NULL_STRING = Expressions.nullExpression(String.class);
     public static final NullExpression<Long> NULL_LONG = Expressions.nullExpression(Long.class);

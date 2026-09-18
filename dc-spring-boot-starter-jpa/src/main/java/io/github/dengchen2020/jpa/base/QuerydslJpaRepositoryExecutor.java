@@ -1,8 +1,11 @@
 package io.github.dengchen2020.jpa.base;
 
-import com.querydsl.core.QueryResults;
+import com.querydsl.core.QueryModifiers;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.EclipseLinkTemplates;
 import com.querydsl.jpa.HQLTemplates;
@@ -103,32 +106,31 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
     }
 
     @Override
-    public JPAUpdateClause update(Predicate[] where) {
-        Assert.notEmpty(where, "更新必须有条件");
-        for (var predicate : where) Assert.notNull(predicate, "更新条件不能为空");
-        return queryFactory.update(path).where(where);
+    public JPAUpdateClause update(Predicate where, Predicate... predicates) {
+        Assert.notNull(where, "更新必须有条件");
+        var clause = queryFactory.update(path).where(where);
+        if (predicates.length > 0) clause.where(predicates);
+        return clause;
     }
 
     @Transactional
     @Override
-    public long delete(Predicate[] where) {
-        Assert.notEmpty(where, "删除必须有条件");
-        for (var predicate : where) Assert.notNull(predicate, "删除条件不能为空");
-        return queryFactory.delete(path).where(where).execute();
+    public long delete(Predicate where, Predicate... predicates) {
+        Assert.notNull(where, "删除必须有条件");
+        var clause = queryFactory.delete(path).where(where);
+        if (predicates.length > 0) clause.where(predicates);
+        return clause.execute();
     }
 
     @Override
     public <R> SimplePage<R> fetchPage(JPAQuery<R> query, Page page, OrderSpecifier<?>... o){
         if (page.size() == 0) return new SimplePage<>(!page.isSelectCount() ? 0 : query.fetchCount(), Collections.emptyList());
-        if (o.length > 0) query = query.orderBy(o);
+        if (o.length > 0) query.orderBy(o);
+        var restrict = new QueryModifiers((long) page.size(), page.offset());
         if (!page.isSelectCount()) {
-            return new SimplePage<>(null, query.limit(page.size())
-                    .offset(page.offset())
-                    .fetch());
+            return new SimplePage<>(null, query.restrict(restrict).fetch());
         }
-        QueryResults<R> result = query.limit(page.size())
-                .offset(page.offset())
-                .fetchResults();
+        var result = query.restrict(restrict).fetchResults();
         return new SimplePage<>(result.getTotal(), result.getResults());
     }
 
@@ -141,11 +143,9 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
 
     @Override
     public <R> Stream<R> fetchStream(JPAQuery<R> query,@Nullable Page page, OrderSpecifier<?>... o){
-        if (o.length > 0) query = query.orderBy(o);
-        if(page == null) return query.stream();
-        return query.limit(page.size())
-                .offset(page.offset())
-                .stream();
+        if (o.length > 0) query.orderBy(o);
+        if(page != null) query.restrict(new QueryModifiers((long) page.size(), page.offset()));
+        return query.stream();
     }
 
     @Override
