@@ -10,6 +10,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.jspecify.annotations.NullMarked;
 
+import static io.github.dengchen2020.jpa.querydsl.QuerydslUtils.EMPTY_PREDICATE;
+
 /**
  * <p>
  * <pre>所有的操作自带from当前实体对应的表，不允许再from其他表，否则形成笛卡尔积查询</pre>
@@ -81,7 +83,7 @@ public interface QuerydslJpaRepository<T> {
      * @param where 更新条件
      * @return {@link JPAUpdateClause}
      */
-    JPAUpdateClause update(Predicate[] where);
+    JPAUpdateClause update(Predicate where, Predicate... predicates);
 
     /**
      * 更新构造
@@ -89,8 +91,8 @@ public interface QuerydslJpaRepository<T> {
      * @param where 更新条件
      * @return {@link JPAUpdateClause}
      */
-    default JPAUpdateClause update(Predicate where){
-        return update(new Predicate[]{where});
+    default JPAUpdateClause update(Predicate where) {
+        return update(where, EMPTY_PREDICATE);
     }
 
     /**
@@ -99,7 +101,7 @@ public interface QuerydslJpaRepository<T> {
      * @param where 删除条件
      * @return 受影响的行数
      */
-    long delete(Predicate[] where);
+    long delete(Predicate where, Predicate... predicates);
 
     /**
      * 删除构造
@@ -107,8 +109,8 @@ public interface QuerydslJpaRepository<T> {
      * @param where 删除条件
      * @return 受影响的行数
      */
-    default long delete(Predicate where){
-        return delete(new Predicate[]{where});
+    default long delete(Predicate where) {
+        return delete(where, EMPTY_PREDICATE);
     }
 
 }
