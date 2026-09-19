@@ -98,7 +98,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
     }
 
     /**
-     * 存储刷新token
+     * 存储刷新token，用于后续校验有效性
      * @param expiresSeconds 有效期（秒）
      * @param jti 刷新token的唯一ID
      * @param sub 用户ID，唯一标识
