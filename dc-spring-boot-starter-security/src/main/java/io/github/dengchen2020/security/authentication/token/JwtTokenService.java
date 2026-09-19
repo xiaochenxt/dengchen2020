@@ -26,6 +26,8 @@ public class JwtTokenService implements TokenService, InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenService.class);
 
+    protected static final String PAYLOAD = "payload";
+
     private AuthenticationConvert authenticationConvert;
 
     @Autowired
@@ -73,7 +75,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
         long timestamp = System.currentTimeMillis();
         long expiresIn = timestamp + expireSeconds * 1000;
         String token = jwtHelper.encode(jwtHelper.create(expiresIn, StrUtils.uuidSimplified(), authentication.userId())
-                .addClaim(TokenConstant.PAYLOAD, authentication));
+                .addClaim(PAYLOAD, authentication));
         if (refreshExpireSeconds > 0) {
             long refreshTokenExpiresIn = timestamp + refreshExpireSeconds * 1000;
             var refreshToken = createRefreshToken(authentication, refreshExpireSeconds, refreshTokenExpiresIn);
@@ -151,7 +153,7 @@ public class JwtTokenService implements TokenService, InitializingBean {
      * @return {@link Authentication}
      */
     private Authentication readJwt(JWT jwt) {
-        return JsonUtils.convertValue(jwt.getOtherClaims().get(TokenConstant.PAYLOAD), authenticationConvert.type());
+        return JsonUtils.convertValue(jwt.getOtherClaims().get(PAYLOAD), authenticationConvert.type());
     }
 
 }
