@@ -74,11 +74,11 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
     private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
         if (!running) return null;
         var signature = joinPoint.getSignature();
-        String key = "{dc:task}:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
         if (concurrency) {
             publishEvent(signature);
             return joinPoint.proceed();
         }
+        String key = "{dc:task}:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
         keys.add(key);
         var str = stringRedisTemplate.opsForValue().get(key);
         if (str != null) {
