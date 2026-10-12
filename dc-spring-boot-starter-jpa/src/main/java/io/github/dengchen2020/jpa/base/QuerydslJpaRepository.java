@@ -96,7 +96,7 @@ public interface QuerydslJpaRepository<T> {
     }
 
     /**
-     * 删除构造
+     * 删除
      *
      * @param where 删除条件
      * @return 受影响的行数
@@ -104,7 +104,7 @@ public interface QuerydslJpaRepository<T> {
     long delete(Predicate where, Predicate... predicates);
 
     /**
-     * 删除构造
+     * 删除
      *
      * @param where 删除条件
      * @return 受影响的行数
