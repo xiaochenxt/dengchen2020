@@ -25,7 +25,7 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, AllowedValuesValidator.class,
                 JsonObjectOrArrayValidator.class, JsonObjectValidator.class, JsonArrayValidator.class,
                 NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
-                ScheduledHandleBeforeEvent.class);
+                ScheduledHandleBeforeEvent.class, AllowedValuesArrayValidator.class, AllowedValuesCollectionValidator.class);
         aotUtils.registerReflection(Page.class,PageParam.class,SimplePage.class,StatsPage.class,AnonymousAuthentication.class, SimpleUserAuthentication.class);
         aotUtils.registerReflectionIfPresent("io.github.dengchen2020.core.context.CtxImpl");
         aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
