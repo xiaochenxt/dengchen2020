@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.github.dengchen2020</groupId>
         <artifactId>dc-spring-boot-starter-parent</artifactId>
-        <version>26.925.35</version>
+        <version>26.1025.35</version>
     </parent>
 
     <artifactId>dc-spring-boot-starter-lock</artifactId>
@@ -39,6 +39,11 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
         </dependency>
 
     </dependencies>
