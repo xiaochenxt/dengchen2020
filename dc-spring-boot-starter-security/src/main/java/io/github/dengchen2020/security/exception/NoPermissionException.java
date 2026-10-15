@@ -1,6 +1,9 @@
 package io.github.dengchen2020.security.exception;
 
 import io.github.dengchen2020.core.exception.ViewToastException;
+import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * 无权限异常
@@ -29,5 +32,10 @@ public class NoPermissionException extends ViewToastException {
      */
     public String[] getPermissions() {
         return permissions;
+    }
+
+    @Override
+    public @NonNull HttpStatusCode getStatusCode() {
+        return HttpStatus.FORBIDDEN;
     }
 }

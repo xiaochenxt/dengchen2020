@@ -1,5 +1,9 @@
 package io.github.dengchen2020.core.exception;
 
+import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+
 /**
  * 调用异常-接口调用产生的异常
  *
@@ -49,4 +53,8 @@ public class CallException extends BaseException {
         this.alarm = alarm;
     }
 
+    @Override
+    public @NonNull HttpStatusCode getStatusCode() {
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+    }
 }

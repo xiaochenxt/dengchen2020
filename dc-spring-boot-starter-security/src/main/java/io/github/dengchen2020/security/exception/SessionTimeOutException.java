@@ -1,6 +1,9 @@
 package io.github.dengchen2020.security.exception;
 
 import io.github.dengchen2020.core.exception.BaseException;
+import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * 登录会话超时异常：前端需跳转登录
@@ -20,5 +23,10 @@ public class SessionTimeOutException extends BaseException {
 
     public SessionTimeOutException() {
         super(DEFAULT_MESSAGE, CODE, null, false);
+    }
+
+    @Override
+    public @NonNull HttpStatusCode getStatusCode() {
+        return HttpStatus.UNAUTHORIZED;
     }
 }
