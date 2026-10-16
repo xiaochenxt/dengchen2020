@@ -15,12 +15,12 @@ import java.util.concurrent.TimeUnit;
 public @interface RateLimit {
 
     /**
-     * 限制次数
+     * 限制次数，最小值：1
      */
     int value() default 60;
 
     /**
-     * 时间窗口，当项目中使用redis时更改才有效
+     * 时间窗口，最小值：1，当项目中使用redis时更改才有效
      */
     int time() default 1;
 
