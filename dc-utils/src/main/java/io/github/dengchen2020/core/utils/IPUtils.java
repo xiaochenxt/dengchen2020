@@ -15,7 +15,6 @@ import java.net.UnknownHostException;
  */
 public abstract class IPUtils {
 
-    public static final String UNKNOWN = "unknown";
     public static final String LOCALHOST_IP1 = "127.0.0.1";
     private static String localHostIp;
 
