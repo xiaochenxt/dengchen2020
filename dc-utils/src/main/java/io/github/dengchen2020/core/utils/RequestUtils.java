@@ -73,7 +73,7 @@ public abstract class RequestUtils {
             }
             ip = request.getRemoteAddr();
         } catch (Exception e) {
-            log.error("获取客户端IP失败: {}", e.toString());
+            log.error("获取客户端真实IP失败: ", e);
         }
         return ip;
     }
