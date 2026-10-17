@@ -4,12 +4,12 @@ import io.github.dengchen2020.core.security.principal.Authentication;
 import io.github.dengchen2020.core.security.principal.TenantInfo;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.core.SpringProperties;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.nio.ByteBuffer;
 import java.security.Principal;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.*;
 
@@ -32,7 +32,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
     private static final String WEBSOCKET_KEEPALIVE_ENABLED = "dc.websocket.keepalive.enabled";
 
     static {
-        if (Objects.equals(System.getProperty(WEBSOCKET_KEEPALIVE_ENABLED), Boolean.TRUE.toString())) {
+        if (SpringProperties.getFlag(WEBSOCKET_KEEPALIVE_ENABLED)) {
             scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("websocket-keepalive").factory());
         }else {
             scheduledExecutorService = null;

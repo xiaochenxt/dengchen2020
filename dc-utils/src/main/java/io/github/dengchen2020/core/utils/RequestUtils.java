@@ -4,14 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
+import org.springframework.core.SpringProperties;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
-
-import static io.github.dengchen2020.core.utils.IPUtils.UNKNOWN;
 
 /**
  * 请求扩展工具类
@@ -23,11 +21,14 @@ public abstract class RequestUtils {
 
     private static final Logger log = LoggerFactory.getLogger(RequestUtils.class);
 
-    private static final String DEFAULT_REAL_IP_HEADER = System.getProperty("dc.real.ip.header","");
-    public static final String NGINX_REAL_IP_HEADER = "x-real-ip";
-    public static final String CLOUDFLARE_REAL_IP_HEADER = "cf-connecting-ip";
-    public static final boolean USE_NGINX = Boolean.parseBoolean(System.getProperty("dc.use-nginx","true"));
-    public static final boolean USE_CLOUDFLARE = Boolean.parseBoolean(System.getProperty("dc.use-cloudflare","true"));
+    /**
+     * 从CDN获取客户端真实IP地址的请求头
+     */
+    public static final String CDN_IP_HEADER = SpringProperties.getProperty("dc.cdn.ip.header");
+    /**
+     * 启用Cloudflare代理时Cloudflare会将客户端真实IP地址放在这个请求头中
+     */
+    public static final String CLOUDFLARE_IP_HEADER = "cf-connecting-ip";
 
     /**
      * 获取当前请求上下文属性
@@ -61,27 +62,14 @@ public abstract class RequestUtils {
 
     /**
      * 获取远程客户端ip地址
-     * <p>
-     * 使用cloudflare的cdn、或Nginx的代理时，不能直接通过request.getRemoteAddr()获取IP地址，获得的ip是代理的ip，
-     * 需要从指定请求头中获取，这里默认尝试从cloudflare的ip请求头、nginx的ip请求头、指定请求头中获取用户的真实ip
-     * </p>
      */
     public static String getRemoteAddr(@NonNull HttpServletRequest request) {
         String ip = null;
         try {
-            if (USE_CLOUDFLARE) {
-                //从cloudflare的ip请求头中获取真实用户的ip
-                ip = request.getHeader(CLOUDFLARE_REAL_IP_HEADER);
-                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
-            }
-            if (USE_NGINX) {
-                //从nginx的ip请求头中获取真实用户的ip
-                ip = request.getHeader(NGINX_REAL_IP_HEADER);
-                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
-            }
-            if (!DEFAULT_REAL_IP_HEADER.isBlank()) {
-                ip = request.getHeader(DEFAULT_REAL_IP_HEADER);
-                if (StringUtils.hasText(ip) && !UNKNOWN.equals(ip)) return ip;
+            if (CDN_IP_HEADER != null) {
+                //从cdn的ip请求头中获取客户端真实IP地址
+                ip = request.getHeader(CDN_IP_HEADER);
+                if (ip != null) return ip;
             }
             ip = request.getRemoteAddr();
         } catch (Exception e) {
@@ -92,10 +80,6 @@ public abstract class RequestUtils {
 
     /**
      * 获取远程客户端ip地址
-     * <p>
-     * 使用cloudflare的cdn、或Nginx的代理时，不能直接通过request.getRemoteAddr()获取IP地址，获得的ip是代理的ip，
-     * 需要从指定请求头中获取，这里默认尝试从cloudflare的ip请求头、nginx的ip请求头、指定请求头中获取用户的真实ip
-     * </p>
      */
     public static String getRemoteAddr() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();

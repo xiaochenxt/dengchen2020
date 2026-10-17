@@ -10,6 +10,7 @@ import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -32,10 +33,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,17 +47,17 @@ public abstract class RestClientUtils {
     /**
      * 默认每个路由最大连接数，200
      */
-    static final int DEFAULT_MAX_CONN_PER_ROUTE = Integer.parseInt(System.getProperty("restClient.maxConnPerRoute", "200"));
+    static final int DEFAULT_MAX_CONN_PER_ROUTE = Integer.parseInt(Objects.requireNonNullElse(SpringProperties.getProperty("dc.restClient.maxConnPerRoute"), "200"));
 
     /**
      * 默认读取超时时间，10秒钟
      */
-    static final Duration DEFAULT_READ_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.readTimeout", "10")));
+    static final Duration DEFAULT_READ_TIMEOUT = Duration.ofSeconds(Integer.parseInt(Objects.requireNonNullElse(SpringProperties.getProperty("dc.restClient.readTimeout"), "10")));
 
     /**
      * 默认连接超时时间，30秒钟
      */
-    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("restClient.connectTimeout", "30")));
+    static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(Objects.requireNonNullElse(SpringProperties.getProperty("dc.restClient.connectTimeout"), "30")));
 
     static final Set<HttpMethod> BUFFER_CONTENT_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
