@@ -40,7 +40,7 @@ public abstract class SingletonDcWebSocketHandler extends AbstractDcWebSocketHan
     }
 
     protected SingletonDcWebSocketHandler() {
-        if (scheduledExecutorService != null) scheduledExecutorService.scheduleAtFixedRate(this::sendPingToAll, 30, 60, TimeUnit.SECONDS);
+        if (scheduledExecutorService != null) scheduledExecutorService.scheduleAtFixedRate(this::sendPingToAll, 30, 50, TimeUnit.SECONDS);
     }
 
     @Override
