@@ -21,13 +21,20 @@ public void processOrder(Long id) {
 `@Lock` 参数说明：
 
 ```java
-String value() default "";       // 锁的key，支持 SpEL 表达式（如 #p0、#id）
+String value() default "";       // 锁的key，支持 SpEL 表达式（如 #p0、#id），仅限变量与属性访问
 String name() default "";        // 锁定的资源名称
 long waitTime() default -1;      // 等待获取锁的时长（秒）
 long lockTime() default -1;      // 持有锁的时长，-1 表示无限续期直到执行完成
 TimeUnit timeUnit() default SECONDS; // 时间单位
 String errorMsg() default "请求人数过多，请稍后再试"; // 异常提示
 ```
+
+`value` 表达式约束：
+
+- 只支持变量引用与属性访问，如 `#id`、`#p0`、`#a0`、`#obj.id`
+- 不支持 `T(...)` 类型引用、`new` 构造和显式方法调用（如 `#obj.getId()`），命中时抛出 `EvaluationException`
+- 不支持 `#{...}` 模板语法，直接写表达式即可
+- 必须是注解中的常量表达式，禁止与运行时数据拼接
 
 编程方式使用：
 

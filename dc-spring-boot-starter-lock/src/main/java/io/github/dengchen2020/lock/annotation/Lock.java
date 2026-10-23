@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
 public @interface Lock {
 
     /**
-     * 锁的key，为空默认为目标方法的toString()值，支持SpringEl表达式（如#p0，#a0，#obj.id，#id等）解析方法参数转化为key
+     * 锁的key，为空默认为目标方法的toString()值，支持SpringEl表达式（如#p0，#a0，#obj.id，#id等）解析方法参数转化为key，
+     * 仅限变量引用与属性访问，不支持T(...)、new和方法调用
      */
     String value() default "";
 

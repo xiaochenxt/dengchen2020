@@ -39,7 +39,7 @@ public void processOrder(Long id) {
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `value` | `""` | 锁的Key，支持 SpEL 表达式（`#p0`、`#id`、`#obj.id`），为空时用方法 `toString()` |
+| `value` | `""` | 锁的Key，支持 SpEL 表达式（`#p0`、`#id`、`#obj.id`），仅限变量与属性访问，为空时用方法 `toString()` |
 | `name` | `""` | 锁的资源名称，与 value 组合为完整 Key |
 | `waitTime` | `-1` | 等待获取锁的时长（秒），-1 表示立即返回 |
 | `lockTime` | `-1` | 持有锁时长（秒），-1 表示无限续期直到执行完成 |
@@ -117,6 +117,8 @@ dc-spring-boot-starter-lock/src/main/java/io/github/dengchen2020/lock/
 ## 注意事项
 
 1. `@Lock` 与 `@Transactional` 一起使用时，注意 `@Lock` 的 order 需高于事务拦截器，确保在事务内持有锁
-2. 锁 Key 的 SpEL 表达式支持：`#p0`(第一个参数)、`#a0`、`#param.id` 等形式
-3. Redisson 连接配置默认复用 `spring.data.redis.*`，可通过 `dc.lock.redisson.redis.*` 单独配置
-4. `lockTime=-1` 时 Watchdog 每 10 秒续期一次，业务执行时长不建议超过看门狗超时时间
+2. 锁 Key 的 SpEL 表达式支持：`#p0`(第一个参数)、`#a0`、`#param.id` 等形式，仅限变量引用与属性访问
+3. 表达式不支持 `T(...)` 类型引用、`new` 构造和显式方法调用（如 `#obj.getId()`），命中时抛 `EvaluationException`；也不支持 `#{...}` 模板语法
+4. `value` 必须是常量表达式，禁止与运行时数据拼接
+5. Redisson 连接配置默认复用 `spring.data.redis.*`，可通过 `dc.lock.redisson.redis.*` 单独配置
+6. `lockTime=-1` 时 Watchdog 每 10 秒续期一次，业务执行时长不建议超过看门狗超时时间
