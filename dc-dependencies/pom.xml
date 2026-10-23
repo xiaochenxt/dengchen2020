@@ -55,11 +55,11 @@
     <graalvm.version>25.4.4.1.1</graalvm.version>
     <zxing.version>3.5.4</zxing.version>
     <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
-    <libphonenumber.version>9.0.41</libphonenumber.version>
+    <libphonenumber.version>9.0.42</libphonenumber.version>
     <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
     <ip2region.version>3.3.7</ip2region.version>
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
-    <playwright.version>1.63.0</playwright.version>
+    <playwright.version>1.64.0</playwright.version>
     <easy-captcha.version>1.6.2</easy-captcha.version>
     <fusionauth-jwt.version>7.0.0</fusionauth-jwt.version>
   </properties>
