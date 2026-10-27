@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 图片处理器
- * <p>支持图片压缩、尺寸调整、Base64转换、文本水印（多位置+字号颜色可控）、图片水印（多位置+宽高可控）</p>
+ * <p>支持图片压缩、尺寸调整、旋转、Base64转换、文本水印（多位置+字号颜色可控）、图片水印（多位置+宽高可控）</p>
  * @author xiaochen
  * @since 2025/10/16
  */
@@ -23,6 +23,7 @@ public class ImageProcessor {
     private boolean compress;
     private int width;
     private int height;
+    private double rotationDegrees;
     private float compressionQuality;
     private List<TextWatermarkConfig> textWatermarkConfigs;
     private List<ImageWatermarkConfig> imageWatermarkConfigs;
@@ -41,6 +42,7 @@ public class ImageProcessor {
         public static final Set<String> SUPPORT_FORMATS = Set.of("jpg", "png", "gif", "wbmp", "bmp", "jpeg", "tif", "tiff");
         private int width = 0;                      // 主图目标宽度
         private int height = 0;                     // 主图目标高度
+        private double rotationDegrees = 0;         // 主图顺时针旋转角度
         private boolean compress = false;
         private float compressionQuality = 0.9f;          // 默认压缩质量（0.0-1.0）
         private static final Font DEFAULT_TEXT_WATERMARK_FONT = new Font("Arial, SimHei, Heiti SC, Ubuntu Sans", Font.BOLD, 20); //字体（字体大小默认20）
@@ -64,6 +66,16 @@ public class ImageProcessor {
                 this.width = width;
                 this.height = height;
             }
+            return this;
+        }
+
+        /**
+         * 主图旋转，在水印处理后、压缩输出前执行
+         * @param degrees 顺时针旋转角度，负数表示逆时针
+         * @return
+         */
+        public Builder rotate(double degrees) {
+            if (Double.isFinite(degrees)) this.rotationDegrees = degrees % 360;
             return this;
         }
 
@@ -255,6 +267,7 @@ public class ImageProcessor {
             var processor = new ImageProcessor();
             processor.width = this.width;
             processor.height = this.height;
+            processor.rotationDegrees = this.rotationDegrees;
             processor.outputFormat = this.outputFormat;
             processor.compress = this.compress;
             processor.compressionQuality = this.compressionQuality;
@@ -368,6 +381,8 @@ public class ImageProcessor {
             if (textWatermarkConfigs != null && !textWatermarkConfigs.isEmpty()) sourceImage = doAddMultiTextWatermark(sourceImage);
             // 图片水印（循环处理所有添加的图片水印）
             if (imageWatermarkConfigs != null && !imageWatermarkConfigs.isEmpty()) sourceImage = doAddMultiImageWatermark(sourceImage);
+            // 主图旋转
+            if (rotationDegrees != 0) sourceImage = doRotate(sourceImage);
             // 压缩输出
             if (compress) {
                 doCompress(sourceImage, outputStream);
@@ -466,6 +481,42 @@ public class ImageProcessor {
         g2d.drawImage(image, 0, 0, w, h, null);
         g2d.dispose();
         return resized;
+    }
+
+    /**
+     * 旋转图片并自动扩展画布，避免图片被裁剪
+     * @param sourceImage 源图片
+     * @return 旋转后的图片
+     */
+    private BufferedImage doRotate(BufferedImage sourceImage) {
+        int sourceWidth = sourceImage.getWidth();
+        int sourceHeight = sourceImage.getHeight();
+        double radians = Math.toRadians(rotationDegrees);
+        double sin = Math.abs(Math.sin(radians));
+        double cos = Math.abs(Math.cos(radians));
+        // 消除直角旋转时的浮点误差，避免画布多出1像素
+        if (sin < 1e-10) sin = 0;
+        if (cos < 1e-10) cos = 0;
+        int rotatedWidth = (int) Math.ceil(sourceWidth * cos + sourceHeight * sin);
+        int rotatedHeight = (int) Math.ceil(sourceHeight * cos + sourceWidth * sin);
+        boolean hasAlpha = sourceImage.getColorModel().hasAlpha();
+        BufferedImage rotatedImage = new BufferedImage(rotatedWidth, rotatedHeight,
+                hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = rotatedImage.createGraphics();
+        try {
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (!hasAlpha) {
+                g2d.setColor(Color.WHITE);
+                g2d.fillRect(0, 0, rotatedWidth, rotatedHeight);
+            }
+            g2d.translate((rotatedWidth - sourceWidth) / 2.0, (rotatedHeight - sourceHeight) / 2.0);
+            g2d.rotate(radians, sourceWidth / 2.0, sourceHeight / 2.0);
+            g2d.drawImage(sourceImage, 0, 0, null);
+        } finally {
+            g2d.dispose();
+        }
+        return rotatedImage;
     }
 
     /**
