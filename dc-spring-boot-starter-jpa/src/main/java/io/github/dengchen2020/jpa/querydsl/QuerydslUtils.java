@@ -83,7 +83,7 @@ public abstract class QuerydslUtils {
      * @param entity Q类实例
      * @return 表达式数组
      */
-    public static <T> Expression<?>[] generateSetterExpressions(
+    private static <T> Expression<?>[] generateSetterExpressions(
             Class<? extends T> type, EntityPath<?> entity) {
         var cacheKey = new BeanCacheKey(entity, type);
         var cache = beansExpressionCache.get(cacheKey);
@@ -97,7 +97,7 @@ public abstract class QuerydslUtils {
             if (expression != null) expressions.add(expression);
         }
 
-        var expressionsArray = expressions.toArray(EMPTY_EXPRESSIONS);
+        var expressionsArray = expressions.isEmpty() ? EMPTY_EXPRESSIONS : expressions.toArray(EMPTY_EXPRESSIONS);
         beansExpressionCache.put(cacheKey, expressionsArray);
         return expressionsArray;
     }
@@ -109,7 +109,7 @@ public abstract class QuerydslUtils {
      * @param entity  Q类实例
      * @return 表达式数组
      */
-    public static <T extends Record> Expression<?>[] generateRecordConstructorExpressions(
+    private static <T extends Record> Expression<?>[] generateRecordConstructorExpressions(
             Class<T> type, EntityPath<?> entity, boolean missingFieldToNull) {
         var cacheKey = new RecordCacheKey(entity, type, missingFieldToNull);
         var cache = recordExpressionCache.get(cacheKey);
@@ -143,7 +143,7 @@ public abstract class QuerydslUtils {
             }
         }
 
-        var expressionsArray = expressions.toArray(EMPTY_EXPRESSIONS);
+        var expressionsArray = expressions.isEmpty() ? EMPTY_EXPRESSIONS : expressions.toArray(EMPTY_EXPRESSIONS);
         recordExpressionCache.put(cacheKey, expressionsArray);
         return expressionsArray;
     }
@@ -168,6 +168,7 @@ public abstract class QuerydslUtils {
     public static <T> QBean<T> bean(Class<? extends T> type, EntityPath<?> entityPath, Expression<?>... exprs) {
         var setters = generateSetterExpressions(type, entityPath);
         if (exprs.length == 0) return Projections.bean(type, setters);
+        if (setters.length == 0) return Projections.bean(type, exprs);
         var expressions = new Expression<?>[setters.length + exprs.length];
         System.arraycopy(setters, 0, expressions, 0, setters.length);
         System.arraycopy(exprs, 0, expressions, setters.length, exprs.length);
@@ -181,6 +182,7 @@ public abstract class QuerydslUtils {
             return Projections.constructor(type, components);
         }
         var components = generateRecordConstructorExpressions(type, entityPath, false);
+        if (components.length == 0) return Projections.constructor(type, exprs);
         var expressions = new Expression<?>[components.length + exprs.length];
         System.arraycopy(components, 0, expressions, 0, components.length);
         System.arraycopy(exprs, 0, expressions, components.length, exprs.length);
