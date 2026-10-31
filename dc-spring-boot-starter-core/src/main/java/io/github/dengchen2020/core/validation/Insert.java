@@ -47,6 +47,10 @@ import jakarta.validation.groups.Default;
  * 此时标注了 {@code groups = Insert.class} 的约束不会生效，需显式写成
  * {@code @Validated(Insert.class)}。</p>
  *
+ * <p>另外，{@code @Valid} 不支持分组校验：接口参数直接接收数组或 {@code List}
+ * （如 {@code @RequestBody List<User> users}）时，分组校验不会作用到集合元素，
+ * 需改用包装对象持有集合并声明级联校验，或对元素逐个校验。</p>
+ *
  * @author xiaochen
  * @since 2026/10/31
  */
