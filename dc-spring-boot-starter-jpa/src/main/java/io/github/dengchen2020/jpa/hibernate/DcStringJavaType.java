@@ -10,7 +10,7 @@ import org.hibernate.type.descriptor.jdbc.JdbcType;
  * @author xiaochen
  * @since 2026/1/8
  */
-public class DcStringJavaType extends StringJavaType {
+class DcStringJavaType extends StringJavaType {
 
     public static final DcStringJavaType INSTANCE = new DcStringJavaType();
 

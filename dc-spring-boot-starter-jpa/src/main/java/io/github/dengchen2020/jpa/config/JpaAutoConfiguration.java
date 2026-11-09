@@ -46,6 +46,9 @@ public final class JpaAutoConfiguration {
             if (environment.getProperty("dc.jpa.properties.hibernate.dynamic-update", Boolean.class, true)) {
                 hibernateProperties.put("dc.hibernate.dynamic_update", true);
             }
+            if (!environment.getProperty("dc.jpa.properties.hibernate.postgres.text-length-limit.enabled", Boolean.class, false)) {
+                hibernateProperties.put("dc.hibernate.postgres.text-length-limit.enabled", false);
+            }
         };
     }
 
