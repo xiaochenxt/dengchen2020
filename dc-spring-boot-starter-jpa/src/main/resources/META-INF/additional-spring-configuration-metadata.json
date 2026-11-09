@@ -11,6 +11,11 @@
       "type": "java.lang.Boolean",
       "description": "是否启用hibernate-orm的动态生成更新sql，即更新sql语句只包含实际修改了值的字段，详见@DynamicUpdate的注解说明.",
       "defaultValue": true
+    },{
+      "name": "dc.jpa.properties.hibernate.postgres.text-length-limit.enabled",
+      "type": "java.lang.Boolean",
+      "description": "JPA会在字符串类型未设置length的时候将长度设置为255，针对Postgres数据库可关闭长度限制将其长度设置为无限，默认关闭postgres的字符串长度限制，需要时显式开启（推荐对参数的长度做校验，而不是依赖数据库的长度限制）.",
+      "defaultValue": false
     }
   ]
 }

@@ -44,6 +44,9 @@ public final class JpaAutoConfiguration {
             if (environment.getProperty("spring.jpa.hibernate.naming.physical-strategy") == null) {
                 hibernateProperties.put(MappingSettings.PHYSICAL_NAMING_STRATEGY, PhysicalNamingStrategySnakeCaseImpl.class.getName());
             }
+            if (!environment.getProperty("dc.jpa.properties.hibernate.postgres.text-length-limit.enabled", Boolean.class, false)) {
+                hibernateProperties.put("dc.hibernate.postgres.text-length-limit.enabled", false);
+            }
         };
     }
 
