@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 
 import static io.github.dengchen2020.aot.utils.CollectUtils.*;
@@ -36,9 +37,10 @@ class DcFeature implements Feature {
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
         FeatureUtils featureUtils = new FeatureUtils(access.getApplicationClassLoader());
+        font(featureUtils, access);
+        image(featureUtils, access);
         caffeine(featureUtils, access);
         lettuce(featureUtils);
-        if (Boolean.parseBoolean(System.getProperty("font.aot","true"))) font(access);
         aliyuncs(featureUtils, access);
         alipay(featureUtils, access);
         captcha(featureUtils, access);
@@ -48,7 +50,6 @@ class DcFeature implements Feature {
         mybatisPlus(featureUtils, access);
         graalJs(featureUtils, access);
         jetty(featureUtils, access);
-        image(featureUtils, access);
         dns(featureUtils, access);
         ssl(featureUtils, access);
         precompute(featureUtils, access);
@@ -60,73 +61,74 @@ class DcFeature implements Feature {
         springai(featureUtils, access);
     }
 
-    /**
-     * 要解决windows环境下的字体问题，需要有java.home，java.home所在文件夹下有lib文件夹，
-     * lib文件夹中要有fontconfig.bfc、fontconfig.properties.src、psfont.properties.ja、psfontj2d.properties
-     */
-    private void font(BeforeAnalysisAccess access) {
+    private void font(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
         access.registerReachabilityHandler(duringAnalysisAccess -> {
-            FeatureUtils fe = new FeatureUtils(duringAnalysisAccess.getApplicationClassLoader());
-            try {
-                new FontRequiredRegister().register(fe);
-            } catch (Exception e) {
-                System.out.println("字体注册异常，可能导致字体相关功能无法使用");
-                e.printStackTrace();
-            }
-            if (Runtime.version().feature() >= 19) {
-                Class<?> fontUtilitiesClass = fe.loadClass("sun.font.FontUtilities");
-                if (fontUtilitiesClass != null) {
-                    RuntimeJNIAccess.register(fontUtilitiesClass);
-                    RuntimeJNIAccess.register(fontUtilitiesClass.getDeclaredFields());
-                    RuntimeJNIAccess.register(fontUtilitiesClass.getDeclaredMethods());
-                    RuntimeJNIAccess.register(fontUtilitiesClass.getDeclaredConstructors());
-                }
-            }
-            fe.registerJniIfPresent("sun.awt.windows.WComponentPeer","sun.awt.windows.WDesktopPeer",
-                    "sun.awt.windows.WObjectPeer","sun.awt.windows.WToolkit","sun.java2d.windows.WindowsFlags");
-            fe.registerJniIfPresent("java.awt.Toolkit","java.awt.Insets","java.awt.FontMetrics","java.awt.Font",
-                    "sun.awt.image.SunVolatileImage","sun.awt.image.VolatileSurfaceManager","java.awt.Component",
-                    "java.awt.desktop.UserSessionEvent$Reason","sun.awt.Win32GraphicsEnvironment");
+            featureUtils.registerJniIfPresent("java.awt.AWTEvent","java.awt.AlphaComposite","java.awt.Color",
+                    "java.awt.GraphicsEnvironment","java.awt.Component","java.awt.Font","java.awt.FontMetrics",
+                    "java.awt.Insets","java.awt.Toolkit","java.awt.desktop.UserSessionEvent$Reason",
+                    "java.awt.event.InputEvent","java.awt.geom.AffineTransform","java.awt.geom.GeneralPath",
+                    "java.awt.geom.Path2D","java.awt.geom.Path2D$Float","java.awt.geom.Point2D$Float",
+                    "java.awt.geom.Rectangle2D$Float","java.awt.image.BufferedImage","java.awt.image.ColorModel",
+                    "java.awt.image.IndexColorModel","java.awt.image.Raster","java.awt.image.SampleModel",
+                    "java.awt.image.SinglePixelPackedSampleModel","java.lang.Boolean","sun.awt.AWTAutoShutdown",
+                    "sun.awt.SunHints","sun.awt.SunToolkit","sun.awt.Win32GraphicsConfig",
+                    "sun.awt.Win32GraphicsDevice","sun.awt.Win32GraphicsEnvironment",
+                    "sun.awt.image.BufImgSurfaceData$ICMColorData","sun.awt.image.IntegerComponentRaster",
+                    "sun.awt.image.SunVolatileImage","sun.awt.image.VolatileSurfaceManager",
+                    "sun.awt.windows.WComponentPeer","sun.awt.windows.WDesktopPeer","sun.awt.windows.WObjectPeer",
+                    "sun.awt.windows.WToolkit","sun.font.CharToGlyphMapper","sun.font.Font2D",
+                    "sun.font.FontConfigManager$FcCompFont","sun.font.FontConfigManager$FontConfigFont",
+                    "sun.font.FontConfigManager$FontConfigInfo","sun.font.FontStrike","sun.font.FontUtilities",
+                    "sun.font.FreetypeFontScaler","sun.font.GlyphList","sun.font.PhysicalStrike",
+                    "sun.font.StrikeCache$1","sun.font.StrikeMetrics","sun.font.TrueTypeFont",
+                    "sun.font.Type1Font","sun.java2d.Disposer","sun.java2d.InvalidPipeException",
+                    "sun.java2d.NullSurfaceData","sun.java2d.SunGraphics2D","sun.java2d.SurfaceData",
+                    "sun.java2d.d3d.D3DGraphicsDevice$1","sun.java2d.d3d.D3DRenderQueue$1","sun.java2d.loops.Blit",
+                    "sun.java2d.loops.BlitBg","sun.java2d.loops.CompositeType","sun.java2d.loops.DrawGlyphList",
+                    "sun.java2d.loops.DrawGlyphListAA","sun.java2d.loops.DrawGlyphListLCD",
+                    "sun.java2d.loops.DrawLine","sun.java2d.loops.DrawParallelogram","sun.java2d.loops.DrawPath",
+                    "sun.java2d.loops.DrawPolygons","sun.java2d.loops.DrawRect","sun.java2d.loops.FillParallelogram",
+                    "sun.java2d.loops.FillPath","sun.java2d.loops.FillRect","sun.java2d.loops.FillSpans",
+                    "sun.java2d.loops.GraphicsPrimitive","sun.java2d.loops.GraphicsPrimitiveMgr",
+                    "sun.java2d.loops.MaskBlit","sun.java2d.loops.MaskFill","sun.java2d.loops.ScaledBlit",
+                    "sun.java2d.loops.SurfaceType","sun.java2d.loops.TransformHelper","sun.java2d.loops.XORComposite",
+                    "sun.java2d.pipe.Region","sun.java2d.pipe.RegionIterator","sun.java2d.windows.WindowsFlags");
+            featureUtils.registerReflectionIfPresent("javax.imageio.spi.ImageReaderSpi",
+                    "javax.imageio.spi.ImageWriterSpi","sun.font.FontConfigManager$FontConfigFont[]",
+                    "sun.java2d.loops.GraphicsPrimitive[]","sun.java2d.marlin.DMarlinRenderingEngine",
+                    "sun.security.provider.DRBG","sun.security.provider.NativePRNG","sun.security.provider.SHA",
+                    "sun.security.provider.SHA2$SHA256","sun.util.resources.cldr.TimeZoneNames",
+                    "sun.util.resources.cldr.TimeZoneNames_en","sun.util.resources.cldr.TimeZoneNames_en_US");
+            featureUtils.registerResource(Font.class, "META-INF/services/javax.imageio.spi.ImageInputStreamSpi",
+                    "META-INF/services/javax.imageio.spi.ImageOutputStreamSpi",
+                    "META-INF/services/javax.imageio.spi.ImageReaderSpi",
+                    "META-INF/services/javax.imageio.spi.ImageTranscoderSpi",
+                    "META-INF/services/javax.imageio.spi.ImageWriterSpi",
+                    "sun/awt/resources/awt_en.properties",
+                    "sun/awt/resources/awt_en_US.properties",
+                    "sun/awt/resources/awt_zh.properties",
+                    "sun/awt/resources/awt_zh_Hans.properties",
+                    "sun/awt/resources/awt_zh_Hans_CN.properties");
+            featureUtils.registerResourceBundle(Font.class, "sun.awt.resources.awt", Locale.getDefault(), Locale.ENGLISH, Locale.CHINESE);
 
-            String javaHome = System.getProperty("java.home");
-            URL url = fe.classLoader().getResource("");
-            if (url != null) {
-                String path = url.getPath();
-                String targetPath = new File(path).getParentFile().getPath();
-                File f = new File(targetPath + File.separator + "lib");
-                if (f.mkdirs()) {
-                    String libPath = javaHome + File.separator + "lib" + File.separator;
-                    File fontconfig = new File(libPath + "fontconfig.bfc");
-                    File fontPropertiiesSrc = new File(libPath + "fontconfig.properties.src");
-                    File psfontPropertiesJa = new File(libPath + "psfont.properties.ja");
-                    File psfontj2dProperties = new File(libPath + "psfontj2d.properties");
-                    String targetLibPath = targetPath + File.separator + "lib" + File.separator;
-                    if (fontconfig.exists()) {
-                        try {
-                            Files.copy(fontconfig.toPath(), Path.of(targetLibPath + "fontconfig.bfc"));
-                        } catch (IOException ignored) {}
-                    }
-                    if (fontPropertiiesSrc.exists()) {
-                        try {
-                            Files.copy(fontPropertiiesSrc.toPath(), Path.of(targetLibPath + "fontconfig.properties.src"));
-                        } catch (IOException ignored) {}
-                    }
-                    if (psfontPropertiesJa.exists()) {
-                        try {
-                            Files.copy(psfontPropertiesJa.toPath(), Path.of(targetLibPath + "psfont.properties.ja"));
-                        } catch (IOException ignored) {}
-                    }
-                    if (psfontj2dProperties.exists()) {
-                        try {
-                            Files.copy(psfontj2dProperties.toPath(), Path.of(targetLibPath + "psfontj2d.properties"));
-                        } catch (IOException ignored) {}
-                    }
-                }
-            }
-            // 需将运行时的java.home设置为当前目录
-            fe.registerSystemProperty("java.home", "./");
-            System.out.println("字体依赖lib文件夹，需要带上它一起打包");
         }, Font.class);
+    }
+
+    private void image(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+        Class<?> imageReader = featureUtils.loadClass("com.sun.imageio.plugins.jpeg.JPEGImageReader");
+        if (imageReader != null) {
+            access.registerReachabilityHandler(duringAnalysisAccess -> {
+                featureUtils.registerJniMethods(imageReader, "acceptPixels","passComplete","passStarted","pushBack","readInputData","setImageData","skipInputBytes","skipPastImage","warningOccurred","warningWithMessage");
+                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGQTable","qTable");
+                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGHuffmanTable","lengths","values");
+                featureUtils.registerJniFields("sun.awt.image.ByteComponentRaster","data","dataOffsets","pixelStride","scanlineStride","type");
+                featureUtils.registerJniMethods("java.util.HashMap", "containsKey","put");
+                featureUtils.registerJni(ArrayList.class.getDeclaredConstructors());
+                featureUtils.registerJniMethods("java.util.ArrayList", "add");
+                featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
+                featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
+            }, imageReader);
+        }
     }
 
     /**
@@ -192,7 +194,7 @@ class DcFeature implements Feature {
         if (captcha != null) {
             access.registerReachabilityHandler(duringAnalysisAccess -> {
                 // 仅添加第一个字体，需要其他的自行添加
-                featureUtils.registerResource(captcha,"epilog.ttf");
+                featureUtils.registerResource(captcha,"actionj.ttf","epilog.ttf");
             }, captcha);
         }
     }
@@ -296,23 +298,6 @@ class DcFeature implements Feature {
                     new JettyWebSocketRequiredRegister().register(featureUtils);
                 } catch (Exception ignored) {}
             }, jettyWebSocket);
-        }
-    }
-
-    private void image(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
-        Class<?> imageReader = featureUtils.loadClass("com.sun.imageio.plugins.jpeg.JPEGImageReader");
-        if (imageReader != null) {
-            access.registerReachabilityHandler(duringAnalysisAccess -> {
-                featureUtils.registerJniMethods(imageReader, "acceptPixels","passComplete","passStarted","pushBack","readInputData","setImageData","skipInputBytes","skipPastImage","warningOccurred","warningWithMessage");
-                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGQTable","qTable");
-                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGHuffmanTable","lengths","values");
-                featureUtils.registerJniFields("sun.awt.image.ByteComponentRaster","data","dataOffsets","pixelStride","scanlineStride","type");
-                featureUtils.registerJniMethods("java.util.HashMap", "containsKey","put");
-                featureUtils.registerJni(ArrayList.class.getDeclaredConstructors());
-                featureUtils.registerJniMethods("java.util.ArrayList", "add");
-                featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
-                featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
-            }, imageReader);
         }
     }
 
