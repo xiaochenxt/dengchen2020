@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
  * 在 native-image 包含的默认字符集之外，精确追加 GBK 系列编码，
  * 避免 -H:+AddAllCharsets 把全部字符集打进镜像带来的体积膨胀。
  */
-public class GbkCharsetFeature implements Feature {
+class GbkCharsetFeature implements Feature {
 
     @Override
     public void afterRegistration(AfterRegistrationAccess access) {
