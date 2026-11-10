@@ -10,6 +10,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.wf.captcha.base.Captcha.FONT_2;
+import static io.github.dengchen2020.core.utils.FontUtils.chineseFont;
+
 /**
  * 验证码工具类
  *
@@ -19,13 +22,23 @@ import java.util.List;
 @NullMarked
 public abstract class CaptchaUtils {
 
-    private static final int width = 200;
+    private static final int WIDTH = 200;
 
-    private static final int height = 72;
+    private static final int HEIGHT = 72;
 
-    private static final int len = 4;
+    private static final int LEN = 4;
 
-    private static final float fontSize = 50f;
+    private static final float FONT_SIZE = 50f;
+
+    private static final Font englishFont;
+
+    static {
+        try {
+            englishFont = Font.createFont(Font.TRUETYPE_FONT, CaptchaUtils.class.getResourceAsStream("/epilog.ttf")).deriveFont(Font.BOLD, FONT_SIZE);
+        } catch (FontFormatException | IOException e) {
+            throw new RuntimeException("epilog.ttf font load error", e);
+        }
+    }
 
     /**
      * 验证码
@@ -34,7 +47,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static Captcha captcha(int type) {
-        return captcha(type, len);
+        return captcha(type, LEN);
     }
 
     /**
@@ -45,7 +58,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static Captcha captcha(int type, int len) {
-        return captcha(type, width, height, len, fontSize);
+        return captcha(type, WIDTH, HEIGHT, len, FONT_SIZE, FONT_2);
     }
 
     /**
@@ -56,7 +69,7 @@ public abstract class CaptchaUtils {
      * @return 验证码答案
      */
     public static String captcha(OutputStream out, int type) {
-        return captcha(out, type, width, height, len, fontSize);
+        return captcha(out, type, WIDTH, HEIGHT, LEN, FONT_SIZE, FONT_2);
     }
 
     /**
@@ -70,8 +83,8 @@ public abstract class CaptchaUtils {
      * @param fontSize 验证码内容文字大小
      * @return 验证码答案
      */
-    public static String captcha(OutputStream out, int type, int width, int height, int len, float fontSize) {
-        Captcha captcha = captcha(type, width, height, len, fontSize);
+    public static String captcha(OutputStream out, int type, int width, int height, int len, float fontSize, int font) {
+        Captcha captcha = captcha(type, width, height, len, fontSize, font);
         captcha.out(out);
         return captcha.text();
     }
@@ -86,13 +99,29 @@ public abstract class CaptchaUtils {
      * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static Captcha captcha(int type, int width, int height, int len, float fontSize) {
+    public static Captcha captcha(int type, int width, int height, int len, float fontSize, int font) {
         return switch (type) {
-            case 2 -> arithmetic(width, height, len, fontSize);
-            case 3 -> chinese(width, height, len, fontSize);
-            case 4 -> chineseGif(width, height, len, fontSize);
-            case 5 -> gif(width, height, len, fontSize);
-            default -> spec(width, height, len, fontSize);
+            case 2 -> arithmetic(width, height, len, fontSize, font);
+            case 3 -> {
+                Font f;
+                if (fontSize == FONT_SIZE) {
+                    f = chineseFont();
+                } else {
+                    f = chineseFont().deriveFont(fontSize);
+                }
+                yield chinese(width, height, len, f);
+            }
+            case 4 -> {
+                Font f;
+                if (fontSize == FONT_SIZE) {
+                    f = chineseFont();
+                } else {
+                    f = chineseFont().deriveFont(fontSize);
+                }
+                yield chineseGif(width, height, len, f);
+            }
+            case 5 -> gif(width, height, len, fontSize, font);
+            default -> spec(width, height, len, fontSize, font);
         };
     }
 
@@ -102,7 +131,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static SpecCaptcha spec() {
-        return spec(width, height, len, fontSize);
+        return spec(WIDTH, HEIGHT, LEN, FONT_SIZE, FONT_2);
     }
 
     /**
@@ -114,14 +143,22 @@ public abstract class CaptchaUtils {
      * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static SpecCaptcha spec(int width, int height, int len, float fontSize) {
-        SpecCaptcha specCaptcha = new SpecCaptcha(width, height, len);
+    public static SpecCaptcha spec(int width, int height, int len, float fontSize, int font) {
+        SpecCaptcha captcha = new SpecCaptcha(width, height, len);
+        if (font == FONT_2) {
+            if (fontSize == FONT_SIZE) {
+                captcha.setFont(englishFont);
+            } else {
+                captcha.setFont(englishFont.deriveFont(fontSize));
+            }
+            return captcha;
+        }
         try {
-            specCaptcha.setFont(1, fontSize);
+            captcha.setFont(font, fontSize);
         } catch (IOException | FontFormatException e) {
             throw new RuntimeException("设置验证码字体失败", e);
         }
-        return specCaptcha;
+        return captcha;
     }
 
     /**
@@ -130,7 +167,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static ArithmeticCaptcha arithmetic() {
-        return arithmetic(width, height, len, fontSize);
+        return arithmetic(WIDTH, HEIGHT, LEN, FONT_SIZE, FONT_2);
     }
 
     /**
@@ -142,10 +179,18 @@ public abstract class CaptchaUtils {
      * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static ArithmeticCaptcha arithmetic(int width, int height, int len, float fontSize) {
+    public static ArithmeticCaptcha arithmetic(int width, int height, int len, float fontSize, int font) {
         ArithmeticCaptcha captcha = new NoJsArithmeticCaptcha(width, height, len);
+        if (font == FONT_2) {
+            if (fontSize == FONT_SIZE) {
+                captcha.setFont(englishFont);
+            } else {
+                captcha.setFont(englishFont.deriveFont(fontSize));
+            }
+            return captcha;
+        }
         try {
-            captcha.setFont(1, fontSize);
+            captcha.setFont(font, fontSize);
         } catch (IOException | FontFormatException e) {
             throw new RuntimeException("设置数字验证码字体失败", e);
         }
@@ -158,7 +203,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static ChineseCaptcha chinese() {
-        return chinese(width, height, len, fontSize);
+        return chinese(WIDTH, HEIGHT, LEN, chineseFont());
     }
 
     /**
@@ -167,12 +212,11 @@ public abstract class CaptchaUtils {
      * @param width    验证码图宽度
      * @param height   验证码图高度
      * @param len      验证码内容长度
-     * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static ChineseCaptcha chinese(int width, int height, int len, float fontSize) {
+    public static ChineseCaptcha chinese(int width, int height, int len, Font font) {
         ChineseCaptcha captcha = new ChineseCaptcha(width, height, len);
-        captcha.setFont(new Font("宋体", Font.BOLD, (int) fontSize));
+        captcha.setFont(font);
         return captcha;
     }
 
@@ -182,7 +226,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static ChineseGifCaptcha chineseGif() {
-        return chineseGif(width, height, len, fontSize);
+        return chineseGif(WIDTH, HEIGHT, LEN, chineseFont());
     }
 
     /**
@@ -191,12 +235,11 @@ public abstract class CaptchaUtils {
      * @param width    验证码图宽度
      * @param height   验证码图高度
      * @param len      验证码内容长度
-     * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static ChineseGifCaptcha chineseGif(int width, int height, int len, float fontSize) {
+    public static ChineseGifCaptcha chineseGif(int width, int height, int len, Font font) {
         ChineseGifCaptcha captcha = new ChineseGifCaptcha(width, height, len);
-        captcha.setFont(new Font("宋体", Font.BOLD, (int) fontSize));
+        captcha.setFont(font);
         return captcha;
     }
 
@@ -206,7 +249,7 @@ public abstract class CaptchaUtils {
      * @return 验证码
      */
     public static GifCaptcha gif() {
-        return gif(width, height, len, fontSize);
+        return gif(WIDTH, HEIGHT, LEN, FONT_SIZE, FONT_2);
     }
 
     /**
@@ -218,10 +261,18 @@ public abstract class CaptchaUtils {
      * @param fontSize 验证码内容文字大小
      * @return 验证码
      */
-    public static GifCaptcha gif(int width, int height, int len, float fontSize) {
+    public static GifCaptcha gif(int width, int height, int len, float fontSize, int font) {
         GifCaptcha captcha = new GifCaptcha(width, height, len);
+        if (font == FONT_2) {
+            if (fontSize == FONT_SIZE) {
+                captcha.setFont(englishFont);
+            } else {
+                captcha.setFont(englishFont.deriveFont(fontSize));
+            }
+            return captcha;
+        }
         try {
-            captcha.setFont(1, fontSize);
+            captcha.setFont(font, fontSize);
         } catch (IOException | FontFormatException e) {
             throw new RuntimeException("设置动图验证码字体失败", e);
         }
