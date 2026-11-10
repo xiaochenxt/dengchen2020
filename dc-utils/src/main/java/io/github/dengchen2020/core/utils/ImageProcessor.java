@@ -11,6 +11,8 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+import static io.github.dengchen2020.core.utils.FontUtils.chineseFont;
+
 /**
  * 图片处理器
  * <p>支持图片压缩、尺寸调整、旋转、Base64转换、文本水印（多位置+字号颜色可控）、图片水印（多位置+宽高可控）</p>
@@ -45,7 +47,7 @@ public class ImageProcessor {
         private double rotationDegrees = 0;         // 主图顺时针旋转角度
         private boolean compress = false;
         private float compressionQuality = 0.9f;          // 默认压缩质量（0.0-1.0）
-        private static final Font DEFAULT_TEXT_WATERMARK_FONT = new Font("Arial, SimHei, Heiti SC, Ubuntu Sans", Font.BOLD, 20); //字体（字体大小默认20）
+        private static final Font DEFAULT_TEXT_WATERMARK_FONT = chineseFont(); //字体
         private Font textWatermarkFont = DEFAULT_TEXT_WATERMARK_FONT; // 文本水印字体
         private Color textWatermarkColor = Color.RED; // 文本水印颜色
         private int imageWatermarkWidth = 0;        // 图片水印宽度
