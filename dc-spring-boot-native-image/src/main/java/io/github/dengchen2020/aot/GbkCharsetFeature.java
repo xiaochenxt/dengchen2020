@@ -6,10 +6,15 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 /**
- * 在 native-image 包含的默认字符集之外，精确追加 GBK 系列编码，
+ * 在 native-image 包含的默认字符集之外，精确追加 GBK 系列编码，并允许通过-Daot.charsets=字符集编码 追加更多字符集编码
  * 避免 -H:+AddAllCharsets 把全部字符集打进镜像带来的体积膨胀。
  */
 class GbkCharsetFeature implements Feature {
+
+    @Override
+    public String getDescription() {
+        return "In addition to the default character sets included, precisely append GBK series encodings, and allow adding more character set encodings through -Daot.charsets=charset encoding";
+    }
 
     @Override
     public void afterRegistration(AfterRegistrationAccess access) {
@@ -23,8 +28,18 @@ class GbkCharsetFeature implements Feature {
             Class<?> localizationFeature = Class.forName("com.oracle.svm.hosted.jdk.localization.LocalizationFeature");
             Method addCharset = localizationFeature.getMethod("addCharset", Charset.class);
             final String[] charsets = {"GB18030","GBK","GB2312"};
-            for (String name : charsets) {
-                addCharset.invoke(null, Charset.forName(name));
+            for (String charsetName : charsets) {
+                addCharset.invoke(null, Charset.forName(charsetName));
+            }
+            var appendCharsets = System.getProperty("aot.charsets");
+            if (appendCharsets != null) {
+                for (var charsetName : appendCharsets.split(",")) {
+                    try {
+                        addCharset.invoke(null, Charset.forName(charsetName.trim()));
+                    } catch (Throwable e) {
+                        System.err.println("Failed to add charset " + charsetName + ": " + e.getMessage());
+                    }
+                }
             }
         } catch (ReflectiveOperationException e) {
             System.err.println("Failed to add GBK charsets to the native image: " + e.getMessage());
