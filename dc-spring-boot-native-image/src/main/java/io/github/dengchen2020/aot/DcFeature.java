@@ -23,7 +23,7 @@ import java.util.Set;
 import static io.github.dengchen2020.aot.utils.CollectUtils.*;
 
 /**
- * 基本注册，解决了一些代理检测无法自动配置的场景
+ * 基本注册，解决了一些配置收集困难的场景
  * <p>
  * 可搭配代理检测自动收集配置，但需注意，尽量不要在idea中启动，如果在idea等开发工具中启动，会收集idea的agent，
  * 会多出sun.instrument.InstrumentationImpl和com.intellij.rt.execution.application.AppMainV2$Agent等
@@ -35,6 +35,11 @@ import static io.github.dengchen2020.aot.utils.CollectUtils.*;
  * @since 2025/8/20
  */
 class DcFeature implements Feature {
+
+    @Override
+    public String getDescription() {
+        return "Resolved some scenarios where collecting configurations was difficult";
+    }
 
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
