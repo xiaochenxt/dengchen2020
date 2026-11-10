@@ -1,7 +1,10 @@
 package io.github.dengchen2020.aot;
 
 import io.github.dengchen2020.aot.utils.FeatureUtils;
-import org.graalvm.nativeimage.hosted.*;
+import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
+import org.graalvm.nativeimage.hosted.RuntimeSerialization;
 
 import java.awt.*;
 import java.io.File;
@@ -14,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 
@@ -37,8 +39,7 @@ class DcFeature implements Feature {
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
         FeatureUtils featureUtils = new FeatureUtils(access.getApplicationClassLoader());
-        font(featureUtils, access);
-        image(featureUtils, access);
+        awt(featureUtils, access);
         caffeine(featureUtils, access);
         lettuce(featureUtils);
         aliyuncs(featureUtils, access);
@@ -61,7 +62,7 @@ class DcFeature implements Feature {
         springai(featureUtils, access);
     }
 
-    private void font(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
+    private void awt(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
         access.registerReachabilityHandler(duringAnalysisAccess -> {
             featureUtils.registerJniIfPresent("java.awt.AWTEvent","java.awt.AlphaComposite","java.awt.Color",
                     "java.awt.GraphicsEnvironment","java.awt.Component","java.awt.Font","java.awt.FontMetrics",
@@ -83,8 +84,8 @@ class DcFeature implements Feature {
                     "sun.font.StrikeCache$1","sun.font.StrikeMetrics","sun.font.TrueTypeFont",
                     "sun.font.Type1Font","sun.java2d.Disposer","sun.java2d.InvalidPipeException",
                     "sun.java2d.NullSurfaceData","sun.java2d.SunGraphics2D","sun.java2d.SurfaceData",
-                    "sun.java2d.d3d.D3DGraphicsDevice$1","sun.java2d.d3d.D3DRenderQueue$1","sun.java2d.loops.Blit",
-                    "sun.java2d.loops.BlitBg","sun.java2d.loops.CompositeType","sun.java2d.loops.DrawGlyphList",
+                    "sun.java2d.d3d.D3DGraphicsDevice", "sun.java2d.d3d.D3DGraphicsDevice$1","sun.java2d.d3d.D3DRenderQueue$1",
+                    "sun.java2d.loops.Blit", "sun.java2d.loops.BlitBg","sun.java2d.loops.CompositeType","sun.java2d.loops.DrawGlyphList",
                     "sun.java2d.loops.DrawGlyphListAA","sun.java2d.loops.DrawGlyphListLCD",
                     "sun.java2d.loops.DrawLine","sun.java2d.loops.DrawParallelogram","sun.java2d.loops.DrawPath",
                     "sun.java2d.loops.DrawPolygons","sun.java2d.loops.DrawRect","sun.java2d.loops.FillParallelogram",
@@ -92,8 +93,12 @@ class DcFeature implements Feature {
                     "sun.java2d.loops.GraphicsPrimitive","sun.java2d.loops.GraphicsPrimitiveMgr",
                     "sun.java2d.loops.MaskBlit","sun.java2d.loops.MaskFill","sun.java2d.loops.ScaledBlit",
                     "sun.java2d.loops.SurfaceType","sun.java2d.loops.TransformHelper","sun.java2d.loops.XORComposite",
-                    "sun.java2d.pipe.Region","sun.java2d.pipe.RegionIterator","sun.java2d.windows.WindowsFlags");
-            featureUtils.registerReflectionIfPresent("javax.imageio.spi.ImageReaderSpi",
+                    "sun.java2d.pipe.Region","sun.java2d.pipe.RegionIterator","sun.java2d.windows.WindowsFlags",
+                    "com.sun.imageio.plugins.jpeg.JPEGImageReader","com.sun.imageio.plugins.jpeg.JPEGImageWriter",
+                    "java.awt.Dimension","javax.imageio.plugins.jpeg.JPEGQTable","javax.imageio.plugins.jpeg.JPEGHuffmanTable","sun.awt.image.ByteComponentRaster",
+                    "javax.imageio.IIOException","java.util.HashMap","java.util.ArrayList","java.lang.String");
+            featureUtils.registerReflectionIfPresent("javax.imageio.spi.ImageReaderWriterSpi",
+                    "javax.imageio.spi.ImageReaderSpi",
                     "javax.imageio.spi.ImageWriterSpi","sun.font.FontConfigManager$FontConfigFont[]",
                     "sun.java2d.loops.GraphicsPrimitive[]","sun.java2d.marlin.DMarlinRenderingEngine",
                     "sun.security.provider.DRBG","sun.security.provider.NativePRNG","sun.security.provider.SHA",
@@ -111,24 +116,7 @@ class DcFeature implements Feature {
                     "sun/awt/resources/awt_zh_Hans_CN.properties");
             featureUtils.registerResourceBundle(Font.class, "sun.awt.resources.awt", Locale.getDefault(), Locale.ENGLISH, Locale.CHINESE);
 
-        }, Font.class);
-    }
-
-    private void image(FeatureUtils featureUtils, BeforeAnalysisAccess access) {
-        Class<?> imageReader = featureUtils.loadClass("com.sun.imageio.plugins.jpeg.JPEGImageReader");
-        if (imageReader != null) {
-            access.registerReachabilityHandler(duringAnalysisAccess -> {
-                featureUtils.registerJniMethods(imageReader, "acceptPixels","passComplete","passStarted","pushBack","readInputData","setImageData","skipInputBytes","skipPastImage","warningOccurred","warningWithMessage");
-                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGQTable","qTable");
-                featureUtils.registerJniFields("javax.imageio.plugins.jpeg.JPEGHuffmanTable","lengths","values");
-                featureUtils.registerJniFields("sun.awt.image.ByteComponentRaster","data","dataOffsets","pixelStride","scanlineStride","type");
-                featureUtils.registerJniMethods("java.util.HashMap", "containsKey","put");
-                featureUtils.registerJni(ArrayList.class.getDeclaredConstructors());
-                featureUtils.registerJniMethods("java.util.ArrayList", "add");
-                featureUtils.registerJniMethods("java.lang.String", "toLowerCase");
-                featureUtils.registerJniMethods("com.sun.imageio.plugins.jpeg.JPEGImageWriter", "grabPixels","warningOccurred","warningWithMessage","writeMetadata","writeOutputData");
-            }, imageReader);
-        }
+        }, java.awt.Font.class,java.awt.Image.class, java.awt.AWTEvent.class);
     }
 
     /**
@@ -355,11 +343,6 @@ class DcFeature implements Feature {
                 String dir = "playwright";
                 featureUtils.registerSystemProperty("playwright.cli.dir", dir);
                 featureUtils.registerReflection(featureUtils.collectClass("com.microsoft.playwright").toArray(EMPTY_CLASS_ARRAY));
-                if (Boolean.getBoolean("playwright.use-awt")) {
-                    featureUtils.registerJniIfPresent("java.awt.event.InputEvent","java.awt.AWTEvent","sun.awt.Win32GraphicsDevice","java.awt.image.IndexColorModel","sun.awt.SunToolkit","sun.awt.AWTAutoShutdown","sun.java2d.d3d.D3DRenderQueue","sun.java2d.d3d.D3DRenderQueue$1",
-                            "sun.java2d.d3d.D3DGraphicsDevice","sun.java2d.d3d.D3DGraphicsDevice$1");
-                    featureUtils.registerReflectionIfPresent("sun.awt.Win32GraphicsDevice");
-                }
                 // 需要将驱动文件放入resources中的playwright目录下，默认会生成驱动文件到C:\Users\用户目录\AppData\Local\Temp\playwright-java-{随机数}文件夹中，可以复制它
                 URL url = featureUtils.classLoader().getResource(dir);
                 if (url != null) {
