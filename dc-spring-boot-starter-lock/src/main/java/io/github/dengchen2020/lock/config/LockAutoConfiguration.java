@@ -1,17 +1,25 @@
 package io.github.dengchen2020.lock.config;
 
 import io.github.dengchen2020.lock.LockAop;
+import io.github.dengchen2020.lock.annotation.Lock;
 import io.github.dengchen2020.lock.api.RedissonLock;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.env.Environment;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.Executors;
 
 /**
@@ -58,6 +66,20 @@ public final class LockAutoConfiguration {
     @Bean
     LockAop lockAop(RedissonLock redissonLock) {
         return new LockAop(redissonLock);
+    }
+
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    static Advisor lockAdvisor(ObjectProvider<LockAop> lockAop) {
+        var advisor = new StaticMethodMatcherPointcutAdvisor(
+                (MethodInterceptor) invocation -> lockAop.getObject().invoke(invocation)) {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass) {
+                return method.isAnnotationPresent(Lock.class);
+            }
+        };
+        advisor.setOrder(LockAop.ORDER);
+        return advisor;
     }
 
 }

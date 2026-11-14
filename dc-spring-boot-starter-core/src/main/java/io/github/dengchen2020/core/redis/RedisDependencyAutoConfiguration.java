@@ -3,12 +3,16 @@ package io.github.dengchen2020.core.redis;
 import io.github.dengchen2020.core.redis.annotation.RedisListener;
 import io.github.dengchen2020.core.scheduled.ScheduledPreventConcurrencyAop;
 import io.github.dengchen2020.core.utils.JsonHelper;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -18,7 +22,9 @@ import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfigurat
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
@@ -34,6 +40,7 @@ import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializ
 import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -159,6 +166,20 @@ public final class RedisDependencyAutoConfiguration {
     @Bean
     ScheduledPreventConcurrencyAop scheduledPreventConcurrencyAop(StringRedisTemplate redisTemplate, Environment environment, ApplicationEventPublisher applicationEventPublisher){
         return new ScheduledPreventConcurrencyAop(redisTemplate, environment, applicationEventPublisher);
+    }
+
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    static Advisor scheduledPreventConcurrencyAdvisor(ObjectProvider<ScheduledPreventConcurrencyAop> scheduledPreventConcurrencyAop) {
+        var advisor = new StaticMethodMatcherPointcutAdvisor(
+                (MethodInterceptor) invocation -> scheduledPreventConcurrencyAop.getObject().invoke(invocation)) {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass) {
+                return AnnotatedElementUtils.hasAnnotation(method, Scheduled.class);
+            }
+        };
+        advisor.setOrder(ScheduledPreventConcurrencyAop.ORDER);
+        return advisor;
     }
 
 }

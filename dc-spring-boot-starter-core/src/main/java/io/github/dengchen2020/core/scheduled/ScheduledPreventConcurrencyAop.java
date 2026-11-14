@@ -2,19 +2,18 @@ package io.github.dengchen2020.core.scheduled;
 
 import io.github.dengchen2020.core.event.ScheduledHandleBeforeEvent;
 import io.github.dengchen2020.core.utils.IPUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,10 +25,11 @@ import java.util.concurrent.TimeUnit;
  * @author xiaochen
  * @since 2022/4/1 11:18
  */
-@Aspect
-public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
+public class ScheduledPreventConcurrencyAop implements MethodInterceptor, SmartLifecycle {
 
     public static final int PHASE = 20000;
+
+    public static final int ORDER = Ordered.HIGHEST_PRECEDENCE + 3000;
 
     private volatile boolean running = false;
 
@@ -52,53 +52,50 @@ public class ScheduledPreventConcurrencyAop implements SmartLifecycle {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Around(value = "@annotation(scheduled)")
-    public Object taskAround(ProceedingJoinPoint joinPoint, Scheduled scheduled) throws Throwable {
-        return handle(joinPoint, false, 20);
-    }
-
-    @Around(value = "@annotation(scheduled)")
-    public Object taskAround(ProceedingJoinPoint joinPoint, DcScheduled scheduled) throws Throwable {
-        return handle(joinPoint, scheduled.concurrency(), scheduled.seconds());
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        var dcScheduled = invocation.getMethod().getAnnotation(DcScheduled.class);
+        if (dcScheduled == null) return handle(invocation, false, 20);
+        return handle(invocation, dcScheduled.concurrency(), dcScheduled.seconds());
     }
 
     /**
      * 对定时任务做前置处理
      *
-     * @param joinPoint
+     * @param invocation
      * @param concurrency 允许多台服务器同时执行（默认false）
      * @param seconds 指定时间内不允许其他服务器执行
      * @return
      * @throws Throwable
      */
-    private Object handle(ProceedingJoinPoint joinPoint, boolean concurrency, long seconds) throws Throwable {
+    private Object handle(MethodInvocation invocation, boolean concurrency, long seconds) throws Throwable {
         if (!running) return null;
-        var signature = joinPoint.getSignature();
+        var method = invocation.getMethod();
         if (concurrency) {
-            publishEvent(signature);
-            return joinPoint.proceed();
+            publishEvent(method);
+            return invocation.proceed();
         }
-        String key = "{dc:task}:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
+        String key = "{dc:task}:" + method.getDeclaringClass().getSimpleName() + ":" + method.getName();
         keys.add(key);
         var str = stringRedisTemplate.opsForValue().get(key);
         if (str != null) {
             if (uniqueId.equals(str)) {
-                publishEvent(signature);
-                return joinPoint.proceed();
+                publishEvent(method);
+                return invocation.proceed();
             }
             return null;
         }
         //获得指定时间内的执行权
         if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, uniqueId, seconds, TimeUnit.SECONDS))) {
-            publishEvent(signature);
-            return joinPoint.proceed();
+            publishEvent(method);
+            return invocation.proceed();
         }
         return null;
     }
 
-    private void publishEvent(Signature signature) {
+    private void publishEvent(Method method) {
         String localIpInfo = StringUtils.hasText(port) ? IPUtils.getLocalAddr() + ":" + port : IPUtils.getLocalAddr();
-        eventPublisher.publishEvent(new ScheduledHandleBeforeEvent(signature, localIpInfo));
+        eventPublisher.publishEvent(new ScheduledHandleBeforeEvent(method, localIpInfo));
     }
 
     @Override
