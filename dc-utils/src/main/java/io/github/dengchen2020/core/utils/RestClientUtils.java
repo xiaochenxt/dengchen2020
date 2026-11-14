@@ -2,6 +2,7 @@ package io.github.dengchen2020.core.utils;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
@@ -9,6 +10,7 @@ import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +36,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * RestClient工具类
@@ -61,7 +62,19 @@ public abstract class RestClientUtils {
 
     static final Set<HttpMethod> BUFFER_CONTENT_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
-    static final RestClient client = create(DEFAULT_MAX_CONN_PER_ROUTE, DEFAULT_READ_TIMEOUT);
+    /**
+     * 全局共享的连接池：每个路由的最大连接数、连接超时都是连接池级别的
+     */
+    private static final HttpClientConnectionManager SHARED_MANAGER =
+            PoolingHttpClientConnectionManagerBuilder.create()
+                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
+                    .setMaxConnPerRoute(DEFAULT_MAX_CONN_PER_ROUTE)
+                    .setDefaultConnectionConfig(ConnectionConfig.custom()
+                            .setConnectTimeout(Timeout.of(DEFAULT_CONNECT_TIMEOUT))
+                            .build())
+                    .build();
+
+    static final RestClient client = create(DEFAULT_READ_TIMEOUT);
 
     public static RestClient.RequestBodyUriSpec method(HttpMethod method) {
         return client.method(method);
@@ -100,7 +113,7 @@ public abstract class RestClientUtils {
     }
 
     public static ClientHttpRequestFactory createFactory(boolean bufferContent) {
-        return createFactory(createHttpClient(DEFAULT_MAX_CONN_PER_ROUTE), DEFAULT_READ_TIMEOUT, bufferContent);
+        return createFactory(createHttpClient(DEFAULT_CONNECT_TIMEOUT), DEFAULT_READ_TIMEOUT, bufferContent);
     }
 
     public static RestClient.Builder builder(ClientHttpRequestFactory factory) {
@@ -113,12 +126,22 @@ public abstract class RestClientUtils {
     /**
      * 创建RestClient实例
      *
-     * @param maxConnPerRoute 每个路由的最大连接数
+     * @param readTimeout 读取超时时间，连接超时使用默认值
+     * @return {@link RestClient}
+     */
+    public static RestClient create(Duration readTimeout) {
+        return create(createHttpClient(DEFAULT_CONNECT_TIMEOUT), readTimeout);
+    }
+
+    /**
+     * 创建RestClient实例
+     *
+     * @param connectTimeout 连接超时时间
      * @param readTimeout 读取超时时间
      * @return {@link RestClient}
      */
-    public static RestClient create(int maxConnPerRoute, Duration readTimeout) {
-        return create(createHttpClient(maxConnPerRoute), readTimeout);
+    public static RestClient create(Duration connectTimeout, Duration readTimeout) {
+        return create(createHttpClient(connectTimeout), readTimeout);
     }
 
     static volatile RestClient noSSL;
@@ -135,6 +158,9 @@ public abstract class RestClientUtils {
                     try {
                         HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create().setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                                 .setMaxConnPerRoute(DEFAULT_MAX_CONN_PER_ROUTE)
+                                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                                        .setConnectTimeout(Timeout.of(DEFAULT_CONNECT_TIMEOUT))
+                                        .build())
                                 .setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()))
                                 .build();
                         noSSL = client = create(HttpClientBuilder.create().setConnectionManager(connectionManager).build(), DEFAULT_READ_TIMEOUT);
@@ -147,15 +173,21 @@ public abstract class RestClientUtils {
         return client;
     }
 
-    private static HttpClient createHttpClient(int maxConnPerRoute) {
-        HttpClientConnectionManager manager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                .setMaxConnPerRoute(maxConnPerRoute <= 0 ? DEFAULT_MAX_CONN_PER_ROUTE : maxConnPerRoute)
-                .setDefaultConnectionConfig(ConnectionConfig.custom()
-                        .setConnectTimeout(DEFAULT_CONNECT_TIMEOUT.toSeconds(), TimeUnit.SECONDS)
+    /**
+     * 共享连接池，只设置客户端的连接超时（读取超时在工厂上设置）
+     */
+    private static HttpClient createHttpClient(Duration connectTimeout) {
+        return HttpClientBuilder.create()
+                .setConnectionManager(SHARED_MANAGER)
+                .setConnectionManagerShared(true)
+                .setDefaultRequestConfig(applyConnectTimeout(RequestConfig.custom(), connectTimeout)
                         .build())
                 .build();
-        return HttpClientBuilder.create().setConnectionManager(manager).build();
+    }
+
+    @SuppressWarnings("deprecation")
+    private static RequestConfig.Builder applyConnectTimeout(RequestConfig.Builder builder, Duration connectTimeout) {
+        return builder.setConnectTimeout(Timeout.of(connectTimeout));
     }
 
     private static ClientHttpRequestFactory createFactory(HttpClient httpClient, Duration readTimeout, boolean bufferContent) {

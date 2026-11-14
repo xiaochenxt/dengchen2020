@@ -15,8 +15,8 @@ public class SecurityScheduledTaskHandleListener {
 
     @EventListener
     public void handle(ScheduledHandleBeforeEvent event) {
-        var signature = event.signature();
-        var key = event.localIpInfo() + ":" + "task:" + signature.getDeclaringType().getSimpleName() + ":" + signature.getName();
+        var method = event.method();
+        var key = event.localIpInfo() + ":" + "task:" + method.getDeclaringClass().getSimpleName() + ":" + method.getName();
         if (SecurityContextHolder.getAuthentication() == null) {
             SecurityContextHolder.setAuthentication(new AnonymousAuthentication(key.substring(0, Math.min(key.length(), 64))));
         }

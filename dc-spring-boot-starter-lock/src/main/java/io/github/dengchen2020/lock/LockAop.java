@@ -3,10 +3,8 @@ package io.github.dengchen2020.lock;
 import io.github.dengchen2020.lock.annotation.Lock;
 import io.github.dengchen2020.lock.api.RedissonLock;
 import io.github.dengchen2020.lock.exception.LockException;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
@@ -18,6 +16,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,8 +26,9 @@ import java.util.List;
  * @author xiaochen
  * @since 2024/7/1
  */
-@Aspect
-public class LockAop implements Ordered {
+public class LockAop implements MethodInterceptor, Ordered {
+
+    public static final int ORDER = Ordered.HIGHEST_PRECEDENCE + 500;
 
     private final RedissonLock redissonLock;
 
@@ -54,25 +54,26 @@ public class LockAop implements Ordered {
      */
     private static final List<MethodResolver> NO_METHOD_RESOLVERS = Collections.emptyList();
 
-    @Around(value = "@annotation(lock)")
-    public Object handle(ProceedingJoinPoint joinPoint, Lock lock) throws Throwable {
-        var signature = (MethodSignature) joinPoint.getSignature();
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        var method = invocation.getMethod();
+        var lock = method.getAnnotation(Lock.class);
         String key;
         if (lock.value().isBlank()) {
-            key = lock.name().isBlank() ? signature.toString() : lock.name();
+            key = lock.name().isBlank() ? methodName(method) : lock.name();
         } else {
-            var args = joinPoint.getArgs();
-            var context = new MethodBasedEvaluationContext(args.length != 1 ? null : args[0] , signature.getMethod(), args, parameterNameDiscoverer);
+            var args = invocation.getArguments();
+            var context = new MethodBasedEvaluationContext(args.length != 1 ? null : args[0], method, args, parameterNameDiscoverer);
             context.setTypeLocator(LOCK_TYPE_LOCATOR);
             context.setConstructorResolvers(NO_CONSTRUCTOR_RESOLVERS);
             context.setMethodResolvers(NO_METHOD_RESOLVERS);
             var value = parser.parseExpression(lock.value()).getValue(context, String.class);
-            key = lock.name().isBlank() ? signature + ":" + value : lock.name() + ":" + value;
+            key = lock.name().isBlank() ? methodName(method) + ":" + value : lock.name() + ":" + value;
         }
         var rLock = redissonLock.getLock(key);
         try {
             if (rLock.tryLock(lock.waitTime(), lock.lockTime(), lock.timeUnit())) {
-                return joinPoint.proceed();
+                return invocation.proceed();
             } else {
                 throw new LockException(lock.errorMsg());
             }
@@ -81,8 +82,23 @@ public class LockAop implements Ordered {
         }
     }
 
+    /**
+     * 锁 key 格式：com.dc.Lock.method(String,int)
+     */
+    private static String methodName(Method method) {
+        var sb = new StringBuilder();
+        sb.append(method.getDeclaringClass().getName()).append('.')
+                .append(method.getName()).append('(');
+        var types = method.getParameterTypes();
+        for (int i = 0; i < types.length; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(types[i].getSimpleName());
+        }
+        return sb.append(')').toString();
+    }
+
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE + 500;
+        return ORDER;
     }
 }
