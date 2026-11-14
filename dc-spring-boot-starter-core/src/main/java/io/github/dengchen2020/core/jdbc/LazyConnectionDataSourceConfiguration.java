@@ -21,6 +21,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -52,6 +53,12 @@ import javax.sql.DataSource;
 @ConditionalOnBean(DataSource.class)
 @ConditionalOnProperty(name = "spring.datasource.connection-fetch", havingValue = "lazy")
 final class LazyConnectionDataSourceConfiguration {
+
+    @Bean
+    @ConditionalOnProperty(value = "spring.jmx.enabled", havingValue = "true")
+    static LazyInitializationExcludeFilter dataSourceLazyExcludeFilter() {
+        return (beanName, beanDefinition, beanType) -> "dataSource".equals(beanName);
+    }
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
