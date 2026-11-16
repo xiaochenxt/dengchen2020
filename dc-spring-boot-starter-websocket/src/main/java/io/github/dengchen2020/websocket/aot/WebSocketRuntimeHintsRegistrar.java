@@ -6,8 +6,6 @@ import io.github.dengchen2020.websocket.handler.cluster.WebSocketSendParam;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.web.socket.server.HandshakeHandler;
-import org.springframework.web.socket.server.HandshakeInterceptor;
 
 /**
  * @author xiaochen
@@ -18,7 +16,7 @@ public class WebSocketRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
-        aotUtils.registerReflection(WebSocketSendParam.class, HandshakeHandler.class, HandshakeInterceptor.class);
+        aotUtils.registerReflection(WebSocketSendParam.class);
         if (aotUtils.isPresent("org.springframework.data.redis.listener.adapter.MessageListenerAdapter")) {
             aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_METHODS}, ClusterWebSocketMsgListener.class);
         }

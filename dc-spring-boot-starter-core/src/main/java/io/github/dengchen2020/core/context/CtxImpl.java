@@ -1,12 +1,12 @@
 package io.github.dengchen2020.core.context;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 /**
  * 上下文存取默认实现
@@ -16,7 +16,7 @@ import java.util.UUID;
 final class CtxImpl implements Ctx {
 
     private String id;
-    @JsonProperty private final Map<String, Object> data;
+    private final Map<String, Object> data;
 
     public CtxImpl() {
         this(null, new HashMap<>());
@@ -27,7 +27,6 @@ final class CtxImpl implements Ctx {
         this.data = data;
     }
 
-    @JsonProperty
     @NonNull
     @Override
     public String id() {
@@ -70,6 +69,11 @@ final class CtxImpl implements Ctx {
     @Override
     public Object getOrDefault(String key, Object defaultValue) {
         return data.getOrDefault(key, defaultValue);
+    }
+
+    @Override
+    public void foreach(BiConsumer<? super String, ? super Object> action) {
+        data.forEach(action);
     }
 
     @Override

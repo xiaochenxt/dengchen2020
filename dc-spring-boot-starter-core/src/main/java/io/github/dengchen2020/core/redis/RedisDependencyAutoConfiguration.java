@@ -27,9 +27,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.PatternTopic;
@@ -38,7 +37,6 @@ import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
@@ -54,7 +52,7 @@ import java.util.List;
  * @since 2024/7/3
  */
 @AutoConfigureAfter(RedisAutoConfiguration.class)
-@ConditionalOnBean(ReactiveRedisConnectionFactory.class)
+@ConditionalOnBean(RedisConnectionFactory.class)
 @Configuration(proxyBeanMethods = false)
 public final class RedisDependencyAutoConfiguration {
 
@@ -71,8 +69,12 @@ public final class RedisDependencyAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    RedisMessagePublisher redisMessagePublisher(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder){
-        return new RedisMessagePublisher(new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, RedisSerializationContext.byteArray()), genericJackson2JsonRedisSerializerBuilder.build());
+    RedisMessagePublisher redisMessagePublisher(RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer.GenericJackson2JsonRedisSerializerBuilder genericJackson2JsonRedisSerializerBuilder){
+        var redisTemplate = new RedisTemplate<byte[], byte[]>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setDefaultSerializer(RedisSerializer.byteArray());
+        redisTemplate.afterPropertiesSet();
+        return new RedisMessagePublisher(redisTemplate, genericJackson2JsonRedisSerializerBuilder.build());
     }
 
     @Bean
@@ -89,7 +91,7 @@ public final class RedisDependencyAutoConfiguration {
     }
 
     @Bean
-    static BeanPostProcessor redisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<JsonHelper> jsonHelper){
+    static RedisMessageListenerRegistrar redisMessageListenerRegistrar(ObjectProvider<RedisMessageListenerContainer> redisMessageListenerContainer, ObjectProvider<JsonHelper> jsonHelper){
         return new RedisMessageListenerRegistrar(redisMessageListenerContainer, jsonHelper);
     }
 

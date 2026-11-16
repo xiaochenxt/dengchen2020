@@ -22,10 +22,13 @@ public class JpaRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
         aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, PathBuilder.class, JPAQuery.class,
                 PhysicalNamingStrategySnakeCaseImpl.class);
-        aotUtils.registerReflection(BaseJpaRepositoryExecutor.class, QuerydslJpaRepositoryExecutor.class, QuerydslJdbcRepositoryExecutor.class);
-        aotUtils.registerPattern("keywords/*");
-        aotUtils.registerReflectionIfPresent("com.querydsl.sql.SQLTemplates");
+        aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_PUBLIC_METHODS}, BaseJpaRepositoryExecutor.class, QuerydslJpaRepositoryExecutor.class);
         aotUtils.registerReflectionIfPresent("org.hibernate.internal.log.DeprecationLogger_$logger");
+        if (aotUtils.isPresent("com.querydsl.sql.SQLTemplates")) {
+            aotUtils.registerReflection(QuerydslJdbcRepositoryExecutor .class);
+            aotUtils.registerPattern("keywords/*");
+            aotUtils.registerReflectionIfPresent("com.querydsl.sql.SQLTemplates");
+        }
     }
 
 }

@@ -29,7 +29,12 @@ public final class RedisRateLimiterAutoConfiguration implements WebMvcConfigurer
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if (properties.isEnabled()) registry.addInterceptor(new RedisRateLimiterInterceptor(new RedisRateLimiter(redisTemplate), properties.getErrorMsg()));
+        if (properties.isEnabled()) registry.addInterceptor(new RedisRateLimiterInterceptor(createRateLimiter(), properties.getErrorMsg()));
+    }
+
+    private RedisRateLimiter createRateLimiter() {
+        if (LettuceRateLimiter.support(redisTemplate)) return new LettuceRateLimiter(redisTemplate);
+        return new RedisRateLimiter(redisTemplate);
     }
 
 }

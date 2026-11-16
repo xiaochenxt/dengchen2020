@@ -1,5 +1,6 @@
 package io.github.dengchen2020.aot.utils;
 
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -34,6 +35,7 @@ public class AotUtils extends CollectUtils {
     }
 
     public static final MemberCategory[] defaultMemberCategory = new MemberCategory[]{MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_CLASSES, MemberCategory.UNSAFE_ALLOCATED};
+    public static final BindingReflectionHintsRegistrar REGISTRAR = new BindingReflectionHintsRegistrar();
 
     public void registerPattern(String... resources) {
         for (String resource : resources) {
@@ -66,16 +68,25 @@ public class AotUtils extends CollectUtils {
     public void registerReflectionIfPresent(MemberCategory[] memberCategories, String... classes) {
         for (String clazz : classes) {
             try {
-                if (isPresent(clazz)) {
-                    hints.reflection().registerType(classLoader.loadClass(clazz), memberCategories);
+                var clz = loadClass(clazz);
+                if (clz != null) {
+                    hints.reflection().registerType(clz, memberCategories);
                     if (debug) System.out.println("registering reflect " + clazz);
                 }
-            } catch (LinkageError | ClassNotFoundException ignored) {}
+            } catch (LinkageError ignored) {}
         }
     }
 
     public void registerReflectionIfPresent(String... classes) {
-        registerReflectionIfPresent(defaultMemberCategory, classes);
+        for (String clazz : classes) {
+            try {
+                var clz = loadClass(clazz);
+                if (clz != null) {
+                    REGISTRAR.registerReflectionHints(hints.reflection(), clz);
+                    if (debug) System.out.println("registering reflect " + clazz);
+                }
+            } catch (LinkageError ignored) {}
+        }
     }
 
     public void registerReflection(MemberCategory[] memberCategories, Collection<Class<?>> classes) {
@@ -101,11 +112,25 @@ public class AotUtils extends CollectUtils {
     }
 
     public void registerReflection(Class<?>... classes) {
-        registerReflection(defaultMemberCategory, classes);
+        for (Class<?> clazz : classes) {
+            try {
+                REGISTRAR.registerReflectionHints(hints.reflection(), clazz);
+                if (debug) System.out.println("registering reflect " + clazz.getName());
+            } catch (LinkageError e) {
+                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
+            }
+        }
     }
 
     public void registerReflection(Collection<Class<?>> classes) {
-        registerReflection(defaultMemberCategory, classes);
+        for (Class<?> clazz : classes) {
+            try {
+                REGISTRAR.registerReflectionHints(hints.reflection(), clazz);
+                if (debug) System.out.println("registering reflect " + clazz.getName());
+            } catch (LinkageError e) {
+                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
+            }
+        }
     }
 
     public void registerReflection(Collection<Class<?>> classes, MemberCategory memberCategory) {

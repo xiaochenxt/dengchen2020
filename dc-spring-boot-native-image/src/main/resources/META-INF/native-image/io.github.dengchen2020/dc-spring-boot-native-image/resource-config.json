@@ -4,7 +4,16 @@
 
     ],
     "excludes": [
-      {"pattern": "META-INF/services/org.hibernate.bytecode.spi.BytecodeProvider"}
+      {"pattern": "META-INF/services/org.hibernate.bytecode.spi.BytecodeProvider"},
+      {"pattern": "META-INF/native-image/.*"},
+      {"pattern": "META-INF/native/.*quiche.*"},
+      {"pattern": "META-INF/spring-autoconfigure-metadata.properties"},
+      {"pattern": "META-INF/spring-configuration-metadata.json"},
+      {"pattern": "META-INF/additional-spring-configuration-metadata.json"},
+      {"pattern": "META-INF/spring-devtools.properties"},
+      {"pattern": "META-INF/spring.tooling"},
+      {"pattern": "META-INF/spring.handlers"},
+      {"pattern": "META-INF/spring.schemas"}
     ]
   }
 }

@@ -20,11 +20,14 @@ final class OnSpringBootVersionCondition extends SpringBootCondition {
     @Override
     public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
         Map<String, Object> attributes = metadata.getAnnotationAttributes(ConditionalOnSpringBootVersion.class.getName());
+        ConditionMessage.Builder message = ConditionMessage.forCondition(ConditionalOnSpringBootVersion.class);
+        if (attributes == null) {
+            return ConditionOutcome.noMatch(message.because("not annotated with @ConditionalOnSpringBootVersion"));
+        }
         String equalOrNewer = (String) attributes.get("equalOrNewer");
         String olderThan = (String) attributes.get("olderThan");
         boolean hasLower = !equalOrNewer.isBlank();
         boolean hasUpper = !olderThan.isBlank();
-        ConditionMessage.Builder message = ConditionMessage.forCondition(ConditionalOnSpringBootVersion.class);
         if (!hasLower && !hasUpper) throw new IllegalArgumentException("@ConditionalOnSpringBootVersion 必须配置 equalOrNewer 或 olderThan 至少其中一个");
         boolean match = true;
         StringBuilder descBuilder = new StringBuilder("版本规则：");
