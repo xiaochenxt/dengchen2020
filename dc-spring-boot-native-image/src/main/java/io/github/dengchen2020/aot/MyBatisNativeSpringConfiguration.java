@@ -58,7 +58,7 @@ public final class MyBatisNativeSpringConfiguration {
 
     @ConditionalOnMissingBean(name = "myBatisBeanFactoryInitializationAotProcessor")
     @Bean
-    MyBatisBeanFactoryInitializationAotProcessor myBatisBeanFactoryInitializationAotProcessor() {
+    static MyBatisBeanFactoryInitializationAotProcessor myBatisBeanFactoryInitializationAotProcessor() {
         return new MyBatisBeanFactoryInitializationAotProcessor();
     }
 

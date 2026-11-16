@@ -1,7 +1,6 @@
 package io.github.dengchen2020.core.aot;
 
 import io.github.dengchen2020.aot.utils.AotUtils;
-import io.github.dengchen2020.core.event.ScheduledHandleBeforeEvent;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.PageParam;
 import io.github.dengchen2020.core.jdbc.SimplePage;
@@ -12,6 +11,7 @@ import io.github.dengchen2020.core.validation.*;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
 
 /**
  * @author xiaochen
@@ -22,13 +22,17 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         AotUtils aotUtils = AotUtils.newInstance(hints, classLoader);
-        aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_CONSTRUCTORS}, AllowedValuesValidator.class,
-                JsonObjectOrArrayValidator.class, JsonObjectValidator.class, JsonArrayValidator.class,
-                NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
-                ScheduledHandleBeforeEvent.class, AllowedValuesArrayValidator.class, AllowedValuesCollectionValidator.class);
         aotUtils.registerReflection(Page.class,PageParam.class,SimplePage.class,StatsPage.class,AnonymousAuthentication.class, SimpleUserAuthentication.class);
-        aotUtils.registerReflectionIfPresent("io.github.dengchen2020.core.context.CtxImpl");
         aotUtils.registerSerializable(AnonymousAuthentication.class, SimpleUserAuthentication.class);
+        if (aotUtils.isPresent("jakarta.validation.ConstraintValidator")) {
+            aotUtils.registerPattern(TypeReference.of("jakarta.validation.ConstraintValidator"),"ValidationMessages.properties","ValidationMessages*.properties");
+            hints.reflection().registerTypes(TypeReference.listOf(AllowedValuesValidator.class,
+                            JsonObjectOrArrayValidator.class, JsonObjectValidator.class, JsonArrayValidator.class,
+                            NotEmptyAllowNullValidatorForString.class, NotEmptyValidatorForCollection.class, NotEmptyValidatorForCollectionString.class,
+                            AllowedValuesArrayValidator.class, AllowedValuesCollectionValidator.class),
+                    builder -> builder.onReachableType(TypeReference.of("jakarta.validation.ConstraintValidator"))
+                            .withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+        }
     }
 
 }

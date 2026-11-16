@@ -1,21 +1,11 @@
 package io.github.dengchen2020.ratelimiter.redis;
 
-import io.github.dengchen2020.core.utils.VersionUtils;
-import io.lettuce.core.codec.ByteArrayCodec;
-import io.lettuce.core.output.IntegerListOutput;
-import org.jspecify.annotations.NonNull;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.lettuce.LettuceConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 基于Redis实现的分布式限流实现
@@ -24,15 +14,7 @@ import java.util.Objects;
  */
 public class RedisRateLimiter {
 
-    private final StringRedisTemplate redisTemplate;
-    private final boolean versionAbove8_8_0;
-
-    private static final String RATE_LIMIT_PREFIX = "dc:rate_limit:";
-
-    private static final String INCREX = "INCREX";
-    private static final byte[] UBOUND = "UBOUND".getBytes(StandardCharsets.UTF_8);
-    private static final byte[] EX = "EX".getBytes(StandardCharsets.UTF_8);
-    private static final byte[] ENX = "ENX".getBytes(StandardCharsets.UTF_8);
+    protected static final String RATE_LIMIT_PREFIX = "dc:rate_limit:";
 
     private static final RedisScript<Long> rateLimitScript = new DefaultRedisScript<>(
             """ 
@@ -55,13 +37,7 @@ public class RedisRateLimiter {
             Long.class
     );
 
-    @SuppressWarnings("unchecked")
-    private List<Long> increx(String key, long ubound, long exSecond) {
-        return redisTemplate.execute((RedisCallback<List<Long>>) connection -> {
-            var command = (LettuceConnection)connection.commands();
-            return (List<Long>) command.execute(INCREX, new IntegerListOutput<>(ByteArrayCodec.INSTANCE), key.getBytes(), UBOUND, String.valueOf(ubound).getBytes(), EX, String.valueOf(exSecond).getBytes(), ENX);
-        });
-    }
+    protected final StringRedisTemplate redisTemplate;
 
     /**
      * 分布式限流实例化
@@ -70,13 +46,6 @@ public class RedisRateLimiter {
      */
     public RedisRateLimiter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        var version = redisTemplate.execute(new RedisCallback<String>() {
-            @Override
-            public @NonNull String doInRedis(@NonNull RedisConnection connection) throws DataAccessException {
-                return (String)Objects.requireNonNull(connection.serverCommands().info()).get("redis_version");
-            }
-        });
-        this.versionAbove8_8_0 = VersionUtils.compareVersion(version, "8.8.0") >= 0;
     }
 
     /**
@@ -89,7 +58,6 @@ public class RedisRateLimiter {
      */
     public boolean limit(String limitKey, int limitNum, Duration duration) {
         var key = RATE_LIMIT_PREFIX + limitKey;
-        if (versionAbove8_8_0) return increx(key, limitNum, duration.toSeconds()).get(1) == 0;
         Long count = redisTemplate.execute(rateLimitScript, List.of(key), String.valueOf(limitNum), String.valueOf(duration.toSeconds()));
         return count > limitNum;
     }

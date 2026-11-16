@@ -75,7 +75,7 @@ RedisMessagePublisher.publish(channel, message)
     ↓
 serializer.serialize(message)  →  默认 GenericJacksonJsonRedisSerializer（含 @class 类型信息）
     ↓
-ReactiveRedisTemplate.convertAndSend(channel, bytes)
+RedisTemplate.convertAndSend(channel, bytes)
     ↓ 失败重试（指数退避，3次）
     ↓
 Redis PubSub → 所有订阅该频道的节点

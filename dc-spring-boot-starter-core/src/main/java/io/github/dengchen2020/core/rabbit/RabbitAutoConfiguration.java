@@ -39,7 +39,7 @@ public final class RabbitAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    MessageConverter jacksonJsonMessageConverter() {
+    JacksonJsonMessageConverter jacksonJsonMessageConverter() {
         var messageConverter = new JacksonJsonMessageConverter();
         messageConverter.setCreateMessageIds(true);
         return messageConverter;

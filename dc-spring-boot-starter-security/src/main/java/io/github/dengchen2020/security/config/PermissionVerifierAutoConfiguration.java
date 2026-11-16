@@ -27,7 +27,7 @@ public final class PermissionVerifierAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    PermissionVerifier permissionVerifier(AuthenticationConvert authenticationConvert) {
+    SimplePermissionVerifier permissionVerifier(AuthenticationConvert authenticationConvert) {
         if (!PermissionsInfo.class.isAssignableFrom(authenticationConvert.type())) {
             throw new IllegalArgumentException(authenticationConvert.type() +" 未实现 " + PermissionsInfo.class.getName());
         }

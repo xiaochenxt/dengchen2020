@@ -2,6 +2,8 @@ package io.github.dengchen2020.core.context;
 
 import org.jspecify.annotations.NonNull;
 
+import java.util.function.BiConsumer;
+
 /**
  * 上下文存取
  * @author xiaochen
@@ -29,5 +31,7 @@ public interface Ctx {
     Object get(String key);
 
     Object getOrDefault(String key, Object defaultValue);
+
+    void foreach(BiConsumer<? super String, ? super Object> action);
 
 }

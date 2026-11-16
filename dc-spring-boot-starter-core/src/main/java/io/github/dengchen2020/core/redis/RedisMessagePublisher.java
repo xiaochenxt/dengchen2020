@@ -3,12 +3,10 @@ package io.github.dengchen2020.core.redis;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import reactor.util.retry.Retry;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 
 /**
  * Redis消息发布者
@@ -21,12 +19,12 @@ public class RedisMessagePublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RedisMessagePublisher.class);
 
-    protected final ReactiveRedisTemplate<byte[], byte[]> reactiveRedisTemplate;
+    protected final RedisTemplate<byte[], byte[]> redisTemplate;
 
     private final RedisSerializer<Object> serializer;
 
-    public RedisMessagePublisher(ReactiveRedisTemplate<byte[], byte[]> reactiveRedisTemplate, RedisSerializer<Object> serializer) {
-        this.reactiveRedisTemplate = reactiveRedisTemplate;
+    public RedisMessagePublisher(RedisTemplate<byte[], byte[]> redisTemplate, RedisSerializer<Object> serializer) {
+        this.redisTemplate = redisTemplate;
         this.serializer = serializer;
     }
 
@@ -63,9 +61,8 @@ public class RedisMessagePublisher {
     }
 
     protected void convertAndSend(String channelName, byte[] message){
-        reactiveRedisTemplate.convertAndSend(channelName, message).retryWhen(Retry.backoff(3, Duration.ofSeconds(1))).subscribe(count -> {
-            if (log.isDebugEnabled()) logMessage(channelName, message, count);
-        });
+        var count = redisTemplate.convertAndSend(channelName, message);
+        if (log.isDebugEnabled()) logMessage(channelName, message, count);
     }
 
     private void logMessage(String channelName, byte[] message, Long count) {

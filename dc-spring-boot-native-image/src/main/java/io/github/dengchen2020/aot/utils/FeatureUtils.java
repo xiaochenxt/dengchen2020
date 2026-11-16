@@ -29,23 +29,6 @@ public class FeatureUtils extends CollectUtils {
         return classLoader;
     }
 
-    public boolean isPresent(String className) {
-        try {
-            classLoader.loadClass(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    public Class<?> loadClass(String className) {
-        try {
-            return classLoader.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
-
     public void registerReflection(Class<?>... classes) {
         for (Class<?> c : classes) {
             runWithIgnoreLinkageError(() -> RuntimeReflection.register(c));

@@ -452,4 +452,13 @@ public class CollectUtils {
         } catch (LinkageError ignored) {}
     }
 
+    public Class<?>[] toClassArray(String... classNames) {
+        var classes = new HashSet<Class<?>>();
+        for (var className : classNames) {
+            var clazz = loadClass(className);
+            if (clazz != null) classes.add(clazz);
+        }
+        return classes.toArray(EMPTY_CLASS_ARRAY);
+    }
+
 }

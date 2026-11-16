@@ -28,7 +28,6 @@ class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 list.add(packageName);
             }
             Set<Class<?>> classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
-            aotUtils.registerReflection(classes);
             aotUtils.registerPattern("*.properties");
             aotUtils.registerSerializable(classes);
             aotUtils.registerPattern(aotUtils.findResources("",
