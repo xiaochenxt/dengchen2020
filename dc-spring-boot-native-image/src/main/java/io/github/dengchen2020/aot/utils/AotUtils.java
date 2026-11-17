@@ -153,7 +153,7 @@ public class AotUtils extends CollectUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public void registerSerializableIfPresent(TypeReference onReachableType, String... classes) {
+    public void registerSerializable(TypeReference onReachableType, String... classes) {
         for (String cs : classes) {
             try {
                 Class<?> c = classLoader.loadClass(cs);
@@ -161,6 +161,12 @@ public class AotUtils extends CollectUtils {
                 hints.serialization().registerType((Class<? extends Serializable>) c, builder -> builder.onReachableType(onReachableType));
             } catch (ClassNotFoundException ignored) {}
         }
+    }
+
+    public void runWithIgnoreIllegalArgument(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (IllegalArgumentException ignored) {}
     }
 
 }

@@ -18,7 +18,7 @@ public class CacheRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
         aotUtils.registerReflection(CacheSyncParam.class);
         if (aotUtils.isPresent("org.springframework.data.redis.listener.adapter.MessageListenerAdapter")) {
-            aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_METHODS}, CacheSyncMessageListener.class);
+            aotUtils.registerReflection(builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS), CacheSyncMessageListener.class);
         }
     }
 
