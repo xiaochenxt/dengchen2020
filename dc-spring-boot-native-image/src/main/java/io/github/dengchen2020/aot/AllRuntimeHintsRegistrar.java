@@ -28,9 +28,9 @@ class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 String packageName = aClass.getPackageName();
                 list.add(packageName);
             }
-            Set<Class<?>> classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
             aotUtils.registerPattern("*.properties");
-            classes.forEach(c -> aotUtils.registerSerializable(TypeReference.of(c), c));
+            Set<Class<?>> classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
+            classes.forEach(c -> aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.registerSerializable(TypeReference.of(c), c)));
             aotUtils.registerPattern(aotUtils.findResources("",
                             name -> !name.startsWith("META-INF/native-image/"))
                     .toArray(EMPTY_STRING_ARRAY)); // 注册用户所有的资源文件

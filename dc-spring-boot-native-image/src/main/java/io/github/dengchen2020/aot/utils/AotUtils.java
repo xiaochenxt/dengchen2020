@@ -141,7 +141,7 @@ public class AotUtils extends CollectUtils {
         }
     }
 
-    public void registerSerializableIfPresent(TypeReference onReachableType, String... classes) {
+    public void registerSerializable(TypeReference onReachableType, String... classes) {
         for (String cs : classes) {
             try {
                 Class<?> c = classLoader.loadClass(cs);
@@ -149,6 +149,12 @@ public class AotUtils extends CollectUtils {
                 hints.reflection().registerType(c, builder -> builder.onReachableType(onReachableType).withJavaSerialization(true));
             } catch (ClassNotFoundException ignored) {}
         }
+    }
+
+    public void runWithIgnoreIllegalArgument(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (IllegalArgumentException ignored) {}
     }
 
 }

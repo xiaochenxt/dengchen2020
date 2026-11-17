@@ -18,7 +18,7 @@ public class WebSocketRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         AotUtils aotUtils = new AotUtils(hints, classLoader);
         aotUtils.registerReflection(WebSocketSendParam.class);
         if (aotUtils.isPresent("org.springframework.data.redis.listener.adapter.MessageListenerAdapter")) {
-            aotUtils.registerReflection(new MemberCategory[]{MemberCategory.INVOKE_DECLARED_METHODS}, ClusterWebSocketMsgListener.class);
+            aotUtils.registerReflection(builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS), ClusterWebSocketMsgListener.class);
         }
     }
 }
