@@ -3,11 +3,11 @@ package io.github.dengchen2020.aot;
 import io.github.dengchen2020.aot.utils.AotUtils;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_STRING_ARRAY;
 
@@ -18,18 +18,19 @@ import static io.github.dengchen2020.aot.utils.CollectUtils.EMPTY_STRING_ARRAY;
  */
 class AllRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         try {
             AotUtils aotUtils = new AotUtils(hints, classLoader);
             List<String> list = new ArrayList<>();
-            for (Class<?> aClass : aotUtils.findSpringBootApplicationClasses()) {
-                String packageName = aClass.getPackageName();
+            for (var c : aotUtils.findSpringBootApplicationClasses()) {
+                String packageName = c.getPackageName();
                 list.add(packageName);
             }
-            Set<Class<?>> classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
             aotUtils.registerPattern("*.properties");
-            aotUtils.registerSerializable(classes);
+            var classes = aotUtils.collectClass(list.toArray(EMPTY_STRING_ARRAY));
+            classes.forEach(c -> aotUtils.registerSerializable(TypeReference.of(c), c));
             aotUtils.registerPattern(aotUtils.findResources("",
                     name -> !name.startsWith("META-INF/native-image/"))
                     .toArray(EMPTY_STRING_ARRAY)); // 注册用户所有的资源文件

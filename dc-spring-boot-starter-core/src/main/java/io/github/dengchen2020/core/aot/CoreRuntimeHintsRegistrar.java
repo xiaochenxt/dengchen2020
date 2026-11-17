@@ -34,7 +34,7 @@ public class CoreRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                             .withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
         }
         if (aotUtils.isPresent("org.apache.coyote.AbstractProtocol")) {
-            aotUtils.registerReflectionIfPresent(new MemberCategory[]{MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS},"org.apache.coyote.http11.Http11NioProtocol",
+            aotUtils.registerReflectionIfPresent(builder -> builder.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS),"org.apache.coyote.http11.Http11NioProtocol",
                     "org.apache.coyote.AbstractProtocol","org.apache.coyote.http11.AbstractHttp11Protocol");
         }
     }

@@ -1,12 +1,10 @@
 package io.github.dengchen2020.aot.utils;
 
-import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.*;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.function.UnaryOperator;
 
 /**
  * 基于spring的aot处理操作简化工具
@@ -34,44 +32,38 @@ public class AotUtils extends CollectUtils {
         return classLoader;
     }
 
-    public static final MemberCategory[] defaultMemberCategory = new MemberCategory[]{MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_CLASSES, MemberCategory.UNSAFE_ALLOCATED};
     public static final BindingReflectionHintsRegistrar REGISTRAR = new BindingReflectionHintsRegistrar();
 
     public void registerPattern(String... resources) {
         for (String resource : resources) {
             hints.resources().registerPattern(resource);
-            if (debug) System.out.println("include resource " + resource);
         }
     }
 
     public void registerPattern(TypeReference typeReference, String... resources) {
         for (String resource : resources) {
             hints.resources().registerPattern(builder -> builder.includes(typeReference, resource));
-            if (debug) System.out.println("include reachableType "+typeReference.getName()+" resource " + resource);
         }
     }
 
     public void excludePattern(String... resources) {
         for (String resource : resources) {
             hints.resources().registerPattern(builder -> builder.excludes(resource));
-            if (debug) System.out.println("exclude resource " + resource);
         }
     }
 
     public void excludePattern(TypeReference typeReference, String... resources) {
         for (String resource : resources) {
             hints.resources().registerPattern(builder -> builder.excludes(typeReference, resource));
-            if (debug) System.out.println("exclude reachableType "+typeReference.getName()+" resource " + resource);
         }
     }
 
-    public void registerReflectionIfPresent(MemberCategory[] memberCategories, String... classes) {
+    public void registerReflectionIfPresent(UnaryOperator<TypeHint.Builder> builderUnaryOperator, String... classes) {
         for (String clazz : classes) {
             try {
                 var clz = loadClass(clazz);
                 if (clz != null) {
-                    hints.reflection().registerType(clz, memberCategories);
-                    if (debug) System.out.println("registering reflect " + clazz);
+                    hints.reflection().registerType(clz, builderUnaryOperator::apply);
                 }
             } catch (LinkageError ignored) {}
         }
@@ -83,31 +75,32 @@ public class AotUtils extends CollectUtils {
                 var clz = loadClass(clazz);
                 if (clz != null) {
                     REGISTRAR.registerReflectionHints(hints.reflection(), clz);
-                    if (debug) System.out.println("registering reflect " + clazz);
                 }
             } catch (LinkageError ignored) {}
         }
     }
 
-    public void registerReflection(MemberCategory[] memberCategories, Collection<Class<?>> classes) {
+    public void registerReflection(UnaryOperator<TypeHint.Builder> builderUnaryOperator, Collection<Class<?>> classes) {
         for (Class<?> clazz : classes) {
             try {
-                hints.reflection().registerType(clazz, memberCategories);
-                if (debug) System.out.println("registering reflect " + clazz.getName());
-            } catch (LinkageError e) {
-                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
-            }
+                hints.reflection().registerType(clazz, builderUnaryOperator::apply);
+            } catch (LinkageError ignored) {}
         }
     }
 
-    public void registerReflection(MemberCategory[] memberCategories, Class<?>... classes) {
+    public void registerReflection(UnaryOperator<TypeHint.Builder> builderUnaryOperator, Class<?>... classes) {
         for (Class<?> clazz : classes) {
             try {
-                hints.reflection().registerType(clazz, memberCategories);
-                if (debug) System.out.println("registering reflect " + clazz.getName());
-            } catch (LinkageError e) {
-                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
-            }
+                hints.reflection().registerType(clazz, builderUnaryOperator::apply);
+            } catch (LinkageError ignored) {}
+        }
+    }
+
+    public void registerReflection(UnaryOperator<TypeHint.Builder> builderUnaryOperator, String... classes) {
+        for (var clazz : toClassArray(classes)) {
+            try {
+                hints.reflection().registerType(clazz, builderUnaryOperator::apply);
+            } catch (LinkageError ignored) {}
         }
     }
 
@@ -115,10 +108,7 @@ public class AotUtils extends CollectUtils {
         for (Class<?> clazz : classes) {
             try {
                 REGISTRAR.registerReflectionHints(hints.reflection(), clazz);
-                if (debug) System.out.println("registering reflect " + clazz.getName());
-            } catch (LinkageError e) {
-                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
-            }
+            } catch (LinkageError ignored) {}
         }
     }
 
@@ -126,47 +116,15 @@ public class AotUtils extends CollectUtils {
         for (Class<?> clazz : classes) {
             try {
                 REGISTRAR.registerReflectionHints(hints.reflection(), clazz);
-                if (debug) System.out.println("registering reflect " + clazz.getName());
-            } catch (LinkageError e) {
-                if (debug) System.err.println("Unable to load class: " + clazz.getName() + ", error: " + e.getMessage());
-            }
+            } catch (LinkageError ignored) {}
         }
     }
 
-    public void registerReflection(Collection<Class<?>> classes, MemberCategory memberCategory) {
-        registerReflection(new MemberCategory[]{memberCategory}, classes);
-    }
-
-    public void registerJni(MemberCategory[] memberCategories, Collection<Class<?>> classes) {
-        for (Class<?> c : classes) {
-            hints.jni().registerType(c, memberCategories);
-            if (debug) System.out.println("registering jni " + c.getName());
-        }
-    }
-
-    public void registerJni(MemberCategory[] memberCategories, Class<?>... classes) {
-        for (Class<?> c : classes) {
-            hints.jni().registerType(c, memberCategories);
-            if (debug) System.out.println("registering jni " + c.getName());
-        }
-    }
-
-    public void registerJni(Class<?>... classes) {
-        registerJni(defaultMemberCategory, classes);
-    }
-
-    public void registerJni(Collection<Class<?>> classes) {
-        registerJni(defaultMemberCategory, classes);
-    }
-
-    public void registerJniIfPresent(String... classes) {
-       registerJniIfPresent(defaultMemberCategory, classes);
-    }
-
-    public void registerJniIfPresent(MemberCategory[] memberCategory, String... classes) {
-        for (String c : classes) {
-            hints.jni().registerTypeIfPresent(classLoader, c, memberCategory);
-            if (debug) System.out.println("registering jni " + c);
+    public void registerReflection(String... classes) {
+        for (var clazz : toClassArray(classes)) {
+            try {
+                REGISTRAR.registerReflectionHints(hints.reflection(), clazz);
+            } catch (LinkageError ignored) {}
         }
     }
 
@@ -175,27 +133,32 @@ public class AotUtils extends CollectUtils {
         for (Class<? extends Serializable> c : classes) {
             if (c.getCanonicalName() == null) continue;
             hints.serialization().registerType(c);
-            if (debug) System.out.println("registering serializable " + c.getName());
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void registerSerializable(Collection<Class<?>> classes) {
+    public void registerSerializable(TypeReference onReachableType, Collection<Class<?>> classes) {
         for (Class<?> c : classes) {
             if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
-            hints.serialization().registerType((Class<? extends Serializable>) c);
-            if (debug) System.out.println("registering serializable " + c.getName());
+            hints.serialization().registerType((Class<? extends Serializable>) c, builder -> builder.onReachableType(onReachableType));
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void registerSerializableIfPresent(String... classes) {
+    public void registerSerializable(TypeReference onReachableType, Class<?>... classes) {
+        for (Class<?> c : classes) {
+            if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
+            hints.serialization().registerType((Class<? extends Serializable>) c, builder -> builder.onReachableType(onReachableType));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void registerSerializableIfPresent(TypeReference onReachableType, String... classes) {
         for (String cs : classes) {
             try {
                 Class<?> c = classLoader.loadClass(cs);
                 if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
-                hints.serialization().registerType((Class<? extends Serializable>) c);
-                if (debug) System.out.println("registering serializable " + c);
+                hints.serialization().registerType((Class<? extends Serializable>) c, builder -> builder.onReachableType(onReachableType));
             } catch (ClassNotFoundException ignored) {}
         }
     }
