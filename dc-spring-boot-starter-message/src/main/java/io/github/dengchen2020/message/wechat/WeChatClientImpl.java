@@ -1,8 +1,8 @@
 package io.github.dengchen2020.message.wechat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.github.dengchen2020.core.utils.JsonUtils;
+import io.avaje.jsonb.Json;
+import io.avaje.jsonb.JsonType;
+import io.github.dengchen2020.core.utils.jsonb.JsonbUtils;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+
 /**
  * 微信webhook推送
  * @author xiaochen
@@ -24,6 +26,8 @@ import org.springframework.util.StringUtils;
 public class WeChatClientImpl implements WeChatClient {
 
     private static final Logger log = LoggerFactory.getLogger(WeChatClientImpl.class);
+
+    private static final JsonType<Response> responseType = JsonbUtils.type(Response.class);
 
     private final AsyncTaskExecutor executor;
 
@@ -55,13 +59,17 @@ public class WeChatClientImpl implements WeChatClient {
     }
 
     public boolean sendSync(Message message, String webhook) {
-        ObjectNode params = JsonUtils.createObjectNode();
+        var params = "";
         try {
-            params.put("msgtype", message.type());
-            params.putPOJO(message.type(), message);
-            JsonNode res = RestClientUtils.post().uri(webhook).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
-            if (res.path("errcode").asInt() != 0) {
-                log.error("微信机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+            var body = new HashMap<String, Object>(4);
+            body.put("msgtype", message.type());
+            body.put(message.type(), message);
+            params = JsonbUtils.toJson(body);
+            var resStr = RestClientUtils.post().uri(webhook).contentType(MediaType.APPLICATION_JSON)
+                    .body(params).retrieve().body(String.class);
+            var res = responseType.fromJson(resStr);
+            if (res.errcode() != 0) {
+                log.error("微信机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, resStr);
                 return false;
             }
         } catch (Exception e) {
@@ -73,15 +81,22 @@ public class WeChatClientImpl implements WeChatClient {
 
     @Override
     public @Nullable String upload(Resource resource, String type, String key) {
-        LinkedMultiValueMap<String, Object> form = new LinkedMultiValueMap<>(1);
+        var form = new LinkedMultiValueMap<String, Object>(1);
         form.add("media", resource);
-        JsonNode res = RestClientUtils.post().uri("https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=" + key + "&type=" +type)
-                .body(form).retrieve().body(JsonNode.class);
-        int errcode = res.get("errcode").asInt();
-        if (errcode != 0) {
-            log.error("微信机器人上传文件失败：{}", res);
+        var resStr = RestClientUtils.post().uri("https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=" + key + "&type=" + type)
+                .body(form).retrieve().body(String.class);
+        var res = responseType.fromJson(resStr);
+        if (res.errcode() != 0 || res.media_id() == null) {
+            log.error("微信机器人上传文件失败：{}", resStr);
             return null;
         }
-        return res.path("media_id").asText();
+        return res.media_id();
+    }
+
+    /**
+     * 微信webhook响应
+     */
+    @Json
+    record Response(int errcode, String errmsg, @Nullable String media_id) {
     }
 }

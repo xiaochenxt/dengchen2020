@@ -1,13 +1,14 @@
 package io.github.dengchen2020.message.wechat;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import io.avaje.jsonb.Json;
 import io.github.dengchen2020.core.utils.Base64Utils;
 import io.github.dengchen2020.core.utils.digest.DigestUtils;
-import java.util.Arrays;
-import java.util.Objects;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.io.Resource;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * 微信消息接口
@@ -47,7 +48,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E6%96%87%E6%9C%AC%E7%B1%BB%E5%9E%8B">文本类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class TextMessage implements Message {
 
         @Override
@@ -114,7 +115,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#markdown%E7%B1%BB%E5%9E%8B">markdown类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class MarkdownMessage implements Message {
 
         @Override
@@ -162,7 +163,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E5%9B%BE%E7%89%87%E7%B1%BB%E5%9E%8B">图片类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class ImageMessage implements Message {
 
         @Override
@@ -230,7 +231,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E5%9B%BE%E6%96%87%E7%B1%BB%E5%9E%8B">图文类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class NewsMessage implements Message {
 
         @Override
@@ -336,7 +337,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B">文件类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class FileMessage implements Message {
 
         @Override
@@ -384,7 +385,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E8%AF%AD%E9%9F%B3%E7%B1%BB%E5%9E%8B">语音类型</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class VoiceMessage implements Message {
 
         @Override
@@ -432,7 +433,7 @@ public interface WeChatClient {
     /**
      * 详见：<a href="https://developer.work.weixin.qq.com/document/path/91770#%E6%96%87%E6%9C%AC%E9%80%9A%E7%9F%A5%E6%A8%A1%E7%89%88%E5%8D%A1%E7%89%87">文本通知模版卡片</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class TemplateCardMessage implements Message {
 
         @Override

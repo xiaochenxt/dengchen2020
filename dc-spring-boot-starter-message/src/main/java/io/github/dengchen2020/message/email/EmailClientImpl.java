@@ -51,7 +51,7 @@ public class EmailClientImpl implements EmailClient {
         this(javaMailSender, null, to, executor);
     }
 
-    public EmailClientImpl(JavaMailSender javaMailSender,@Nullable String username, String @Nullable[] to, AsyncTaskExecutor executor) {
+    public EmailClientImpl(JavaMailSender javaMailSender, @Nullable String username, String @Nullable[] to, AsyncTaskExecutor executor) {
         if (StringUtils.hasText(username)) {
             this.username = username;
         } else {
@@ -83,7 +83,7 @@ public class EmailClientImpl implements EmailClient {
 
     public boolean sendTextSync(String subject, String text, String... to) {
         try {
-            SimpleMailMessage mail = new SimpleMailMessage();
+            var mail = new SimpleMailMessage();
             mail.setFrom(username);
             mail.setTo(to);
             mail.setSentDate(new Date());
@@ -123,19 +123,19 @@ public class EmailClientImpl implements EmailClient {
 
     public boolean sendMimeSync(String subject, String html, DataSource @Nullable[] attachments, DataSource @Nullable[] inlines, String... to) {
         try {
-            MimeMessageHelper mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
+            var mime = new MimeMessageHelper(javaMailSender.createMimeMessage(), true, "UTF-8");
             mime.setFrom(username);
             mime.setTo(to);
             mime.setSubject(subject);
             mime.setText(html, true);
             if (attachments != null) {
-                for (DataSource attachment : attachments) {
+                for (var attachment : attachments) {
                     if (attachment instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
                     mime.addAttachment(attachment.getName(), attachment);
                 }
             }
             if (inlines != null) {
-                for (DataSource inline : inlines) {
+                for (var inline : inlines) {
                     if (inline instanceof FileDataSource fileDataSource) fileDataSource.setFileTypeMap(mime.getFileTypeMap());
                     mime.addInline(inline.getName(), inline);
                 }
