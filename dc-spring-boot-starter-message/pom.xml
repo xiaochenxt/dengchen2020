@@ -41,6 +41,15 @@
       <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-jsonb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-json-node</artifactId>
+    </dependency>
+
   </dependencies>
 
 

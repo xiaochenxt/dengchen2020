@@ -1,6 +1,6 @@
 package io.github.dengchen2020.message.dingtalk;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import io.avaje.jsonb.Json;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Arrays;
@@ -49,7 +49,7 @@ public interface DingTalkClient {
     /**
      * 详见：<a href="https://open.dingtalk.com/document/isvapp/message-type#title-2as-54h-wmc">钉钉开放平台</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class TextMessage implements Message, At {
 
         @Override
@@ -135,7 +135,7 @@ public interface DingTalkClient {
     /**
      * 详见：<a href="https://open.dingtalk.com/document/isvapp/message-type#title-2as-54h-wmc">钉钉开放平台</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class LinkMessage implements Message {
         @Override
         public String type() {
@@ -224,7 +224,7 @@ public interface DingTalkClient {
     /**
      * 详见：<a href="https://open.dingtalk.com/document/isvapp/message-type#title-2as-54h-wmc">钉钉开放平台</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class MarkdownMessage implements Message, At {
 
         @Override
@@ -326,7 +326,7 @@ public interface DingTalkClient {
     /**
      * 详见：<a href="https://open.dingtalk.com/document/isvapp/message-type#title-2as-54h-wmc">钉钉开放平台</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class ActionCardMessage implements Message {
         @Override
         public String type() {

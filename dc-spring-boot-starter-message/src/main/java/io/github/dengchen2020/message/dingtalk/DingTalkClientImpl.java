@@ -1,9 +1,9 @@
 package io.github.dengchen2020.message.dingtalk;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
-import io.github.dengchen2020.core.utils.JsonUtils;
+import io.avaje.jsonb.Json;
+import io.avaje.jsonb.JsonType;
 import io.github.dengchen2020.core.utils.RestClientUtils;
+import io.github.dengchen2020.core.utils.jsonb.JsonbUtils;
 import io.github.dengchen2020.core.utils.sign.HMACUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 
 /**
  * 钉钉webhook推送
@@ -28,6 +29,8 @@ import java.util.Base64;
 public class DingTalkClientImpl implements DingTalkClient {
 
     private static final Logger log = LoggerFactory.getLogger(DingTalkClientImpl.class);
+
+    private static final JsonType<Response> responseType = JsonbUtils.type(Response.class);
 
     private final AsyncTaskExecutor executor;
 
@@ -72,16 +75,18 @@ public class DingTalkClientImpl implements DingTalkClient {
     }
 
     public boolean sendSync(Message message, String webhook,@Nullable String secret) {
-        ObjectNode params = JsonUtils.createObjectNode();
+        var params = "";
         try {
-            params.put("msgtype", message.type());
-            params.putPOJO(message.type(), message);
+            var body = new HashMap<String, Object>(4);
+            body.put("msgtype", message.type());
+            body.put(message.type(), message);
             if (message instanceof At at) {
-                ObjectNode atNode = JsonUtils.createObjectNode();
-                atNode.putPOJO("atMobiles", at.atMobiles());
+                var atNode = new HashMap<String, Object>(2);
+                atNode.put("atMobiles", at.atMobiles());
                 atNode.put("isAtAll", at.isAtAll());
-                params.set("at", atNode);
+                body.put("at", atNode);
             }
+            params = JsonbUtils.toJson(body);
             String url;
             if (StringUtils.hasText(secret)) {
                 long timestamp = System.currentTimeMillis();
@@ -89,9 +94,11 @@ public class DingTalkClientImpl implements DingTalkClient {
             }else {
                 url = webhook;
             }
-            JsonNode res = RestClientUtils.post().uri(url).contentType(MediaType.APPLICATION_JSON).body(params).retrieve().body(JsonNode.class);
-            if (res.path("errcode").asInt() != 0) {
-                log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+            var resStr = RestClientUtils.post().uri(url).contentType(MediaType.APPLICATION_JSON)
+                    .body(params).retrieve().body(String.class);
+            var res = responseType.fromJson(resStr);
+            if (res.errcode() != 0) {
+                log.error("钉钉机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, resStr);
                 return false;
             }
         } catch (Exception e) {
@@ -99,6 +106,13 @@ public class DingTalkClientImpl implements DingTalkClient {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 钉钉webhook响应
+     */
+    @Json
+    record Response(int errcode, String errmsg) {
     }
 
 }

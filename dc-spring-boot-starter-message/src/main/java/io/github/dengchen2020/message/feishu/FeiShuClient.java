@@ -1,8 +1,8 @@
 package io.github.dengchen2020.message.feishu;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.node.ArrayNode;
-import io.github.dengchen2020.core.utils.JsonUtils;
+import io.avaje.json.node.JsonArray;
+import io.avaje.json.node.JsonObject;
+import io.avaje.jsonb.Json;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Objects;
@@ -45,7 +45,7 @@ public interface FeiShuClient {
     /**
      * 详见：<a href="https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot#756b882f">自定义机器人使用指南</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class TextMessage implements Message {
 
         @Override
@@ -104,7 +104,7 @@ public interface FeiShuClient {
     /**
      * 详见：<a href="https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot#756b882f">自定义机器人使用指南</a>
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Json
     class PostMessage implements Message {
 
         @Override
@@ -118,7 +118,7 @@ public interface FeiShuClient {
 
         private Post post;
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Json
         public static class Post {
 
             public Post(Zh_cn zh_cn) {
@@ -138,52 +138,54 @@ public interface FeiShuClient {
 
             private En_us en_us;
 
-            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @Json
             public static class Zh_cn {
                 private String title;
-                private final ArrayNode content = JsonUtils.createArrayNode();
+                private JsonArray content;
 
                 public Zh_cn() {
+                    content = createNode();
                 }
 
                 public Zh_cn(String title) {
+                    this();
                     this.title = title;
                 }
 
-                public ArrayNode createNode() {
-                    return JsonUtils.createArrayNode();
+                public JsonArray createNode() {
+                    return JsonArray.create();
                 }
 
-                public void addNode(ArrayNode node) {
+                public void addNode(JsonArray node) {
                     content.add(node);
                 }
 
                 public Zh_cn addText(String text, Boolean un_escape) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addText(node, text, un_escape);
                     addNode(node);
                     return this;
                 }
 
-                public Zh_cn addText(ArrayNode node, String text, boolean un_escape) {
-                    node.add(JsonUtils.createObjectNode().put("tag", "text").put("text", text).put("unescape", un_escape));
+                public Zh_cn addText(JsonArray node, String text, boolean un_escape) {
+                    node.add(JsonObject.create().add("tag", "text").add("text", text).add("unescape", un_escape));
                     return this;
                 }
 
                 public Zh_cn addA(String text, String href) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addA(node, text, href);
                     addNode(node);
                     return this;
                 }
 
-                public Zh_cn addA(ArrayNode node, String text, String href) {
-                    node.add(JsonUtils.createObjectNode().put("tag", "a").put("text", text).put("href", href));
+                public Zh_cn addA(JsonArray node, String text, String href) {
+                    node.add(JsonObject.create().add("tag", "a").add("text", text).add("href", href));
                     return this;
                 }
 
                 public Zh_cn addAt(String user_id) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addAt(node, user_id);
                     addNode(node);
                     return this;
@@ -194,8 +196,8 @@ public interface FeiShuClient {
                     return this;
                 }
 
-                public Zh_cn addAt(ArrayNode arrayNode, String user_id) {
-                    arrayNode.add(JsonUtils.createObjectNode().put("tag", "at").put("user_id", user_id));
+                public Zh_cn addAt(JsonArray arrayNode, String user_id) {
+                    arrayNode.add(JsonObject.create().add("tag", "at").add("user_id", user_id));
                     return this;
                 }
 
@@ -207,8 +209,12 @@ public interface FeiShuClient {
                     this.title = title;
                 }
 
-                public ArrayNode getContent() {
+                public JsonArray getContent() {
                     return content;
+                }
+
+                public void setContent(JsonArray content) {
+                    this.content = content;
                 }
 
                 @Override
@@ -232,52 +238,54 @@ public interface FeiShuClient {
                 }
             }
 
-            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @Json
             public static class En_us {
                 private String title;
-                private final ArrayNode content = JsonUtils.createArrayNode();
+                private JsonArray content;
 
                 public En_us() {
+                    content = createNode();
                 }
 
                 public En_us(String title) {
+                    this();
                     this.title = title;
                 }
 
-                public ArrayNode createNode() {
-                    return JsonUtils.createArrayNode();
+                public JsonArray createNode() {
+                    return JsonArray.create();
                 }
 
-                public void addNode(ArrayNode node) {
+                public void addNode(JsonArray node) {
                     content.add(node);
                 }
 
                 public En_us addText(String text, Boolean un_escape) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addText(node, text, un_escape);
                     addNode(node);
                     return this;
                 }
 
-                public En_us addText(ArrayNode node, String text, boolean un_escape) {
-                    node.add(JsonUtils.createObjectNode().put("tag", "text").put("text", text).put("unescape", un_escape));
+                public En_us addText(JsonArray node, String text, boolean un_escape) {
+                    node.add(JsonObject.create().add("tag", "text").add("text", text).add("unescape", un_escape));
                     return this;
                 }
 
                 public En_us addA(String text, String href) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addA(node, text, href);
                     addNode(node);
                     return this;
                 }
 
-                public En_us addA(ArrayNode node, String text, String href) {
-                    node.add(JsonUtils.createObjectNode().put("tag", "a").put("text", text).put("href", href));
+                public En_us addA(JsonArray node, String text, String href) {
+                    node.add(JsonObject.create().add("tag", "a").add("text", text).add("href", href));
                     return this;
                 }
 
                 public En_us addAt(String user_id) {
-                    ArrayNode node = createNode();
+                    var node = createNode();
                     addAt(node, user_id);
                     addNode(node);
                     return this;
@@ -288,8 +296,8 @@ public interface FeiShuClient {
                     return this;
                 }
 
-                public En_us addAt(ArrayNode arrayNode, String user_id) {
-                    arrayNode.add(JsonUtils.createObjectNode().put("tag", "at").put("user_id", user_id));
+                public En_us addAt(JsonArray arrayNode, String user_id) {
+                    arrayNode.add(JsonObject.create().add("tag", "at").add("user_id", user_id));
                     return this;
                 }
 
@@ -301,8 +309,12 @@ public interface FeiShuClient {
                     this.title = title;
                 }
 
-                public ArrayNode getContent() {
+                public JsonArray getContent() {
                     return content;
+                }
+
+                public void setContent(JsonArray content) {
+                    this.content = content;
                 }
 
                 @Override

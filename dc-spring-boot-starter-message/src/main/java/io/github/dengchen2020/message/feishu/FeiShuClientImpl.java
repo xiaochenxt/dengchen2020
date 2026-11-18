@@ -1,9 +1,9 @@
 package io.github.dengchen2020.message.feishu;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
-import io.github.dengchen2020.core.utils.JsonUtils;
+import io.avaje.jsonb.Json;
+import io.avaje.jsonb.JsonType;
 import io.github.dengchen2020.core.utils.RestClientUtils;
+import io.github.dengchen2020.core.utils.jsonb.JsonbUtils;
 import io.github.dengchen2020.core.utils.sign.HMACUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 import java.util.Base64;
+import java.util.HashMap;
 
 /**
  * 飞书webhook推送
@@ -26,6 +27,8 @@ import java.util.Base64;
 public class FeiShuClientImpl implements FeiShuClient {
 
     private static final Logger log = LoggerFactory.getLogger(FeiShuClientImpl.class);
+
+    private static final JsonType<Response> responseType = JsonbUtils.type(Response.class);
 
     private final AsyncTaskExecutor executor;
 
@@ -70,20 +73,23 @@ public class FeiShuClientImpl implements FeiShuClient {
     }
 
     public boolean sendSync(Message message, String webhook,@Nullable String secret) {
-        ObjectNode params = JsonUtils.createObjectNode();
+        var params = "";
         try {
-            params.put("msg_type", message.type());
-            params.putPOJO("content", message);
+            var body = new HashMap<String, Object>(4);
+            body.put("msg_type", message.type());
+            body.put("content", message);
             if (StringUtils.hasText(secret)) {
-                String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-                params.put("timestamp", timestamp);
-                params.put("sign", Base64.getEncoder().encodeToString(HMACUtils.sha256("",timestamp+"\n"+secret)));
+                var timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+                body.put("timestamp", timestamp);
+                body.put("sign", Base64.getEncoder().encodeToString(HMACUtils.sha256("", timestamp + "\n" + secret)));
             }
-            JsonNode res = RestClientUtils.post().uri(webhook)
+            params = JsonbUtils.toJson(body);
+            var resStr = RestClientUtils.post().uri(webhook)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(params).retrieve().body(JsonNode.class);
-            if (res.path("code").asInt() != 0) {
-                log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, res);
+                    .body(params).retrieve().body(String.class);
+            var res = responseType.fromJson(resStr);
+            if (res.code() != 0) {
+                log.error("飞书机器人发送信息失败，参数：{}，webhook：{}，响应信息：{}", params, webhook, resStr);
                 return false;
             }
         } catch (Exception e) {
@@ -91,5 +97,12 @@ public class FeiShuClientImpl implements FeiShuClient {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 飞书webhook响应
+     */
+    @Json
+    record Response(int code, String msg) {
     }
 }
