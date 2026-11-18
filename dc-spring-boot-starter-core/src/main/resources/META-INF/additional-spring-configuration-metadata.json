@@ -63,6 +63,31 @@
       "type": "java.lang.Boolean",
       "description": "是否启用CompletionExceptionResolver，将CompletionException或ExecutionException解包出实际的异常供@ExceptionHandler处理，默认为false.",
       "defaultValue": false
+    },{
+      "name": "dc.jsonb.deserialize.failOnUnknown",
+      "type": "java.lang.Boolean",
+      "description": "是否在jsonb反序列化时忽略未知的属性，默认为false.",
+      "defaultValue": false
+    },{
+      "name": "dc.jsonb.deserialize.failOnNullPrimitives",
+      "type": "java.lang.Boolean",
+      "description": "是否在jsonb反序列化时属性是基本类型但值为null时抛出异常，默认为false.",
+      "defaultValue": false
+    },{
+      "name": "dc.jsonb.serialize.mathTypesAsString",
+      "type": "java.lang.Boolean",
+      "description": "是否在jsonb序列化时将Math类型转换为字符串，默认为false.",
+      "defaultValue": false
+    },{
+      "name": "dc.jsonb.serialize.empty",
+      "type": "java.lang.Boolean",
+      "description": "是否在jsonb序列化时输出空字符串值，默认为true.",
+      "defaultValue": false
+    },{
+      "name": "dc.jsonb.serialize.nulls",
+      "type": "java.lang.Boolean",
+      "description": "是否在jsonb序列化时输出null值，默认为false.",
+      "defaultValue": false
     }
   ]
 }
