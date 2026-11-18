@@ -214,12 +214,12 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                 "org.apache.ibatis.cache.decorators.SoftCache", "org.apache.ibatis.cache.decorators.WeakCache",
                 "org.mybatis.spring.SqlSessionFactoryBean", "java.util.ArrayList", "java.util.HashMap", "java.util.TreeSet",
                 "java.util.HashSet")) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder.onReachableType(TypeReference.of(c))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder
                     .withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)));
         }
         aotUtils.runWithIgnoreIllegalArgument(() -> {
             try {
-                aotUtils.registerPattern(TypeReference.of(sqlSessionFactory), aotUtils.findResources("org/apache/ibatis/builder/xml",
+                aotUtils.registerPattern(aotUtils.findResources("org/apache/ibatis/builder/xml",
                         name -> name.endsWith(".dtd") || name.endsWith(".xsd")).toArray(EMPTY_STRING_ARRAY));
             } catch (IOException ignored) {}
         });
@@ -231,44 +231,44 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         var sqlSessionFactory = aotUtils.loadClass("org.apache.ibatis.session.SqlSessionFactory");
         if (sqlSessionFactory == null) return;
         for (var c : aotUtils.toClassArray("org.apache.ibatis.mapping.BoundSql")) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder.onReachableType(TypeReference.of(c))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder
                     .withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.ACCESS_DECLARED_FIELDS)));
         }
         var statementHandler = aotUtils.loadClass("org.apache.ibatis.executor.statement.StatementHandler");
         if (statementHandler != null) {
             aotUtils.collectClass(statementHandler::isAssignableFrom, "org.apache.ibatis.executor.statement").forEach(c -> {
-                aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder.onReachableType(TypeReference.of(statementHandler))
+                aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder
                         .withMembers(MemberCategory.INVOKE_DECLARED_METHODS)));
             });
         }
         var baseStatementHandler = aotUtils.loadClass("org.apache.ibatis.executor.statement.BaseStatementHandler");
         if (baseStatementHandler != null) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(baseStatementHandler, builder -> builder.onReachableType(TypeReference.of(baseStatementHandler))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(baseStatementHandler, builder -> builder
                     .withMembers(MemberCategory.ACCESS_DECLARED_FIELDS)));
         }
         var routingStatementHandler = aotUtils.loadClass("org.apache.ibatis.executor.statement.RoutingStatementHandler");
         if (routingStatementHandler != null) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(routingStatementHandler, builder -> builder.onReachableType(TypeReference.of(routingStatementHandler))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(routingStatementHandler, builder -> builder
                     .withMembers(MemberCategory.ACCESS_DECLARED_FIELDS)));
         }
         for (Class<?> c : aotUtils.toClassArray("org.apache.ibatis.executor.Executor", "org.apache.ibatis.executor.statement.StatementHandler")) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().proxies().registerJdkProxy(builder -> builder.onReachableType(TypeReference.of(c))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().proxies().registerJdkProxy(builder -> builder
                     .proxiedInterfaces(c)));
         }
         aotUtils.registerSerializable(TypeReference.of(wrapper),"com.baomidou.mybatisplus.core.toolkit.support.SFunction");
         for (var c : aotUtils.toClassArray("com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver",
                 "com.baomidou.mybatisplus.core.conditions.ISqlSegment")) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder.onReachableType(TypeReference.of(sqlSessionFactory))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder
                     .withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)));
         }
         for (var c : aotUtils.collectClass(wrapper::isAssignableFrom, "com.baomidou.mybatisplus")) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder.onReachableType(TypeReference.of(c))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c, builder -> builder
                     .withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.ACCESS_DECLARED_FIELDS)));
             aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.registerSerializable(TypeReference.of(c), c));
         }
         var mybatisMapperProxy = aotUtils.loadClass("com.baomidou.mybatisplus.core.override.MybatisMapperProxy");
         if (mybatisMapperProxy != null) {
-            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(TypeReference.of(mybatisMapperProxy), builder -> builder.onReachableType(TypeReference.of(mybatisMapperProxy))
+            aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(TypeReference.of(mybatisMapperProxy), builder -> builder
                     .withField("sqlSession")
                     .withField("mapperInterface")
                     .withMethod("getSqlSession", Collections.emptyList(), ExecutableMode.INVOKE)
