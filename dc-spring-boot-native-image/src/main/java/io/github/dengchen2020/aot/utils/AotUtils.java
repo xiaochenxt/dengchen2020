@@ -128,11 +128,11 @@ public class AotUtils extends CollectUtils {
         }
     }
 
-    @SafeVarargs
-    public final void registerSerializable(Class<? extends Serializable>... classes) {
-        for (Class<? extends Serializable> c : classes) {
-            if (c.getCanonicalName() == null) continue;
-            hints.serialization().registerType(c);
+    @SuppressWarnings("unchecked")
+    public final void registerSerializable(Class<?>... classes) {
+        for (var c : classes) {
+            if (!Serializable.class.isAssignableFrom(c) || c.getCanonicalName() == null) continue;
+            hints.serialization().registerType((Class<? extends Serializable>) c);
         }
     }
 
