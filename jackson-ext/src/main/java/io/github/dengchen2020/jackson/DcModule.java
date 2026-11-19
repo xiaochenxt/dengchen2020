@@ -11,6 +11,7 @@ public class DcModule extends SimpleModule {
 
     @Override
     public void setupModule(SetupContext context) {
+        super.setupModule(context);
         context.insertAnnotationIntrospector(JsonRawValueAnnotationIntrospector.INSTANCE);
     }
 

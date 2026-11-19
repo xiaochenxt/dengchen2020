@@ -10,9 +10,8 @@ import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.*;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -34,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -42,9 +42,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -119,6 +117,28 @@ public final class MyBatisNativeSpringConfiguration {
                             registerMapperRelationships(mapperInterfaceType, hints);
                         }
                     }
+                }
+                try {
+                    var env = beanFactory.getBean(Environment.class);
+                    var logImpl = env.getProperty("mybatis.configuration.log-impl");
+                    var stringParam = List.of(TypeReference.of(String.class));
+                    if (logImpl != null) {
+                        hints.reflection().registerType(TypeReference.of(logImpl), builder -> builder.withConstructor(stringParam, ExecutableMode.INVOKE));
+                    }
+                    var vfs = env.getProperty("mybatis.configuration.vfs-impl");
+                    if (vfs != null) {
+                        hints.reflection().registerType(TypeReference.of(vfs), builder -> builder.withConstructor(Collections.emptyList(), ExecutableMode.INVOKE));
+                    }
+                    var mybatisPlusLogImpl = env.getProperty("mybatis-plus.configuration.log-impl");
+                    if (mybatisPlusLogImpl != null) {
+                        hints.reflection().registerType(TypeReference.of(mybatisPlusLogImpl), builder -> builder.withConstructor(stringParam, ExecutableMode.INVOKE));
+                    }
+                    var mybatisPlusVfs = env.getProperty("mybatis-plus.configuration.vfs-impl");
+                    if (mybatisPlusVfs != null) {
+                        hints.reflection().registerType(TypeReference.of(mybatisPlusVfs), builder -> builder.withConstructor(Collections.emptyList(), ExecutableMode.INVOKE));
+                    }
+                } catch (BeansException ignored) {
+
                 }
             };
         }
