@@ -55,7 +55,7 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                     "com.github.benmanes.caffeine.cache.PSA","com.github.benmanes.caffeine.cache.PSAMS","com.github.benmanes.caffeine.cache.PSW",
                     "com.github.benmanes.caffeine.cache.PSWMS")), builder -> builder.onReachableType(nodeFactory)
                     .withField("FACTORY")
-                    .withMethod("<init>",Collections.emptyList(), ExecutableMode.INVOKE)));
+                    .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
         }
         Class<?> localCacheFactory = aotUtils.loadClass("com.github.benmanes.caffeine.cache.LocalCacheFactory");
         if (localCacheFactory != null) {
@@ -63,7 +63,7 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                     "com.github.benmanes.caffeine.cache.SIMSA","com.github.benmanes.caffeine.cache.SIMSW",
                     "com.github.benmanes.caffeine.cache.SSMSA","com.github.benmanes.caffeine.cache.SSMSW")), builder -> builder.onReachableType(localCacheFactory)
                     .withField("FACTORY")
-                    .withMethod("<init>",Collections.emptyList(), ExecutableMode.INVOKE)));
+                    .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
         }
     }
 
@@ -95,13 +95,13 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
             aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(response,
                     builder -> builder.onReachableType(response)
                             .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             var cs = response.getDeclaredClasses();
             for (var c : cs) {
                 aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c,
                         builder -> builder.onReachableType(c)
                                 .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                                .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                                .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             }
         });
     }
@@ -117,13 +117,13 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
             aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(response,
                     builder -> builder.onReachableType(response)
                             .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             var cs = response.getDeclaredClasses();
             for (var c : cs) {
                 aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c,
                         builder -> builder.onReachableType(c)
                                 .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                                .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                                .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             }
         });
     }
@@ -143,13 +143,13 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
             aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(apiObject,
                     builder -> builder.onReachableType(apiObject)
                             .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             var cs = apiObject.getDeclaredClasses();
             for (var c : cs) {
                 aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection().registerType(c,
                         builder -> builder.onReachableType(c)
                                 .withMembers(MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS)
-                                .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE)));
+                                .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE)));
             }
         });
     }
@@ -162,26 +162,26 @@ class DcRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         if (wkbDecoder != null) {
             classes.stream().filter(wkbDecoder::isAssignableFrom).forEach(c -> aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection()
                     .registerType(c, builder -> builder.onReachableType(c)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE))));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE))));
             aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.registerPattern(TypeReference.of(wkbDecoder), "spatial_ref_sys.txt"));
         }
         var wktDecoder = aotUtils.loadClass("org.geolatte.geom.codec.WktEncoder");
         if (wktDecoder != null) {
             classes.stream().filter(wktDecoder::isAssignableFrom).forEach(c -> aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection()
                     .registerType(c, builder -> builder.onReachableType(c)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE))));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE))));
         }
         var wkbEncoder = aotUtils.loadClass("org.geolatte.geom.codec.WkbEncoder");
         if (wkbEncoder != null) {
             classes.stream().filter(wkbEncoder::isAssignableFrom).forEach(c -> aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection()
                     .registerType(c, builder -> builder.onReachableType(c)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE))));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE))));
         }
         var wktEncoder = aotUtils.loadClass("org.geolatte.geom.codec.WktEncoder");
         if (wktEncoder != null) {
             classes.stream().filter(wktEncoder::isAssignableFrom).forEach(c -> aotUtils.runWithIgnoreIllegalArgument(() -> aotUtils.hints().reflection()
                     .registerType(c, builder -> builder.onReachableType(c)
-                            .withMethod("<init>", Collections.emptyList(), ExecutableMode.INVOKE))));
+                            .withConstructor(Collections.emptyList(), ExecutableMode.INVOKE))));
         }
     }
 
