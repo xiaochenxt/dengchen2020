@@ -72,40 +72,44 @@ public abstract class RestClientUtils {
 
     static final RestClient client = create(DEFAULT_READ_TIMEOUT);
 
+    private static RestClient getClient() {
+        return SpringUtils.applicationContext != null ? SpringUtils.getBean(RestClient.class) : client;
+    }
+
     public static RestClient.RequestBodyUriSpec method(HttpMethod method) {
-        return client.method(method);
+        return getClient().method(method);
     }
 
     public static RestClient.RequestHeadersUriSpec<?> get() {
-        return client.get();
+        return getClient().get();
     }
 
     public static RestClient.RequestBodyUriSpec post() {
-        return client.post();
+        return getClient().post();
     }
 
     public static RestClient.RequestBodyUriSpec put() {
-        return client.put();
+        return getClient().put();
     }
 
     public static RestClient.RequestHeadersUriSpec<?> delete() {
-        return client.delete();
+        return getClient().delete();
     }
 
     public static RestClient.RequestHeadersUriSpec<?> options() {
-        return client.options();
+        return getClient().options();
     }
 
     public static RestClient.RequestBodyUriSpec patch() {
-        return client.patch();
+        return getClient().patch();
     }
 
     public static RestClient.RequestHeadersUriSpec<?> head() {
-        return client.head();
+        return getClient().head();
     }
 
     public static RestClient.Builder mutate() {
-        return client.mutate();
+        return getClient().mutate();
     }
 
     public static ClientHttpRequestFactory createFactory(boolean bufferContent) {

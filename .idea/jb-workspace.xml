@@ -2,7 +2,6 @@
 <project version="4">
   <component name="WorkspaceSettings">
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-parent" />
-    <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-utils" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-core" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-cache" />
     <project name="${project.artifactId}" path="$PROJECT_DIR$/dc-spring-boot-starter-id-generator" />

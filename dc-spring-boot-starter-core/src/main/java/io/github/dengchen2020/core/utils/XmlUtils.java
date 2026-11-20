@@ -1,20 +1,24 @@
 package io.github.dengchen2020.core.utils;
 
-import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.util.stream.Stream;
+
 /**
  * xml处理工具类
- * <p>未注入到SpringBean，与Spring的全局Jackson配置可能不一致，因此可能导致转换的部分字段数据与前者不一致</p>
  * @author xiaochen
  * @since 2022/9/15
  */
 @NullMarked
 public abstract class XmlUtils {
+
+    private static XmlHelper getXmlHelper() {
+        return SpringUtils.applicationContext != null ? SpringUtils.applicationContext.getBean(XmlHelper.class) : XmlHelper.INSTANCE;
+    }
 
     /**
      * 初始化一个{@link ObjectNode}
@@ -42,7 +46,7 @@ public abstract class XmlUtils {
      * @return T 指定类型的对象
      */
     public static <T> T fromXml(String xml, Class<T> type) {
-        return XmlHelper.INSTANCE.fromXml(xml, type);
+        return getXmlHelper().fromXml(xml, type);
     }
 
     /**
@@ -52,7 +56,7 @@ public abstract class XmlUtils {
      * @return 指定类型的对象
      */
     public static <T> T fromXml(String xml, TypeReference<T> typeReference) {
-        return XmlHelper.INSTANCE.fromXml(xml, typeReference);
+        return getXmlHelper().fromXml(xml, typeReference);
     }
 
     /**
@@ -62,7 +66,7 @@ public abstract class XmlUtils {
      * @return xml
      */
     public static String toXml(Object source) {
-        return XmlHelper.INSTANCE.toXml(source);
+        return getXmlHelper().toXml(source);
     }
 
     /**
@@ -72,7 +76,7 @@ public abstract class XmlUtils {
      * @return xml
      */
     public static String toXmlIgnoreNull(Object source) {
-        return XmlHelper.INSTANCE.toXmlIgnoreNull(source);
+        return getXmlHelper().toXmlIgnoreNull(source);
     }
 
     /**
@@ -82,7 +86,7 @@ public abstract class XmlUtils {
      * @return {@link JsonNode}
      */
     public static JsonNode readTree(String xml) {
-        return XmlHelper.INSTANCE.readTree(xml);
+        return getXmlHelper().readTree(xml);
     }
 
     /**

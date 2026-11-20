@@ -9,3 +9,4 @@ io.github.dengchen2020.core.web.mvc.DcWebAutoConfiguration
 io.github.dengchen2020.core.web.mvc.StaticServletAutoConfiguration
 io.github.dengchen2020.core.jdbc.LazyConnectionDataSourceConfiguration
 io.github.dengchen2020.core.jsonb.JsonbAutoConfiguration
+io.github.dengchen2020.core.utils.SpringUtilsInitialize
