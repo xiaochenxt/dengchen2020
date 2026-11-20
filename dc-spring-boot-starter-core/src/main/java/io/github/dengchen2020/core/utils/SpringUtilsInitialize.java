@@ -1,4 +1,4 @@
-package io.github.dengchen2020.core.utils.spring;
+package io.github.dengchen2020.core.utils;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

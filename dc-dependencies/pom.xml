@@ -51,15 +51,13 @@
     <jspecify.version>1.0.1</jspecify.version>
     <redisson.version>4.6.1</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <protostuff.version>1.8.0</protostuff.version>
-    <graalvm.version>25.5.5.0.3</graalvm.version>
     <zxing.version>3.5.4</zxing.version>
     <openfeign.querydsl.version>6.12</openfeign.querydsl.version>
-    <libphonenumber.version>9.0.43</libphonenumber.version>
+    <libphonenumber.version>9.0.44</libphonenumber.version>
     <mybatis.springboot.version>3.0.5</mybatis.springboot.version>
-    <ip2region.version>3.3.7</ip2region.version>
+    <ip2region.version>3.3.8</ip2region.version>
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
-    <playwright.version>1.64.0</playwright.version>
+    <playwright.version>1.65.1</playwright.version>
     <easy-captcha.version>1.6.2</easy-captcha.version>
     <fusionauth-jwt.version>7.0.0</fusionauth-jwt.version>
     <avaje.jsonb.version>3.16</avaje.jsonb.version>
@@ -134,16 +132,6 @@
         <version>${dc.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.protostuff</groupId>
-        <artifactId>protostuff-core</artifactId>
-        <version>${protostuff.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.protostuff</groupId>
-        <artifactId>protostuff-runtime</artifactId>
-        <version>${protostuff.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.google.zxing</groupId>
         <artifactId>zxing-parent</artifactId>
         <version>${zxing.version}</version>
@@ -199,31 +187,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.graalvm.sdk</groupId>
-        <artifactId>nativeimage</artifactId>
-        <version>${graalvm.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.js</groupId>
-        <artifactId>js</artifactId>
-        <version>${graalvm.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.polyglot</groupId>
-        <artifactId>js</artifactId>
-        <version>${graalvm.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.js</groupId>
-        <artifactId>js-scriptengine</artifactId>
-        <version>${graalvm.version}</version>
-      </dependency>
-      <dependency>
         <groupId>software.amazon.awssdk</groupId>
         <artifactId>bom</artifactId>
         <version>${software.amazon.awssdk.version}</version>
@@ -263,7 +226,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.11.0</version>
+        <version>0.12.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>

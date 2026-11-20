@@ -16,12 +16,15 @@ import java.util.stream.Stream;
 
 /**
  * json处理工具类
- * <p>未注入到SpringBean，与Spring的全局Jackson配置可能不一致，因此可能导致转换的部分字段数据与前者不一致</p>
  * @author xiaochen
  * @since 2022/9/15
  */
 @NullMarked
 public abstract class JsonUtils {
+
+    private static JsonHelper getJsonHelper() {
+        return SpringUtils.applicationContext != null ? SpringUtils.applicationContext.getBean(JsonHelper.class) : JsonHelper.INSTANCE;
+    }
 
     /**
      * 初始化一个{@link ObjectNode}
@@ -48,7 +51,7 @@ public abstract class JsonUtils {
      * @return json
      */
     public static String toJson(Object source) {
-        return JsonHelper.INSTANCE.toJson(source);
+        return getJsonHelper().toJson(source);
     }
 
     /**
@@ -58,7 +61,7 @@ public abstract class JsonUtils {
      * @return json
      */
     public static String toJsonIgnoreNull(Object source) {
-        return JsonHelper.INSTANCE.toJsonIgnoreNull(source);
+        return getJsonHelper().toJsonIgnoreNull(source);
     }
 
     /**
@@ -69,7 +72,7 @@ public abstract class JsonUtils {
      * @return 指定类型的新对象
      */
     public static <T> T convertValue(Object source, Class<T> target) {
-        return JsonHelper.INSTANCE.convertValue(source, target);
+        return getJsonHelper().convertValue(source, target);
     }
 
     /**
@@ -80,7 +83,7 @@ public abstract class JsonUtils {
      * @return 指定类型的新对象
      */
     public static <T> T convertValue(Object source, TypeReference<T> target) {
-        return JsonHelper.INSTANCE.convertValue(source, target);
+        return getJsonHelper().convertValue(source, target);
     }
 
     /**
@@ -90,7 +93,7 @@ public abstract class JsonUtils {
      * @return {@link JsonNode}
      */
     public static JsonNode readTree(String json) {
-        return JsonHelper.INSTANCE.readTree(json);
+        return getJsonHelper().readTree(json);
     }
 
     /**
@@ -100,7 +103,7 @@ public abstract class JsonUtils {
      * @return 指定类型的对象
      */
     public static <T> @Nullable T fromJson(String json, Class<T> type) {
-        return JsonHelper.INSTANCE.fromJson(json, type);
+        return getJsonHelper().fromJson(json, type);
     }
 
     /**
@@ -110,7 +113,7 @@ public abstract class JsonUtils {
      * @return 指定类型的对象
      */
     public static <T> @Nullable T fromJson(String json, TypeReference<T> typeReference) {
-        return JsonHelper.INSTANCE.fromJson(json, typeReference);
+        return getJsonHelper().fromJson(json, typeReference);
     }
 
     /**
@@ -119,7 +122,7 @@ public abstract class JsonUtils {
      * @return {@link ObjectNode}
      */
     public static @Nullable ObjectNode valueToTree(Object source) {
-        return JsonHelper.INSTANCE.valueToTree(source);
+        return getJsonHelper().valueToTree(source);
     }
 
     /**
@@ -129,7 +132,7 @@ public abstract class JsonUtils {
      * @return 字节数组
      */
     public static byte[] serialize(@Nullable Object source) {
-        return JsonHelper.INSTANCE.serialize(source);
+        return getJsonHelper().serialize(source);
     }
 
     /**
@@ -140,7 +143,7 @@ public abstract class JsonUtils {
      * @return 对象
      */
     public static <T> @Nullable T deserialize(byte[] data, Class<T> type) {
-        return JsonHelper.INSTANCE.deserialize(data, type);
+        return getJsonHelper().deserialize(data, type);
     }
 
     /**
@@ -151,7 +154,7 @@ public abstract class JsonUtils {
      * @return 对象
      */
     public <T> @Nullable T deserialize(byte[] data, TypeReference<T> type) {
-        return JsonHelper.INSTANCE.deserialize(data, type);
+        return getJsonHelper().deserialize(data, type);
     }
 
     /**
@@ -197,7 +200,7 @@ public abstract class JsonUtils {
      * @param consumer 处理json数据
      */
     public static <T> void readStreamHandleObject(InputStream inputStream, Class<T> objectType, Consumer<T> consumer) {
-        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+        getJsonHelper().readStreamHandleObject(inputStream, objectType, consumer);
     }
 
     /**
@@ -207,7 +210,7 @@ public abstract class JsonUtils {
      * @param consumer 处理json数据
      */
     public static <T> void readStreamHandleObject(InputStream inputStream, TypeReference<T> objectType, Consumer<T> consumer) {
-        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, objectType, consumer);
+        getJsonHelper().readStreamHandleObject(inputStream, objectType, consumer);
     }
 
     /**
@@ -216,7 +219,7 @@ public abstract class JsonUtils {
      * @param consumer 处理json数据
      */
     public static void readStreamHandleObject(InputStream inputStream, Consumer<ObjectNode> consumer) {
-        JsonHelper.INSTANCE.readStreamHandleObject(inputStream, consumer);
+        getJsonHelper().readStreamHandleObject(inputStream, consumer);
     }
 
     /**
@@ -225,7 +228,7 @@ public abstract class JsonUtils {
      * @param consumer 处理json数据
      */
     public static void readStream(InputStream inputStream, BiConsumer<JsonParser, JsonToken> consumer) {
-        JsonHelper.INSTANCE.readStream(inputStream, consumer);
+        getJsonHelper().readStream(inputStream, consumer);
     }
 
 }
