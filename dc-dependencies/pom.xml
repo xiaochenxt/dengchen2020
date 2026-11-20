@@ -4,7 +4,7 @@
 
   <groupId>io.github.dengchen2020</groupId>
   <artifactId>dc-dependencies</artifactId>
-  <version>26.1025.40</version>
+  <version>26.1129.41</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -50,13 +50,13 @@
     <java.version>25</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <dc.version>26.1025.40</dc.version>
-    <redisson.version>4.7.0</redisson.version>
+    <dc.version>26.1129.41</dc.version>
+    <redisson.version>4.8.0</redisson.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <zxing.version>3.5.4</zxing.version>
     <openfeign.querydsl.version>7.7</openfeign.querydsl.version>
     <libphonenumber.version>9.0.44</libphonenumber.version>
-    <mybatis.springboot.version>4.0.1</mybatis.springboot.version>
+    <mybatis.springboot.version>4.1.0</mybatis.springboot.version>
     <ip2region.version>3.3.8</ip2region.version>
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
     <playwright.version>1.65.1</playwright.version>
