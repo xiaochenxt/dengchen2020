@@ -25,7 +25,7 @@ import static io.github.dengchen2020.core.utils.EmptyConstant.EMPTY_BYTE_ARRAY;
 public class DcCachingResourceResolver extends CachingResourceResolver {
 
     private final long maxContentLength;
-    private static final boolean IS_THAN_3015 = VersionUtils.compareVersion(SpringBootVersion.getVersion(), "3.0.15") >= 0;
+    private static final boolean IS_THAN_3515 = VersionUtils.compareVersion(SpringBootVersion.getVersion(), "3.5.15") >= 0;
 
     private static final ByteArrayResource NOT_FOUND_RESOURCE = new ByteArrayResource(EMPTY_BYTE_ARRAY, "404.html", -1);
 
@@ -37,7 +37,7 @@ public class DcCachingResourceResolver extends CachingResourceResolver {
     @Override
     protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request,@NonNull String requestPath,@NonNull List<? extends Resource> locations,@NonNull ResourceResolverChain chain) {
         if (request != null) ShallowEtagHeaderFilter.disableContentCaching(request);
-        String key = IS_THAN_3015 ? computeKey(request, requestPath, locations) : computeKey(request, requestPath);
+        String key = IS_THAN_3515 ? computeKey(request, requestPath, locations) : computeKey(request, requestPath);
         Resource resource = this.getCache().get(key, Resource.class);
 
         if (resource != null) {
