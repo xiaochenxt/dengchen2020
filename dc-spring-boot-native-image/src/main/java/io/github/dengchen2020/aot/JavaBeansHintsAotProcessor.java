@@ -3,6 +3,10 @@ package io.github.dengchen2020.aot;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.ClassReader;
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.Opcodes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
@@ -22,6 +26,7 @@ import org.springframework.util.ClassUtils;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -104,10 +109,32 @@ public class JavaBeansHintsAotProcessor implements BeanFactoryInitializationAotP
         catch (ClassNotFoundException | LinkageError ex) {
             return null;
         }
-        if (AnnotatedElementUtils.hasAnnotation(type, Component.class)) {
+        if (AnnotatedElementUtils.hasAnnotation(type, Component.class) || hasGeneratedAnnotation(resource)) {
             return null;
         }
         return (type.isRecord() || isJavaBean(type)) ? type : null;
+    }
+
+    /**
+     * 通过ASM读取类上的Generated注解（含CLASS保留策略），因为APT注解处理器生成的类一般不需要注册反射，因此需要排除
+     */
+    private static boolean hasGeneratedAnnotation(Resource resource) {
+        try (InputStream in = resource.getInputStream()) {
+            var found = new boolean[1];
+            new ClassReader(in).accept(new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                    if (descriptor.endsWith("/Generated;")) {
+                        found[0] = true;
+                    }
+                    return null;
+                }
+            }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+            return found[0];
+        }
+        catch (IOException ex) {
+            return false;
+        }
     }
 
     private static boolean isJavaBean(Class<?> type) {
