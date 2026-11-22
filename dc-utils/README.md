@@ -1,4 +1,4 @@
-工具类集合，涵盖 JSON、Bean 拷贝、加密解密、摘要算法、日期时间、随机数、验证码、二维码、CSV、S3、图片压缩等。
+工具类集合，涵盖 JSON、Bean 拷贝、加密解密、摘要算法、日期时间、随机数、二维码、CSV、S3、图片压缩等。
 
 JSON 处理（JsonUtils）：
 
@@ -59,16 +59,6 @@ Date parsed = DateTimeUtils.parse(str, "yyyy-MM-dd HH:mm:ss");
 String code = RandomStringUtils.insecure().nextNumeric(6);
 String str = RandomStringUtils.insecure().nextAlphanumeric(16);
 int num = RandomUtils.insecure().randomInt(0, 100);
-```
-
-验证码（CaptchaUtils）：
-
-```java
-ArithmeticCaptcha captcha = CaptchaUtils.arithmetic();
-String base64 = captcha.toBase64();
-String code = captcha.text();
-
-ChineseCaptcha chinese = CaptchaUtils.chinese();
 ```
 
 二维码（QRCodeGenerator）— Builder 模式：

@@ -20,7 +20,7 @@
 | dc-spring-boot-starter-websocket | WebSocket 单机/集群模式，跨服务消息推送 |
 | dc-spring-boot-starter-ip | IP 归属地查询（ip2region xdb，支持 IPv4/IPv6） |
 | dc-spring-boot-native-image | GraalVM 原生镜像编译支持 |
-| dc-utils | 工具类集合：JSON、Bean 拷贝、加解密、验证码、二维码、CSV、S3 等 |
+| dc-utils | 工具类集合：JSON、Bean 拷贝、加解密、二维码、CSV、S3 等 |
 | jackson-ext | Jackson 扩展：`@JsonRawValue` 反序列化支持 |
 | dc-dependencies / dc-spring-boot-starter-parent | 依赖版本统一管理的 BOM 与 Parent |
 
@@ -188,7 +188,6 @@ public void onPattern(String message) { ... }
 JsonUtils.toJson(source);                          // JSON 序列化
 BeanUtils.copyProperties(source, target);          // CGLib Bean 拷贝，忽略 null
 String code = RandomStringUtils.insecure().nextNumeric(6); // 随机数字验证码
-CaptchaUtils.arithmetic();                         // 算术验证码
 QRCodeGenerator.builder().size(300).logo(logoBytes).build(); // 二维码
 ```
 
