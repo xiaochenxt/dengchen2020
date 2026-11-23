@@ -1,6 +1,5 @@
 package io.github.dengchen2020.jpa.base;
 
-import io.github.dengchen2020.core.utils.IterableUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
@@ -76,13 +75,6 @@ public class BaseJpaRepositoryExecutor<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public void detach(T entity) {
         entityManager.detach(entity);
-    }
-
-    @Transactional
-    @Override
-    public <S extends T> List<S> saveAll(Iterable<S> entities) {
-        for (S entity : entities) save(entity);
-        return IterableUtils.toList(entities);
     }
 
     @Nullable
