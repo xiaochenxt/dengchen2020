@@ -61,7 +61,6 @@
     <ip2region.version>3.3.8</ip2region.version>
     <software.amazon.awssdk.version>2.46.21</software.amazon.awssdk.version>
     <playwright.version>1.65.1</playwright.version>
-    <easy-captcha.version>1.6.2</easy-captcha.version>
     <fusionauth-jwt.version>7.0.0</fusionauth-jwt.version>
     <avaje.jsonb.version>3.16</avaje.jsonb.version>
     <avaje-jex-parent>3.6</avaje-jex-parent>
@@ -135,16 +134,22 @@
         <version>${dc.version}</version>
       </dependency>
       <dependency>
+        <groupId>io.github.dengchen2020</groupId>
+        <artifactId>captcha</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
         <groupId>com.google.zxing</groupId>
         <artifactId>zxing-parent</artifactId>
         <version>${zxing.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- 后续移除easy-captcha-->
       <dependency>
         <groupId>com.github.whvcse</groupId>
         <artifactId>easy-captcha</artifactId>
-        <version>${easy-captcha.version}</version>
+        <version>1.6.2</version>
       </dependency>
       <dependency>
         <groupId>org.redisson</groupId>
