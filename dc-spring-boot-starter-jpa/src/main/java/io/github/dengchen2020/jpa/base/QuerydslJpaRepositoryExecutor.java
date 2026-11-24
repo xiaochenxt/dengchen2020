@@ -2,6 +2,7 @@ package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.QueryModifiers;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.dml.UpdateClause;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
@@ -12,7 +13,6 @@ import com.querydsl.jpa.HQLTemplates;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import io.github.dengchen2020.core.jdbc.Page;
 import io.github.dengchen2020.core.jdbc.SimplePage;
 import io.github.dengchen2020.jpa.querydsl.QuerydslUtils;
@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -105,12 +106,14 @@ public class QuerydslJpaRepositoryExecutor<T> implements QuerydslJpaRepository<T
         return select(QuerydslUtils.record(type, path, exprs));
     }
 
+    @Transactional
     @Override
-    public JPAUpdateClause update(Predicate where, Predicate... predicates) {
+    public long update(Predicate where, Consumer<UpdateClause<?>> setters) {
         Assert.notNull(where, "更新必须有条件");
         var clause = queryFactory.update(path).where(where);
-        if (predicates.length > 0) clause.where(predicates);
-        return clause;
+        setters.accept(clause);
+        if (clause.isEmpty()) throw new IllegalArgumentException("更新必须要有赋值");
+        return clause.execute();
     }
 
     @Transactional

@@ -1,14 +1,16 @@
 package io.github.dengchen2020.jpa.base;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.dml.UpdateClause;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.function.Consumer;
 
 import static io.github.dengchen2020.jpa.querydsl.QuerydslUtils.EMPTY_PREDICATE;
 
@@ -78,28 +80,21 @@ public interface QuerydslJpaRepository<T> {
     }
 
     /**
-     * 更新构造
+     * 更新
      *
      * @param where 更新条件
-     * @return {@link JPAUpdateClause}
+     * @param setters 赋值
+     * @return 受影响的行数
+     * @throws IllegalArgumentException 当未指定任何条件或任何赋值时
      */
-    JPAUpdateClause update(Predicate where, Predicate... predicates);
-
-    /**
-     * 更新构造
-     *
-     * @param where 更新条件
-     * @return {@link JPAUpdateClause}
-     */
-    default JPAUpdateClause update(Predicate where) {
-        return update(where, EMPTY_PREDICATE);
-    }
+    long update(Predicate where, Consumer<UpdateClause<?>> setters);
 
     /**
      * 删除
      *
      * @param where 删除条件
      * @return 受影响的行数
+     * @throws IllegalArgumentException 当未指定任何条件时
      */
     long delete(Predicate where, Predicate... predicates);
 
@@ -108,6 +103,7 @@ public interface QuerydslJpaRepository<T> {
      *
      * @param where 删除条件
      * @return 受影响的行数
+     * @throws IllegalArgumentException 当未指定任何条件时
      */
     default long delete(Predicate where) {
         return delete(where, EMPTY_PREDICATE);
