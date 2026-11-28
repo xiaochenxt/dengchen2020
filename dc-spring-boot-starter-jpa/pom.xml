@@ -46,6 +46,11 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-aspects</artifactId>
                 </exclusion>
+                <!-- 都是用注解，用不到xml配置-->
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
