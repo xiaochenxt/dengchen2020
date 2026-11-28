@@ -110,7 +110,7 @@ class DcFeature implements Feature {
                     "sun/awt/resources/awt_zh_Hans_CN.properties");
             featureUtils.registerResourceBundle(Font.class, "sun.awt.resources.awt", Locale.getDefault(), Locale.ENGLISH, Locale.CHINESE);
 
-        }, java.awt.Font.class,java.awt.Image.class, java.awt.AWTEvent.class);
+        }, java.awt.Font.class,java.awt.Image.class);
     }
 
     private void lettuce(FeatureUtils featureUtils) {

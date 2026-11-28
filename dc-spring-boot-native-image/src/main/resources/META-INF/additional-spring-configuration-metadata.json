@@ -1,0 +1,11 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "dc.native.trim-property-editor-hints",
+      "type": "java.lang.Boolean",
+      "description": "大部分用户用不到@Value绑定MediaType却为此引入AWT，为true则移除掉对应的反射注册.",
+      "defaultValue": true
+    }
+  ]
+}

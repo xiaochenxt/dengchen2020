@@ -1,5 +1,6 @@
 package io.github.dengchen2020.core.config;
 
+import io.github.dengchen2020.aot.DcHintsTrimmer;
 import io.github.dengchen2020.core.utils.RestClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import java.nio.charset.StandardCharsets;
  * @author xiaochen
  * @since 2024/5/31
  */
+@ImportRuntimeHints(DcHintsTrimmer.class) // 通过@ImportRuntimeHints注册的Hint可以保证顺序在最后，才能修剪成功
 @Lazy(false)
 @PropertySource("classpath:application-core.properties")
 @Configuration(proxyBeanMethods = false)
